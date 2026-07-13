@@ -1,0 +1,96 @@
+import { Search } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import client from '../api/client'
+import { LANGUAGES, LEVELS } from '../constants'
+import { avatarUrl } from '../utils/images'
+
+export default function Partners() {
+  const [partners, setPartners] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState({ language: '', level: '' })
+
+  useEffect(() => {
+    setLoading(true)
+    const params = {}
+    if (filters.language) params.language = filters.language
+    if (filters.level) params.level = filters.level
+    client.get('/matching/partners/', { params })
+      .then(({ data }) => setPartners(data))
+      .finally(() => setLoading(false))
+  }, [filters])
+
+  return (
+    <div className="bg-slate-50 min-h-[calc(100vh-4rem)]">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">Find a partner</h1>
+        <p className="text-slate-500 text-sm mb-6">Exchange matches are ranked first, peer practice fills in the rest.</p>
+
+        <div className="flex gap-3 mb-8">
+          <select
+            value={filters.language}
+            onChange={(e) => setFilters({ ...filters, language: e.target.value })}
+            className="rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white"
+          >
+            <option value="">Any language</option>
+            {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
+          <select
+            value={filters.level}
+            onChange={(e) => setFilters({ ...filters, level: e.target.value })}
+            className="rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white"
+          >
+            <option value="">Any level</option>
+            {LEVELS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </div>
+
+        {loading ? (
+          <p className="text-slate-500 text-sm">Loading partners...</p>
+        ) : partners.length === 0 ? (
+          <div className="flex flex-col items-center text-center py-20">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 mb-4">
+              <Search size={20} />
+            </div>
+            <p className="text-slate-500 text-sm">No partners found. Try widening your filters.</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {partners.map((p) => (
+              <Link
+                key={p.user_id}
+                to={`/partners/${p.user_id}`}
+                className="block bg-white border border-slate-200 rounded-2xl p-5 hover:border-indigo-300 hover:shadow-md transition-all"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <img
+                    src={avatarUrl(p.user_id, 80)}
+                    alt=""
+                    className="h-11 w-11 rounded-full object-cover shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-slate-900 truncate">{p.full_name}</h3>
+                    <span
+                      className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${
+                        p.match_type === 'exchange'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
+                      {p.match_type === 'exchange' ? 'Exchange match' : 'Peer practice'}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-600 mb-1">
+                  Speaks {p.native_language} · Learning {p.learning_language}
+                </p>
+                <p className="text-xs text-slate-400">{p.proficiency_level} · {p.timezone}</p>
+                {p.bio && <p className="text-sm text-slate-600 mt-3 line-clamp-2">{p.bio}</p>}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

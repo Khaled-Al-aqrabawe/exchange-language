@@ -1,0 +1,24 @@
+# Python / Django
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/migrations/__pycache__/
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+*.pyc
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Editors / OS
+.DS_Store
+.vscode/
+*.log
+
+# Env files (never commit real secrets)
+.env
+.env.*
+!.env.example
