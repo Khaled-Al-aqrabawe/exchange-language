@@ -31,7 +31,7 @@ export default function CallPreview({ partnerSeed = 'hero-partner', partnerName 
   }
 
   return (
-    <div className="relative w-full max-w-md mx-auto">
+    <div className="relative w-full max-w-md mx-auto" dir="ltr">
       <div className="relative rounded-2xl bg-slate-900 p-3 shadow-2xl ring-1 ring-slate-900/10">
         <div className="flex items-center justify-between px-2 pb-2">
           <div className="flex items-center gap-1.5">

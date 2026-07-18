@@ -1,0 +1,312 @@
+{
+  "common": {
+    "appName": "Language Partner",
+    "loading": "Yükleniyor...",
+    "loadingDashboard": "Panonuz yükleniyor...",
+    "seeAll": "Tümünü gör",
+    "save": "Kaydet",
+    "cancel": "Vazgeç"
+  },
+  "nav": {
+    "dashboard": "Panom",
+    "partners": "Partnerler",
+    "messages": "Mesajlar",
+    "schedule": "Takvim",
+    "courses": "Kurslar",
+    "about": "Hakkımızda",
+    "faq": "SSS",
+    "login": "Giriş yap",
+    "signUpFree": "Ücretsiz kaydol",
+    "settings": "Ayarlar",
+    "logOut": "Çıkış yap"
+  },
+  "footer": {
+    "tagline": "Language Partner",
+    "copyright": "© {{year}} Language Partner — MVP"
+  },
+  "theme": {
+    "light": "Açık",
+    "dark": "Koyu",
+    "toggleToLight": "Açık moda geç",
+    "toggleToDark": "Koyu moda geç"
+  },
+  "language": {
+    "choose": "Dil seç"
+  },
+  "landing": {
+    "badge": "Erken erişimde ücretsiz",
+    "heroTitleLine1": "Bir dili gerçekten",
+    "heroTitleLine2": "konuşarak öğren",
+    "heroSubtitle": "Language Partner, gerçek konuşma pratiği için seni ana dili konuşanlarla ve diğer öğrencilerle buluşturur; temellerini oluşturman için yapılandırılmış video kurslar da sunar.",
+    "findAPartner": "Partner bul",
+    "getStartedFree": "Ücretsiz başla",
+    "learnMore": "Daha fazla bilgi",
+    "joinLearners": "<bold>Arapça, İngilizce</bold> ve daha fazlasını pratik yapan öğrencilere katıl",
+    "howItWorks": "Nasıl çalışır",
+    "steps": {
+      "exchangeTitle": "Ana dili konuşanlarla değişim yap",
+      "exchangeBody": "İngilizce konuşanlardan İngilizce öğrenirken onlara Arapça öğret — ya da istediğin herhangi bir dil çiftinde.",
+      "practiceTitle": "Akranlarınla pratik yap",
+      "practiceBody": "Çevrimiçi bir değişim partnerin yok mu? Aynı dili öğrenen başka biriyle konuşma pratiği yap.",
+      "learnTitle": "Bağımsız öğren",
+      "learnBody": "Kendi hızında, dile ve seviyeye göre yapılandırılmış video kurslarını takip et."
+    },
+    "realConversations": "Gerçek sohbetler",
+    "practiceHeadline": "Kartlarla değil, insanlarla pratik yap",
+    "practiceBody": "Sadece kelime çalıştıran uygulamalar seni ancak belirli bir noktaya kadar götürür. Language Partner, daha ilk seansından itibaren seni gerçek biriyle konuşturur — planlamak için mesajlaşma, pratik için video ve boşlukları doldurmak için kurslar.",
+    "practiceList": {
+      "matched": "Dil çifti, seviye ve saat dilimine göre eşleştirme",
+      "builtin": "Yerleşik sohbet ve video — kurulacak hiçbir şey yok",
+      "free": "Daha fazla yapı istediğinde ücretsiz yapılandırılmış kurslar"
+    },
+    "everythingIncluded": "Her şey dahil",
+    "featuresHeadline": "Gerçek konuşma pratiği için tasarlandı",
+    "features": {
+      "videoTitle": "Yerleşik video ve ses",
+      "videoBody": "Tarayıcında yüz yüze konuşma pratiği — indirme yok, ekstra uygulama yok.",
+      "matchingTitle": "Akıllı eşleştirme",
+      "matchingBody": "Önce değişim partnerlerini önceliklendiririz, sonra seviyene ve saat dilimine uygun akranları öneririz.",
+      "messagingTitle": "Gerçek zamanlı mesajlaşma",
+      "messagingBody": "Seans planlamak veya sohbeti sürdürmek için partnerlerinle anında mesajlaş.",
+      "schedulingTitle": "Basit planlama",
+      "schedulingBody": "Birkaç tıkla seans ayırt, zamanı geldiğinde doğrudan aramaya katıl.",
+      "coursesTitle": "Yapılandırılmış kurslar",
+      "coursesBody": "Daha fazla yapı istediğinde dile ve seviyeye göre kendi hızında video dersleri.",
+      "freeTitle": "Ücretsiz başlangıç",
+      "freeBody": "Erken erişim süresince tüm özellikler açık — kredi kartı yok, ücretli duvar yok."
+    },
+    "ctaTitle": "Ücretsiz kullanım, gizli koşul yok",
+    "ctaBody": "Language Partner, erken erişim aşamamız boyunca ücretsizdir — tüm özellikler ilk günden itibaren açıktır.",
+    "ctaButton": "Ücretsiz hesabını oluştur"
+  },
+  "about": {
+    "eyebrow": "Hakkımızda",
+    "titlePrefix": "Akıcılık",
+    "titleHighlight": "sohbetten doğar",
+    "intro": "Language Partner var, çünkü bir dili öğrenmenin en hızlı yolu onu başka biriyle gerçekten konuşmaktır. Öğrencileri ana dili konuşanlarla değişim, akranlarla pratik ve kendi hızında yapılandırılmış kurslar için tek bir yerde bir araya getiriyoruz.",
+    "missionEyebrow": "Misyonumuz",
+    "missionHeadline": "Gerçek pratiği herkes için, her yerde erişilebilir kılmak",
+    "missionBody": "Öğrencileri dil çifti, seviye ve saat dilimine göre eşleştirir, sonra araya girmeyiz — yerleşik video ve sohbet sayesinde kurulacak ekstra bir şey olmaz, seanslar arasında biraz daha yapı istediğinde kurslar devreye girer.",
+    "beliefEyebrow": "İnandıklarımız",
+    "beliefHeadline": "Yaklaşımımız",
+    "values": {
+      "realTitle": "Gerçek insanlar, gerçek pratik",
+      "realBody": "Bir dili öğrenmenin en hızlı yolu onu başka bir insanla konuşmaktır — tek başına kelime kartlarına dokunmak değil.",
+      "accessibleTitle": "Herkes için erişilebilir",
+      "accessibleBody": "Gerçek konuşma pratiği, özel bir öğretmen bulmayı ya da ona ödeme yapmayı gerektirmemeli.",
+      "structureTitle": "İhtiyacın olduğunda yapı",
+      "structureBody": "Kurslar, sohbetler arasındaki boşlukları doldurur; böylece her zaman üzerinde çalışacak bir şeyin olur."
+    }
+  },
+  "faq": {
+    "eyebrow": "Yardım merkezi",
+    "title": "Sık Sorulan Sorular",
+    "items": {
+      "free": {
+        "q": "Language Partner ücretsiz mi?",
+        "a": "Evet. Erken erişim aşamamız boyunca değişim eşleştirmesi, akran pratiği, video görüşmeleri ve kurslar dahil tüm özellikler tamamen ücretsizdir."
+      },
+      "matching": {
+        "q": "Eşleştirme nasıl çalışır?",
+        "a": "Önce seni, senin ana dilini öğrenen hedef dilinin ana dili konuşuruyla eşleştirmeye çalışırız (değişim eşleşmesi). Uygun kimse yoksa, seninle aynı dili öğrenen akran pratiği partnerleri öneririz."
+      },
+      "install": {
+        "q": "Video görüşmeler için bir şey kurmam gerekiyor mu?",
+        "a": "Hayır. Görüşmeler WebRTC kullanarak doğrudan tarayıcında çalışır — indirme veya eklenti gerekmez."
+      },
+      "coursesOnly": {
+        "q": "Kimseyle konuşmadan sadece video kursları kullanabilir miyim?",
+        "a": "Kesinlikle. Kurslar tamamen kendi hızında ilerler ve partner eşleştirmesinden bağımsızdır."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "quote": "“Burada ilk on dakikamda bir konuşma partneri buldum.”",
+      "title": "Tekrar hoş geldin",
+      "subtitle": "Partnerlerinle pratik yapmaya devam etmek için giriş yap.",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Giriş yap",
+      "submitting": "Giriş yapılıyor...",
+      "error": "Geçersiz e-posta veya şifre.",
+      "noAccount": "Hesabın yok mu?",
+      "signUp": "Kaydol"
+    },
+    "register": {
+      "quote": "“Ana dilimi öğretmek, öğrendiğim dili nasıl açıklayacağımı öğretti.”",
+      "title": "Hesabını oluştur",
+      "subtitle": "Ücretsiz, kredi kartı gerekmez — bugün pratiğe başla.",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "email": "E-posta",
+      "password": "Şifre",
+      "iSpeak": "Konuştuğum dil",
+      "iAmLearning": "Öğrendiğim dil",
+      "submit": "Kaydol",
+      "submitting": "Hesap oluşturuluyor...",
+      "error": "Kayıt başarısız oldu.",
+      "haveAccount": "Zaten bir hesabın var mı?",
+      "logIn": "Giriş yap"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Panon",
+    "welcome": "Tekrar hoş geldin",
+    "welcomeWithName": "Tekrar hoş geldin, {{name}}",
+    "speaking": "Konuştuğu dil",
+    "learning": "Öğrendiği dil",
+    "finishProfile": "Partnerlerle eşleşmek için profilini tamamla",
+    "findAPartner": "Partner bul",
+    "quickActions": {
+      "findPartner": "Partner bul",
+      "findPartnerSub": "Dile göre eşleştir",
+      "schedule": "Seans planla",
+      "scheduleSub": "Birlikte zaman ayır",
+      "courses": "Kurslara göz at",
+      "coursesSub": "Yapılandırılmış dersler"
+    },
+    "suggestedPartners": "Önerilen partnerler",
+    "suggestedPartnersEmpty": "Henüz eşleşme yok — profilindeki dilleri genişletmeyi dene.",
+    "upcomingSessions": "Yaklaşan seanslar",
+    "upcomingSessionsEmpty": "Henüz planlanan bir şey yok.",
+    "keepLearning": "Öğrenmeye devam et",
+    "keepLearningEmpty": "Henüz kurs yok.",
+    "exchange": "Değişim",
+    "peer": "Akran",
+    "emptyStateBody": "Partnerler katıldıkça ve kurslar eklendikçe panon dolacak — başlamak için <link>Partner bul</link> sayfasına git."
+  },
+  "partners": {
+    "title": "Partner bul",
+    "subtitle": "Değişim eşleşmeleri önce sıralanır, akran pratiği geri kalanı tamamlar.",
+    "anyLanguage": "Herhangi bir dil",
+    "anyLevel": "Herhangi bir seviye",
+    "loading": "Partnerler yükleniyor...",
+    "empty": "Partner bulunamadı. Filtrelerini genişletmeyi dene.",
+    "exchangeMatch": "Değişim eşleşmesi",
+    "peerPractice": "Akran pratiği",
+    "speaksLearning": "{{native}} konuşuyor · {{learning}} öğreniyor"
+  },
+  "partnerProfile": {
+    "loading": "Yükleniyor...",
+    "notFound": "Partner bulunamadı.",
+    "exchangeMatch": "Değişim eşleşmesi",
+    "peerPractice": "Akran pratiği",
+    "speaksLearning": "<native>{{native}}</native> konuşuyor · <learning>{{learning}}</learning> öğreniyor",
+    "bio": "Biyografi",
+    "learningGoals": "Öğrenme hedefleri",
+    "message": "Mesaj",
+    "startVideoCall": "Video görüşme başlat",
+    "scheduleSession": "Seans planla"
+  },
+  "messages": {
+    "title": "Mesajlar",
+    "loading": "Yükleniyor...",
+    "empty": "Henüz konuşma yok. Başlamak için bir partnerin profilinden mesaj gönder.",
+    "noMessagesYet": "Henüz mesaj yok",
+    "selectConversation": "Bir konuşma seç"
+  },
+  "conversationThread": {
+    "connected": "Bağlandı",
+    "connecting": "Bağlanıyor...",
+    "videoCall": "Video görüşme",
+    "typeAMessage": "Bir mesaj yaz...",
+    "send": "Gönder",
+    "conversation": "Konuşma"
+  },
+  "schedule": {
+    "title": "Seans planla",
+    "partner": "Partner",
+    "selectAPartner": "Bir partner seç...",
+    "dateTime": "Tarih ve saat",
+    "duration": "Süre (dakika)",
+    "notes": "Notlar (isteğe bağlı)",
+    "errorMissing": "Lütfen bir partner ve saat seç.",
+    "errorFailed": "Seans planlanamadı.",
+    "submit": "Seansı planla",
+    "submitting": "Planlanıyor...",
+    "yourSessions": "Seansların",
+    "loading": "Yükleniyor...",
+    "empty": "Henüz planlanmış bir seans yok.",
+    "withPartner": "{{name}} ile",
+    "minutesShort": "{{count}} dk",
+    "confirm": "Onayla",
+    "cancelSession": "İptal et",
+    "joinCall": "Görüşmeye katıl",
+    "status": {
+      "pending": "beklemede",
+      "confirmed": "onaylandı",
+      "completed": "tamamlandı",
+      "cancelled": "iptal edildi"
+    }
+  },
+  "courses": {
+    "title": "Kurslar",
+    "subtitle": "Dile ve seviyeye göre kendi hızında video dersleri.",
+    "anyLanguage": "Herhangi bir dil",
+    "anyLevel": "Herhangi bir seviye",
+    "loading": "Kurslar yükleniyor...",
+    "lessonsCount": "{{count}} ders"
+  },
+  "coursePlayer": {
+    "loading": "Yükleniyor...",
+    "notFound": "Kurs bulunamadı.",
+    "lessonsProgress": "{{completed}} / {{total}} ders",
+    "noLessons": "Bu kursta henüz ders yok.",
+    "completed": "Tamamlandı",
+    "markComplete": "Tamamlandı olarak işaretle"
+  },
+  "profile": {
+    "title": "Profilin",
+    "loading": "Yükleniyor...",
+    "photoNote": "Fotoğrafın hesabından otomatik olarak oluşturulur.",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "bio": "Biyografi",
+    "bioPlaceholder": "Partnerlerine kendinden biraz bahset...",
+    "nativeLanguage": "Ana dil",
+    "learningLanguage": "Öğrenilen dil",
+    "select": "Seç...",
+    "proficiencyLevel": "Yeterlilik seviyesi",
+    "timezone": "Saat dilimi",
+    "learningGoals": "Öğrenme hedefleri",
+    "learningGoalsPlaceholder": "Neyi başarmak istiyorsun?",
+    "save": "Değişiklikleri kaydet",
+    "saving": "Kaydediliyor...",
+    "saved": "Kaydedildi!"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "editProfile": "Profili düzenle",
+    "notifications": "Bildirimler",
+    "newMessageAlerts": "Yeni mesaj uyarıları",
+    "sessionReminders": "Seans hatırlatıcıları",
+    "appearance": "Görünüm",
+    "appearanceBody": "Açık ve koyu mod arasında geçiş yap.",
+    "language": "Dil",
+    "languageBody": "Language Partner genelinde kullanılan dili seç.",
+    "logOut": "Çıkış yap"
+  },
+  "call": {
+    "title": "Video görüşme",
+    "connecting": "Bağlanıyor...",
+    "connected": "Bağlandı",
+    "waitingForPartner": "Partnerin katılması bekleniyor...",
+    "partnerJoined": "Partner katıldı, bağlanıyor...",
+    "callEnded": "Görüşme sona erdi",
+    "partnerLeft": "Partner görüşmeden ayrıldı",
+    "micError": "Kamera/mikrofona erişilemedi. Lütfen izin ver ve sayfayı yeniden yükle.",
+    "mute": "Sesi kapat",
+    "unmute": "Sesi aç",
+    "turnOffCamera": "Kamerayı kapat",
+    "turnOnCamera": "Kamerayı aç",
+    "leave": "Ayrıl"
+  },
+  "levels": {
+    "beginner": "Başlangıç",
+    "elementary": "Temel",
+    "intermediate": "Orta",
+    "advanced": "İleri",
+    "fluent": "Akıcı"
+  }
+}

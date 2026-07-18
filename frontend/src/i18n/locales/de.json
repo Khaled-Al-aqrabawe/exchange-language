@@ -1,0 +1,312 @@
+{
+  "common": {
+    "appName": "Language Partner",
+    "loading": "Wird geladen...",
+    "loadingDashboard": "Dein Dashboard wird geladen...",
+    "seeAll": "Alle anzeigen",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
+  },
+  "nav": {
+    "dashboard": "Übersicht",
+    "partners": "Partner",
+    "messages": "Nachrichten",
+    "schedule": "Termine",
+    "courses": "Kurse",
+    "about": "Über uns",
+    "faq": "FAQ",
+    "login": "Anmelden",
+    "signUpFree": "Kostenlos registrieren",
+    "settings": "Einstellungen",
+    "logOut": "Abmelden"
+  },
+  "footer": {
+    "tagline": "Language Partner",
+    "copyright": "© {{year}} Language Partner — MVP"
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "toggleToLight": "Zum hellen Modus wechseln",
+    "toggleToDark": "Zum dunklen Modus wechseln"
+  },
+  "language": {
+    "choose": "Sprache wählen"
+  },
+  "landing": {
+    "badge": "Kostenlos während des Early Access",
+    "heroTitleLine1": "Lerne eine Sprache, indem du",
+    "heroTitleLine2": "sie wirklich sprichst",
+    "heroSubtitle": "Language Partner verbindet dich mit Muttersprachlern und anderen Lernenden für echtes Gesprächstraining, plus strukturierte Videokurse für deine Grundlagen.",
+    "findAPartner": "Partner finden",
+    "getStartedFree": "Kostenlos starten",
+    "learnMore": "Mehr erfahren",
+    "joinLearners": "Schließ dich Lernenden an, die <bold>Arabisch, Englisch</bold> und mehr üben",
+    "howItWorks": "So funktioniert's",
+    "steps": {
+      "exchangeTitle": "Austausch mit Muttersprachlern",
+      "exchangeBody": "Lerne Englisch von englischen Muttersprachlern, während du ihnen Arabisch beibringst — oder jede andere Sprachkombination, die du möchtest.",
+      "practiceTitle": "Üben mit Gleichgesinnten",
+      "practiceBody": "Kein Austauschpartner online? Übe Konversation mit jemand anderem, der dieselbe Sprache lernt.",
+      "learnTitle": "Selbstständig lernen",
+      "learnBody": "Arbeite dich in deinem eigenen Tempo durch strukturierte Videokurse nach Sprache und Niveau."
+    },
+    "realConversations": "Echte Gespräche",
+    "practiceHeadline": "Übe mit echten Menschen, nicht mit Karteikarten",
+    "practiceBody": "Apps, die nur Vokabeln abfragen, bringen dich nur bis zu einem gewissen Punkt. Language Partner lässt dich schon in deiner ersten Sitzung mit einer echten Person sprechen — Nachrichten zum Planen, Video zum Üben und Kurse, um Lücken zu schließen.",
+    "practiceList": {
+      "matched": "Gematcht nach Sprachkombination, Niveau und Zeitzone",
+      "builtin": "Integrierter Chat und Video — nichts zu installieren",
+      "free": "Kostenlose strukturierte Kurse, wenn du mehr Struktur möchtest"
+    },
+    "everythingIncluded": "Alles inklusive",
+    "featuresHeadline": "Gebaut für echtes Gesprächstraining",
+    "features": {
+      "videoTitle": "Integriertes Video & Audio",
+      "videoBody": "Gesprächstraining von Angesicht zu Angesicht direkt im Browser — keine Downloads, keine zusätzlichen Apps.",
+      "matchingTitle": "Intelligentes Matching",
+      "matchingBody": "Wir reihen Austauschpartner zuerst, gefolgt von Gleichgesinnten auf deinem Niveau und in deiner Zeitzone.",
+      "messagingTitle": "Nachrichten in Echtzeit",
+      "messagingBody": "Chatte sofort mit Partnern, um Sitzungen zu planen oder das Gespräch fortzusetzen.",
+      "schedulingTitle": "Einfache Terminplanung",
+      "schedulingBody": "Buche Sitzungen mit ein paar Klicks und starte direkt in einen Anruf, wenn es soweit ist.",
+      "coursesTitle": "Strukturierte Kurse",
+      "coursesBody": "Videolektionen im eigenen Tempo nach Sprache und Niveau, wann immer du mehr Struktur möchtest.",
+      "freeTitle": "Kostenloser Einstieg",
+      "freeBody": "Alle Funktionen sind während des Early Access freigeschaltet — keine Kreditkarte, keine Bezahlschranken."
+    },
+    "ctaTitle": "Kostenlos nutzbar, ohne Haken",
+    "ctaBody": "Language Partner ist während unserer Early-Access-Phase kostenlos — alle Funktionen sind von Anfang an freigeschaltet.",
+    "ctaButton": "Kostenloses Konto erstellen"
+  },
+  "about": {
+    "eyebrow": "Über uns",
+    "titlePrefix": "Sprachgefühl entsteht durch",
+    "titleHighlight": "Konversation",
+    "intro": "Language Partner gibt es, weil der schnellste Weg, eine Sprache zu lernen, darin besteht, sie tatsächlich mit einer anderen Person zu sprechen. Wir verbinden Lernende für Muttersprachler-Austausch, Übung mit Gleichgesinnten und strukturierte Kurse im eigenen Tempo — alles an einem Ort.",
+    "missionEyebrow": "Unsere Mission",
+    "missionHeadline": "Authentische Übung für alle zugänglich machen, überall",
+    "missionBody": "Wir matchen Lernende nach Sprachkombination, Niveau und Zeitzone und halten uns dann zurück — integriertes Video und Chat, sodass nichts extra installiert werden muss, und Kurse für mehr Struktur zwischen den Sitzungen.",
+    "beliefEyebrow": "Woran wir glauben",
+    "beliefHeadline": "Unser Ansatz",
+    "values": {
+      "realTitle": "Echte Menschen, echte Übung",
+      "realBody": "Der schnellste Weg, eine Sprache zu lernen, ist, sie mit einem anderen Menschen zu sprechen — nicht allein Karteikarten durchzuklicken.",
+      "accessibleTitle": "Für alle zugänglich",
+      "accessibleBody": "Authentisches Gesprächstraining sollte nicht bedeuten, einen privaten Nachhilfelehrer finden oder bezahlen zu müssen.",
+      "structureTitle": "Struktur, wenn du sie brauchst",
+      "structureBody": "Kurse füllen die Lücken zwischen Gesprächen, damit du immer etwas zu üben hast."
+    }
+  },
+  "faq": {
+    "eyebrow": "Hilfe-Center",
+    "title": "Häufig gestellte Fragen",
+    "items": {
+      "free": {
+        "q": "Ist Language Partner kostenlos?",
+        "a": "Ja. Während unserer Early-Access-Phase ist jede Funktion — Austausch-Matching, Übung mit Gleichgesinnten, Videoanrufe und Kurse — komplett kostenlos."
+      },
+      "matching": {
+        "q": "Wie funktioniert das Matching?",
+        "a": "Wir versuchen zuerst, dich mit einem Muttersprachler deiner Zielsprache zu matchen, der deine Muttersprache lernt (ein Austausch-Match). Falls keiner verfügbar ist, schlagen wir Partner zur Übung mit Gleichgesinnten vor, die dieselbe Sprache wie du lernen."
+      },
+      "install": {
+        "q": "Muss ich etwas für Videoanrufe installieren?",
+        "a": "Nein. Anrufe laufen direkt in deinem Browser über WebRTC — keine Downloads oder Plugins erforderlich."
+      },
+      "coursesOnly": {
+        "q": "Kann ich die Videokurse nutzen, ohne mit jemandem zu sprechen?",
+        "a": "Auf jeden Fall. Die Kurse sind vollständig selbstbestimmt und unabhängig vom Partner-Matching."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "quote": "„Ich habe hier innerhalb der ersten zehn Minuten einen Gesprächspartner gefunden.“",
+      "title": "Willkommen zurück",
+      "subtitle": "Melde dich an, um mit deinen Partnern weiterzuüben.",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "submit": "Anmelden",
+      "submitting": "Anmeldung läuft...",
+      "error": "Ungültige E-Mail oder falsches Passwort.",
+      "noAccount": "Noch kein Konto?",
+      "signUp": "Registrieren"
+    },
+    "register": {
+      "quote": "„Meine Muttersprache zu unterrichten hat mir gezeigt, wie ich die Sprache, die ich lerne, erklären kann.“",
+      "title": "Konto erstellen",
+      "subtitle": "Kostenlos, keine Kreditkarte — starte noch heute mit dem Üben.",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "iSpeak": "Ich spreche",
+      "iAmLearning": "Ich lerne",
+      "submit": "Registrieren",
+      "submitting": "Konto wird erstellt...",
+      "error": "Registrierung fehlgeschlagen.",
+      "haveAccount": "Schon ein Konto?",
+      "logIn": "Anmelden"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Dein Dashboard",
+    "welcome": "Willkommen zurück",
+    "welcomeWithName": "Willkommen zurück, {{name}}",
+    "speaking": "Muttersprache",
+    "learning": "Lernt",
+    "finishProfile": "Vervollständige dein Profil, um mit Partnern gematcht zu werden",
+    "findAPartner": "Partner finden",
+    "quickActions": {
+      "findPartner": "Partner finden",
+      "findPartnerSub": "Nach Sprache matchen",
+      "schedule": "Sitzung planen",
+      "scheduleSub": "Gemeinsame Zeit buchen",
+      "courses": "Kurse durchsuchen",
+      "coursesSub": "Strukturierte Lektionen"
+    },
+    "suggestedPartners": "Vorgeschlagene Partner",
+    "suggestedPartnersEmpty": "Noch keine Treffer — erweitere die Sprachen in deinem Profil.",
+    "upcomingSessions": "Anstehende Sitzungen",
+    "upcomingSessionsEmpty": "Noch nichts geplant.",
+    "keepLearning": "Weiter lernen",
+    "keepLearningEmpty": "Noch keine Kurse.",
+    "exchange": "Austausch",
+    "peer": "Gleichgesinnte",
+    "emptyStateBody": "Dein Dashboard füllt sich, sobald Partner beitreten und Kurse hinzugefügt werden — geh zu <link>Partner finden</link>, um loszulegen."
+  },
+  "partners": {
+    "title": "Partner finden",
+    "subtitle": "Austausch-Matches werden zuerst gelistet, Übung mit Gleichgesinnten füllt den Rest auf.",
+    "anyLanguage": "Beliebige Sprache",
+    "anyLevel": "Beliebiges Niveau",
+    "loading": "Partner werden geladen...",
+    "empty": "Keine Partner gefunden. Erweitere deine Filter.",
+    "exchangeMatch": "Austausch-Match",
+    "peerPractice": "Übung mit Gleichgesinnten",
+    "speaksLearning": "Spricht {{native}} · Lernt {{learning}}"
+  },
+  "partnerProfile": {
+    "loading": "Wird geladen...",
+    "notFound": "Partner nicht gefunden.",
+    "exchangeMatch": "Austausch-Match",
+    "peerPractice": "Übung mit Gleichgesinnten",
+    "speaksLearning": "Spricht <native>{{native}}</native> · Lernt <learning>{{learning}}</learning>",
+    "bio": "Über mich",
+    "learningGoals": "Lernziele",
+    "message": "Nachricht",
+    "startVideoCall": "Videoanruf starten",
+    "scheduleSession": "Sitzung planen"
+  },
+  "messages": {
+    "title": "Nachrichten",
+    "loading": "Wird geladen...",
+    "empty": "Noch keine Unterhaltungen. Schreib einem Partner über dessen Profil, um zu starten.",
+    "noMessagesYet": "Noch keine Nachrichten",
+    "selectConversation": "Wähle eine Unterhaltung"
+  },
+  "conversationThread": {
+    "connected": "Verbunden",
+    "connecting": "Verbindung wird hergestellt...",
+    "videoCall": "Videoanruf",
+    "typeAMessage": "Nachricht schreiben...",
+    "send": "Senden",
+    "conversation": "Unterhaltung"
+  },
+  "schedule": {
+    "title": "Sitzung planen",
+    "partner": "Partner",
+    "selectAPartner": "Partner auswählen...",
+    "dateTime": "Datum & Uhrzeit",
+    "duration": "Dauer (Minuten)",
+    "notes": "Notizen (optional)",
+    "errorMissing": "Bitte wähle einen Partner und eine Uhrzeit.",
+    "errorFailed": "Die Sitzung konnte nicht geplant werden.",
+    "submit": "Sitzung planen",
+    "submitting": "Wird geplant...",
+    "yourSessions": "Deine Sitzungen",
+    "loading": "Wird geladen...",
+    "empty": "Noch keine Sitzungen geplant.",
+    "withPartner": "mit {{name}}",
+    "minutesShort": "{{count}} Min.",
+    "confirm": "Bestätigen",
+    "cancelSession": "Absagen",
+    "joinCall": "Anruf beitreten",
+    "status": {
+      "pending": "ausstehend",
+      "confirmed": "bestätigt",
+      "completed": "abgeschlossen",
+      "cancelled": "abgesagt"
+    }
+  },
+  "courses": {
+    "title": "Kurse",
+    "subtitle": "Videolektionen im eigenen Tempo nach Sprache und Niveau.",
+    "anyLanguage": "Beliebige Sprache",
+    "anyLevel": "Beliebiges Niveau",
+    "loading": "Kurse werden geladen...",
+    "lessonsCount": "{{count}} Lektionen"
+  },
+  "coursePlayer": {
+    "loading": "Wird geladen...",
+    "notFound": "Kurs nicht gefunden.",
+    "lessonsProgress": "{{completed}} / {{total}} Lektionen",
+    "noLessons": "Dieser Kurs hat noch keine Lektionen.",
+    "completed": "Abgeschlossen",
+    "markComplete": "Als abgeschlossen markieren"
+  },
+  "profile": {
+    "title": "Dein Profil",
+    "loading": "Wird geladen...",
+    "photoNote": "Dein Foto wird automatisch aus deinem Konto generiert.",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "bio": "Über mich",
+    "bioPlaceholder": "Erzähl Partnern etwas über dich...",
+    "nativeLanguage": "Muttersprache",
+    "learningLanguage": "Lernsprache",
+    "select": "Auswählen...",
+    "proficiencyLevel": "Sprachniveau",
+    "timezone": "Zeitzone",
+    "learningGoals": "Lernziele",
+    "learningGoalsPlaceholder": "Was möchtest du erreichen?",
+    "save": "Änderungen speichern",
+    "saving": "Wird gespeichert...",
+    "saved": "Gespeichert!"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "editProfile": "Profil bearbeiten",
+    "notifications": "Benachrichtigungen",
+    "newMessageAlerts": "Benachrichtigung bei neuen Nachrichten",
+    "sessionReminders": "Erinnerungen an Sitzungen",
+    "appearance": "Erscheinungsbild",
+    "appearanceBody": "Zwischen hellem und dunklem Modus wechseln.",
+    "language": "Sprache",
+    "languageBody": "Wähle die Sprache, die in Language Partner verwendet wird.",
+    "logOut": "Abmelden"
+  },
+  "call": {
+    "title": "Videoanruf",
+    "connecting": "Verbindung wird hergestellt...",
+    "connected": "Verbunden",
+    "waitingForPartner": "Warten, bis der Partner beitritt...",
+    "partnerJoined": "Partner ist beigetreten, Verbindung wird hergestellt...",
+    "callEnded": "Anruf beendet",
+    "partnerLeft": "Partner hat den Anruf verlassen",
+    "micError": "Kein Zugriff auf Kamera/Mikrofon möglich. Bitte erteile die Berechtigung und lade die Seite neu.",
+    "mute": "Stummschalten",
+    "unmute": "Stummschaltung aufheben",
+    "turnOffCamera": "Kamera ausschalten",
+    "turnOnCamera": "Kamera einschalten",
+    "leave": "Verlassen"
+  },
+  "levels": {
+    "beginner": "Anfänger",
+    "elementary": "Grundkenntnisse",
+    "intermediate": "Mittelstufe",
+    "advanced": "Fortgeschritten",
+    "fluent": "Fließend"
+  }
+}

@@ -1,11 +1,22 @@
 import { Mic, MicOff, PhoneOff, Video, VideoOff } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { wsUrl } from '../api/client'
 
 const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }]
 
+const statusKeys = {
+  connecting: 'call.connecting',
+  connected: 'call.connected',
+  waiting: 'call.waitingForPartner',
+  joined: 'call.partnerJoined',
+  ended: 'call.callEnded',
+  left: 'call.partnerLeft',
+}
+
 export default function Call() {
+  const { t } = useTranslation()
   const { roomId } = useParams()
   const navigate = useNavigate()
 
@@ -15,7 +26,7 @@ export default function Call() {
   const socketRef = useRef(null)
   const pendingCandidatesRef = useRef([])
 
-  const [status, setStatus] = useState('Connecting...')
+  const [status, setStatus] = useState('connecting')
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
   const [error, setError] = useState('')
@@ -28,7 +39,7 @@ export default function Call() {
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       } catch {
-        if (!cancelled) setError('Could not access camera/microphone. Please grant permission and reload.')
+        if (!cancelled) setError(t('call.micError'))
         return
       }
       if (cancelled) {
@@ -43,7 +54,7 @@ export default function Call() {
 
       pc.ontrack = (event) => {
         if (remoteVideoRef.current) remoteVideoRef.current.srcObject = event.streams[0]
-        setStatus('Connected')
+        setStatus('connected')
       }
 
       pc.onicecandidate = (event) => {
@@ -53,9 +64,9 @@ export default function Call() {
       }
 
       pc.onconnectionstatechange = () => {
-        if (pc.connectionState === 'connected') setStatus('Connected')
+        if (pc.connectionState === 'connected') setStatus('connected')
         if (['disconnected', 'failed', 'closed'].includes(pc.connectionState)) {
-          setStatus('Call ended')
+          setStatus('ended')
         }
       }
 
@@ -63,7 +74,7 @@ export default function Call() {
       socketRef.current = socket
 
       socket.onopen = () => {
-        if (!cancelled) setStatus('Waiting for partner to join...')
+        if (!cancelled) setStatus('waiting')
       }
 
       socket.onmessage = async (event) => {
@@ -71,7 +82,7 @@ export default function Call() {
         const data = JSON.parse(event.data)
 
         if (data.event === 'peer-joined') {
-          setStatus('Partner joined, connecting...')
+          setStatus('joined')
           const offer = await pc.createOffer()
           await pc.setLocalDescription(offer)
           send({ type: 'offer', sdp: offer })
@@ -91,12 +102,12 @@ export default function Call() {
             pendingCandidatesRef.current.push(data.candidate)
           }
         } else if (data.event === 'peer-left') {
-          setStatus('Partner left the call')
+          setStatus('left')
           if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
         }
       }
 
-      socket.onclose = () => setStatus((s) => (s === 'Connected' ? 'Call ended' : s))
+      socket.onclose = () => setStatus((s) => (s === 'connected' ? 'ended' : s))
     }
 
     async function flushCandidates(pc) {
@@ -122,7 +133,7 @@ export default function Call() {
       pcRef.current = null
       localStream?.getTracks().forEach((track) => track.stop())
     }
-  }, [roomId])
+  }, [roomId, t])
 
   const toggleMic = () => {
     const stream = localVideoRef.current?.srcObject
@@ -136,13 +147,14 @@ export default function Call() {
     setCamOn((v) => !v)
   }
 
-  const isConnected = status === 'Connected'
+  const isConnected = status === 'connected'
+  const statusText = t(statusKeys[status] || statusKeys.connecting)
 
   return (
     <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
       <div className="max-w-4xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold text-white">Video call</h1>
+          <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
           <span className="inline-flex items-center gap-1.5 text-sm text-slate-300">
             <span className="relative flex h-2 w-2">
               {isConnected && (
@@ -150,7 +162,7 @@ export default function Call() {
               )}
               <span className={`relative inline-flex h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-slate-500'}`} />
             </span>
-            {status}
+            {statusText}
           </span>
         </div>
 
@@ -163,7 +175,7 @@ export default function Call() {
             <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
             {!isConnected && (
               <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">
-                {status}
+                {statusText}
               </div>
             )}
             <video
@@ -171,7 +183,7 @@ export default function Call() {
               autoPlay
               playsInline
               muted
-              className="absolute bottom-4 right-4 w-40 rounded-xl border-2 border-white/80 shadow-lg"
+              className="absolute bottom-4 end-4 w-40 rounded-xl border-2 border-white/80 shadow-lg"
             />
           </div>
         )}
@@ -182,7 +194,7 @@ export default function Call() {
             className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
               micOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
             }`}
-            title={micOn ? 'Mute' : 'Unmute'}
+            title={micOn ? t('call.mute') : t('call.unmute')}
           >
             {micOn ? <Mic size={18} /> : <MicOff size={18} />}
           </button>
@@ -191,7 +203,7 @@ export default function Call() {
             className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
               camOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
             }`}
-            title={camOn ? 'Turn off camera' : 'Turn on camera'}
+            title={camOn ? t('call.turnOffCamera') : t('call.turnOnCamera')}
           >
             {camOn ? <Video size={18} /> : <VideoOff size={18} />}
           </button>
@@ -199,7 +211,7 @@ export default function Call() {
             onClick={() => navigate(-1)}
             className="flex h-12 items-center gap-2 rounded-full bg-red-600 px-6 text-white font-medium hover:bg-red-700 transition-colors"
           >
-            <PhoneOff size={17} /> Leave
+            <PhoneOff size={17} /> {t('call.leave')}
           </button>
         </div>
       </div>

@@ -1,14 +1,17 @@
 import { UserPlus } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthImagePanel from '../components/AuthImagePanel'
 import { LANGUAGES } from '../constants'
 import { useAuth } from '../context/AuthContext'
 
 const inputClass =
-  'w-full rounded-xl border border-slate-300 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+  'w-full rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent'
+const inputStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
 
 export default function Register() {
+  const { t } = useTranslation()
   const { register } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({
@@ -29,41 +32,44 @@ export default function Register() {
       navigate('/dashboard')
     } catch (err) {
       const data = err.response?.data
-      setError(data ? Object.values(data).flat().join(' ') : 'Registration failed.')
+      setError(data ? Object.values(data).flat().join(' ') : t('auth.register.error'))
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <div className="grid lg:grid-cols-2 min-h-[calc(100vh-4rem)]">
-      <AuthImagePanel quote="“Teaching my native language taught me how to explain the one I'm learning.”" />
+    <div className="grid lg:grid-cols-2 min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
+      <AuthImagePanel quote={t('auth.register.quote')} />
 
       <div className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 mb-5">
+          <div
+            className="flex h-11 w-11 items-center justify-center rounded-xl mb-5"
+            style={{ background: 'var(--surface-2)', color: 'var(--accent)' }}
+          >
             <UserPlus size={20} />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">Create your account</h1>
-          <p className="text-slate-500 text-sm mb-7">Free, no credit card — start practicing today.</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight mb-1" style={{ color: 'var(--ink)' }}>{t('auth.register.title')}</h1>
+          <p className="text-sm mb-7" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.subtitle')}</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">First name</label>
-                <input value={form.first_name} onChange={update('first_name')} className={inputClass} />
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>{t('auth.register.firstName')}</label>
+                <input value={form.first_name} onChange={update('first_name')} className={inputClass} style={inputStyle} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Last name</label>
-                <input value={form.last_name} onChange={update('last_name')} className={inputClass} />
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>{t('auth.register.lastName')}</label>
+                <input value={form.last_name} onChange={update('last_name')} className={inputClass} style={inputStyle} />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-              <input type="email" required value={form.email} onChange={update('email')} className={inputClass} />
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>{t('auth.register.email')}</label>
+              <input type="email" required value={form.email} onChange={update('email')} className={inputClass} style={inputStyle} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>{t('auth.register.password')}</label>
               <input
                 type="password"
                 required
@@ -71,35 +77,32 @@ export default function Register() {
                 value={form.password}
                 onChange={update('password')}
                 className={inputClass}
+                style={inputStyle}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">I speak</label>
-                <select value={form.native_language} onChange={update('native_language')} className={inputClass}>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>{t('auth.register.iSpeak')}</label>
+                <select value={form.native_language} onChange={update('native_language')} className={inputClass} style={inputStyle}>
                   {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">I'm learning</label>
-                <select value={form.learning_language} onChange={update('learning_language')} className={inputClass}>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>{t('auth.register.iAmLearning')}</label>
+                <select value={form.learning_language} onChange={update('learning_language')} className={inputClass} style={inputStyle}>
                   {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
                 </select>
               </div>
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 disabled:opacity-50 transition-colors"
-            >
-              {submitting ? 'Creating account...' : 'Sign up'}
+            {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
+            <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50">
+              {submitting ? t('auth.register.submitting') : t('auth.register.submit')}
             </button>
           </form>
-          <p className="mt-6 text-sm text-slate-500 text-center">
-            Already have an account?{' '}
-            <Link to="/login" className="text-indigo-600 font-semibold">
-              Log in
+          <p className="mt-6 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
+            {t('auth.register.haveAccount')}{' '}
+            <Link to="/login" className="font-semibold" style={{ color: 'var(--accent)' }}>
+              {t('auth.register.logIn')}
             </Link>
           </p>
         </div>

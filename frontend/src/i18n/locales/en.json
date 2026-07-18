@@ -1,0 +1,312 @@
+{
+  "common": {
+    "appName": "Language Partner",
+    "loading": "Loading...",
+    "loadingDashboard": "Loading your dashboard...",
+    "seeAll": "See all",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "partners": "Partners",
+    "messages": "Messages",
+    "schedule": "Schedule",
+    "courses": "Courses",
+    "about": "About",
+    "faq": "FAQ",
+    "login": "Log in",
+    "signUpFree": "Sign up free",
+    "settings": "Settings",
+    "logOut": "Log out"
+  },
+  "footer": {
+    "tagline": "Language Partner",
+    "copyright": "© {{year}} Language Partner — MVP"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "toggleToLight": "Switch to light mode",
+    "toggleToDark": "Switch to dark mode"
+  },
+  "language": {
+    "choose": "Choose language"
+  },
+  "landing": {
+    "badge": "Free during early access",
+    "heroTitleLine1": "Learn a language by",
+    "heroTitleLine2": "actually speaking it",
+    "heroSubtitle": "Language Partner connects you with native speakers and fellow learners for real conversation practice, plus structured video courses to build your foundation.",
+    "findAPartner": "Find a partner",
+    "getStartedFree": "Get started free",
+    "learnMore": "Learn more",
+    "joinLearners": "Join learners practicing <bold>Arabic, English</bold> and more",
+    "howItWorks": "How it works",
+    "steps": {
+      "exchangeTitle": "Exchange with native speakers",
+      "exchangeBody": "Learn English from English speakers while teaching them Arabic — or any language pair you like.",
+      "practiceTitle": "Practice with peers",
+      "practiceBody": "No exchange partner online? Practice conversation with someone else learning the same language.",
+      "learnTitle": "Learn independently",
+      "learnBody": "Work through structured video courses by language and level, at your own pace."
+    },
+    "realConversations": "Real conversations",
+    "practiceHeadline": "Practice with people, not flashcards",
+    "practiceBody": "Apps that only drill vocabulary can only take you so far. Language Partner gets you talking with a real person from your very first session — messaging to plan, video to practice, and courses to fill in the gaps.",
+    "practiceList": {
+      "matched": "Matched by language pair, level, and timezone",
+      "builtin": "Built-in chat and video — nothing to install",
+      "free": "Free structured courses when you want more structure"
+    },
+    "everythingIncluded": "Everything included",
+    "featuresHeadline": "Built for real conversation practice",
+    "features": {
+      "videoTitle": "Built-in video & audio",
+      "videoBody": "Face-to-face conversation practice in your browser — no downloads, no extra apps.",
+      "matchingTitle": "Smart matching",
+      "matchingBody": "We rank exchange partners first, then fall back to peers at your level and timezone.",
+      "messagingTitle": "Real-time messaging",
+      "messagingBody": "Chat with partners instantly to plan sessions or keep the conversation going.",
+      "schedulingTitle": "Simple scheduling",
+      "schedulingBody": "Book sessions in a couple of clicks and jump straight into a call when it's time.",
+      "coursesTitle": "Structured courses",
+      "coursesBody": "Self-paced video lessons by language and level whenever you want extra structure.",
+      "freeTitle": "Free to start",
+      "freeBody": "Every feature is unlocked during early access — no credit card, no paywalls."
+    },
+    "ctaTitle": "Free to use, no catch",
+    "ctaBody": "Language Partner is free during our early access phase — every feature is unlocked from day one.",
+    "ctaButton": "Create your free account"
+  },
+  "about": {
+    "eyebrow": "About us",
+    "titlePrefix": "Fluency comes from",
+    "titleHighlight": "conversation",
+    "intro": "Language Partner exists because the fastest way to learn a language is to actually speak it with another person. We connect learners for native-speaker exchange, peer practice, and structured self-paced courses — all in one place.",
+    "missionEyebrow": "Our mission",
+    "missionHeadline": "Make authentic practice accessible to anyone, anywhere",
+    "missionBody": "We match learners by language pair, level, and timezone, then get out of the way — built-in video and chat so there's nothing extra to install, and courses for whenever you want a bit more structure between sessions.",
+    "beliefEyebrow": "What we believe",
+    "beliefHeadline": "Our approach",
+    "values": {
+      "realTitle": "Real people, real practice",
+      "realBody": "The fastest way to learn a language is to speak it with another human being — not tap through flashcards alone.",
+      "accessibleTitle": "Accessible to everyone",
+      "accessibleBody": "Authentic conversation practice shouldn't require finding or affording a private tutor.",
+      "structureTitle": "Structure when you need it",
+      "structureBody": "Courses fill the gaps between conversations so you always have something to work on."
+    }
+  },
+  "faq": {
+    "eyebrow": "Help center",
+    "title": "Frequently Asked Questions",
+    "items": {
+      "free": {
+        "q": "Is Language Partner free?",
+        "a": "Yes. During our early access phase, every feature — exchange matching, peer practice, video calls, and courses — is completely free."
+      },
+      "matching": {
+        "q": "How does matching work?",
+        "a": "We first try to match you with a native speaker of your target language who is learning your native language (an exchange match). If none are available, we suggest peer-practice partners who are learning the same language as you."
+      },
+      "install": {
+        "q": "Do I need to install anything for video calls?",
+        "a": "No. Calls run directly in your browser using WebRTC — no downloads or plugins required."
+      },
+      "coursesOnly": {
+        "q": "Can I just use the video courses without talking to anyone?",
+        "a": "Absolutely. Courses are fully self-paced and independent of partner matching."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "quote": "“I found a conversation partner in my first ten minutes here.”",
+      "title": "Welcome back",
+      "subtitle": "Log in to keep practicing with your partners.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Log in",
+      "submitting": "Logging in...",
+      "error": "Invalid email or password.",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "register": {
+      "quote": "“Teaching my native language taught me how to explain the one I'm learning.”",
+      "title": "Create your account",
+      "subtitle": "Free, no credit card — start practicing today.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "iSpeak": "I speak",
+      "iAmLearning": "I'm learning",
+      "submit": "Sign up",
+      "submitting": "Creating account...",
+      "error": "Registration failed.",
+      "haveAccount": "Already have an account?",
+      "logIn": "Log in"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Your dashboard",
+    "welcome": "Welcome back",
+    "welcomeWithName": "Welcome back, {{name}}",
+    "speaking": "Speaking",
+    "learning": "Learning",
+    "finishProfile": "Finish setting up your profile to get matched with partners",
+    "findAPartner": "Find a partner",
+    "quickActions": {
+      "findPartner": "Find a partner",
+      "findPartnerSub": "Match by language",
+      "schedule": "Schedule a session",
+      "scheduleSub": "Book time together",
+      "courses": "Browse courses",
+      "coursesSub": "Structured lessons"
+    },
+    "suggestedPartners": "Suggested partners",
+    "suggestedPartnersEmpty": "No matches yet — try widening your profile languages.",
+    "upcomingSessions": "Upcoming sessions",
+    "upcomingSessionsEmpty": "Nothing scheduled yet.",
+    "keepLearning": "Keep learning",
+    "keepLearningEmpty": "No courses yet.",
+    "exchange": "Exchange",
+    "peer": "Peer",
+    "emptyStateBody": "Your dashboard will fill up as partners join and courses are added — head to <link>Find a partner</link> to get started."
+  },
+  "partners": {
+    "title": "Find a partner",
+    "subtitle": "Exchange matches are ranked first, peer practice fills in the rest.",
+    "anyLanguage": "Any language",
+    "anyLevel": "Any level",
+    "loading": "Loading partners...",
+    "empty": "No partners found. Try widening your filters.",
+    "exchangeMatch": "Exchange match",
+    "peerPractice": "Peer practice",
+    "speaksLearning": "Speaks {{native}} · Learning {{learning}}"
+  },
+  "partnerProfile": {
+    "loading": "Loading...",
+    "notFound": "Partner not found.",
+    "exchangeMatch": "Exchange match",
+    "peerPractice": "Peer practice",
+    "speaksLearning": "Speaks <native>{{native}}</native> · Learning <learning>{{learning}}</learning>",
+    "bio": "Bio",
+    "learningGoals": "Learning goals",
+    "message": "Message",
+    "startVideoCall": "Start video call",
+    "scheduleSession": "Schedule a session"
+  },
+  "messages": {
+    "title": "Messages",
+    "loading": "Loading...",
+    "empty": "No conversations yet. Message a partner from their profile to get started.",
+    "noMessagesYet": "No messages yet",
+    "selectConversation": "Select a conversation"
+  },
+  "conversationThread": {
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "videoCall": "Video call",
+    "typeAMessage": "Type a message...",
+    "send": "Send",
+    "conversation": "Conversation"
+  },
+  "schedule": {
+    "title": "Schedule a session",
+    "partner": "Partner",
+    "selectAPartner": "Select a partner...",
+    "dateTime": "Date & time",
+    "duration": "Duration (minutes)",
+    "notes": "Notes (optional)",
+    "errorMissing": "Please choose a partner and a time.",
+    "errorFailed": "Could not schedule the session.",
+    "submit": "Schedule session",
+    "submitting": "Scheduling...",
+    "yourSessions": "Your sessions",
+    "loading": "Loading...",
+    "empty": "No sessions scheduled yet.",
+    "withPartner": "with {{name}}",
+    "minutesShort": "{{count}} min",
+    "confirm": "Confirm",
+    "cancelSession": "Cancel",
+    "joinCall": "Join call",
+    "status": {
+      "pending": "pending",
+      "confirmed": "confirmed",
+      "completed": "completed",
+      "cancelled": "cancelled"
+    }
+  },
+  "courses": {
+    "title": "Courses",
+    "subtitle": "Self-paced video lessons by language and level.",
+    "anyLanguage": "Any language",
+    "anyLevel": "Any level",
+    "loading": "Loading courses...",
+    "lessonsCount": "{{count}} lessons"
+  },
+  "coursePlayer": {
+    "loading": "Loading...",
+    "notFound": "Course not found.",
+    "lessonsProgress": "{{completed}} / {{total}} lessons",
+    "noLessons": "This course has no lessons yet.",
+    "completed": "Completed",
+    "markComplete": "Mark as complete"
+  },
+  "profile": {
+    "title": "Your profile",
+    "loading": "Loading...",
+    "photoNote": "Your photo is generated automatically from your account.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell partners a bit about yourself...",
+    "nativeLanguage": "Native language",
+    "learningLanguage": "Learning language",
+    "select": "Select...",
+    "proficiencyLevel": "Proficiency level",
+    "timezone": "Timezone",
+    "learningGoals": "Learning goals",
+    "learningGoalsPlaceholder": "What do you want to achieve?",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saved": "Saved!"
+  },
+  "settings": {
+    "title": "Settings",
+    "editProfile": "Edit profile",
+    "notifications": "Notifications",
+    "newMessageAlerts": "New message alerts",
+    "sessionReminders": "Session reminders",
+    "appearance": "Appearance",
+    "appearanceBody": "Switch between light and dark mode.",
+    "language": "Language",
+    "languageBody": "Choose the language used across Language Partner.",
+    "logOut": "Log out"
+  },
+  "call": {
+    "title": "Video call",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "waitingForPartner": "Waiting for partner to join...",
+    "partnerJoined": "Partner joined, connecting...",
+    "callEnded": "Call ended",
+    "partnerLeft": "Partner left the call",
+    "micError": "Could not access camera/microphone. Please grant permission and reload.",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "turnOffCamera": "Turn off camera",
+    "turnOnCamera": "Turn on camera",
+    "leave": "Leave"
+  },
+  "levels": {
+    "beginner": "Beginner",
+    "elementary": "Elementary",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "fluent": "Fluent"
+  }
+}

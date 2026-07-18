@@ -2,27 +2,37 @@ import {
   ArrowRight,
   BookOpenCheck,
   CalendarClock,
-  MessageCircle,
   Sparkles,
   Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { avatarUrl } from '../utils/images'
 
-const quickActions = [
-  { to: '/partners', label: 'Find a partner', icon: Users },
-  { to: '/schedule', label: 'Schedule a session', icon: CalendarClock },
-  { to: '/courses', label: 'Browse courses', icon: BookOpenCheck },
-]
+const levelTag = {
+  beginner: 'lp-tag lp-tag--accent2',
+  elementary: 'lp-tag lp-tag--accent2',
+  intermediate: 'lp-tag',
+  advanced: 'lp-tag lp-tag--accent',
+  fluent: 'lp-tag lp-tag--accent',
+}
 
 export default function Dashboard() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [partners, setPartners] = useState([])
   const [sessions, setSessions] = useState([])
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
+
+  const quickActions = [
+    { to: '/partners', label: t('dashboard.quickActions.findPartner'), sub: t('dashboard.quickActions.findPartnerSub'), icon: Users },
+    { to: '/schedule', label: t('dashboard.quickActions.schedule'), sub: t('dashboard.quickActions.scheduleSub'), icon: CalendarClock },
+    { to: '/courses', label: t('dashboard.quickActions.courses'), sub: t('dashboard.quickActions.coursesSub'), icon: BookOpenCheck },
+  ]
 
   useEffect(() => {
     Promise.all([
@@ -39,79 +49,94 @@ export default function Dashboard() {
   }, [user])
 
   const profile = user?.profile
-  const initial = (user?.first_name?.[0] || user?.email?.[0] || '?').toUpperCase()
 
   return (
-    <div className="bg-slate-50 min-h-[calc(100vh-4rem)]">
+    <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       {/* Welcome banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950">
-        <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-indigo-600/30 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-violet-600/20 blur-3xl" />
-        <div className="relative max-w-5xl mx-auto px-6 py-10 flex items-center gap-5">
-          <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-xl font-bold text-white backdrop-blur-sm">
-            {initial}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">
-              Welcome back{user?.first_name ? `, ${user.first_name}` : ''}
-            </h1>
-            <p className="mt-1 text-slate-300 text-sm">
+      <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)' }}>
+        <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col sm:flex-row sm:items-center gap-6">
+          <div className="flex items-center gap-5">
+            <img
+              src={avatarUrl(user?.id, 128)}
+              alt=""
+              className="lp-avatar hidden sm:block h-16 w-16 shrink-0"
+              style={{ border: '1px solid var(--line)' }}
+            />
+            <div>
+              <p className="lp-eyebrow mb-1.5">{t('dashboard.eyebrow')}</p>
+              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
+                {user?.first_name ? t('dashboard.welcomeWithName', { name: user.first_name }) : t('dashboard.welcome')}
+              </h1>
               {profile?.native_language && profile?.learning_language ? (
-                <>Speaking <span className="text-white font-medium">{profile.native_language}</span> · Learning <span className="text-white font-medium">{profile.learning_language}</span></>
+                <div className="mt-2.5 flex items-center gap-2 text-sm" style={{ color: 'var(--ink-soft)' }}>
+                  <span>{t('dashboard.speaking')} <span className="font-semibold" style={{ color: 'var(--ink)' }}>{profile.native_language}</span></span>
+                  <span aria-hidden style={{ color: 'var(--line)' }}>／</span>
+                  <span>{t('dashboard.learning')} <span className="font-semibold" style={{ color: 'var(--ink)' }}>{profile.learning_language}</span></span>
+                </div>
               ) : (
-                <Link to="/profile" className="underline decoration-slate-500 hover:text-white">
-                  Finish setting up your profile to get matched with partners
-                </Link>
+                <p className="mt-2.5 text-sm" style={{ color: 'var(--ink-soft)' }}>
+                  <Link to="/profile" className="underline underline-offset-2" style={{ color: 'var(--accent)' }}>
+                    {t('dashboard.finishProfile')}
+                  </Link>
+                </p>
               )}
-            </p>
+            </div>
           </div>
+          <Link to="/partners" className="lp-btn-primary sm:ms-auto shrink-0">
+            {t('dashboard.findAPartner')}
+            <ArrowRight size={16} className="rtl:rotate-180" />
+          </Link>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 -mt-6 pb-14">
+      <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Quick actions */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid sm:grid-cols-3 gap-4 mb-10">
           {quickActions.map((action) => (
-            <Link
-              key={action.to}
-              to={action.to}
-              className="group flex items-center gap-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+            <Link key={action.to} to={action.to} className="lp-card flex items-center gap-3 hover:opacity-90 transition-opacity">
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center"
+                style={{ borderRadius: 'var(--radius-tag)', background: 'var(--surface-2)', color: 'var(--accent)' }}
+              >
                 <action.icon size={18} strokeWidth={2} />
               </div>
-              <span className="font-semibold text-slate-800 text-sm">{action.label}</span>
-              <ArrowRight size={15} className="ml-auto text-slate-300 group-hover:text-indigo-500 transition-colors" />
+              <div>
+                <p className="font-semibold text-sm" style={{ color: 'var(--ink)' }}>{action.label}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--ink-soft)' }}>{action.sub}</p>
+              </div>
+              <ArrowRight size={15} className="ms-auto shrink-0 rtl:rotate-180" style={{ color: 'var(--ink-soft)' }} />
             </Link>
           ))}
         </div>
 
         {loading ? (
-          <p className="text-slate-500 text-sm">Loading your dashboard...</p>
+          <div className="grid sm:grid-cols-3 gap-5">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="lp-card animate-pulse">
+                <div className="h-4 w-28 rounded mb-5" style={{ background: 'var(--surface-2)' }} />
+                <div className="space-y-3">
+                  <div className="h-3 rounded" style={{ background: 'var(--surface-2)' }} />
+                  <div className="h-3 rounded w-4/5" style={{ background: 'var(--surface-2)' }} />
+                  <div className="h-3 rounded w-3/5" style={{ background: 'var(--surface-2)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="grid sm:grid-cols-3 gap-5">
             <DashboardCard
-              icon={Users}
-              title="Suggested partners"
+              title={t('dashboard.suggestedPartners')}
               to="/partners"
               empty={partners.length === 0}
-              emptyText="No matches yet — try widening your profile languages."
+              emptyText={t('dashboard.suggestedPartnersEmpty')}
             >
               {partners.map((p) => (
                 <li key={p.user_id}>
-                  <Link
-                    to={`/partners/${p.user_id}`}
-                    className="flex items-center justify-between py-2 text-sm text-slate-700 hover:text-indigo-600"
-                  >
-                    <span className="font-medium">{p.full_name}</span>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
-                        p.match_type === 'exchange'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-blue-100 text-blue-700'
-                      }`}
-                    >
-                      {p.match_type === 'exchange' ? 'Exchange' : 'Peer'}
+                  <Link to={`/partners/${p.user_id}`} className="flex items-center gap-3 py-2.5 text-sm hover:opacity-70" style={{ color: 'var(--ink)' }}>
+                    <img src={avatarUrl(p.user_id, 64)} alt="" className="lp-avatar h-8 w-8 shrink-0" style={{ border: '1px solid var(--line)' }} />
+                    <span className="font-medium truncate">{p.full_name}</span>
+                    <span className={`ms-auto shrink-0 ${p.match_type === 'exchange' ? 'lp-tag lp-tag--accent2' : 'lp-tag'}`}>
+                      {p.match_type === 'exchange' ? t('dashboard.exchange') : t('dashboard.peer')}
                     </span>
                   </Link>
                 </li>
@@ -119,38 +144,48 @@ export default function Dashboard() {
             </DashboardCard>
 
             <DashboardCard
-              icon={CalendarClock}
-              title="Upcoming sessions"
+              title={t('dashboard.upcomingSessions')}
               to="/schedule"
               empty={sessions.length === 0}
-              emptyText="Nothing scheduled yet."
+              emptyText={t('dashboard.upcomingSessionsEmpty')}
             >
-              {sessions.map((s) => (
-                <li key={s.id} className="py-2 text-sm text-slate-700">
-                  <span className="font-medium">{new Date(s.scheduled_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>{' '}
-                  <span className="text-slate-400">·</span>{' '}
-                  {new Date(s.scheduled_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
-                  {' with '}
-                  {s.host.id === user.id ? s.partner.full_name : s.host.full_name}
-                </li>
-              ))}
+              {sessions.map((s) => {
+                const date = new Date(s.scheduled_time)
+                return (
+                  <li key={s.id} className="flex items-center gap-3 py-2.5 text-sm" style={{ color: 'var(--ink)' }}>
+                    <div
+                      className="flex h-9 w-9 shrink-0 flex-col items-center justify-center leading-none font-mono"
+                      style={{ borderRadius: 'var(--radius-tag)', background: 'var(--surface-2)' }}
+                    >
+                      <span className="text-[9px] font-semibold uppercase" style={{ color: 'var(--ink-soft)' }}>
+                        {date.toLocaleDateString(undefined, { month: 'short' })}
+                      </span>
+                      <span className="text-xs font-bold">{date.getDate()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">
+                        {s.host.id === user.id ? s.partner.full_name : s.host.full_name}
+                      </p>
+                      <p className="text-xs font-mono" style={{ color: 'var(--ink-soft)' }}>
+                        {date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </li>
+                )
+              })}
             </DashboardCard>
 
             <DashboardCard
-              icon={BookOpenCheck}
-              title="Keep learning"
+              title={t('dashboard.keepLearning')}
               to="/courses"
               empty={courses.length === 0}
-              emptyText="No courses yet."
+              emptyText={t('dashboard.keepLearningEmpty')}
             >
               {courses.map((c) => (
                 <li key={c.id}>
-                  <Link
-                    to={`/courses/${c.id}`}
-                    className="flex items-center justify-between py-2 text-sm text-slate-700 hover:text-indigo-600"
-                  >
-                    <span className="font-medium">{c.title}</span>
-                    <span className="text-xs text-slate-400 capitalize">{c.level}</span>
+                  <Link to={`/courses/${c.id}`} className="flex items-center justify-between gap-2 py-2.5 text-sm hover:opacity-70" style={{ color: 'var(--ink)' }}>
+                    <span className="font-medium truncate">{c.title}</span>
+                    <span className={`shrink-0 capitalize ${levelTag[c.level] || 'lp-tag'}`}>{t(`levels.${c.level}`, c.level)}</span>
                   </Link>
                 </li>
               ))}
@@ -159,11 +194,13 @@ export default function Dashboard() {
         )}
 
         {!loading && partners.length === 0 && sessions.length === 0 && courses.length === 0 && (
-          <div className="mt-8 flex items-start gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
-            <Sparkles size={18} className="text-indigo-600 mt-0.5 shrink-0" />
-            <p className="text-sm text-indigo-900">
-              Your dashboard will fill up as partners join and courses are added — head to{' '}
-              <Link to="/partners" className="font-semibold underline">Find a partner</Link> to get started.
+          <div className="lp-card mt-8 flex items-start gap-3">
+            <Sparkles size={18} className="mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />
+            <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>
+              <Trans
+                i18nKey="dashboard.emptyStateBody"
+                components={{ link: <Link to="/partners" className="font-semibold underline" style={{ color: 'var(--ink)' }} /> }}
+              />
             </p>
           </div>
         )}
@@ -172,22 +209,20 @@ export default function Dashboard() {
   )
 }
 
-function DashboardCard({ icon: Icon, title, to, empty, emptyText, children }) {
+function DashboardCard({ title, to, empty, emptyText, children }) {
+  const { t } = useTranslation()
   return (
-    <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Icon size={16} className="text-slate-400" />
-          <h2 className="font-semibold text-slate-900 text-sm">{title}</h2>
-        </div>
-        <Link to={to} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
-          See all
+    <section className="lp-card">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="lp-eyebrow">{title}</h2>
+        <Link to={to} className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>
+          {t('common.seeAll')}
         </Link>
       </div>
       {empty ? (
-        <p className="text-sm text-slate-400 py-2">{emptyText}</p>
+        <p className="text-sm py-3" style={{ color: 'var(--ink-soft)' }}>{emptyText}</p>
       ) : (
-        <ul className="divide-y divide-slate-100">{children}</ul>
+        <ul style={{ borderTop: '1px solid var(--line)' }} className="[&>li]:border-b [&>li]:border-[var(--line)]">{children}</ul>
       )}
     </section>
   )

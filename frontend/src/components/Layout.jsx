@@ -1,82 +1,176 @@
-import { Languages } from 'lucide-react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import {
+  BookOpenCheck,
+  CalendarClock,
+  ChevronDown,
+  LayoutDashboard,
+  LogOut,
+  MessageCircle,
+  Settings,
+  Users,
+} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { avatarUrl } from '../utils/images'
+import LanguageSwitcher from './LanguageSwitcher'
+import ThemeToggle from './ThemeToggle'
 
-const authedLinks = [
-  ['/dashboard', 'Dashboard'],
-  ['/partners', 'Partners'],
-  ['/messages', 'Messages'],
-  ['/schedule', 'Schedule'],
-  ['/courses', 'Courses'],
-]
+function useAuthedLinks() {
+  const { t } = useTranslation()
+  return [
+    ['/dashboard', t('nav.dashboard'), LayoutDashboard],
+    ['/partners', t('nav.partners'), Users],
+    ['/messages', t('nav.messages'), MessageCircle],
+    ['/schedule', t('nav.schedule'), CalendarClock],
+    ['/courses', t('nav.courses'), BookOpenCheck],
+  ]
+}
 
 function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2 shrink-0">
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-sm">
-        <Languages size={18} strokeWidth={2.25} />
+    <Link to="/" className="flex items-center gap-2.5 shrink-0">
+      <span
+        className="flex h-8 w-8 items-center justify-center font-display font-bold text-sm"
+        style={{ background: 'var(--accent)', color: 'var(--accent-ink)', borderRadius: 'var(--radius-tag)' }}
+      >
+        LP
       </span>
-      <span className="text-[17px] font-bold tracking-tight text-slate-900">
+      <span className="font-display text-[18px] font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
         Language Partner
       </span>
     </Link>
   )
 }
 
+function UserMenu({ user, onLogout }) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const name = user.first_name || user.email
+
+  return (
+    <div className="relative ms-2" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 py-1 ps-1 pe-2 transition-colors"
+        style={{ borderRadius: 'var(--radius-pill)' }}
+      >
+        <img src={avatarUrl(user.id, 64)} alt="" className="lp-avatar h-8 w-8" style={{ border: '1px solid var(--line)' }} />
+        <ChevronDown size={14} style={{ color: 'var(--ink-soft)' }} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute end-0 top-full mt-2 w-56 py-1.5 lp-surface"
+          style={{ boxShadow: '0 12px 30px -12px rgb(0 0 0 / 0.25)' }}
+        >
+          <div className="px-3.5 py-2" style={{ borderBottom: '1px solid var(--line)' }}>
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--ink)' }}>{name}</p>
+            <p className="text-xs truncate" style={{ color: 'var(--ink-soft)' }}>{user.email}</p>
+          </div>
+          <Link
+            to="/settings"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
+            style={{ color: 'var(--ink-soft)' }}
+          >
+            <Settings size={15} />
+            {t('nav.settings')}
+          </Link>
+          <button
+            onClick={() => {
+              setOpen(false)
+              onLogout()
+            }}
+            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
+            style={{ color: '#c1443d' }}
+          >
+            <LogOut size={15} />
+            {t('nav.logOut')}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const { t } = useTranslation()
+  const authedLinks = useAuthedLinks()
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+      <nav
+        className="sticky top-0 z-50 backdrop-blur-md"
+        style={{ background: 'color-mix(in srgb, var(--surface) 88%, transparent)', borderBottom: '1px solid var(--line)' }}
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Logo />
           <div className="flex items-center gap-1 text-sm flex-wrap">
             {user ? (
               <>
-                {authedLinks.map(([to, label]) => (
+                {authedLinks.map(([to, label, Icon]) => (
                   <NavLink
                     key={to}
                     to={to}
-                    className={({ isActive }) =>
-                      `px-3 py-2 rounded-lg font-medium transition-colors ${
-                        isActive
-                          ? 'text-indigo-600 bg-indigo-50'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                      }`
-                    }
+                    className="flex items-center gap-1.5 px-3.5 py-2 font-semibold transition-colors"
+                    style={({ isActive }) => ({
+                      borderRadius: 'var(--radius-tag)',
+                      color: isActive ? 'var(--accent-ink)' : 'var(--ink-soft)',
+                      background: isActive ? 'var(--accent)' : 'transparent',
+                    })}
                   >
-                    {label}
+                    <Icon size={15} strokeWidth={2.25} />
+                    <span className="hidden md:inline">{label}</span>
                   </NavLink>
                 ))}
-                <Link
-                  to="/settings"
-                  className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white"
-                  title="Settings"
-                >
-                  {(user.first_name?.[0] || user.email[0]).toUpperCase()}
-                </Link>
-                <button
-                  onClick={() => {
+                <span className="mx-1 hidden sm:inline-block h-5 w-px" style={{ background: 'var(--line)' }} />
+                <ThemeToggle />
+                <LanguageSwitcher />
+                <UserMenu
+                  user={user}
+                  onLogout={() => {
                     logout()
                     navigate('/')
                   }}
-                  className="ml-2 px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium"
-                >
-                  Log out
-                </button>
+                />
               </>
             ) : (
               <>
-                <Link to="/about" className="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium">About</Link>
-                <Link to="/faq" className="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium">FAQ</Link>
-                <Link to="/login" className="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium">Log in</Link>
                 <Link
-                  to="/register"
-                  className="ml-1 px-4 py-2 rounded-lg bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors"
+                  to="/about"
+                  className="px-3 py-2 font-medium"
+                  style={{ borderRadius: 'var(--radius-tag)', color: location.pathname === '/about' ? 'var(--ink)' : 'var(--ink-soft)' }}
                 >
-                  Sign up free
+                  {t('nav.about')}
+                </Link>
+                <Link
+                  to="/faq"
+                  className="px-3 py-2 font-medium"
+                  style={{ borderRadius: 'var(--radius-tag)', color: location.pathname === '/faq' ? 'var(--ink)' : 'var(--ink-soft)' }}
+                >
+                  {t('nav.faq')}
+                </Link>
+                <ThemeToggle />
+                <LanguageSwitcher />
+                <Link to="/login" className="px-3 py-2 font-medium" style={{ borderRadius: 'var(--radius-tag)', color: 'var(--ink-soft)' }}>
+                  {t('nav.login')}
+                </Link>
+                <Link to="/register" className="lp-btn-primary ms-1">
+                  {t('nav.signUpFree')}
                 </Link>
               </>
             )}
@@ -88,17 +182,22 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-slate-200">
+      <footer style={{ borderTop: '1px solid var(--line)' }}>
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-slate-500 text-sm">
-            <Languages size={16} />
-            <span>Language Partner</span>
+          <div className="flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--ink-soft)' }}>
+            <span
+              className="flex h-6 w-6 items-center justify-center font-display font-bold text-[11px]"
+              style={{ background: 'var(--accent)', color: 'var(--accent-ink)', borderRadius: 'var(--radius-tag)' }}
+            >
+              LP
+            </span>
+            <span>{t('footer.tagline')}</span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-slate-500">
-            <Link to="/about" className="hover:text-slate-900">About</Link>
-            <Link to="/faq" className="hover:text-slate-900">FAQ</Link>
+          <div className="flex items-center gap-6 text-sm" style={{ color: 'var(--ink-soft)' }}>
+            <Link to="/about" className="hover:opacity-70">{t('nav.about')}</Link>
+            <Link to="/faq" className="hover:opacity-70">{t('nav.faq')}</Link>
           </div>
-          <p className="text-xs text-slate-400">© {new Date().getFullYear()} Language Partner — MVP</p>
+          <p className="text-xs" style={{ color: 'var(--ink-soft)' }}>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
         </div>
       </footer>
     </div>

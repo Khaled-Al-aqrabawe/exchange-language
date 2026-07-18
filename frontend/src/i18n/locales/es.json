@@ -1,0 +1,312 @@
+{
+  "common": {
+    "appName": "Language Partner",
+    "loading": "Cargando...",
+    "loadingDashboard": "Cargando tu panel...",
+    "seeAll": "Ver todo",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "partners": "Compañeros",
+    "messages": "Mensajes",
+    "schedule": "Agenda",
+    "courses": "Cursos",
+    "about": "Acerca de",
+    "faq": "Preguntas frecuentes",
+    "login": "Iniciar sesión",
+    "signUpFree": "Regístrate gratis",
+    "settings": "Ajustes",
+    "logOut": "Cerrar sesión"
+  },
+  "footer": {
+    "tagline": "Language Partner",
+    "copyright": "© {{year}} Language Partner — MVP"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "toggleToLight": "Cambiar a modo claro",
+    "toggleToDark": "Cambiar a modo oscuro"
+  },
+  "language": {
+    "choose": "Elegir idioma"
+  },
+  "landing": {
+    "badge": "Gratis durante el acceso anticipado",
+    "heroTitleLine1": "Aprende un idioma",
+    "heroTitleLine2": "hablándolo de verdad",
+    "heroSubtitle": "Language Partner te conecta con hablantes nativos y otros estudiantes para practicar conversación real, además de cursos en vídeo estructurados para construir tu base.",
+    "findAPartner": "Buscar compañero",
+    "getStartedFree": "Empieza gratis",
+    "learnMore": "Saber más",
+    "joinLearners": "Únete a estudiantes practicando <bold>árabe, inglés</bold> y más",
+    "howItWorks": "Cómo funciona",
+    "steps": {
+      "exchangeTitle": "Intercambia con hablantes nativos",
+      "exchangeBody": "Aprende inglés de hablantes de inglés mientras les enseñas árabe, o cualquier combinación de idiomas que prefieras.",
+      "practiceTitle": "Practica con otros estudiantes",
+      "practiceBody": "¿Sin compañero de intercambio conectado? Practica conversación con alguien más que esté aprendiendo el mismo idioma.",
+      "learnTitle": "Aprende de forma independiente",
+      "learnBody": "Avanza a tu propio ritmo por cursos en vídeo estructurados según idioma y nivel."
+    },
+    "realConversations": "Conversaciones reales",
+    "practiceHeadline": "Practica con personas, no con tarjetas de memoria",
+    "practiceBody": "Las apps que solo repasan vocabulario solo te llevan hasta cierto punto. Language Partner te pone a hablar con una persona real desde tu primera sesión: mensajes para organizar, vídeo para practicar y cursos para cubrir los vacíos.",
+    "practiceList": {
+      "matched": "Emparejado por combinación de idiomas, nivel y zona horaria",
+      "builtin": "Chat y vídeo integrados, sin nada que instalar",
+      "free": "Cursos estructurados gratuitos cuando quieras más estructura"
+    },
+    "everythingIncluded": "Todo incluido",
+    "featuresHeadline": "Diseñado para practicar conversación real",
+    "features": {
+      "videoTitle": "Vídeo y audio integrados",
+      "videoBody": "Práctica de conversación cara a cara en tu navegador, sin descargas ni apps adicionales.",
+      "matchingTitle": "Emparejamiento inteligente",
+      "matchingBody": "Priorizamos compañeros de intercambio y, si no hay, sugerimos compañeros de tu nivel y zona horaria.",
+      "messagingTitle": "Mensajería en tiempo real",
+      "messagingBody": "Chatea al instante con tus compañeros para organizar sesiones o seguir la conversación.",
+      "schedulingTitle": "Agenda sencilla",
+      "schedulingBody": "Reserva sesiones en un par de clics y entra directo a una llamada cuando llegue la hora.",
+      "coursesTitle": "Cursos estructurados",
+      "coursesBody": "Lecciones en vídeo a tu ritmo, por idioma y nivel, siempre que quieras más estructura.",
+      "freeTitle": "Gratis para empezar",
+      "freeBody": "Todas las funciones están disponibles durante el acceso anticipado, sin tarjeta de crédito ni muros de pago."
+    },
+    "ctaTitle": "Gratis, sin trampa",
+    "ctaBody": "Language Partner es gratuito durante nuestra fase de acceso anticipado: todas las funciones están disponibles desde el primer día.",
+    "ctaButton": "Crea tu cuenta gratis"
+  },
+  "about": {
+    "eyebrow": "Sobre nosotros",
+    "titlePrefix": "La fluidez nace de la",
+    "titleHighlight": "conversación",
+    "intro": "Language Partner existe porque la forma más rápida de aprender un idioma es hablarlo con otra persona. Conectamos a estudiantes para el intercambio con hablantes nativos, la práctica entre compañeros y cursos estructurados a su propio ritmo, todo en un solo lugar.",
+    "missionEyebrow": "Nuestra misión",
+    "missionHeadline": "Hacer que la práctica auténtica sea accesible para cualquiera, en cualquier lugar",
+    "missionBody": "Emparejamos a los estudiantes por combinación de idiomas, nivel y zona horaria, y luego nos apartamos: vídeo y chat integrados para que no haya nada extra que instalar, y cursos para cuando quieras un poco más de estructura entre sesiones.",
+    "beliefEyebrow": "En qué creemos",
+    "beliefHeadline": "Nuestro enfoque",
+    "values": {
+      "realTitle": "Personas reales, práctica real",
+      "realBody": "La forma más rápida de aprender un idioma es hablarlo con otro ser humano, no solo pasar tarjetas de memoria a solas.",
+      "accessibleTitle": "Accesible para todos",
+      "accessibleBody": "La práctica de conversación auténtica no debería requerir encontrar o pagar un tutor privado.",
+      "structureTitle": "Estructura cuando la necesitas",
+      "structureBody": "Los cursos llenan los vacíos entre conversaciones para que siempre tengas algo en qué trabajar."
+    }
+  },
+  "faq": {
+    "eyebrow": "Centro de ayuda",
+    "title": "Preguntas frecuentes",
+    "items": {
+      "free": {
+        "q": "¿Language Partner es gratis?",
+        "a": "Sí. Durante nuestra fase de acceso anticipado, todas las funciones —emparejamiento de intercambio, práctica entre compañeros, videollamadas y cursos— son completamente gratuitas."
+      },
+      "matching": {
+        "q": "¿Cómo funciona el emparejamiento?",
+        "a": "Primero intentamos emparejarte con un hablante nativo de tu idioma objetivo que esté aprendiendo tu idioma nativo (un intercambio). Si no hay ninguno disponible, te sugerimos compañeros de práctica que estén aprendiendo el mismo idioma que tú."
+      },
+      "install": {
+        "q": "¿Necesito instalar algo para las videollamadas?",
+        "a": "No. Las llamadas funcionan directamente en tu navegador mediante WebRTC, sin descargas ni complementos."
+      },
+      "coursesOnly": {
+        "q": "¿Puedo usar solo los cursos en vídeo sin hablar con nadie?",
+        "a": "Por supuesto. Los cursos son completamente a tu ritmo e independientes del emparejamiento de compañeros."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "quote": "«Encontré un compañero de conversación en mis primeros diez minutos aquí».",
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Inicia sesión para seguir practicando con tus compañeros.",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión...",
+      "error": "Correo electrónico o contraseña incorrectos.",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Regístrate"
+    },
+    "register": {
+      "quote": "«Enseñar mi idioma nativo me enseñó a explicar el que estoy aprendiendo».",
+      "title": "Crea tu cuenta",
+      "subtitle": "Gratis, sin tarjeta de crédito. Empieza a practicar hoy.",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "iSpeak": "Hablo",
+      "iAmLearning": "Estoy aprendiendo",
+      "submit": "Registrarse",
+      "submitting": "Creando cuenta...",
+      "error": "El registro falló.",
+      "haveAccount": "¿Ya tienes cuenta?",
+      "logIn": "Iniciar sesión"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Tu panel",
+    "welcome": "Bienvenido de nuevo",
+    "welcomeWithName": "Bienvenido de nuevo, {{name}}",
+    "speaking": "Habla",
+    "learning": "Aprende",
+    "finishProfile": "Completa tu perfil para que te emparejemos con compañeros",
+    "findAPartner": "Buscar compañero",
+    "quickActions": {
+      "findPartner": "Buscar compañero",
+      "findPartnerSub": "Emparejar por idioma",
+      "schedule": "Agendar una sesión",
+      "scheduleSub": "Reserva tiempo juntos",
+      "courses": "Explorar cursos",
+      "coursesSub": "Lecciones estructuradas"
+    },
+    "suggestedPartners": "Compañeros sugeridos",
+    "suggestedPartnersEmpty": "Aún no hay coincidencias — prueba a ampliar los idiomas de tu perfil.",
+    "upcomingSessions": "Próximas sesiones",
+    "upcomingSessionsEmpty": "Nada agendado todavía.",
+    "keepLearning": "Sigue aprendiendo",
+    "keepLearningEmpty": "Todavía no hay cursos.",
+    "exchange": "Intercambio",
+    "peer": "Compañero",
+    "emptyStateBody": "Tu panel se irá completando a medida que se unan compañeros y se agreguen cursos — ve a <link>Buscar compañero</link> para empezar."
+  },
+  "partners": {
+    "title": "Buscar compañero",
+    "subtitle": "Los intercambios se muestran primero, la práctica entre compañeros completa el resto.",
+    "anyLanguage": "Cualquier idioma",
+    "anyLevel": "Cualquier nivel",
+    "loading": "Cargando compañeros...",
+    "empty": "No se encontraron compañeros. Prueba a ampliar tus filtros.",
+    "exchangeMatch": "Intercambio",
+    "peerPractice": "Práctica entre compañeros",
+    "speaksLearning": "Habla {{native}} · Aprende {{learning}}"
+  },
+  "partnerProfile": {
+    "loading": "Cargando...",
+    "notFound": "Compañero no encontrado.",
+    "exchangeMatch": "Intercambio",
+    "peerPractice": "Práctica entre compañeros",
+    "speaksLearning": "Habla <native>{{native}}</native> · Aprende <learning>{{learning}}</learning>",
+    "bio": "Biografía",
+    "learningGoals": "Objetivos de aprendizaje",
+    "message": "Mensaje",
+    "startVideoCall": "Iniciar videollamada",
+    "scheduleSession": "Agendar una sesión"
+  },
+  "messages": {
+    "title": "Mensajes",
+    "loading": "Cargando...",
+    "empty": "Aún no hay conversaciones. Escribe a un compañero desde su perfil para empezar.",
+    "noMessagesYet": "Todavía no hay mensajes",
+    "selectConversation": "Selecciona una conversación"
+  },
+  "conversationThread": {
+    "connected": "Conectado",
+    "connecting": "Conectando...",
+    "videoCall": "Videollamada",
+    "typeAMessage": "Escribe un mensaje...",
+    "send": "Enviar",
+    "conversation": "Conversación"
+  },
+  "schedule": {
+    "title": "Agendar una sesión",
+    "partner": "Compañero",
+    "selectAPartner": "Selecciona un compañero...",
+    "dateTime": "Fecha y hora",
+    "duration": "Duración (minutos)",
+    "notes": "Notas (opcional)",
+    "errorMissing": "Elige un compañero y una hora.",
+    "errorFailed": "No se pudo agendar la sesión.",
+    "submit": "Agendar sesión",
+    "submitting": "Agendando...",
+    "yourSessions": "Tus sesiones",
+    "loading": "Cargando...",
+    "empty": "Todavía no hay sesiones agendadas.",
+    "withPartner": "con {{name}}",
+    "minutesShort": "{{count}} min",
+    "confirm": "Confirmar",
+    "cancelSession": "Cancelar",
+    "joinCall": "Unirse a la llamada",
+    "status": {
+      "pending": "pendiente",
+      "confirmed": "confirmada",
+      "completed": "completada",
+      "cancelled": "cancelada"
+    }
+  },
+  "courses": {
+    "title": "Cursos",
+    "subtitle": "Lecciones en vídeo a tu ritmo, por idioma y nivel.",
+    "anyLanguage": "Cualquier idioma",
+    "anyLevel": "Cualquier nivel",
+    "loading": "Cargando cursos...",
+    "lessonsCount": "{{count}} lecciones"
+  },
+  "coursePlayer": {
+    "loading": "Cargando...",
+    "notFound": "Curso no encontrado.",
+    "lessonsProgress": "{{completed}} / {{total}} lecciones",
+    "noLessons": "Este curso todavía no tiene lecciones.",
+    "completed": "Completada",
+    "markComplete": "Marcar como completada"
+  },
+  "profile": {
+    "title": "Tu perfil",
+    "loading": "Cargando...",
+    "photoNote": "Tu foto se genera automáticamente a partir de tu cuenta.",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "bio": "Biografía",
+    "bioPlaceholder": "Cuéntales algo sobre ti a tus compañeros...",
+    "nativeLanguage": "Idioma nativo",
+    "learningLanguage": "Idioma que aprendes",
+    "select": "Selecciona...",
+    "proficiencyLevel": "Nivel de competencia",
+    "timezone": "Zona horaria",
+    "learningGoals": "Objetivos de aprendizaje",
+    "learningGoalsPlaceholder": "¿Qué quieres lograr?",
+    "save": "Guardar cambios",
+    "saving": "Guardando...",
+    "saved": "¡Guardado!"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "editProfile": "Editar perfil",
+    "notifications": "Notificaciones",
+    "newMessageAlerts": "Alertas de mensajes nuevos",
+    "sessionReminders": "Recordatorios de sesiones",
+    "appearance": "Apariencia",
+    "appearanceBody": "Cambia entre modo claro y oscuro.",
+    "language": "Idioma",
+    "languageBody": "Elige el idioma que se usa en Language Partner.",
+    "logOut": "Cerrar sesión"
+  },
+  "call": {
+    "title": "Videollamada",
+    "connecting": "Conectando...",
+    "connected": "Conectado",
+    "waitingForPartner": "Esperando a que se una tu compañero...",
+    "partnerJoined": "Tu compañero se unió, conectando...",
+    "callEnded": "Llamada finalizada",
+    "partnerLeft": "Tu compañero abandonó la llamada",
+    "micError": "No se pudo acceder a la cámara o al micrófono. Concede el permiso y recarga la página.",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido",
+    "turnOffCamera": "Apagar cámara",
+    "turnOnCamera": "Encender cámara",
+    "leave": "Salir"
+  },
+  "levels": {
+    "beginner": "Principiante",
+    "elementary": "Elemental",
+    "intermediate": "Intermedio",
+    "advanced": "Avanzado",
+    "fluent": "Fluido"
+  }
+}

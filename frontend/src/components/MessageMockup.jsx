@@ -8,7 +8,7 @@ const thread = [
 
 export default function MessageMockup() {
   return (
-    <div className="rounded-2xl bg-white shadow-xl ring-1 ring-slate-900/5 p-5 max-w-sm">
+    <div className="rounded-2xl bg-white shadow-xl ring-1 ring-slate-900/5 p-5 max-w-sm" dir="ltr">
       <div className="flex items-center gap-2.5 pb-3 mb-3 border-b border-slate-100">
         <img src={avatarUrl('mockup-partner', 60)} alt="" className="h-8 w-8 rounded-full object-cover" />
         <div>
