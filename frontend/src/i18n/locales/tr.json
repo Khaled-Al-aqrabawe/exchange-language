@@ -238,7 +238,23 @@
       "confirmed": "onaylandı",
       "completed": "tamamlandı",
       "cancelled": "iptal edildi"
-    }
+    },
+    "language": "Dil",
+    "level": "Seviye",
+    "anyLanguage": "Herhangi bir dil",
+    "anyLevel": "Herhangi bir seviye",
+    "noPartnersForFilters": "Bu dil ve seviyeye uyan partner henüz yok — filtrelerini genişletmeyi dene.",
+    "durationFixed": "Seanslar sabit olarak 40 dakikadır.",
+    "joinCallLocked": "Seans başlamadan 5 dakika önce katılabilirsin.",
+    "selectLanguage": "Bir dil seç...",
+    "selectLevel": "Bir seviye seç...",
+    "cancelModalTitle": "Bu seans iptal edilsin mi?",
+    "cancelReasonLabel": "İptal nedeni",
+    "cancelReasonPlaceholder": "Nedenini belirt...",
+    "cancelReasonRequired": "Lütfen bir neden belirt.",
+    "cancelConfirm": "Seansı iptal et",
+    "cancelDismiss": "Vazgeç",
+    "cancelledReason": "Neden: {{reason}}"
   },
   "courses": {
     "title": "Kurslar",
@@ -308,5 +324,11 @@
     "intermediate": "Orta",
     "advanced": "İleri",
     "fluent": "Akıcı"
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "empty": "Henüz bildirim yok.",
+    "request": "{{name}} sana bir seans isteği gönderdi",
+    "confirmed": "{{name}} seansını onayladı"
   }
 }

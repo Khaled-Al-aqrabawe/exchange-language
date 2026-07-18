@@ -20,9 +20,9 @@ class ScheduledSessionSerializer(serializers.ModelSerializer):
         model = ScheduledSession
         fields = [
             'id', 'host', 'partner', 'partner_id', 'scheduled_time',
-            'duration_minutes', 'status', 'notes', 'room_id', 'created_at',
+            'duration_minutes', 'status', 'notes', 'cancellation_reason', 'room_id', 'created_at',
         ]
-        read_only_fields = ['id', 'host', 'partner', 'status', 'room_id', 'created_at']
+        read_only_fields = ['id', 'host', 'partner', 'status', 'cancellation_reason', 'room_id', 'created_at']
 
     def validate_partner_id(self, value):
         if not User.objects.filter(id=value).exists():

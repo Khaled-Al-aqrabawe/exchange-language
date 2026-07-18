@@ -14,6 +14,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
 import LanguageSwitcher from './LanguageSwitcher'
+import NotificationBell from './NotificationBell'
 import ThemeToggle from './ThemeToggle'
 
 function useAuthedLinks() {
@@ -138,6 +139,7 @@ export default function Layout() {
                   </NavLink>
                 ))}
                 <span className="mx-1 hidden sm:inline-block h-5 w-px" style={{ background: 'var(--line)' }} />
+                <NotificationBell />
                 <ThemeToggle />
                 <LanguageSwitcher />
                 <UserMenu

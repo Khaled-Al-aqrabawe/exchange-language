@@ -238,7 +238,23 @@
       "confirmed": "confirmada",
       "completed": "completada",
       "cancelled": "cancelada"
-    }
+    },
+    "language": "Idioma",
+    "level": "Nivel",
+    "anyLanguage": "Cualquier idioma",
+    "anyLevel": "Cualquier nivel",
+    "noPartnersForFilters": "Todavía no hay compañeros para este idioma y nivel — prueba a ampliar tus filtros.",
+    "durationFixed": "Las sesiones tienen una duración fija de 40 minutos.",
+    "joinCallLocked": "Puedes unirte 5 minutos antes de que comience la sesión.",
+    "selectLanguage": "Selecciona un idioma...",
+    "selectLevel": "Selecciona un nivel...",
+    "cancelModalTitle": "¿Cancelar esta sesión?",
+    "cancelReasonLabel": "Motivo de la cancelación",
+    "cancelReasonPlaceholder": "Cuéntales por qué...",
+    "cancelReasonRequired": "Indica un motivo.",
+    "cancelConfirm": "Cancelar sesión",
+    "cancelDismiss": "No cancelar",
+    "cancelledReason": "Motivo: {{reason}}"
   },
   "courses": {
     "title": "Cursos",
@@ -308,5 +324,11 @@
     "intermediate": "Intermedio",
     "advanced": "Avanzado",
     "fluent": "Fluido"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Todavía no hay notificaciones.",
+    "request": "{{name}} te envió una solicitud de sesión",
+    "confirmed": "{{name}} confirmó tu sesión"
   }
 }

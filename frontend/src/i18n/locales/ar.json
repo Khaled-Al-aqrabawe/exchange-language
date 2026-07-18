@@ -238,7 +238,23 @@
       "confirmed": "مؤكدة",
       "completed": "مكتملة",
       "cancelled": "ملغاة"
-    }
+    },
+    "language": "اللغة",
+    "level": "المستوى",
+    "anyLanguage": "أي لغة",
+    "anyLevel": "أي مستوى",
+    "noPartnersForFilters": "لا يوجد شركاء يطابقون هذه اللغة والمستوى بعد — جرّب توسيع عوامل التصفية.",
+    "durationFixed": "مدة الجلسات ثابتة عند 40 دقيقة.",
+    "joinCallLocked": "يمكنك الانضمام قبل 5 دقائق من بدء الجلسة.",
+    "selectLanguage": "اختر لغة...",
+    "selectLevel": "اختر مستوى...",
+    "cancelModalTitle": "هل تريد إلغاء هذه الجلسة؟",
+    "cancelReasonLabel": "سبب الإلغاء",
+    "cancelReasonPlaceholder": "أخبرهم بالسبب...",
+    "cancelReasonRequired": "الرجاء ذكر السبب.",
+    "cancelConfirm": "إلغاء الجلسة",
+    "cancelDismiss": "تراجع",
+    "cancelledReason": "السبب: {{reason}}"
   },
   "courses": {
     "title": "الدورات",
@@ -308,5 +324,11 @@
     "intermediate": "متوسط",
     "advanced": "متقدم",
     "fluent": "طليق"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات بعد.",
+    "request": "أرسل لك {{name}} طلب جلسة",
+    "confirmed": "أكّد {{name}} جلستك"
   }
 }

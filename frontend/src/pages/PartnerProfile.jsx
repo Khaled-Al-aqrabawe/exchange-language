@@ -1,19 +1,16 @@
-import { CalendarClock, MessageCircle, Target, Video } from 'lucide-react'
+import { CalendarClock, MessageCircle, Target } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import client from '../api/client'
-import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
 
 export default function PartnerProfile() {
   const { t } = useTranslation()
   const { userId } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
   const [partner, setPartner] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [starting, setStarting] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -25,12 +22,6 @@ export default function PartnerProfile() {
   const handleMessage = async () => {
     const { data } = await client.post('/chat/conversations/start/', { partner_id: userId })
     navigate(`/messages/${data.id}`)
-  }
-
-  const handleCallNow = () => {
-    setStarting(true)
-    const roomId = [user.id, Number(userId)].sort((a, b) => a - b).join('-')
-    navigate(`/call/${roomId}`)
   }
 
   if (loading) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.loading')}</div>
@@ -85,14 +76,6 @@ export default function PartnerProfile() {
             <div className="flex flex-wrap gap-3 pt-2">
               <button onClick={handleMessage} className="lp-btn-primary">
                 <MessageCircle size={16} /> {t('partnerProfile.message')}
-              </button>
-              <button
-                onClick={handleCallNow}
-                disabled={starting}
-                className="inline-flex items-center gap-2 px-5 py-2.5 font-semibold transition-colors hover:opacity-70"
-                style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-tag)', color: 'var(--accent)' }}
-              >
-                <Video size={16} /> {t('partnerProfile.startVideoCall')}
               </button>
               <button
                 onClick={() => navigate(`/schedule?partner=${userId}`)}

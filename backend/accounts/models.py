@@ -62,6 +62,7 @@ class Profile(models.Model):
     avatar_url = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    notifications_seen_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f'Profile<{self.user.email}>'

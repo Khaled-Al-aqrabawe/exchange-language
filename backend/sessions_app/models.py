@@ -18,8 +18,10 @@ class ScheduledSession(models.Model):
     duration_minutes = models.PositiveIntegerField(default=30)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     notes = models.TextField(blank=True)
+    cancellation_reason = models.TextField(blank=True)
     room_id = models.CharField(max_length=64, default=uuid.uuid4, editable=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['scheduled_time']

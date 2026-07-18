@@ -238,7 +238,23 @@
       "confirmed": "confirmed",
       "completed": "completed",
       "cancelled": "cancelled"
-    }
+    },
+    "language": "Language",
+    "level": "Level",
+    "anyLanguage": "Any language",
+    "anyLevel": "Any level",
+    "noPartnersForFilters": "No partners match this language and level yet — try widening your filters.",
+    "durationFixed": "Sessions are fixed at 40 minutes.",
+    "joinCallLocked": "You can join 5 minutes before the session starts.",
+    "selectLanguage": "Select a language...",
+    "selectLevel": "Select a level...",
+    "cancelModalTitle": "Cancel this session?",
+    "cancelReasonLabel": "Reason for cancelling",
+    "cancelReasonPlaceholder": "Let them know why...",
+    "cancelReasonRequired": "Please provide a reason.",
+    "cancelConfirm": "Cancel session",
+    "cancelDismiss": "Never mind",
+    "cancelledReason": "Reason: {{reason}}"
   },
   "courses": {
     "title": "Courses",
@@ -308,5 +324,11 @@
     "intermediate": "Intermediate",
     "advanced": "Advanced",
     "fluent": "Fluent"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet.",
+    "request": "{{name}} sent you a session request",
+    "confirmed": "{{name}} confirmed your session"
   }
 }

@@ -238,7 +238,23 @@
       "confirmed": "bestätigt",
       "completed": "abgeschlossen",
       "cancelled": "abgesagt"
-    }
+    },
+    "language": "Sprache",
+    "level": "Niveau",
+    "anyLanguage": "Beliebige Sprache",
+    "anyLevel": "Beliebiges Niveau",
+    "noPartnersForFilters": "Noch keine Partner für diese Sprache und dieses Niveau — erweitere deine Filter.",
+    "durationFixed": "Sitzungen sind fest auf 40 Minuten eingestellt.",
+    "joinCallLocked": "Du kannst 5 Minuten vor Beginn der Sitzung beitreten.",
+    "selectLanguage": "Sprache auswählen...",
+    "selectLevel": "Niveau auswählen...",
+    "cancelModalTitle": "Diese Sitzung absagen?",
+    "cancelReasonLabel": "Grund für die Absage",
+    "cancelReasonPlaceholder": "Lass sie wissen, warum...",
+    "cancelReasonRequired": "Bitte gib einen Grund an.",
+    "cancelConfirm": "Sitzung absagen",
+    "cancelDismiss": "Doch nicht",
+    "cancelledReason": "Grund: {{reason}}"
   },
   "courses": {
     "title": "Kurse",
@@ -308,5 +324,11 @@
     "intermediate": "Mittelstufe",
     "advanced": "Fortgeschritten",
     "fluent": "Fließend"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Noch keine Benachrichtigungen.",
+    "request": "{{name}} hat dir eine Sitzungsanfrage gesendet",
+    "confirmed": "{{name}} hat deine Sitzung bestätigt"
   }
 }
