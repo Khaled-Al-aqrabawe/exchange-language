@@ -461,6 +461,7 @@
     "title": "Tu perfil",
     "loading": "Cargando...",
     "changePhoto": "Cambiar foto",
+    "photoNote": "Tu foto se genera automáticamente a partir de tu cuenta.",
     "uploading": "Subiendo...",
     "uploadError": "No se pudo subir la foto. Prueba con otra imagen.",
     "firstName": "Nombre",

@@ -461,6 +461,7 @@
     "title": "Your profile",
     "loading": "Loading...",
     "changePhoto": "Change photo",
+    "photoNote": "Your photo is generated automatically from your account.",
     "uploading": "Uploading...",
     "uploadError": "Could not upload photo. Please try a different image.",
     "firstName": "First name",

@@ -461,6 +461,7 @@
     "title": "Votre profil",
     "loading": "Chargement...",
     "changePhoto": "Changer la photo",
+    "photoNote": "Votre photo est générée automatiquement à partir de votre compte.",
     "uploading": "Envoi en cours...",
     "uploadError": "Impossible d'envoyer la photo. Essayez une autre image.",
     "firstName": "Prénom",

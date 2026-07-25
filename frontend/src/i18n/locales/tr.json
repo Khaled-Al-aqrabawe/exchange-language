@@ -461,6 +461,7 @@
     "title": "Profilin",
     "loading": "Yükleniyor...",
     "changePhoto": "Fotoğrafı değiştir",
+    "photoNote": "Fotoğrafın hesabından otomatik olarak oluşturulur.",
     "uploading": "Yükleniyor...",
     "uploadError": "Fotoğraf yüklenemedi. Lütfen başka bir görsel dene.",
     "firstName": "Ad",

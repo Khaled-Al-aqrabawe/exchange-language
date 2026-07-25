@@ -461,6 +461,7 @@
     "title": "Dein Profil",
     "loading": "Wird geladen...",
     "changePhoto": "Foto ändern",
+    "photoNote": "Dein Foto wird automatisch aus deinem Konto generiert.",
     "uploading": "Wird hochgeladen...",
     "uploadError": "Foto konnte nicht hochgeladen werden. Bitte versuche ein anderes Bild.",
     "firstName": "Vorname",

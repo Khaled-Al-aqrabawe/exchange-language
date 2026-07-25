@@ -6,6 +6,7 @@ import {
   Home,
   LogOut,
   MessageCircle,
+  Settings,
   UserRound,
   Users,
 } from 'lucide-react'
@@ -148,6 +149,15 @@ function UserMenu({ user, onLogout }) {
           >
             <UserRound size={15} />
             {t('nav.profile')}
+          </Link>
+          <Link
+            to="/settings"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
+            style={{ color: 'var(--ink-soft)' }}
+          >
+            <Settings size={15} />
+            {t('nav.settings')}
           </Link>
           <button
             onClick={() => {
