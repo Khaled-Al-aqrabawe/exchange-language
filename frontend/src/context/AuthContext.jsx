@@ -36,15 +36,8 @@ export function AuthProvider({ children }) {
     }
   }, [fetchMe])
 
-  // Step 1 of login: validate credentials, triggers an emailed code. No
-  // tokens are issued yet — see verifyLoginCode for step 2.
   const login = async (email, password) => {
     const { data } = await client.post('/auth/login/', { email, password })
-    return data
-  }
-
-  const verifyLoginCode = async (loginRef, code) => {
-    const { data } = await client.post('/auth/login/verify/', { login_ref: loginRef, code })
     localStorage.setItem('access_token', data.access)
     localStorage.setItem('refresh_token', data.refresh)
     setUser(data.user)
@@ -52,13 +45,8 @@ export function AuthProvider({ children }) {
     return data
   }
 
-  const resendLoginCode = async (loginRef) => {
-    const { data } = await client.post('/auth/login/resend-code/', { login_ref: loginRef })
-    return data
-  }
-
-  // Registration no longer logs the user in — the account must be verified
-  // by email first.
+  // Registration doesn't log the user in - no account exists yet at this
+  // point. See verifyEmail, which creates the account and logs in.
   const register = async (payload) => {
     const { data } = await client.post('/auth/register/', payload)
     return data
@@ -66,6 +54,10 @@ export function AuthProvider({ children }) {
 
   const verifyEmail = async (email, code) => {
     const { data } = await client.post('/auth/verify-email/', { email, code })
+    localStorage.setItem('access_token', data.access)
+    localStorage.setItem('refresh_token', data.refresh)
+    setUser(data.user)
+    syncLanguageFromProfile(data.user)
     return data
   }
 
@@ -83,7 +75,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider
       value={{
-        user, loading, login, verifyLoginCode, resendLoginCode,
+        user, loading, login,
         register, verifyEmail, resendVerification, logout, refreshUser: fetchMe,
       }}
     >

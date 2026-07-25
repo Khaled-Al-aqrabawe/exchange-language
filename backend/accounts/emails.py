@@ -149,29 +149,3 @@ def send_password_reset_email(user, code):
         f'{strings["text_expiry"]}'
     )
     send_html_email(user.email, strings['subject'], html, text)
-
-
-def send_login_code_email(user, code):
-    language = user_language(user)
-    strings, common = get_strings(language, 'login_code')
-    name = user.first_name or user.email
-
-    html = render_email_html(
-        preheader=strings['preheader'].format(code=code),
-        heading=strings['heading'],
-        body_html=f'''
-        <p style="margin:0 0 20px 0;font-size:14px;color:{BRAND['ink_soft']};line-height:1.6;font-family:{FONT_STACK};">
-          {strings['body'].format(name=name)}
-        </p>
-        <div style="margin:0 0 8px 0;padding:18px;background-color:{BRAND['surface_2']};border-radius:12px;text-align:center;">
-          <span style="font-size:32px;font-weight:700;letter-spacing:8px;color:{BRAND['ink']};font-family:'SFMono-Regular',Consolas,Menlo,monospace;">{code}</span>
-        </div>
-        ''',
-        language=language,
-    )
-    text = (
-        f'{common["greeting"].format(name=name)}\n\n'
-        f'{strings["text_code"].format(code=code)}\n\n'
-        f'{strings["text_expiry"]}'
-    )
-    send_html_email(user.email, strings['subject'], html, text)

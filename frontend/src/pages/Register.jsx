@@ -111,7 +111,7 @@ export default function Register() {
         <AuthHeroBackground />
         <div className="relative w-full max-w-sm m-auto lp-animate-in">
           <StepHeader icon={MailCheck} title={t('auth.register.checkEmailTitle')} subtitle={t('auth.register.checkEmailBody', { email: registeredEmail })} />
-          <EmailVerifyForm email={registeredEmail} onVerified={() => navigate('/login')} />
+          <EmailVerifyForm email={registeredEmail} onVerified={() => navigate('/home')} />
           <p className="mt-6 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
             <Link to="/login" className="font-semibold" style={{ color: 'var(--accent)' }}>{t('auth.register.logIn')}</Link>
           </p>

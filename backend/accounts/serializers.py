@@ -106,11 +106,6 @@ class LoginPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
-class LoginCodeVerifySerializer(serializers.Serializer):
-    login_ref = serializers.CharField()
-    code = serializers.CharField()
-
-
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 

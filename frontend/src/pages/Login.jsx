@@ -1,4 +1,4 @@
-import { CheckCircle2, KeyRound, Lock, LogIn, Mail, MailCheck } from 'lucide-react'
+import { CheckCircle2, Lock, LogIn, Mail, MailCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
@@ -32,13 +32,11 @@ function StepHeader({ icon: Icon, title, subtitle }) {
 
 export default function Login() {
   const { t } = useTranslation()
-  const { login, verifyLoginCode, resendLoginCode } = useAuth()
+  const { login } = useAuth()
   const navigate = useNavigate()
   const [step, setStep] = useState('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [code, setCode] = useState('')
-  const [loginRef, setLoginRef] = useState('')
   const [error, setError] = useState('')
   const [justVerified, setJustVerified] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -49,9 +47,8 @@ export default function Login() {
     setJustVerified(false)
     setSubmitting(true)
     try {
-      const data = await login(email, password)
-      setLoginRef(data.login_ref)
-      setStep('code')
+      await login(email, password)
+      navigate('/home')
     } catch (err) {
       if (err.response?.data?.code === 'email_not_verified') {
         setStep('verifyEmail')
@@ -60,30 +57,6 @@ export default function Login() {
       }
     } finally {
       setSubmitting(false)
-    }
-  }
-
-  const handleCodeSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setSubmitting(true)
-    try {
-      await verifyLoginCode(loginRef, code)
-      navigate('/home')
-    } catch {
-      setError(t('auth.login.invalidCode'))
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const handleResendCode = async () => {
-    setError('')
-    try {
-      const data = await resendLoginCode(loginRef)
-      setLoginRef(data.login_ref)
-    } catch {
-      setError(t('auth.login.resendFailed'))
     }
   }
 
@@ -126,41 +99,6 @@ export default function Login() {
                   {t('auth.login.signUp')}
                 </Link>
               </p>
-            </>
-          )}
-
-          {step === 'code' && (
-            <>
-              <StepHeader icon={KeyRound} title={t('auth.login.codeTitle')} subtitle={t('auth.login.codeSubtitle', { email })} />
-
-              <form onSubmit={handleCodeSubmit} className="space-y-3.5">
-                <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.login.code')}</label>
-                  <IconInput
-                    icon={KeyRound}
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    required
-                    maxLength={6}
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    placeholder={t('auth.login.codePlaceholder')}
-                  />
-                </div>
-                {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
-                <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50">
-                  {submitting ? t('auth.login.verifying') : t('auth.login.verify')}
-                </button>
-              </form>
-              <div className="mt-5 flex items-center justify-between text-sm">
-                <button type="button" onClick={() => setStep('password')} style={{ color: 'var(--ink-soft)' }}>
-                  {t('auth.login.back')}
-                </button>
-                <button type="button" onClick={handleResendCode} className="font-semibold" style={{ color: 'var(--accent)' }}>
-                  {t('auth.login.resendCode')}
-                </button>
-              </div>
             </>
           )}
 

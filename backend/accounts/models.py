@@ -123,6 +123,8 @@ def generate_verification_token():
 
 
 def generate_login_reference():
+    # Kept for historical migration 0003, which references this as a field
+    # default. No longer used by any current model field.
     return uuid.uuid4().hex
 
 
@@ -199,35 +201,6 @@ class PendingRegistration(models.Model):
 
     def __str__(self):
         return f'PendingRegistration<{self.email}>'
-
-
-class LoginCode(models.Model):
-    MAX_ATTEMPTS = 5
-
-    user = models.ForeignKey(User, related_name='login_codes', on_delete=models.CASCADE)
-    reference = models.CharField(max_length=64, unique=True, default=generate_login_reference)
-    code = models.CharField(max_length=6)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    consumed_at = models.DateTimeField(null=True, blank=True)
-    attempts = models.PositiveSmallIntegerField(default=0)
-
-    def is_valid(self):
-        return (
-            self.consumed_at is None
-            and self.attempts < self.MAX_ATTEMPTS
-            and self.expires_at > dj_timezone.now()
-        )
-
-    @classmethod
-    def create_for_user(cls, user, lifetime_minutes=10):
-        code = f'{secrets.randbelow(1_000_000):06d}'
-        return cls.objects.create(
-            user=user, code=code, expires_at=dj_timezone.now() + timedelta(minutes=lifetime_minutes),
-        )
-
-    def __str__(self):
-        return f'LoginCode<{self.user_id}>'
 
 
 class PasswordResetCode(models.Model):

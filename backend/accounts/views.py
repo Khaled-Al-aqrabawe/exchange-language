@@ -4,18 +4,17 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from rest_framework import generics, permissions, status
-from rest_framework.exceptions import APIException, ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .emails import send_login_code_email, send_password_reset_email, send_verification_email
-from .models import AvailabilitySlot, LoginCode, PasswordResetCode, PendingRegistration, User
+from .emails import send_password_reset_email, send_verification_email
+from .models import AvailabilitySlot, PasswordResetCode, PendingRegistration, User
 from .serializers import (
     AvailabilitySlotSerializer,
     ChangePasswordSerializer,
-    LoginCodeVerifySerializer,
     LoginPasswordSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
@@ -27,12 +26,6 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 
 RESEND_CODE_COOLDOWN_SECONDS = 30
-
-
-class EmailDeliveryError(APIException):
-    status_code = 503
-    default_detail = 'Could not send the email right now. Please try again shortly.'
-    default_code = 'email_delivery_failed'
 
 
 class RegisterView(APIView):
@@ -88,7 +81,16 @@ class VerifyEmailView(APIView):
         user = pending.create_user()
         pending.delete()
 
-        return Response({'detail': 'Email verified. You can now log in.'})
+        # Verifying the code is proof of both email ownership and the
+        # password (set at registration), so log the user straight in rather
+        # than making them re-enter credentials immediately after.
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'detail': 'Email verified.',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': UserSerializer(user).data,
+        })
 
 
 class ResendVerificationView(APIView):
@@ -122,71 +124,12 @@ class LoginView(APIView):
         if not user.email_verified:
             return Response({'code': 'email_not_verified', 'detail': 'Please verify your email before logging in.'}, status=status.HTTP_403_FORBIDDEN)
 
-        login_code = LoginCode.create_for_user(user)
-        try:
-            send_login_code_email(user, login_code.code)
-        except Exception:
-            logger.exception('Failed to send login code email to %s', user.email)
-            raise EmailDeliveryError()
-
-        return Response({'login_ref': login_code.reference, 'expires_in': 600})
-
-
-class LoginVerifyView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        serializer = LoginCodeVerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        login_ref = serializer.validated_data['login_ref']
-        code = serializer.validated_data['code']
-
-        try:
-            login_code = LoginCode.objects.select_related('user').get(reference=login_ref)
-        except LoginCode.DoesNotExist:
-            raise ValidationError({'detail': 'Invalid or expired login attempt.'})
-
-        if not login_code.is_valid():
-            raise ValidationError({'detail': 'This code has expired. Please log in again.'})
-
-        if login_code.code != code:
-            login_code.attempts += 1
-            login_code.save(update_fields=['attempts'])
-            raise ValidationError({'detail': 'Incorrect code.'})
-
-        login_code.consumed_at = timezone.now()
-        login_code.save(update_fields=['consumed_at'])
-
-        user = login_code.user
         refresh = RefreshToken.for_user(user)
         return Response({
             'access': str(refresh.access_token),
             'refresh': str(refresh),
             'user': UserSerializer(user).data,
         })
-
-
-class LoginResendCodeView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        login_ref = request.data.get('login_ref', '')
-        try:
-            login_code = LoginCode.objects.select_related('user').get(reference=login_ref)
-        except LoginCode.DoesNotExist:
-            raise ValidationError({'detail': 'Invalid or expired login attempt.'})
-
-        seconds_since_created = (timezone.now() - login_code.created_at).total_seconds()
-        if login_code.consumed_at is None and seconds_since_created < RESEND_CODE_COOLDOWN_SECONDS:
-            raise ValidationError({'detail': 'Please wait before requesting another code.'})
-
-        new_code = LoginCode.create_for_user(login_code.user)
-        try:
-            send_login_code_email(login_code.user, new_code.code)
-        except Exception:
-            logger.exception('Failed to send login code email to %s', login_code.user.email)
-            raise EmailDeliveryError()
-        return Response({'login_ref': new_code.reference, 'expires_in': 600})
 
 
 class PasswordResetRequestView(APIView):
