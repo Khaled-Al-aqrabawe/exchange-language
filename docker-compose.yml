@@ -37,6 +37,7 @@ services:
     environment: &backend_env
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY in .env}
       DJANGO_DEBUG: "false"
+      DJANGO_BEHIND_TLS_PROXY: ${DJANGO_BEHIND_TLS_PROXY:-false}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       DATABASE_URL: postgres://${POSTGRES_USER:-language_partner}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-language_partner}
       REDIS_URL: redis://redis:6379/0

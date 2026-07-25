@@ -233,7 +233,12 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 
 # Coolify (via Traefik) terminates TLS and proxies plain HTTP to the container,
 # so Django needs to trust the forwarded proto/host to know a request was HTTPS.
-if not DEBUG:
+# This is independent of DEBUG: a plain-HTTP deployment (e.g. hitting a raw
+# IP:port with no TLS-terminating proxy in front) must NOT get Secure-flagged
+# cookies, or browsers silently drop them and CSRF/session auth breaks - hence
+# a dedicated flag rather than piggybacking on `not DEBUG`.
+BEHIND_TLS_PROXY = env_bool('DJANGO_BEHIND_TLS_PROXY', default=not DEBUG)
+if BEHIND_TLS_PROXY:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     USE_X_FORWARDED_HOST = True
     SESSION_COOKIE_SECURE = True
