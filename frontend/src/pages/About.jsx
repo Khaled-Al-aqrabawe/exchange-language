@@ -1,68 +1,56 @@
 import { Globe2, HeartHandshake, Target } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import AuthHeroBackground from '../components/AuthHeroBackground'
 import MessageMockup from '../components/MessageMockup'
 
-const values = [
-  {
-    icon: HeartHandshake,
-    title: 'Real people, real practice',
-    body: 'The fastest way to learn a language is to speak it with another human being — not tap through flashcards alone.',
-  },
-  {
-    icon: Globe2,
-    title: 'Accessible to everyone',
-    body: 'Authentic conversation practice shouldn\'t require finding or affording a private tutor.',
-  },
-  {
-    icon: Target,
-    title: 'Structure when you need it',
-    body: 'Courses fill the gaps between conversations so you always have something to work on.',
-  },
-]
-
 export default function About() {
+  const { t } = useTranslation()
+
+  const values = [
+    { icon: HeartHandshake, title: t('about.values.realTitle'), body: t('about.values.realBody') },
+    { icon: Globe2, title: t('about.values.accessibleTitle'), body: t('about.values.accessibleBody') },
+    { icon: Target, title: t('about.values.structureTitle'), body: t('about.values.structureBody') },
+  ]
+
   return (
-    <div>
-      <section className="max-w-3xl mx-auto px-6 pt-16 pb-20 text-center">
-        <p className="text-sm font-semibold text-indigo-600 tracking-wide uppercase mb-4">About us</p>
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-          Fluency comes from <span className="text-gradient">conversation</span>
-        </h1>
-        <p className="mt-5 text-lg text-slate-600 leading-relaxed">
-          Language Partner exists because the fastest way to learn a language is to
-          actually speak it with another person. We connect learners for native-speaker
-          exchange, peer practice, and structured self-paced courses — all in one place.
-        </p>
+    <div className="relative" style={{ color: 'var(--ink)' }}>
+      <AuthHeroBackground />
+
+      <section className="lp-hero-bg">
+        <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-20 text-center lp-animate-in">
+          <p className="lp-eyebrow mb-4" style={{ color: 'var(--accent)' }}>{t('about.eyebrow')}</p>
+          <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight">
+            {t('about.titlePrefix')} <span className="lp-gradient-text">{t('about.titleHighlight')}</span>
+          </h1>
+          <p className="mt-5 text-lg leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{t('about.intro')}</p>
+        </div>
       </section>
 
-      <section className="border-t border-slate-200 bg-slate-50">
+      <section style={{ borderTop: '1px solid var(--line)' }}>
         <div className="max-w-6xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-16 items-center">
-          <div className="flex justify-center">
+          <div className="flex justify-center lp-animate-in-scale">
             <MessageMockup />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-indigo-600 tracking-wide uppercase mb-2">Our mission</p>
-            <p className="text-3xl font-bold text-slate-900 tracking-tight mb-4">
-              Make authentic practice accessible to anyone, anywhere
-            </p>
-            <p className="text-slate-600 leading-relaxed">
-              We match learners by language pair, level, and timezone, then get out of the
-              way — built-in video and chat so there's nothing extra to install, and courses
-              for whenever you want a bit more structure between sessions.
-            </p>
+          <div className="lp-animate-in">
+            <p className="lp-eyebrow mb-2" style={{ color: 'var(--accent-2)' }}>{t('about.missionEyebrow')}</p>
+            <p className="font-display text-3xl font-bold tracking-tight mb-4">{t('about.missionHeadline')}</p>
+            <p className="leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{t('about.missionBody')}</p>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-slate-200">
+      <section style={{ borderTop: '1px solid var(--line)' }}>
         <div className="max-w-5xl mx-auto px-6 py-20">
-          <p className="text-sm font-semibold text-indigo-600 tracking-wide uppercase mb-2">What we believe</p>
-          <p className="text-3xl font-bold text-slate-900 tracking-tight mb-12">Our approach</p>
-          <div className="grid sm:grid-cols-3 gap-x-8 gap-y-10">
-            {values.map((v) => (
-              <div key={v.title} className="border-t border-slate-200 pt-5">
-                <v.icon size={20} strokeWidth={1.75} className="text-slate-400 mb-3" />
-                <h3 className="font-semibold text-slate-900 mb-1.5">{v.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{v.body}</p>
+          <p className="lp-eyebrow mb-2 lp-animate-in" style={{ color: 'var(--accent)' }}>{t('about.beliefEyebrow')}</p>
+          <p className="font-display text-3xl font-bold tracking-tight mb-12 lp-animate-in">{t('about.beliefHeadline')}</p>
+          <div className="grid sm:grid-cols-3 gap-5">
+            {values.map((v, i) => (
+              <div key={v.title} className={`lp-card lp-card--hover lp-animate-in lp-delay-${i + 1}`}>
+                <span className="lp-icon-badge h-10 w-10 mb-4">
+                  <v.icon size={19} strokeWidth={2} />
+                </span>
+                <h3 className="font-semibold mb-1.5">{v.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{v.body}</p>
               </div>
             ))}
           </div>

@@ -5,11 +5,14 @@ import About from './pages/About'
 import Call from './pages/Call'
 import CoursePlayer from './pages/CoursePlayer'
 import Courses from './pages/Courses'
-import Dashboard from './pages/Dashboard'
 import FAQ from './pages/FAQ'
+import ForgotPassword from './pages/ForgotPassword'
+import Home from './pages/Home'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
+import Materials from './pages/Materials'
 import Messages from './pages/Messages'
+import Notifications from './pages/Notifications'
 import Partners from './pages/Partners'
 import PartnerProfile from './pages/PartnerProfile'
 import Profile from './pages/Profile'
@@ -26,9 +29,10 @@ function App() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/partners/:userId" element={<PartnerProfile />} />
@@ -38,6 +42,8 @@ function App() {
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:courseId" element={<CoursePlayer />} />
+          <Route path="/materials" element={<Materials />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>

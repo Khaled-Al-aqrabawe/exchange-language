@@ -3,8 +3,8 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Course, Lesson, LessonProgress
-from .serializers import CourseDetailSerializer, CourseListSerializer
+from .models import Course, Lesson, LessonProgress, Material
+from .serializers import CourseDetailSerializer, CourseListSerializer, MaterialSerializer
 
 
 class CourseListView(generics.ListAPIView):
@@ -26,6 +26,24 @@ class CourseDetailView(generics.RetrieveAPIView):
     queryset = Course.objects.prefetch_related('lessons')
     serializer_class = CourseDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+
+class MaterialListView(generics.ListAPIView):
+    serializer_class = MaterialSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = Material.objects.all()
+        language = self.request.query_params.get('language')
+        level = self.request.query_params.get('level')
+        if language:
+            qs = qs.filter(language__iexact=language)
+        if level:
+            qs = qs.filter(level=level)
+        return qs
 
     def get_serializer_context(self):
         return {'request': self.request}

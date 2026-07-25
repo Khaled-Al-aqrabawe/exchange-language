@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Course, Lesson, LessonProgress
+from .models import Course, Lesson, LessonProgress, Material
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -29,3 +29,15 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['id', 'title', 'language', 'level', 'description', 'thumbnail_url', 'lessons']
+
+
+class MaterialSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(use_url=True)
+    file_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Material
+        fields = ['id', 'title', 'language', 'level', 'description', 'file', 'file_name', 'created_at']
+
+    def get_file_name(self, obj):
+        return obj.file.name.rsplit('/', 1)[-1] if obj.file else ''

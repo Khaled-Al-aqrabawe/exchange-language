@@ -1,79 +1,190 @@
-import { LogIn } from 'lucide-react'
+import { CheckCircle2, KeyRound, Lock, LogIn, Mail, MailCheck } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import AuthImagePanel from '../components/AuthImagePanel'
+import AuthHeroBackground from '../components/AuthHeroBackground'
+import EmailVerifyForm from '../components/EmailVerifyForm'
 import { useAuth } from '../context/AuthContext'
 
+const inputClass = 'w-full rounded-xl ps-10 pe-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent'
+const inputStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
+
+function IconInput({ icon: Icon, ...props }) {
+  return (
+    <div className="relative">
+      <Icon size={16} className="absolute top-1/2 -translate-y-1/2 start-3.5 pointer-events-none" style={{ color: 'var(--ink-soft)' }} />
+      <input {...props} className={inputClass} style={inputStyle} />
+    </div>
+  )
+}
+
+function StepHeader({ icon: Icon, title, subtitle }) {
+  return (
+    <div className="flex flex-col items-center text-center mb-7 lp-animate-in-scale">
+      <span className="lp-icon-badge h-12 w-12 mb-4">
+        <Icon size={20} />
+      </span>
+      <h1 className="font-display text-2xl font-bold tracking-tight lp-gradient-text">{title}</h1>
+      <p className="text-sm mt-1.5 max-w-xs" style={{ color: 'var(--ink-soft)' }}>{subtitle}</p>
+    </div>
+  )
+}
+
 export default function Login() {
-  const { login } = useAuth()
+  const { t } = useTranslation()
+  const { login, verifyLoginCode, resendLoginCode } = useAuth()
   const navigate = useNavigate()
+  const [step, setStep] = useState('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [code, setCode] = useState('')
+  const [loginRef, setLoginRef] = useState('')
   const [error, setError] = useState('')
+  const [justVerified, setJustVerified] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = async (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setJustVerified(false)
     setSubmitting(true)
     try {
-      await login(email, password)
-      navigate('/dashboard')
-    } catch {
-      setError('Invalid email or password.')
+      const data = await login(email, password)
+      setLoginRef(data.login_ref)
+      setStep('code')
+    } catch (err) {
+      if (err.response?.data?.code === 'email_not_verified') {
+        setStep('verifyEmail')
+      } else {
+        setError(t('auth.login.error'))
+      }
     } finally {
       setSubmitting(false)
     }
   }
 
+  const handleCodeSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setSubmitting(true)
+    try {
+      await verifyLoginCode(loginRef, code)
+      navigate('/home')
+    } catch {
+      setError(t('auth.login.invalidCode'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleResendCode = async () => {
+    setError('')
+    try {
+      const data = await resendLoginCode(loginRef)
+      setLoginRef(data.login_ref)
+    } catch {
+      setError(t('auth.login.resendFailed'))
+    }
+  }
+
   return (
-    <div className="grid lg:grid-cols-2 min-h-[calc(100vh-4rem)]">
-      <AuthImagePanel quote="“I found a conversation partner in my first ten minutes here.”" />
+    <div className="relative overflow-hidden lp-hero-bg bg-dots min-h-[calc(100vh-4rem)] flex flex-col items-center px-6 py-14">
+      <AuthHeroBackground />
 
-      <div className="flex items-center justify-center px-6 py-16">
-        <div className="w-full max-w-sm">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 mb-5">
-            <LogIn size={20} />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">Welcome back</h1>
-          <p className="text-slate-500 text-sm mb-7">Log in to keep practicing with your partners.</p>
+      <div className="relative w-full max-w-sm m-auto">
+        <div key={step} className="lp-animate-in-scale">
+          {step === 'password' && (
+            <>
+              <StepHeader icon={LogIn} title={t('auth.login.title')} subtitle={t('auth.login.subtitle')} />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              {justVerified && (
+                <p className="flex items-center justify-center gap-1.5 text-sm mb-4" style={{ color: 'var(--accent-2)' }}>
+                  <CheckCircle2 size={15} /> {t('auth.verifyEmail.success')}
+                </p>
+              )}
+
+              <form onSubmit={handlePasswordSubmit} className="space-y-3.5">
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.login.email')}</label>
+                  <IconInput icon={Mail} type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.login.password')}</label>
+                  <IconInput icon={Lock} type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Link to="/forgot-password" className="mt-1.5 block text-end text-xs font-semibold hover:opacity-80" style={{ color: 'var(--accent)' }}>
+                    {t('auth.login.forgotPassword')}
+                  </Link>
+                </div>
+                {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
+                <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50">
+                  {submitting ? t('auth.login.submitting') : t('auth.login.submit')}
+                </button>
+              </form>
+              <p className="mt-5 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
+                {t('auth.login.noAccount')}{' '}
+                <Link to="/register" className="font-semibold" style={{ color: 'var(--accent)' }}>
+                  {t('auth.login.signUp')}
+                </Link>
+              </p>
+            </>
+          )}
+
+          {step === 'code' && (
+            <>
+              <StepHeader icon={KeyRound} title={t('auth.login.codeTitle')} subtitle={t('auth.login.codeSubtitle', { email })} />
+
+              <form onSubmit={handleCodeSubmit} className="space-y-3.5">
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.login.code')}</label>
+                  <IconInput
+                    icon={KeyRound}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder={t('auth.login.codePlaceholder')}
+                  />
+                </div>
+                {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
+                <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50">
+                  {submitting ? t('auth.login.verifying') : t('auth.login.verify')}
+                </button>
+              </form>
+              <div className="mt-5 flex items-center justify-between text-sm">
+                <button type="button" onClick={() => setStep('password')} style={{ color: 'var(--ink-soft)' }}>
+                  {t('auth.login.back')}
+                </button>
+                <button type="button" onClick={handleResendCode} className="font-semibold" style={{ color: 'var(--accent)' }}>
+                  {t('auth.login.resendCode')}
+                </button>
+              </div>
+            </>
+          )}
+
+          {step === 'verifyEmail' && (
+            <>
+              <StepHeader icon={MailCheck} title={t('auth.login.emailNotVerified')} subtitle={t('auth.register.checkEmailBody', { email })} />
+
+              <EmailVerifyForm
+                email={email}
+                onVerified={() => {
+                  setStep('password')
+                  setJustVerified(true)
+                }}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 disabled:opacity-50 transition-colors"
-            >
-              {submitting ? 'Logging in...' : 'Log in'}
-            </button>
-          </form>
-          <p className="mt-6 text-sm text-slate-500 text-center">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-indigo-600 font-semibold">
-              Sign up
-            </Link>
-          </p>
+              <button
+                type="button"
+                onClick={() => setStep('password')}
+                className="mt-5 text-sm w-full text-center"
+                style={{ color: 'var(--ink-soft)' }}
+              >
+                {t('auth.login.back')}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

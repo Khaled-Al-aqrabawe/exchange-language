@@ -2,22 +2,35 @@ import { Camera, Mic, Video } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { avatarUrl } from '../utils/images'
 
+const CHAT_LINES = [
+  "Let's practice tomorrow? 👋",
+  'Your accent is getting so good!',
+  'Same time next week?',
+]
+
 /**
  * A styled two-tile "video call" mockup for marketing pages. Starts with
  * static avatar photos; on request, swaps the local tile for the visitor's
  * real camera feed via getUserMedia — a genuine product demo rather than
- * unrelated stock footage.
+ * unrelated stock footage. The floating chat bubble cycles through a few
+ * lines to keep the hero feeling alive without any real video asset.
  */
 export default function CallPreview({ partnerSeed = 'hero-partner', partnerName = 'Sara · Arabic' }) {
   const videoRef = useRef(null)
   const [live, setLive] = useState(false)
   const [error, setError] = useState(false)
+  const [lineIndex, setLineIndex] = useState(0)
 
   useEffect(() => {
     return () => {
       const stream = videoRef.current?.srcObject
       stream?.getTracks().forEach((t) => t.stop())
     }
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => setLineIndex((i) => (i + 1) % CHAT_LINES.length), 3800)
+    return () => clearInterval(interval)
   }, [])
 
   const startPreview = async () => {
@@ -31,8 +44,12 @@ export default function CallPreview({ partnerSeed = 'hero-partner', partnerName 
   }
 
   return (
-    <div className="relative w-full max-w-md mx-auto">
-      <div className="relative rounded-2xl bg-slate-900 p-3 shadow-2xl ring-1 ring-slate-900/10">
+    <div className="relative w-full max-w-md mx-auto" dir="ltr">
+      <span
+        className="pointer-events-none absolute -inset-6 rounded-[2rem] blur-2xl lp-blob-drift"
+        style={{ background: 'var(--gradient-brand)', opacity: 0.25 }}
+      />
+      <div className="relative rounded-2xl p-3 shadow-2xl" style={{ background: '#0f1117', border: '1px solid rgb(255 255 255 / 0.08)' }}>
         <div className="flex items-center justify-between px-2 pb-2">
           <div className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
@@ -91,9 +108,13 @@ export default function CallPreview({ partnerSeed = 'hero-partner', partnerName 
         </div>
       </div>
 
-      <div className="absolute -bottom-4 -left-4 rounded-xl bg-white shadow-lg px-3 py-2 flex items-center gap-2 ring-1 ring-slate-900/5">
-        <img src={avatarUrl('hero-msg', 60)} alt="" className="h-6 w-6 rounded-full object-cover" />
-        <span className="text-xs font-medium text-slate-700">"Let's practice tomorrow?" 👋</span>
+      <div
+        key={lineIndex}
+        className="absolute -bottom-4 -left-4 rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 lp-animate-in-scale max-w-[220px]"
+        style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
+      >
+        <img src={avatarUrl('hero-msg', 60)} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
+        <span className="text-xs font-medium" style={{ color: 'var(--ink)' }}>{CHAT_LINES[lineIndex]}</span>
       </div>
     </div>
   )

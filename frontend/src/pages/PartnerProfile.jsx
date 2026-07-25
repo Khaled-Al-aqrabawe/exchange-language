@@ -1,23 +1,147 @@
-import { CalendarClock, MessageCircle, Target, Video } from 'lucide-react'
+import { CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, Play, Sparkles, Star, Target, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import client from '../api/client'
-import { useAuth } from '../context/AuthContext'
-import { avatarUrl } from '../utils/images'
+import SendSessionRequestModal from '../components/SendSessionRequestModal'
+import { bookableStartTimes, DAYS, isSlotExpiredToday, slotOccurrenceUtcInstant } from '../utils/availability'
+import { resolveAvatarUrl } from '../utils/images'
+
+function BookSlotModal({ slot, partner, userId, onClose, onBooked }) {
+  const { t, i18n } = useTranslation()
+  const options = bookableStartTimes(slot)
+  const [selected, setSelected] = useState(options[0])
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [done, setDone] = useState(false)
+
+  const dayLabel = slot.is_recurring
+    ? t(`profile.days.${DAYS.find((d) => d.value === slot.day_of_week)?.key}`)
+    : new Date(`${slot.specific_date}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric' })
+
+  const handleConfirm = async () => {
+    setError('')
+    setSubmitting(true)
+    try {
+      const utcInstant = slotOccurrenceUtcInstant(slot, selected, partner.timezone)
+      await client.post('/sessions/', {
+        partner_id: userId,
+        scheduled_time: utcInstant.toISOString(),
+        duration_minutes: 40,
+        auto_confirm: true,
+      })
+      setDone(true)
+      onBooked?.()
+    } catch (err) {
+      const data = err.response?.data
+      setError(data ? Object.values(data).flat().join(' ') : t('partnerProfile.bookError'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-8 overflow-y-auto" style={{ background: 'color-mix(in srgb, black 45%, transparent)' }}>
+      <div className="lp-surface w-full max-w-sm p-6 lp-animate-in-scale my-auto" style={{ boxShadow: 'var(--shadow-card-hover)' }}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="lp-icon-badge h-9 w-9">
+              <CalendarClock size={16} />
+            </span>
+            <h2 className="font-display text-lg font-bold tracking-tight" style={{ color: 'var(--ink)' }}>{t('partnerProfile.bookSession')}</h2>
+          </div>
+          <button type="button" onClick={onClose} className="hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }} aria-label={t('common.close')}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {done ? (
+          <div className="py-4 text-center lp-animate-in">
+            <CheckCircle2 size={28} className="mx-auto mb-2" style={{ color: 'var(--accent-2)' }} />
+            <p className="text-sm font-medium mb-4" style={{ color: 'var(--ink)' }}>{t('partnerProfile.requestSent')}</p>
+            <button type="button" onClick={onClose} className="lp-btn-primary">{t('common.done')}</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm mb-4" style={{ color: 'var(--ink-soft)' }}>
+              {t('partnerProfile.bookSubtitle', { name: partner.full_name, day: dayLabel, start: slot.start_time.slice(0, 5), end: slot.end_time.slice(0, 5) })}
+            </p>
+
+            {options.length > 1 ? (
+              <div className="mb-5">
+                <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.chooseStartTime')}</p>
+                <div className="flex flex-wrap gap-2">
+                  {options.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setSelected(opt)}
+                      className="px-3.5 py-2 text-sm font-semibold transition-all"
+                      style={{
+                        borderRadius: 'var(--radius-pill)',
+                        background: selected === opt ? 'var(--gradient-brand)' : 'var(--surface-2)',
+                        color: selected === opt ? 'var(--accent-ink)' : 'var(--ink-soft)',
+                      }}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div
+                className="flex items-center gap-2 mb-5 px-4 py-3 text-sm font-semibold"
+                style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-card)', color: 'var(--ink)' }}
+              >
+                <Clock size={15} style={{ color: 'var(--accent)' }} /> {selected} ({t('schedule.minutesShort', { count: 40 })})
+              </div>
+            )}
+
+            {error && <p className="text-sm mb-3" style={{ color: '#c1443d' }}>{error}</p>}
+            <button type="button" onClick={handleConfirm} disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50">
+              {submitting ? t('schedule.submitting') : t('partnerProfile.sendRequest')}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function StatChip({ icon: Icon, value, label, accent }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+        style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }}
+      >
+        <Icon size={16} />
+      </span>
+      <div className="min-w-0">
+        <p className="font-display text-base font-bold leading-none" style={{ color: 'var(--ink)' }}>{value}</p>
+        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--ink-soft)' }}>{label}</p>
+      </div>
+    </div>
+  )
+}
 
 export default function PartnerProfile() {
+  const { t, i18n } = useTranslation()
   const { userId } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
   const [partner, setPartner] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [starting, setStarting] = useState(false)
+  const [bookingSlot, setBookingSlot] = useState(null)
+  const [showRequestModal, setShowRequestModal] = useState(false)
+  const [videoPlaying, setVideoPlaying] = useState(false)
+
+  const loadPartner = () => client.get(`/matching/partners/${userId}/`).then(({ data }) => setPartner(data))
 
   useEffect(() => {
     setLoading(true)
-    client.get(`/matching/partners/${userId}/`)
-      .then(({ data }) => setPartner(data))
-      .finally(() => setLoading(false))
+    setVideoPlaying(false)
+    loadPartner().finally(() => setLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
   const handleMessage = async () => {
@@ -25,87 +149,210 @@ export default function PartnerProfile() {
     navigate(`/messages/${data.id}`)
   }
 
-  const handleCallNow = () => {
-    setStarting(true)
-    const roomId = [user.id, Number(userId)].sort((a, b) => a - b).join('-')
-    navigate(`/call/${roomId}`)
-  }
+  if (loading) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.loading')}</div>
+  if (!partner) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.notFound')}</div>
 
-  if (loading) return <div className="p-16 text-center text-slate-500 text-sm">Loading...</div>
-  if (!partner) return <div className="p-16 text-center text-slate-500 text-sm">Partner not found.</div>
+  const accent = partner.match_type === 'exchange' ? 'var(--accent)' : 'var(--accent-2)'
+  const visibleAvailability = partner.availability?.filter((slot) => !isSlotExpiredToday(slot)) || []
 
   return (
-    <div className="bg-slate-50 min-h-[calc(100vh-4rem)]">
-      <div className="max-w-2xl mx-auto px-6 py-10">
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <div className="h-24 bg-gradient-to-br from-indigo-600 to-violet-600" />
-          <div className="px-8 pb-8">
-            <div className="flex items-end justify-between -mt-10 mb-4">
-              <img
-                src={avatarUrl(partner.user_id, 160)}
-                alt=""
-                className="h-20 w-20 rounded-2xl object-cover ring-4 ring-white"
-              />
+    <div className="min-h-[calc(100vh-4rem)] relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+      <div
+        className="absolute -top-20 -end-20 h-80 w-80 rounded-full pointer-events-none lp-blob-drift"
+        style={{ background: 'var(--accent)', opacity: 0.14, filter: 'blur(80px)' }}
+      />
+      <div
+        className="absolute top-[380px] -start-24 h-80 w-80 rounded-full pointer-events-none lp-blob-drift"
+        style={{ background: 'var(--accent-2)', opacity: 0.14, filter: 'blur(80px)', animationDelay: '3s' }}
+      />
+
+      <div className="max-w-4xl mx-auto px-6 py-14 relative">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-12">
+          {/* Left: visual identity + actions */}
+          <div className="lp-animate-in lg:sticky lg:top-24 lg:self-start">
+            <div className="relative w-fit mx-auto lg:mx-0 mb-5">
               <span
-                className={`mb-2 text-xs px-2.5 py-1 rounded-full font-medium ${
-                  partner.match_type === 'exchange'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-blue-100 text-blue-700'
-                }`}
-              >
-                {partner.match_type === 'exchange' ? 'Exchange match' : 'Peer practice'}
+                className="absolute -inset-3 rounded-full pointer-events-none"
+                style={{ background: accent, filter: 'blur(30px)', opacity: 0.35 }}
+              />
+              <img
+                src={resolveAvatarUrl(partner.avatar, partner.user_id, 280)}
+                alt=""
+                className="relative lp-avatar lp-gradient-ring h-36 w-36 object-cover"
+                style={{ border: '4px solid var(--bg)' }}
+              />
+              {partner.intro_video && (
+                <span
+                  className="absolute bottom-1 end-1 flex h-9 w-9 items-center justify-center rounded-full"
+                  style={{ background: 'var(--gradient-brand)', color: 'var(--accent-ink)', border: '3px solid var(--bg)' }}
+                  title={t('partnerProfile.introVideo')}
+                >
+                  <Video size={15} />
+                </span>
+              )}
+            </div>
+
+            <div className="text-center lg:text-start mb-6">
+              <h1 className="font-display text-2xl font-bold tracking-tight lp-gradient-text">{partner.full_name}</h1>
+              <span className="inline-flex mt-1.5 text-xs font-semibold" style={{ color: accent }}>
+                {partner.match_type === 'exchange' ? t('partnerProfile.exchangeMatch') : t('partnerProfile.peerPractice')}
               </span>
             </div>
 
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{partner.full_name}</h1>
-            <p className="text-slate-600 mt-1">
-              Speaks <strong className="text-slate-900">{partner.native_language}</strong> · Learning{' '}
-              <strong className="text-slate-900">{partner.learning_language}</strong>
-            </p>
-            <p className="text-sm text-slate-400 mb-6 capitalize">
-              {partner.proficiency_level} · {partner.timezone}
-            </p>
+            <div className="space-y-4 mb-6">
+              <StatChip icon={CalendarCheck} value={partner.sessions_completed} label={t('partnerProfile.sessionsLabel')} accent="var(--accent)" />
+              <StatChip
+                icon={Star}
+                value={partner.ratings_count > 0 ? partner.average_rating : '—'}
+                label={partner.ratings_count > 0 ? t('partnerProfile.ratingsLabel', { count: partner.ratings_count }) : t('partnerProfile.noRatingsYet')}
+                accent="#c98a1c"
+              />
+            </div>
 
-            {partner.bio && (
-              <div className="mb-4">
-                <h2 className="text-sm font-semibold text-slate-900 mb-1">Bio</h2>
-                <p className="text-sm text-slate-600 leading-relaxed">{partner.bio}</p>
-              </div>
-            )}
-            {partner.learning_goals && (
-              <div className="mb-6 flex items-start gap-2">
-                <Target size={15} className="text-indigo-500 mt-0.5 shrink-0" />
-                <div>
-                  <h2 className="text-sm font-semibold text-slate-900 mb-1">Learning goals</h2>
-                  <p className="text-sm text-slate-600 leading-relaxed">{partner.learning_goals}</p>
+            <div className="flex lg:flex-col gap-2.5">
+              <button onClick={handleMessage} className="lp-btn-primary flex-1 lg:w-full justify-center">
+                <MessageCircle size={16} /> {t('partnerProfile.message')}
+              </button>
+              <button onClick={() => setShowRequestModal(true)} className="lp-btn-secondary flex-1 lg:w-full justify-center">
+                <CalendarClock size={16} /> {t('partnerProfile.scheduleSession')}
+              </button>
+            </div>
+          </div>
+
+          {/* Right: story + details */}
+          <div className="lp-animate-in lp-delay-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-8">
+              <Trans
+                i18nKey="partnerProfile.speaksLearning"
+                values={{
+                  native: `${partner.native_language} · ${t('levels.native')}`,
+                  learning: `${partner.learning_language} · ${t(`levels.${partner.proficiency_level}`, partner.proficiency_level)}`,
+                }}
+                components={{
+                  native: (
+                    <span
+                      className="px-2.5 py-1 text-xs font-semibold"
+                      style={{ borderRadius: 'var(--radius-pill)', background: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}
+                    />
+                  ),
+                  learning: (
+                    <span
+                      className="px-2.5 py-1 text-xs font-semibold"
+                      style={{ borderRadius: 'var(--radius-pill)', background: 'color-mix(in srgb, var(--accent-2) 14%, transparent)', color: 'var(--accent-2)' }}
+                    />
+                  ),
+                }}
+              />
+              {partner.age != null && <span className="lp-tag">{t('partnerProfile.ageYears', { age: partner.age })}</span>}
+            </div>
+
+            <div className="mb-8">
+              <p className="lp-eyebrow mb-2">{t('partnerProfile.introVideo')}</p>
+              {partner.intro_video ? (
+                <div className="relative rounded-3xl overflow-hidden" style={{ background: 'var(--surface-2)', boxShadow: 'var(--shadow-card)' }}>
+                  <video
+                    src={partner.intro_video}
+                    controls={videoPlaying}
+                    onPlay={() => setVideoPlaying(true)}
+                    className="w-full max-h-96"
+                  />
+                  {!videoPlaying && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.currentTarget.previousElementSibling?.play(); setVideoPlaying(true) }}
+                      className="absolute inset-0 flex items-center justify-center group"
+                      style={{ background: 'color-mix(in srgb, black 15%, transparent)' }}
+                      aria-label={t('partnerProfile.introVideo')}
+                    >
+                      <span
+                        className="flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110"
+                        style={{ background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 8px 24px -8px rgb(0 0 0 / 0.4)' }}
+                      >
+                        <Play size={22} fill="currentColor" />
+                      </span>
+                    </button>
+                  )}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div
+                  className="flex items-center gap-2 px-4 py-6 rounded-2xl text-sm"
+                  style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)' }}
+                >
+                  <Video size={16} className="shrink-0" />
+                  {t('partnerProfile.noVideo')}
+                </div>
+              )}
+            </div>
 
-            <div className="flex flex-wrap gap-3 pt-2">
-              <button
-                onClick={handleMessage}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors"
-              >
-                <MessageCircle size={16} /> Message
-              </button>
-              <button
-                onClick={handleCallNow}
-                disabled={starting}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-indigo-200 text-indigo-700 font-semibold hover:bg-indigo-50 transition-colors"
-              >
-                <Video size={16} /> Start video call
-              </button>
-              <button
-                onClick={() => navigate(`/schedule?partner=${userId}`)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
-              >
-                <CalendarClock size={16} /> Schedule a session
-              </button>
+            <div className="mb-8">
+              <p className="lp-eyebrow mb-2">{t('partnerProfile.bio')}</p>
+              <p className="text-base leading-relaxed" style={{ color: 'var(--ink)' }}>
+                {partner.bio || t('partnerProfile.noBio')}
+              </p>
+            </div>
+
+            <div className="mb-8 flex items-start gap-3">
+              <span className="lp-icon-badge h-9 w-9 shrink-0">
+                <Target size={16} />
+              </span>
+              <div>
+                <p className="lp-eyebrow mb-1">{t('partnerProfile.learningGoals')}</p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
+                  {partner.learning_goals || t('partnerProfile.noLearningGoals')}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="lp-eyebrow mb-2">{t('partnerProfile.availability')}</p>
+              {visibleAvailability.length > 0 ? (
+                <>
+                  <p className="text-xs mb-3 inline-flex items-center gap-1.5" style={{ color: 'var(--ink-soft)' }}>
+                    <Sparkles size={12} style={{ color: 'var(--accent)' }} /> {t('partnerProfile.availabilityBookHint')}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {visibleAvailability.map((slot) => (
+                      <button
+                        key={slot.id}
+                        type="button"
+                        onClick={() => setBookingSlot(slot)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5"
+                        style={{ borderRadius: 'var(--radius-pill)', background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: 'var(--shadow-card)' }}
+                      >
+                        <CalendarClock size={13} />
+                        {slot.is_recurring
+                          ? t(`profile.days.${DAYS.find((d) => d.value === slot.day_of_week)?.key}`)
+                          : new Date(`${slot.specific_date}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric' })}
+                        {' '}{slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.noAvailability')}</p>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {bookingSlot && (
+        <BookSlotModal
+          slot={bookingSlot}
+          partner={partner}
+          userId={userId}
+          onClose={() => setBookingSlot(null)}
+          onBooked={loadPartner}
+        />
+      )}
+
+      {showRequestModal && (
+        <SendSessionRequestModal
+          lockedPartnerId={userId}
+          onClose={() => setShowRequestModal(false)}
+          onSent={loadPartner}
+        />
+      )}
     </div>
   )
 }

@@ -39,6 +39,23 @@ class Lesson(models.Model):
         return f'{self.course.title} - {self.title}'
 
 
+class Material(models.Model):
+    LEVEL_CHOICES = Course.LEVEL_CHOICES
+
+    title = models.CharField(max_length=200)
+    language = models.CharField(max_length=50)
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
+    description = models.TextField(blank=True)
+    file = models.FileField(upload_to='materials/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.title} ({self.language}, {self.level})'
+
+
 class LessonProgress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='lesson_progress', on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, related_name='progress_entries', on_delete=models.CASCADE)

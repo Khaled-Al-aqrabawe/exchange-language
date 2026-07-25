@@ -1,16 +1,32 @@
 from rest_framework import serializers
 
-from .models import Profile, User
+from .models import AvailabilitySlot, Profile, User
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    age = serializers.ReadOnlyField()
+
     class Meta:
         model = Profile
         fields = [
-            'bio', 'native_language', 'learning_language', 'proficiency_level',
-            'timezone', 'learning_goals', 'avatar_url', 'updated_at',
+            'bio', 'gender', 'country', 'date_of_birth', 'age', 'ui_language', 'native_language',
+            'learning_language', 'proficiency_level', 'timezone', 'learning_goals', 'avatar', 'intro_video',
+            'updated_at',
         ]
-        read_only_fields = ['updated_at']
+        read_only_fields = ['avatar', 'intro_video', 'age', 'updated_at']
+
+    def validate_date_of_birth(self, value):
+        if value is None:
+            return value
+        from django.utils import timezone as dj_timezone
+
+        today = dj_timezone.localdate()
+        age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
+        if age < 16:
+            raise serializers.ValidationError('You must be at least 16 years old.')
+        if age > 120:
+            raise serializers.ValidationError('Enter a valid date of birth.')
+        return value
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,8 +34,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'full_name', 'date_joined', 'profile']
-        read_only_fields = ['id', 'email', 'date_joined', 'full_name']
+        fields = ['id', 'email', 'first_name', 'last_name', 'full_name', 'date_joined', 'email_verified', 'profile']
+        read_only_fields = ['id', 'email', 'date_joined', 'full_name', 'email_verified']
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', None)
@@ -38,12 +54,30 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
+    gender = serializers.ChoiceField(
+        choices=Profile.GENDER_CHOICES, write_only=True, required=False, allow_blank=True, default='',
+    )
+    country = serializers.CharField(write_only=True, max_length=100)
+    date_of_birth = serializers.DateField(write_only=True)
     native_language = serializers.CharField(write_only=True, required=False, allow_blank=True)
     learning_language = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    proficiency_level = serializers.ChoiceField(
+        choices=Profile.LEVEL_CHOICES, write_only=True, required=False, default='beginner',
+    )
+    speaking_level = serializers.ChoiceField(
+        choices=Profile.LEVEL_CHOICES, write_only=True, required=False, default='fluent',
+    )
+    timezone = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    ui_language = serializers.ChoiceField(
+        choices=Profile.UI_LANGUAGE_CHOICES, write_only=True, required=False, default='en',
+    )
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'first_name', 'last_name', 'native_language', 'learning_language']
+        fields = [
+            'email', 'password', 'first_name', 'last_name', 'gender', 'country', 'date_of_birth',
+            'native_language', 'learning_language', 'proficiency_level', 'speaking_level', 'timezone', 'ui_language',
+        ]
 
     def validate_email(self, value):
         value = value.lower().strip()
@@ -51,9 +85,27 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('An account with this email already exists.')
         return value
 
+    def validate_date_of_birth(self, value):
+        from django.utils import timezone as dj_timezone
+
+        today = dj_timezone.localdate()
+        age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
+        if age < 16:
+            raise serializers.ValidationError('You must be at least 16 years old to register.')
+        if age > 120:
+            raise serializers.ValidationError('Enter a valid date of birth.')
+        return value
+
     def create(self, validated_data):
+        gender = validated_data.pop('gender', '')
+        country = validated_data.pop('country')
+        date_of_birth = validated_data.pop('date_of_birth')
         native_language = validated_data.pop('native_language', '')
         learning_language = validated_data.pop('learning_language', '')
+        proficiency_level = validated_data.pop('proficiency_level', 'beginner')
+        speaking_level = validated_data.pop('speaking_level', 'fluent')
+        timezone_value = validated_data.pop('timezone', '') or 'UTC'
+        ui_language = validated_data.pop('ui_language', 'en')
         password = validated_data.pop('password')
 
         user = User(**validated_data)
@@ -61,8 +113,75 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         profile = user.profile
+        profile.gender = gender
+        profile.country = country
+        profile.date_of_birth = date_of_birth
         profile.native_language = native_language
         profile.learning_language = learning_language
+        profile.proficiency_level = proficiency_level
+        profile.speaking_level = speaking_level
+        profile.timezone = timezone_value
+        profile.ui_language = ui_language
         profile.save()
 
         return user
+
+
+class LoginPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+
+class LoginCodeVerifySerializer(serializers.Serializer):
+    login_ref = serializers.CharField()
+    code = serializers.CharField()
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField()
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+
+class AvailabilitySlotSerializer(serializers.ModelSerializer):
+    is_recurring = serializers.BooleanField(required=False, default=True)
+
+    class Meta:
+        model = AvailabilitySlot
+        fields = ['id', 'day_of_week', 'start_time', 'end_time', 'is_recurring', 'specific_date']
+        read_only_fields = ['id']
+
+    def validate(self, attrs):
+        start_time = attrs.get('start_time', getattr(self.instance, 'start_time', None))
+        end_time = attrs.get('end_time', getattr(self.instance, 'end_time', None))
+        day_of_week = attrs.get('day_of_week', getattr(self.instance, 'day_of_week', None))
+        is_recurring = attrs.get('is_recurring', getattr(self.instance, 'is_recurring', True))
+        specific_date = attrs.get('specific_date', getattr(self.instance, 'specific_date', None))
+
+        if start_time is not None and end_time is not None and end_time <= start_time:
+            raise serializers.ValidationError({'end_time': 'End time must be after start time.'})
+
+        if not is_recurring and not specific_date:
+            raise serializers.ValidationError({'specific_date': 'A specific date is required for a one-time slot.'})
+        if is_recurring:
+            attrs['specific_date'] = None
+
+        request = self.context.get('request')
+        if request and day_of_week is not None and start_time is not None and end_time is not None:
+            overlapping = AvailabilitySlot.objects.filter(
+                user=request.user, day_of_week=day_of_week, start_time__lt=end_time, end_time__gt=start_time,
+            )
+            if self.instance:
+                overlapping = overlapping.exclude(pk=self.instance.pk)
+            if overlapping.exists():
+                raise serializers.ValidationError({'start_time': 'You already have an overlapping time slot on this day.'})
+        return attrs

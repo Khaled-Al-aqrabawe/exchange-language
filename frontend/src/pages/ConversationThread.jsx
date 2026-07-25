@@ -1,11 +1,13 @@
 import { Send, Video } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
 
 export default function ConversationThread({ conversationId, partner }) {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
@@ -48,24 +50,28 @@ export default function ConversationThread({ conversationId, partner }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b border-slate-200 px-5 py-3 flex items-center justify-between">
+      <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="flex items-center gap-2.5">
           {partner && (
-            <img src={avatarUrl(partner.id, 60)} alt="" className="h-8 w-8 rounded-full object-cover" />
+            <img src={avatarUrl(partner.id, 60)} alt="" className="lp-avatar h-8 w-8 object-cover" />
           )}
           <div>
-            <h2 className="font-semibold text-slate-900 text-sm leading-tight">{partner?.full_name || 'Conversation'}</h2>
-            <span className={`text-xs ${connected ? 'text-emerald-600' : 'text-slate-400'}`}>
-              {connected ? 'Connected' : 'Connecting...'}
+            <h2 className="font-semibold text-sm leading-tight" style={{ color: 'var(--ink)' }}>{partner?.full_name || t('conversationThread.conversation')}</h2>
+            <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: connected ? 'var(--accent-2)' : 'var(--ink-soft)' }}>
+              {connected && <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--accent-2)', animation: 'lp-pulse-ring 1.6s ease-out infinite' }} />}
+              {connected ? t('conversationThread.connected') : t('conversationThread.connecting')}
             </span>
           </div>
         </div>
         {partner && (
           <Link
             to={`/call/${[user.id, partner.id].sort((a, b) => a - b).join('-')}`}
-            className="inline-flex items-center gap-1.5 text-sm text-indigo-600 font-medium hover:text-indigo-700"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-70"
+            style={{ color: 'var(--accent)' }}
           >
-            <Video size={15} /> Video call
+            <Video size={15} /> {t('conversationThread.videoCall')}
           </Link>
         )}
       </div>
@@ -76,14 +82,15 @@ export default function ConversationThread({ conversationId, partner }) {
           return (
             <div key={m.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
               {!isMine && (
-                <img src={avatarUrl(m.sender.id, 40)} alt="" className="h-6 w-6 rounded-full object-cover mb-0.5" />
+                <img src={avatarUrl(m.sender.id, 40)} alt="" className="lp-avatar h-6 w-6 object-cover mb-0.5" />
               )}
               <div
-                className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
+                className="max-w-xs px-4 py-2 rounded-2xl text-sm lp-animate-in-scale"
+                style={
                   isMine
-                    ? 'bg-slate-900 text-white rounded-br-md'
-                    : 'bg-slate-100 text-slate-800 rounded-bl-md'
-                }`}
+                    ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', borderEndEndRadius: '4px' }
+                    : { background: 'var(--surface-2)', color: 'var(--ink)', borderEndStartRadius: '4px' }
+                }
               >
                 {m.text}
               </div>
@@ -93,18 +100,16 @@ export default function ConversationThread({ conversationId, partner }) {
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="border-t border-slate-200 p-4 flex gap-3">
+      <form onSubmit={sendMessage} className="p-4 flex gap-3" style={{ borderTop: '1px solid var(--line)' }}>
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1 rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          placeholder={t('conversationThread.typeAMessage')}
+          className="flex-1 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent"
+          style={{ border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }}
         />
-        <button
-          type="submit"
-          className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors"
-        >
-          <Send size={14} /> Send
+        <button type="submit" className="lp-btn-primary text-sm">
+          <Send size={14} /> {t('conversationThread.send')}
         </button>
       </form>
     </div>

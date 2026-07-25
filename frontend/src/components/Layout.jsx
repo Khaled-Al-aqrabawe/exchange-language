@@ -1,82 +1,247 @@
-import { Languages } from 'lucide-react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import {
+  BookOpenCheck,
+  CalendarClock,
+  ChevronDown,
+  FileText,
+  Home,
+  LogOut,
+  MessageCircle,
+  UserRound,
+  Users,
+} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import logoIcon from '../assets/logo-icon.png'
 import { useAuth } from '../context/AuthContext'
+import { avatarUrl } from '../utils/images'
+import LanguageSwitcher from './LanguageSwitcher'
+import NotificationBell from './NotificationBell'
+import ThemeToggle from './ThemeToggle'
 
-const authedLinks = [
-  ['/dashboard', 'Dashboard'],
-  ['/partners', 'Partners'],
-  ['/messages', 'Messages'],
-  ['/schedule', 'Schedule'],
-  ['/courses', 'Courses'],
-]
+function useAuthedLinks() {
+  const { t } = useTranslation()
+  return [
+    ['/home', t('nav.home'), Home],
+    ['/partners', t('nav.partners'), Users],
+    ['/messages', t('nav.messages'), MessageCircle],
+    ['/schedule', t('nav.schedule'), CalendarClock],
+    ['/courses', t('nav.courses'), BookOpenCheck],
+    ['/materials', t('nav.materials'), FileText],
+  ]
+}
+
+const SOCIAL_ICON_PATHS = {
+  instagram: (
+    <>
+      <defs>
+        <linearGradient id="lp-social-instagram" x1="0" y1="24" x2="24" y2="0">
+          <stop offset="0%" stopColor="#f9ce34" />
+          <stop offset="45%" stopColor="#ee2a7b" />
+          <stop offset="100%" stopColor="#6228d7" />
+        </linearGradient>
+      </defs>
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="url(#lp-social-instagram)" />
+      <circle cx="12" cy="12" r="4" stroke="url(#lp-social-instagram)" />
+      <circle cx="17.2" cy="6.8" r="0.6" fill="url(#lp-social-instagram)" stroke="none" />
+    </>
+  ),
+  x: (
+    <>
+      <line x1="5" y1="5" x2="19" y2="19" />
+      <line x1="19" y1="5" x2="5" y2="19" />
+    </>
+  ),
+  facebook: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <path d="M13.5 21v-6.5H15.5l.3-2.5h-2.3V10.3c0-.7.2-1.2 1.2-1.2H16V6.9c-.2 0-.9-.1-1.7-.1-1.7 0-2.8 1-2.8 2.9V12H9.7v2.5h1.8V21" fill="currentColor" stroke="none" />
+    </>
+  ),
+  linkedin: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <line x1="7.6" y1="10.5" x2="7.6" y2="16.8" />
+      <circle cx="7.6" cy="7.4" r="0.7" fill="currentColor" stroke="none" />
+      <path d="M11.4 16.8v-4c0-1.3.9-2.3 2.1-2.3s2.1 1 2.1 2.3v4" />
+    </>
+  ),
+}
+
+const SOCIAL_COLORS = {
+  instagram: '#ee2a7b',
+  x: 'var(--ink)',
+  facebook: '#1877F2',
+  linkedin: '#0A66C2',
+}
+
+function SocialIcon({ name, href, label }) {
+  return (
+    <a
+      href={href}
+      onClick={(e) => { if (href === '#') e.preventDefault() }}
+      target={href !== '#' ? '_blank' : undefined}
+      rel={href !== '#' ? 'noopener noreferrer' : undefined}
+      aria-label={label}
+      title={label}
+      className="lp-social-icon flex h-9 w-9 items-center justify-center"
+      style={{ borderRadius: 'var(--radius-tag)', border: '1px solid var(--line)', color: SOCIAL_COLORS[name] }}
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {SOCIAL_ICON_PATHS[name]}
+      </svg>
+    </a>
+  )
+}
 
 function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2 shrink-0">
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-sm">
-        <Languages size={18} strokeWidth={2.25} />
-      </span>
-      <span className="text-[17px] font-bold tracking-tight text-slate-900">
+    <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+      <img src={logoIcon} alt="" className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-105" />
+      <span className="font-display text-[18px] font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
         Language Partner
       </span>
     </Link>
   )
 }
 
+function UserMenu({ user, onLogout }) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const name = user.first_name || user.email
+
+  return (
+    <div className="relative ms-2" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 py-1 ps-1 pe-2 transition-colors"
+        style={{ borderRadius: 'var(--radius-pill)' }}
+      >
+        <img src={avatarUrl(user.id, 64)} alt="" className="lp-avatar h-8 w-8 lp-gradient-ring" style={{ border: '1px solid var(--line)' }} />
+        <ChevronDown size={14} style={{ color: 'var(--ink-soft)' }} className={`transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute end-0 top-full mt-2 w-56 py-1.5 lp-surface lp-animate-in-scale"
+          style={{ boxShadow: 'var(--shadow-card-hover)' }}
+        >
+          <div className="px-3.5 py-2" style={{ borderBottom: '1px solid var(--line)' }}>
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--ink)' }}>{name}</p>
+            <p className="text-xs truncate" style={{ color: 'var(--ink-soft)' }}>{user.email}</p>
+          </div>
+          <Link
+            to="/profile"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
+            style={{ color: 'var(--ink-soft)' }}
+          >
+            <UserRound size={15} />
+            {t('nav.profile')}
+          </Link>
+          <button
+            onClick={() => {
+              setOpen(false)
+              onLogout()
+            }}
+            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
+            style={{ color: '#c1443d' }}
+          >
+            <LogOut size={15} />
+            {t('nav.logOut')}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+const NO_FOOTER_PATHS = ['/login', '/register', '/forgot-password']
+
 export default function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const { t } = useTranslation()
+  const authedLinks = useAuthedLinks()
+  const hideFooter = NO_FOOTER_PATHS.includes(location.pathname)
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+      <nav
+        className="sticky top-0 z-50"
+        style={{ background: 'var(--bg)' }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Logo />
-          <div className="flex items-center gap-1 text-sm flex-wrap">
+          <div className="flex items-center gap-0.5 text-sm min-w-0">
             {user ? (
               <>
-                {authedLinks.map(([to, label]) => (
-                  <NavLink
-                    key={to}
-                    to={to}
-                    className={({ isActive }) =>
-                      `px-3 py-2 rounded-lg font-medium transition-colors ${
-                        isActive
-                          ? 'text-indigo-600 bg-indigo-50'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                      }`
-                    }
-                  >
-                    {label}
-                  </NavLink>
-                ))}
-                <Link
-                  to="/settings"
-                  className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white"
-                  title="Settings"
-                >
-                  {(user.first_name?.[0] || user.email[0]).toUpperCase()}
-                </Link>
-                <button
-                  onClick={() => {
-                    logout()
-                    navigate('/')
-                  }}
-                  className="ml-2 px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium"
-                >
-                  Log out
-                </button>
+                <div className="flex items-center gap-0.5 flex-nowrap overflow-x-auto min-w-0">
+                  {authedLinks.map(([to, label, Icon]) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      className="relative flex items-center gap-1.5 px-2.5 py-2 font-semibold transition-colors shrink-0"
+                      style={({ isActive }) => ({
+                        borderRadius: 'var(--radius-tag)',
+                        color: isActive ? 'var(--accent-ink)' : 'var(--ink-soft)',
+                        background: isActive ? 'var(--gradient-brand)' : 'transparent',
+                        boxShadow: isActive ? '0 4px 14px -6px color-mix(in srgb, var(--accent) 60%, transparent)' : 'none',
+                      })}
+                    >
+                      <Icon size={15} strokeWidth={2.25} />
+                      <span className="hidden lg:inline">{label}</span>
+                    </NavLink>
+                  ))}
+                </div>
+                <span className="mx-1 hidden sm:inline-block h-5 w-px shrink-0" style={{ background: 'var(--line)' }} />
+                <span className="shrink-0"><NotificationBell /></span>
+                <span className="shrink-0"><ThemeToggle /></span>
+                <span className="shrink-0"><LanguageSwitcher /></span>
+                <span className="shrink-0">
+                  <UserMenu
+                    user={user}
+                    onLogout={() => {
+                      logout()
+                      navigate('/')
+                    }}
+                  />
+                </span>
               </>
             ) : (
               <>
-                <Link to="/about" className="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium">About</Link>
-                <Link to="/faq" className="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium">FAQ</Link>
-                <Link to="/login" className="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium">Log in</Link>
                 <Link
-                  to="/register"
-                  className="ml-1 px-4 py-2 rounded-lg bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors"
+                  to="/about"
+                  className="px-3 py-2 font-medium transition-colors"
+                  style={{ borderRadius: 'var(--radius-tag)', color: location.pathname === '/about' ? 'var(--ink)' : 'var(--ink-soft)' }}
                 >
-                  Sign up free
+                  {t('nav.about')}
+                </Link>
+                <Link
+                  to="/faq"
+                  className="px-3 py-2 font-medium transition-colors"
+                  style={{ borderRadius: 'var(--radius-tag)', color: location.pathname === '/faq' ? 'var(--ink)' : 'var(--ink-soft)' }}
+                >
+                  {t('nav.faq')}
+                </Link>
+                <ThemeToggle />
+                <LanguageSwitcher />
+                <Link to="/login" className="px-3 py-2 font-medium" style={{ borderRadius: 'var(--radius-tag)', color: 'var(--ink-soft)' }}>
+                  {t('nav.login')}
+                </Link>
+                <Link to="/register" className="lp-btn-primary ms-1">
+                  {t('nav.signUpFree')}
                 </Link>
               </>
             )}
@@ -88,19 +253,70 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-slate-200">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-slate-500 text-sm">
-            <Languages size={16} />
-            <span>Language Partner</span>
+      {!hideFooter && (
+        <footer className="relative" style={{ background: 'var(--bg)', borderTop: '1px solid var(--line)' }}>
+          <div className="max-w-6xl mx-auto px-6 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-2.5 mb-3">
+                <img src={logoIcon} alt="" className="h-8 w-8 object-contain" />
+                <span className="font-display text-base font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
+                  {t('footer.tagline')}
+                </span>
+              </div>
+              <p className="text-sm max-w-xs leading-relaxed mb-5" style={{ color: 'var(--ink-soft)' }}>
+                {t('landing.heroSubtitle')}
+              </p>
+              <div className="flex items-center gap-2">
+                <SocialIcon name="instagram" href="#" label="Instagram" />
+                <SocialIcon name="x" href="#" label="X (Twitter)" />
+                <SocialIcon name="facebook" href="#" label="Facebook" />
+                <SocialIcon name="linkedin" href="#" label="LinkedIn" />
+              </div>
+            </div>
+
+            <div>
+              <p className="lp-eyebrow mb-3">{t('footer.explore')}</p>
+              <div className="flex flex-col gap-2.5 text-sm">
+                {user ? (
+                  <>
+                    <Link to="/home" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.home')}</Link>
+                    <Link to="/partners" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.partners')}</Link>
+                    <Link to="/courses" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.courses')}</Link>
+                    <Link to="/materials" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.materials')}</Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/about" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.about')}</Link>
+                    <Link to="/faq" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.faq')}</Link>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <p className="lp-eyebrow mb-3">{user ? t('footer.account') : t('footer.getStarted')}</p>
+              <div className="flex flex-col gap-2.5 text-sm">
+                {user ? (
+                  <>
+                    <Link to="/profile" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.profile')}</Link>
+                    <Link to="/schedule" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.schedule')}</Link>
+                    <Link to="/about" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.about')}</Link>
+                    <Link to="/faq" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.faq')}</Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.login')}</Link>
+                    <Link to="/register" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.signUpFree')}</Link>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-6 text-sm text-slate-500">
-            <Link to="/about" className="hover:text-slate-900">About</Link>
-            <Link to="/faq" className="hover:text-slate-900">FAQ</Link>
+          <div className="max-w-6xl mx-auto px-6 py-5" style={{ borderTop: '1px solid var(--line)' }}>
+            <p className="text-xs" style={{ color: 'var(--ink-soft)' }}>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
           </div>
-          <p className="text-xs text-slate-400">© {new Date().getFullYear()} Language Partner — MVP</p>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   )
 }

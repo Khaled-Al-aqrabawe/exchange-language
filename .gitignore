@@ -4,9 +4,14 @@ backend/__pycache__/
 backend/**/__pycache__/
 backend/**/migrations/__pycache__/
 backend/db.sqlite3
+*.sqlite3
 backend/media/
 backend/staticfiles/
 *.pyc
+
+# OneDrive sync-conflict copies (this project sits in a OneDrive-synced folder)
+*-CH-IT-LAP-004.*
+*-CH-IT-LAP-004
 
 # Node / React
 frontend/node_modules/

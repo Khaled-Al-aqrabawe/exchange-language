@@ -7,121 +7,133 @@ import {
   Users,
   Video,
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Trans, useTranslation } from 'react-i18next'
+import { Link, Navigate } from 'react-router-dom'
+import AuthHeroBackground from '../components/AuthHeroBackground'
 import CallPreview from '../components/CallPreview'
 import MessageMockup from '../components/MessageMockup'
 import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
 
-const steps = [
-  {
-    n: '01',
-    title: 'Exchange with native speakers',
-    body: 'Learn English from English speakers while teaching them Arabic — or any language pair you like.',
-  },
-  {
-    n: '02',
-    title: 'Practice with peers',
-    body: 'No exchange partner online? Practice conversation with someone else learning the same language.',
-  },
-  {
-    n: '03',
-    title: 'Learn independently',
-    body: 'Work through structured video courses by language and level, at your own pace.',
-  },
-]
-
-const features = [
-  { icon: Video, title: 'Built-in video & audio', body: 'Face-to-face conversation practice in your browser — no downloads, no extra apps.' },
-  { icon: Users, title: 'Smart matching', body: 'We rank exchange partners first, then fall back to peers at your level and timezone.' },
-  { icon: MessageCircle, title: 'Real-time messaging', body: 'Chat with partners instantly to plan sessions or keep the conversation going.' },
-  { icon: CalendarClock, title: 'Simple scheduling', body: 'Book sessions in a couple of clicks and jump straight into a call when it\'s time.' },
-  { icon: BookOpenCheck, title: 'Structured courses', body: 'Self-paced video lessons by language and level whenever you want extra structure.' },
-  { icon: ShieldCheck, title: 'Free to start', body: 'Every feature is unlocked during early access — no credit card, no paywalls.' },
-]
-
 const learnerSeeds = ['learner-1', 'learner-2', 'learner-3', 'learner-4', 'learner-5']
 
 export default function Landing() {
+  const { t } = useTranslation()
   const { user } = useAuth()
 
-  return (
-    <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-40 -left-32 h-96 w-96 rounded-full bg-indigo-100 blur-3xl opacity-50" />
+  if (user) return <Navigate to="/home" replace />
 
+  const steps = [
+    { n: '01', icon: Users, title: t('landing.steps.exchangeTitle'), body: t('landing.steps.exchangeBody') },
+    { n: '02', icon: MessageCircle, title: t('landing.steps.practiceTitle'), body: t('landing.steps.practiceBody') },
+    { n: '03', icon: BookOpenCheck, title: t('landing.steps.learnTitle'), body: t('landing.steps.learnBody') },
+  ]
+
+  const features = [
+    { icon: Video, title: t('landing.features.videoTitle'), body: t('landing.features.videoBody'), big: true },
+    { icon: Users, title: t('landing.features.matchingTitle'), body: t('landing.features.matchingBody') },
+    { icon: MessageCircle, title: t('landing.features.messagingTitle'), body: t('landing.features.messagingBody') },
+    { icon: CalendarClock, title: t('landing.features.schedulingTitle'), body: t('landing.features.schedulingBody') },
+    { icon: BookOpenCheck, title: t('landing.features.coursesTitle'), body: t('landing.features.coursesBody'), big: true },
+    { icon: ShieldCheck, title: t('landing.features.freeTitle'), body: t('landing.features.freeBody') },
+  ]
+
+  const practiceList = [
+    t('landing.practiceList.matched'),
+    t('landing.practiceList.builtin'),
+    t('landing.practiceList.free'),
+  ]
+
+  return (
+    <div className="relative" style={{ color: 'var(--ink)' }}>
+      <AuthHeroBackground />
+
+      {/* Hero */}
+      <section className="relative overflow-hidden lp-hero-bg">
         <div className="relative max-w-6xl mx-auto px-6 pt-16 sm:pt-20 pb-24 grid lg:grid-cols-2 gap-14 items-center">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 mb-6">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-600" /> Free during early access
+          <div className="lp-animate-in">
+            <span
+              className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium mb-6"
+              style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-pill)', color: 'var(--ink-soft)', background: 'var(--surface)' }}
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full lp-blob-drift" style={{ background: 'var(--accent-2)', opacity: 0.6 }} />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: 'var(--accent-2)' }} />
+              </span>
+              {t('landing.badge')}
             </span>
 
-            <h1 className="text-5xl sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.05]">
-              Learn a language by
+            <h1 className="font-display text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
+              {t('landing.heroTitleLine1')}
               <br />
-              <span className="text-gradient">actually speaking it</span>
+              <span className="lp-gradient-text">{t('landing.heroTitleLine2')}</span>
             </h1>
 
-            <p className="mt-6 text-lg text-slate-600 max-w-xl leading-relaxed">
-              Language Partner connects you with native speakers and fellow learners for
-              real conversation practice, plus structured video courses to build your
-              foundation.
+            <p className="mt-6 text-lg max-w-xl leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
+              {t('landing.heroSubtitle')}
             </p>
 
             <div className="mt-9 flex items-center gap-3 flex-wrap">
               {user ? (
-                <Link
-                  to="/partners"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors"
-                >
-                  Find a partner <ArrowRight size={17} />
+                <Link to="/partners" className="lp-btn-primary">
+                  {t('landing.findAPartner')} <ArrowRight size={17} className="rtl:rotate-180" />
                 </Link>
               ) : (
                 <>
-                  <Link
-                    to="/register"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors"
-                  >
-                    Get started free <ArrowRight size={17} />
+                  <Link to="/register" className="lp-btn-primary">
+                    {t('landing.getStartedFree')} <ArrowRight size={17} className="rtl:rotate-180" />
                   </Link>
-                  <Link
-                    to="/about"
-                    className="px-6 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
-                  >
-                    Learn more
+                  <Link to="/about" className="lp-btn-secondary">
+                    {t('landing.learnMore')}
                   </Link>
                 </>
               )}
             </div>
 
             <div className="mt-8 flex items-center gap-3">
-              <div className="flex -space-x-3">
+              <div className="flex -space-x-3 rtl:space-x-reverse">
                 {learnerSeeds.map((seed) => (
-                  <img key={seed} src={avatarUrl(seed, 64)} alt="" className="h-9 w-9 rounded-full ring-2 ring-white object-cover" />
+                  <img key={seed} src={avatarUrl(seed, 64)} alt="" className="h-9 w-9 rounded-full ring-2 object-cover" style={{ '--tw-ring-color': 'var(--surface)' }} />
                 ))}
               </div>
-              <p className="text-sm text-slate-500">
-                Join learners practicing <span className="font-medium text-slate-700">Arabic, English</span> and more
+              <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>
+                <Trans i18nKey="landing.joinLearners" components={{ bold: <span className="font-medium" style={{ color: 'var(--ink)' }} /> }} />
               </p>
             </div>
           </div>
 
-          <CallPreview />
+          <div className="lp-animate-in lp-delay-2">
+            <CallPreview />
+          </div>
         </div>
       </section>
 
-      {/* How it works — editorial numbered list, no icon boxes */}
-      <section className="border-t border-slate-200">
+      {/* How it works */}
+      <section style={{ borderTop: '1px solid var(--line)' }}>
         <div className="max-w-4xl mx-auto px-6 py-20">
-          <p className="text-sm font-semibold text-indigo-600 tracking-wide uppercase mb-10">How it works</p>
-          <div className="divide-y divide-slate-200">
-            {steps.map((step) => (
-              <div key={step.n} className="grid sm:grid-cols-[80px_1fr] gap-4 sm:gap-8 py-8 first:pt-0 last:pb-0">
-                <span className="text-4xl font-bold text-slate-200 tabular-nums">{step.n}</span>
+          <p className="lp-eyebrow mb-10 lp-animate-in" style={{ color: 'var(--accent)' }}>{t('landing.howItWorks')}</p>
+          <div className="relative">
+            <div
+              className="absolute top-0 bottom-0 hidden sm:block"
+              style={{ insetInlineStart: '39px', width: '2px', background: 'linear-gradient(var(--accent), var(--accent-2))', opacity: 0.25 }}
+            />
+            {steps.map((step, i) => (
+              <div
+                key={step.n}
+                className={`relative grid sm:grid-cols-[80px_1fr] gap-4 sm:gap-8 py-8 first:pt-0 last:pb-0 lp-animate-in lp-delay-${i + 1}`}
+              >
+                <div className="relative flex sm:justify-center">
+                  <span
+                    className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl shrink-0"
+                    style={{ background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: 'var(--shadow-card)' }}
+                  >
+                    <step.icon size={22} />
+                  </span>
+                </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900 text-lg mb-1.5">{step.title}</h3>
-                  <p className="text-slate-600 leading-relaxed max-w-md">{step.body}</p>
+                  <span className="lp-eyebrow" style={{ color: 'var(--accent-2)' }}>{step.n}</span>
+                  <h3 className="font-semibold text-lg mt-1 mb-1.5">{step.title}</h3>
+                  <p className="leading-relaxed max-w-md" style={{ color: 'var(--ink-soft)' }}>{step.body}</p>
                 </div>
               </div>
             ))}
@@ -129,26 +141,20 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Product showcase — real UI mockup, not stock photography */}
-      <section className="border-t border-slate-200 bg-slate-50">
+      {/* Product showcase */}
+      <section style={{ borderTop: '1px solid var(--line)' }}>
         <div className="max-w-6xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-16 items-center">
-          <div className="flex justify-center order-2 lg:order-1">
+          <div className="flex justify-center order-2 lg:order-1 lp-animate-in-scale">
             <MessageMockup />
           </div>
-          <div className="order-1 lg:order-2">
-            <p className="text-sm font-semibold text-indigo-600 tracking-wide uppercase mb-2">Real conversations</p>
-            <p className="text-3xl font-bold text-slate-900 tracking-tight mb-4">
-              Practice with people, not flashcards
-            </p>
-            <p className="text-slate-600 leading-relaxed mb-6">
-              Apps that only drill vocabulary can only take you so far. Language Partner
-              gets you talking with a real person from your very first session — messaging
-              to plan, video to practice, and courses to fill in the gaps.
-            </p>
+          <div className="order-1 lg:order-2 lp-animate-in">
+            <p className="lp-eyebrow mb-2" style={{ color: 'var(--accent-2)' }}>{t('landing.realConversations')}</p>
+            <p className="font-display text-3xl font-bold tracking-tight mb-4">{t('landing.practiceHeadline')}</p>
+            <p className="leading-relaxed mb-6" style={{ color: 'var(--ink-soft)' }}>{t('landing.practiceBody')}</p>
             <ul className="space-y-3">
-              {['Matched by language pair, level, and timezone', 'Built-in chat and video — nothing to install', 'Free structured courses when you want more structure'].map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-slate-700">
-                  <ShieldCheck size={16} className="text-indigo-600 mt-0.5 shrink-0" />
+              {practiceList.map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm">
+                  <ShieldCheck size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--accent-2)' }} />
                   {item}
                 </li>
               ))}
@@ -157,17 +163,28 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features — flat list, no colored boxes */}
-      <section className="border-t border-slate-200">
+      {/* Features */}
+      <section style={{ borderTop: '1px solid var(--line)' }}>
         <div className="max-w-5xl mx-auto px-6 py-20">
-          <p className="text-sm font-semibold text-indigo-600 tracking-wide uppercase mb-2">Everything included</p>
-          <p className="text-3xl font-bold text-slate-900 tracking-tight mb-12">Built for real conversation practice</p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
-            {features.map((f) => (
-              <div key={f.title} className="border-t border-slate-200 pt-5">
-                <f.icon size={20} strokeWidth={1.75} className="text-slate-400 mb-3" />
-                <h3 className="font-semibold text-slate-900 mb-1.5">{f.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{f.body}</p>
+          <p className="lp-eyebrow mb-2 lp-animate-in" style={{ color: 'var(--accent)' }}>{t('landing.everythingIncluded')}</p>
+          <p className="font-display text-3xl font-bold tracking-tight mb-12 lp-animate-in">{t('landing.featuresHeadline')}</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-fr">
+            {features.map((f, i) => (
+              <div
+                key={f.title}
+                className={`relative overflow-hidden lp-card lp-card--hover lp-animate-in lp-delay-${(i % 6) + 1} ${f.big ? 'lg:col-span-2' : ''}`}
+              >
+                {f.big && (
+                  <span
+                    className="pointer-events-none absolute -bottom-8 -end-8 h-32 w-32 rounded-full blur-2xl"
+                    style={{ background: 'var(--gradient-brand)', opacity: 0.14 }}
+                  />
+                )}
+                <span className="lp-icon-badge h-10 w-10 mb-4">
+                  <f.icon size={19} strokeWidth={2} />
+                </span>
+                <h3 className="font-semibold mb-1.5">{f.title}</h3>
+                <p className="text-sm leading-relaxed max-w-sm" style={{ color: 'var(--ink-soft)' }}>{f.body}</p>
               </div>
             ))}
           </div>
@@ -175,24 +192,26 @@ export default function Landing() {
       </section>
 
       {/* Final CTA */}
-      <section className="border-t border-slate-200">
+      <section style={{ borderTop: '1px solid var(--line)' }}>
         <div className="max-w-4xl mx-auto px-6 py-20">
-          <div className="relative overflow-hidden rounded-3xl bg-slate-950 bg-dots px-8 py-16 text-center">
-            <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-600/20 blur-3xl" />
+          <div
+            className="relative overflow-hidden rounded-3xl bg-dots px-8 py-16 text-center lp-animate-in-scale"
+            style={{ background: 'var(--gradient-brand)' }}
+          >
+            <span className="pointer-events-none absolute -top-16 -start-16 h-64 w-64 rounded-full blur-3xl lp-blob-drift" style={{ background: 'rgb(255 255 255 / 0.25)' }} />
+            <span className="pointer-events-none absolute -bottom-16 -end-16 h-64 w-64 rounded-full blur-3xl lp-blob-drift" style={{ background: 'rgb(0 0 0 / 0.15)', animationDelay: '4s' }} />
             <div className="relative">
-              <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">
-                Free to use, no catch
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">
+                {t('landing.ctaTitle')}
               </h2>
-              <p className="text-slate-400 max-w-md mx-auto mb-8">
-                Language Partner is free during our early access phase — every feature is
-                unlocked from day one.
-              </p>
+              <p className="max-w-md mx-auto mb-8" style={{ color: 'rgb(255 255 255 / 0.85)' }}>{t('landing.ctaBody')}</p>
               {!user && (
                 <Link
                   to="/register"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-slate-900 font-semibold hover:bg-slate-100 transition-colors"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white font-semibold hover:opacity-90 transition-opacity"
+                  style={{ color: 'var(--accent)' }}
                 >
-                  Create your free account <ArrowRight size={17} />
+                  {t('landing.ctaButton')} <ArrowRight size={17} className="rtl:rotate-180" />
                 </Link>
               )}
             </div>

@@ -7,3 +7,8 @@ export function avatarUrl(seed, size = 200) {
 export function photoUrl(seed, width = 800, height = 600) {
   return `https://picsum.photos/seed/${seed}/${width}/${height}`
 }
+
+// Prefer a real uploaded avatar; fall back to the deterministic placeholder.
+export function resolveAvatarUrl(avatar, seed, size = 200) {
+  return avatar || avatarUrl(seed, size)
+}
