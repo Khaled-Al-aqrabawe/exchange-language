@@ -96,35 +96,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Enter a valid date of birth.')
         return value
 
-    def create(self, validated_data):
-        gender = validated_data.pop('gender', '')
-        country = validated_data.pop('country')
-        date_of_birth = validated_data.pop('date_of_birth')
-        native_language = validated_data.pop('native_language', '')
-        learning_language = validated_data.pop('learning_language', '')
-        proficiency_level = validated_data.pop('proficiency_level', 'beginner')
-        speaking_level = validated_data.pop('speaking_level', 'fluent')
-        timezone_value = validated_data.pop('timezone', '') or 'UTC'
-        ui_language = validated_data.pop('ui_language', 'en')
-        password = validated_data.pop('password')
-
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
-
-        profile = user.profile
-        profile.gender = gender
-        profile.country = country
-        profile.date_of_birth = date_of_birth
-        profile.native_language = native_language
-        profile.learning_language = learning_language
-        profile.proficiency_level = proficiency_level
-        profile.speaking_level = speaking_level
-        profile.timezone = timezone_value
-        profile.ui_language = ui_language
-        profile.save()
-
-        return user
+    # No create(): registration only stages a PendingRegistration until the
+    # email code is confirmed (see RegisterView / PendingRegistration.create_user) -
+    # nothing is written to the User table at this point.
 
 
 class LoginPasswordSerializer(serializers.Serializer):

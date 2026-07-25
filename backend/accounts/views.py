@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import APIException, ValidationError
@@ -10,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .emails import send_login_code_email, send_password_reset_email, send_verification_email
-from .models import AvailabilitySlot, EmailVerificationToken, LoginCode, PasswordResetCode, User
+from .models import AvailabilitySlot, LoginCode, PasswordResetCode, PendingRegistration, User
 from .serializers import (
     AvailabilitySlotSerializer,
     ChangePasswordSerializer,
@@ -40,17 +41,29 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        data = dict(serializer.validated_data)
+        email = data.pop('email')
+        password = data.pop('password')
+        date_of_birth = data.pop('date_of_birth', None)
+        if date_of_birth is not None:
+            data['date_of_birth'] = date_of_birth.isoformat()
 
-        token = EmailVerificationToken.create_for_user(user)
+        # No User row is created here - only once the code below is confirmed
+        # in VerifyEmailView. An abandoned signup leaves nothing behind, and
+        # the same email can just be re-registered (this overwrites any
+        # earlier unconfirmed attempt for it).
+        pending = PendingRegistration.create_for_email(email, make_password(password), data)
         try:
-            send_verification_email(user, token.code)
+            send_verification_email(pending, pending.code)
         except Exception:
-            # The account still exists; the user can request the code again once
-            # email delivery is working via ResendVerificationView.
-            logger.exception('Failed to send verification email to %s', user.email)
+            # Nothing was created yet; the user can request the code again
+            # once email delivery is working via ResendVerificationView.
+            logger.exception('Failed to send verification email to %s', email)
 
-        return Response({'detail': 'Account created. Check your email to verify your address.', 'email': user.email}, status=status.HTTP_201_CREATED)
+        return Response(
+            {'detail': 'Check your email for a code to finish creating your account.', 'email': email},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class VerifyEmailView(APIView):
@@ -60,24 +73,20 @@ class VerifyEmailView(APIView):
         email = (request.data.get('email') or '').lower().strip()
         code = request.data.get('code', '')
 
-        user = User.objects.filter(email=email).first()
-        if not user:
+        pending = PendingRegistration.objects.filter(email=email).first()
+        if not pending:
             raise ValidationError({'detail': 'Invalid email or code.'})
 
-        token = EmailVerificationToken.objects.filter(user=user, used_at__isnull=True).order_by('-created_at').first()
-        if not token or not token.is_valid():
-            raise ValidationError({'detail': 'This code has expired. Please request a new one.'})
+        if not pending.is_valid():
+            raise ValidationError({'detail': 'This code has expired. Please register again.'})
 
-        if token.code != code:
-            token.attempts += 1
-            token.save(update_fields=['attempts'])
+        if pending.code != code:
+            pending.attempts += 1
+            pending.save(update_fields=['attempts'])
             raise ValidationError({'detail': 'Incorrect code.'})
 
-        token.used_at = timezone.now()
-        token.save(update_fields=['used_at'])
-
-        user.email_verified = True
-        user.save(update_fields=['email_verified'])
+        user = pending.create_user()
+        pending.delete()
 
         return Response({'detail': 'Email verified. You can now log in.'})
 
@@ -87,14 +96,14 @@ class ResendVerificationView(APIView):
 
     def post(self, request):
         email = (request.data.get('email') or '').lower().strip()
-        user = User.objects.filter(email=email).first()
-        if user and not user.email_verified:
-            token = EmailVerificationToken.create_for_user(user)
+        pending = PendingRegistration.objects.filter(email=email).first()
+        if pending:
+            pending = PendingRegistration.create_for_email(pending.email, pending.password_hash, pending.payload)
             try:
-                send_verification_email(user, token.code)
+                send_verification_email(pending, pending.code)
             except Exception:
-                logger.exception('Failed to send verification email to %s', user.email)
-        return Response({'detail': 'If that account exists and is unverified, a new email has been sent.'})
+                logger.exception('Failed to send verification email to %s', email)
+        return Response({'detail': 'If that registration is still pending, a new code has been sent.'})
 
 
 class LoginView(APIView):

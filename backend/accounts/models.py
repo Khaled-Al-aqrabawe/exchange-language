@@ -1,6 +1,6 @@
 import secrets
 import uuid
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
@@ -126,30 +126,79 @@ def generate_login_reference():
     return uuid.uuid4().hex
 
 
-class EmailVerificationToken(models.Model):
+class PendingRegistration(models.Model):
+    """A registration that hasn't been email-verified yet.
+
+    No User row exists until the code is confirmed, so an abandoned signup
+    (wrong email, never checks inbox, etc.) leaves nothing behind - the email
+    address stays free and re-registering just overwrites this record.
+    """
+
     MAX_ATTEMPTS = 5
 
-    user = models.ForeignKey(User, related_name='email_verification_tokens', on_delete=models.CASCADE)
+    email = models.EmailField(unique=True)
+    password_hash = models.CharField(max_length=128)
+    payload = models.JSONField()
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    used_at = models.DateTimeField(null=True, blank=True)
     attempts = models.PositiveSmallIntegerField(default=0)
 
     def is_valid(self):
-        return (
-            self.used_at is None
-            and self.attempts < self.MAX_ATTEMPTS
-            and self.expires_at > dj_timezone.now()
-        )
+        return self.attempts < self.MAX_ATTEMPTS and self.expires_at > dj_timezone.now()
+
+    @property
+    def first_name(self):
+        # Lets this stand in for a User when passed to the verification email
+        # renderer, which reads `.email`, `.first_name`, `.profile.ui_language`.
+        return self.payload.get('first_name', '')
+
+    @property
+    def profile(self):
+        from types import SimpleNamespace
+        return SimpleNamespace(ui_language=self.payload.get('ui_language', 'en'))
 
     @classmethod
-    def create_for_user(cls, user, lifetime_hours=24):
+    def create_for_email(cls, email, password_hash, payload, lifetime_hours=24):
         code = f'{secrets.randbelow(1_000_000):06d}'
-        return cls.objects.create(user=user, code=code, expires_at=dj_timezone.now() + timedelta(hours=lifetime_hours))
+        obj, _ = cls.objects.update_or_create(
+            email=email,
+            defaults={
+                'password_hash': password_hash,
+                'payload': payload,
+                'code': code,
+                'attempts': 0,
+                'expires_at': dj_timezone.now() + timedelta(hours=lifetime_hours),
+            },
+        )
+        return obj
+
+    def create_user(self):
+        payload = dict(self.payload)
+        date_of_birth = payload.pop('date_of_birth', None)
+        first_name = payload.pop('first_name', '')
+        last_name = payload.pop('last_name', '')
+
+        user = User(email=self.email, first_name=first_name, last_name=last_name, email_verified=True)
+        user.password = self.password_hash
+        user.save()
+
+        profile = user.profile
+        profile.gender = payload.get('gender', '')
+        profile.country = payload.get('country', '')
+        if date_of_birth:
+            profile.date_of_birth = date.fromisoformat(date_of_birth)
+        profile.native_language = payload.get('native_language', '')
+        profile.learning_language = payload.get('learning_language', '')
+        profile.proficiency_level = payload.get('proficiency_level', 'beginner')
+        profile.speaking_level = payload.get('speaking_level', 'fluent')
+        profile.timezone = payload.get('timezone') or 'UTC'
+        profile.ui_language = payload.get('ui_language', 'en')
+        profile.save()
+        return user
 
     def __str__(self):
-        return f'EmailVerificationToken<{self.user_id}>'
+        return f'PendingRegistration<{self.email}>'
 
 
 class LoginCode(models.Model):
