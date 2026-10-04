@@ -10,8 +10,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = [
             'bio', 'gender', 'country', 'date_of_birth', 'age', 'ui_language', 'native_language',
-            'learning_language', 'proficiency_level', 'timezone', 'learning_goals', 'avatar', 'intro_video',
-            'updated_at',
+            'learning_language', 'spoken_languages', 'proficiency_level', 'timezone', 'learning_goals', 'avatar',
+            'intro_video', 'updated_at',
         ]
         read_only_fields = ['avatar', 'intro_video', 'age', 'updated_at']
 

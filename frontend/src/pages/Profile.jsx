@@ -266,21 +266,31 @@ export default function Profile() {
 
           <section className="lp-card mb-6 lp-animate-in lp-delay-3">
             <h2 className="font-semibold mb-4" style={{ color: 'var(--ink)' }}>{t('profile.languagesTitle')}</h2>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('profile.nativeLanguage')}</label>
-                <select value={form.profile.native_language} onChange={updateProfile('native_language')} className={inputClass} style={inputStyle}>
-                  <option value="">{t('profile.select')}</option>
-                  {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
+            <div className="mb-4">
+              <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('profile.spokenLanguages')}</label>
+              <div className="flex flex-wrap gap-2">
+                {LANGUAGES.map((l) => {
+                  const selected = (form.profile.spoken_languages || []).includes(l)
+                  return (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => {
+                        const current = form.profile.spoken_languages || []
+                        const next = selected ? current.filter((x) => x !== l) : [...current, l]
+                        setForm({ ...form, profile: { ...form.profile, spoken_languages: next } })
+                      }}
+                      className="rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors"
+                      style={selected
+                        ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', border: '1px solid transparent' }
+                        : { background: 'var(--surface)', color: 'var(--ink-soft)', border: '1px solid var(--line)' }}
+                    >
+                      {l}
+                    </button>
+                  )
+                })}
               </div>
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('profile.learningLanguage')}</label>
-                <select value={form.profile.learning_language} onChange={updateProfile('learning_language')} className={inputClass} style={inputStyle}>
-                  <option value="">{t('profile.select')}</option>
-                  {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
+              <p className="text-xs mt-1.5" style={{ color: 'var(--ink-soft)' }}>{t('profile.spokenLanguagesHint')}</p>
             </div>
             <div className="mb-4">
               <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('profile.timezone')}</label>

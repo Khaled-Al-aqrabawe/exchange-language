@@ -188,7 +188,7 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
       <nav
         className="sticky top-0 z-50"
-        style={{ background: 'var(--bg)' }}
+        style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Logo />
@@ -203,9 +203,8 @@ export default function Layout() {
                       className="relative flex items-center gap-1.5 px-2.5 py-2 font-semibold transition-colors shrink-0"
                       style={({ isActive }) => ({
                         borderRadius: 'var(--radius-tag)',
-                        color: isActive ? 'var(--accent-ink)' : 'var(--ink-soft)',
-                        background: isActive ? 'var(--gradient-brand)' : 'transparent',
-                        boxShadow: isActive ? '0 4px 14px -6px color-mix(in srgb, var(--accent) 60%, transparent)' : 'none',
+                        color: isActive ? 'var(--accent)' : 'var(--ink-soft)',
+                        background: isActive ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'transparent',
                       })}
                     >
                       <Icon size={15} strokeWidth={2.25} />

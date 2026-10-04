@@ -26,7 +26,7 @@
   },
   "footer": {
     "tagline": "Language Partner",
-    "copyright": "© {{year}} Language Partner — MVP",
+    "copyright": "© {{year}} Language Partner. All rights reserved.",
     "explore": "Explore",
     "account": "Account",
     "getStarted": "Get started"
@@ -460,6 +460,8 @@
     "markComplete": "Mark as complete"
   },
   "profile": {
+    "spokenLanguages": "Languages I speak",
+    "spokenLanguagesHint": "Choose every language you speak. Partners page only shows people learning one of these.",
     "title": "Your profile",
     "loading": "Loading...",
     "changePhoto": "Change photo",

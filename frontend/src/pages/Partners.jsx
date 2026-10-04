@@ -348,7 +348,7 @@ export default function Partners() {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibility, setVisibility] = useState('available')
-  const [filters, setFilters] = useState({ learning: '', speaking: '', date: '' })
+  const [filters, setFilters] = useState({ learning: '', date: '' })
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
   const [showRequestModal, setShowRequestModal] = useState(false)
 
@@ -356,7 +356,6 @@ export default function Partners() {
     setLoading(true)
     const params = {}
     if (filters.learning) params.language = filters.learning
-    if (filters.speaking) params.speaks = filters.speaking
     if (filters.date) params.day = dateToDayOfWeek(filters.date)
     client.get('/matching/partners/', { params })
       .then(({ data }) => setPartners(data))
@@ -450,20 +449,6 @@ export default function Partners() {
                   <select
                     value={filters.learning}
                     onChange={(e) => setFilters({ ...filters, learning: e.target.value })}
-                    className={ghostFieldClass}
-                    style={ghostFieldStyle}
-                  >
-                    <option value="">{t('partners.anyLanguage')}</option>
-                    {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                </IconField>
-              </div>
-              <div className="w-40">
-                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iSpeak')}</label>
-                <IconField icon={Languages}>
-                  <select
-                    value={filters.speaking}
-                    onChange={(e) => setFilters({ ...filters, speaking: e.target.value })}
                     className={ghostFieldClass}
                     style={ghostFieldStyle}
                   >

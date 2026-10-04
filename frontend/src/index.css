@@ -1,95 +1,70 @@
 @import "tailwindcss";
 
+/* ---- Design tokens: clean, trustworthy product look ---- */
+
 :root {
   color-scheme: light;
 
-  /* ---- Theme: Departures (light, structured, transit/passport-inspired) ---- */
-  --font-display: 'Bricolage Grotesque', ui-sans-serif, sans-serif;
-  --font-body: 'Public Sans', ui-sans-serif, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  --bg: #f7f7fb;
+  --bg: #f6f8fb;
   --surface: #ffffff;
-  --surface-2: #eeeef5;
-  --ink: #14151a;
-  --ink-soft: #5b5d6b;
-  --line: #e2e2ec;
-  --accent: #4338ca;
+  --surface-2: #eef2f7;
+  --ink: #0f172a;
+  --ink-soft: #566176;
+  --line: #e2e8f0;
+  --accent: #2b59e0;
   --accent-ink: #ffffff;
-  --accent-2: #fb6a52;
+  --accent-2: #0d9488;
   --accent-2-ink: #ffffff;
-  --gradient-brand: linear-gradient(135deg, var(--accent), var(--accent-2));
-  --shadow-card: 0 1px 2px rgb(30 20 60 / 0.04), 0 8px 24px -12px rgb(30 20 60 / 0.10);
-  --shadow-card-hover: 0 4px 10px rgb(30 20 60 / 0.06), 0 20px 40px -16px rgb(30 20 60 / 0.18);
-  --radius-card: 16px;
+  --gradient-brand: linear-gradient(135deg, #3b6cf0, #2447c7);
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.05), 0 4px 12px -6px rgb(15 23 42 / 0.08);
+  --shadow-card-hover: 0 2px 6px rgb(15 23 42 / 0.06), 0 14px 30px -14px rgb(15 23 42 / 0.18);
+  --radius-card: 14px;
   --radius-pill: 999px;
-  --radius-tag: 10px;
+  --radius-tag: 9px;
 }
 
-/* ---- Theme: Indigo & Coral (dark) ---- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --font-display: 'Bricolage Grotesque', ui-sans-serif, sans-serif;
-    --font-body: 'Public Sans', ui-sans-serif, sans-serif;
-    --bg: #0e1016;
-    --surface: #171a23;
-    --surface-2: #1d212c;
-    --ink: #eef0f5;
-    --ink-soft: #a3a7b7;
-    --line: #262b38;
-    --accent: #818cf8;
-    --accent-ink: #1a1735;
-    --accent-2: #ff8368;
-    --accent-2-ink: #341009;
-    --gradient-brand: linear-gradient(135deg, var(--accent), var(--accent-2));
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5);
-    --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.35), 0 20px 44px -16px rgb(0 0 0 / 0.65);
-    --radius-card: 18px;
-    --radius-tag: 10px;
+    --bg: #0b1220;
+    --surface: #111a2c;
+    --surface-2: #17223a;
+    --ink: #e8edf6;
+    --ink-soft: #9aa7bd;
+    --line: #223049;
+    --accent: #6d93ff;
+    --accent-ink: #ffffff;
+    --accent-2: #2dd4bf;
+    --accent-2-ink: #04201c;
+    --gradient-brand: linear-gradient(135deg, #4a76f2, #2c4fd0);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 18px -10px rgb(0 0 0 / 0.5);
+    --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.35), 0 18px 36px -16px rgb(0 0 0 / 0.65);
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --font-display: 'Bricolage Grotesque', ui-sans-serif, sans-serif;
-  --font-body: 'Public Sans', ui-sans-serif, sans-serif;
-  --bg: #0e1016;
-  --surface: #171a23;
-  --surface-2: #1d212c;
-  --ink: #eef0f5;
-  --ink-soft: #a3a7b7;
-  --line: #262b38;
-  --accent: #818cf8;
-  --accent-ink: #1a1735;
-  --accent-2: #ff8368;
-  --accent-2-ink: #341009;
-  --gradient-brand: linear-gradient(135deg, var(--accent), var(--accent-2));
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5);
-  --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.35), 0 20px 44px -16px rgb(0 0 0 / 0.65);
-  --radius-card: 18px;
-  --radius-tag: 10px;
+  --bg: #0b1220;
+  --surface: #111a2c;
+  --surface-2: #17223a;
+  --ink: #e8edf6;
+  --ink-soft: #9aa7bd;
+  --line: #223049;
+  --accent: #6d93ff;
+  --accent-ink: #ffffff;
+  --accent-2: #2dd4bf;
+  --accent-2-ink: #04201c;
+  --gradient-brand: linear-gradient(135deg, #4a76f2, #2c4fd0);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 18px -10px rgb(0 0 0 / 0.5);
+  --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.35), 0 18px 36px -16px rgb(0 0 0 / 0.65);
 }
 
 :root[data-theme='light'] {
   color-scheme: light;
-  --font-display: 'Bricolage Grotesque', ui-sans-serif, sans-serif;
-  --font-body: 'Public Sans', ui-sans-serif, sans-serif;
-  --bg: #f7f7fb;
-  --surface: #ffffff;
-  --surface-2: #eeeef5;
-  --ink: #14151a;
-  --ink-soft: #5b5d6b;
-  --line: #e2e2ec;
-  --accent: #4338ca;
-  --accent-ink: #ffffff;
-  --accent-2: #fb6a52;
-  --accent-2-ink: #ffffff;
-  --gradient-brand: linear-gradient(135deg, var(--accent), var(--accent-2));
-  --shadow-card: 0 1px 2px rgb(30 20 60 / 0.04), 0 8px 24px -12px rgb(30 20 60 / 0.10);
-  --shadow-card-hover: 0 4px 10px rgb(30 20 60 / 0.06), 0 20px 40px -16px rgb(30 20 60 / 0.18);
-  --radius-card: 16px;
-  --radius-tag: 10px;
 }
 
 * {
@@ -102,6 +77,12 @@ body {
   background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv11', 'ss01';
+  letter-spacing: -0.005em;
+}
+
+h1, h2, h3, .font-display {
+  letter-spacing: -0.02em;
 }
 
 .font-display {
@@ -202,29 +183,25 @@ body {
 a.lp-card:hover,
 button.lp-card:hover {
   box-shadow: var(--shadow-card-hover);
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--accent) 25%, var(--line));
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
 }
 
 .lp-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--accent);
 }
 
 .lp-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.3em;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 0.2rem 0.55rem;
+  padding: 0.2rem 0.6rem;
   border-radius: var(--radius-tag);
   border: 1px solid var(--line);
   color: var(--ink-soft);
@@ -252,18 +229,18 @@ button.lp-card:hover {
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.875rem;
-  padding: 0.65rem 1.25rem;
+  padding: 0.6rem 1.15rem;
   border-radius: var(--radius-tag);
   background: var(--gradient-brand);
   color: var(--accent-ink);
   transition: filter 180ms ease, transform 180ms ease, box-shadow 180ms ease;
-  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12), 0 6px 14px -8px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .lp-btn-primary:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12), 0 10px 20px -8px color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
 .lp-btn-primary:active {
@@ -278,7 +255,7 @@ button.lp-card:hover {
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.875rem;
-  padding: 0.65rem 1.25rem;
+  padding: 0.6rem 1.15rem;
   border-radius: var(--radius-tag);
   border: 1px solid var(--line);
   color: var(--ink);
@@ -303,19 +280,9 @@ button.lp-card:hover {
 }
 
 .lp-avatar {
-  border-radius: 8px;
+  border-radius: var(--radius-pill);
   object-fit: cover;
   transition: transform 220ms ease;
-}
-
-:root[data-theme='dark'] .lp-avatar {
-  border-radius: var(--radius-pill);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .lp-avatar {
-    border-radius: var(--radius-pill);
-  }
 }
 
 .lp-gradient-text {
@@ -364,8 +331,8 @@ button.lp-card:hover {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(60% 55% at 15% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%),
-    radial-gradient(55% 50% at 100% 20%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 65%);
+    radial-gradient(60% 55% at 15% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 65%),
+    radial-gradient(55% 50% at 100% 20%, color-mix(in srgb, var(--accent-2) 7%, transparent), transparent 65%);
 }
 
 /* ---- Legacy utilities kept for backward compatibility ---- */
@@ -396,6 +363,14 @@ button.lp-card:hover {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgb(255 255 255 / 0.14) 1px, transparent 1px);
+  background-image: radial-gradient(rgb(255 255 255 / 0.10) 1px, transparent 1px);
   background-size: 16px 16px;
+}
+
+/* Decorative motion (floating words, drifting blobs) is hidden for a calmer, product-grade look */
+.lp-blob-drift,
+.lp-float-1,
+.lp-float-2,
+.lp-float-3 {
+  display: none !important;
 }

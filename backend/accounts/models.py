@@ -83,6 +83,8 @@ class Profile(models.Model):
     ui_language = models.CharField(max_length=5, choices=UI_LANGUAGE_CHOICES, default='en')
     native_language = models.CharField(max_length=50, blank=True)
     learning_language = models.CharField(max_length=50, blank=True)
+    # Extra languages the user speaks besides native_language ("I speak" list).
+    spoken_languages = models.JSONField(default=list, blank=True)
     # Proficiency in learning_language.
     proficiency_level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
     # Proficiency in native_language - not always a true native speaker (e.g. a

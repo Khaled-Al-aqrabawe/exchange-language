@@ -1,3 +1,4 @@
+from django.db.models.functions import Lower
 from rest_framework import generics, permissions
 from rest_framework.exceptions import NotFound
 
@@ -15,24 +16,30 @@ class PartnerListView(generics.ListAPIView):
         qs = Profile.objects.exclude(user=self.request.user).select_related('user')
 
         explicit_language = self.request.query_params.get('language')
-        speaks = self.request.query_params.get('speaks')
         level = self.request.query_params.get('level')
         timezone = self.request.query_params.get('timezone')
         day_of_week = self.request.query_params.get('day')
 
         if explicit_language:
-            # "I'm learning" filter: match partners who natively speak that language -
-            # the people who can actually teach it to you.
-            qs = qs.filter(native_language__iexact=explicit_language)
+            # "I'm learning" filter: partners who speak that language on their profile
+            # (native or any extra spoken language) plus those also learning it.
+            wanted = explicit_language.lower()
+            ids = [
+                p.id for p in qs
+                if wanted in {l.lower() for l in [p.native_language, *(p.spoken_languages or [])] if l}
+                or p.learning_language.lower() == wanted
+            ]
+            qs = qs.filter(id__in=ids)
         elif my_profile.learning_language:
             # No explicit filter: default browse stays broad (exchange + peer).
             qs = qs.filter(learning_language__iexact=my_profile.learning_language) | qs.filter(
                 native_language__iexact=my_profile.learning_language
             )
-        if speaks:
-            # "I speak" filter: match partners who are learning that language - the
-            # people you could teach it to, distinct from the filter above.
-            qs = qs.filter(learning_language__iexact=speaks)
+        # "I speak" filter always comes from the profile: only show partners who are
+        # learning a language the user speaks (native + extra spoken languages).
+        my_spoken = {l.lower() for l in [my_profile.native_language, *(my_profile.spoken_languages or [])] if l}
+        if my_spoken:
+            qs = qs.annotate(_learning_lower=Lower('learning_language')).filter(_learning_lower__in=my_spoken)
         if level:
             qs = qs.filter(proficiency_level=level)
         if timezone:

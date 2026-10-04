@@ -63,7 +63,7 @@ export default function Landing() {
               {t('landing.badge')}
             </span>
 
-            <h1 className="font-display text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
+            <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight leading-[1.05]">
               {t('landing.heroTitleLine1')}
               <br />
               <span className="lp-gradient-text">{t('landing.heroTitleLine2')}</span>
@@ -172,14 +172,8 @@ export default function Landing() {
             {features.map((f, i) => (
               <div
                 key={f.title}
-                className={`relative overflow-hidden lp-card lp-card--hover lp-animate-in lp-delay-${(i % 6) + 1} ${f.big ? 'lg:col-span-2' : ''}`}
+                className={`relative overflow-hidden lp-card lp-card--hover lp-animate-in lp-delay-${(i % 6) + 1}`}
               >
-                {f.big && (
-                  <span
-                    className="pointer-events-none absolute -bottom-8 -end-8 h-32 w-32 rounded-full blur-2xl"
-                    style={{ background: 'var(--gradient-brand)', opacity: 0.14 }}
-                  />
-                )}
                 <span className="lp-icon-badge h-10 w-10 mb-4">
                   <f.icon size={19} strokeWidth={2} />
                 </span>
