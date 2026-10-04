@@ -36,6 +36,7 @@ class PartnerSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     ratings_count = serializers.SerializerMethodField()
     availability = serializers.SerializerMethodField()
+    is_available_now = serializers.SerializerMethodField()
     age = serializers.ReadOnlyField()
 
     class Meta:
@@ -43,8 +44,13 @@ class PartnerSerializer(serializers.ModelSerializer):
         fields = [
             'user_id', 'email', 'full_name', 'bio', 'gender', 'country', 'age', 'native_language',
             'learning_language', 'proficiency_level', 'timezone', 'learning_goals', 'avatar', 'intro_video',
-            'match_type', 'sessions_completed', 'average_rating', 'ratings_count', 'availability',
+            'match_type', 'is_available_now', 'sessions_completed', 'average_rating', 'ratings_count', 'availability',
         ]
+
+    def get_is_available_now(self, obj):
+        if not obj.available_now or not obj.last_seen:
+            return False
+        return dj_timezone.now() - obj.last_seen < timedelta(minutes=3)
 
     def get_match_type(self, obj):
         request = self.context.get('request')

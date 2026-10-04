@@ -306,7 +306,10 @@
     "exchangeMatch": "Exchange match",
     "peerPractice": "Peer practice",
     "speaksLearning": "Speaks {{native}} · Learning {{learning}}",
-    "viewProfile": "View profile"
+    "viewProfile": "View profile",
+    "visibilityNow": "Available now",
+    "visibilityScheduled": "Scheduled available",
+    "emptyNow": "Nobody is online and available right now. Check \"Scheduled available\" for upcoming times."
   },
   "partnerProfile": {
     "loading": "Loading...",
@@ -460,8 +463,10 @@
     "markComplete": "Mark as complete"
   },
   "profile": {
+    "learningLanguages": "Languages I want to learn",
+    "learningLanguagesHint": "Choose the languages you are learning. The Partners filter lets you pick from these.",
     "spokenLanguages": "Languages I speak",
-    "spokenLanguagesHint": "Choose every language you speak. Partners page only shows people learning one of these.",
+    "spokenLanguagesHint": "Add every language you speak well (minimum B1). Choose your level or take the exam. The Partners page only shows people learning one of these.",
     "title": "Your profile",
     "loading": "Loading...",
     "changePhoto": "Change photo",
@@ -585,5 +590,21 @@
     "seeAll": "See all notifications",
     "pageTitle": "Notifications",
     "pageSubtitle": "Everything about your sessions, in one place."
+  },
+  "levelExam": {
+    "title": "{{language}} level test",
+    "questionOf": "Question {{current}} of {{total}}",
+    "next": "Next",
+    "finish": "Finish",
+    "yourLevel": "Your {{language}} level is",
+    "continue": "Use this level",
+    "takeExam": "Take level exam",
+    "chooseLevel": "Choose level",
+    "required": "Choose a level or take the exam",
+    "notEnough": "Your {{language}} level ({{level}}) isn't enough to be listed as a language you speak - you need at least {{min}}. You can add it to the languages you want to learn instead."
+  },
+  "presence": {
+    "on": "Available now",
+    "off": "Not available"
   }
 }

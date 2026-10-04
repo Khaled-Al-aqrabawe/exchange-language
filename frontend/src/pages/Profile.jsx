@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
 import { COUNTRIES, GENDERS, LANGUAGES } from '../constants'
+import LanguageLevelPicker from '../components/LanguageLevelPicker'
 import { useAuth } from '../context/AuthContext'
 import { resolveAvatarUrl } from '../utils/images'
 import { detectTimezone, formatTimezoneOption, timezoneOptions } from '../utils/timezone'
@@ -89,6 +90,7 @@ export default function Profile() {
   const [form, setForm] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const fileInputRef = useRef(null)
@@ -102,7 +104,13 @@ export default function Profile() {
       setForm({
         first_name: user.first_name,
         last_name: user.last_name,
-        profile: { ...user.profile, timezone },
+        profile: {
+          ...user.profile,
+          timezone,
+          learning_languages: user.profile.learning_languages?.length
+            ? user.profile.learning_languages
+            : (user.profile.learning_language ? [user.profile.learning_language] : []),
+        },
       })
     }
   }, [user])
@@ -117,10 +125,16 @@ export default function Profile() {
     e.preventDefault()
     setSaving(true)
     setSaved(false)
+    setSaveError('')
     try {
       await client.patch('/auth/me/', form)
       await refreshUser()
       setSaved(true)
+    } catch (err) {
+      const data = err.response?.data?.profile || err.response?.data
+      const msg = data && typeof data === 'object' ? Object.values(data).flat().join(' ') : ''
+      if (msg) setSaveError(msg)
+      else throw err
     } finally {
       setSaving(false)
     }
@@ -266,31 +280,27 @@ export default function Profile() {
 
           <section className="lp-card mb-6 lp-animate-in lp-delay-3">
             <h2 className="font-semibold mb-4" style={{ color: 'var(--ink)' }}>{t('profile.languagesTitle')}</h2>
-            <div className="mb-4">
+            <div className="mb-6">
               <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('profile.spokenLanguages')}</label>
-              <div className="flex flex-wrap gap-2">
-                {LANGUAGES.map((l) => {
-                  const selected = (form.profile.spoken_languages || []).includes(l)
-                  return (
-                    <button
-                      key={l}
-                      type="button"
-                      onClick={() => {
-                        const current = form.profile.spoken_languages || []
-                        const next = selected ? current.filter((x) => x !== l) : [...current, l]
-                        setForm({ ...form, profile: { ...form.profile, spoken_languages: next } })
-                      }}
-                      className="rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors"
-                      style={selected
-                        ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', border: '1px solid transparent' }
-                        : { background: 'var(--surface)', color: 'var(--ink-soft)', border: '1px solid var(--line)' }}
-                    >
-                      {l}
-                    </button>
-                  )
-                })}
-              </div>
-              <p className="text-xs mt-1.5" style={{ color: 'var(--ink-soft)' }}>{t('profile.spokenLanguagesHint')}</p>
+              <LanguageLevelPicker
+                mode="speak"
+                selected={form.profile.spoken_languages || []}
+                levels={form.profile.language_levels || {}}
+                onChange={(spoken, levels) =>
+                  setForm({ ...form, profile: { ...form.profile, spoken_languages: spoken, language_levels: levels } })}
+              />
+              <p className="text-xs mt-2" style={{ color: 'var(--ink-soft)' }}>{t('profile.spokenLanguagesHint')}</p>
+            </div>
+            <div className="mb-6">
+              <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('profile.learningLanguages')}</label>
+              <LanguageLevelPicker
+                mode="learn"
+                selected={form.profile.learning_languages || []}
+                levels={form.profile.language_levels || {}}
+                onChange={(learning, levels) =>
+                  setForm({ ...form, profile: { ...form.profile, learning_languages: learning, language_levels: levels } })}
+              />
+              <p className="text-xs mt-2" style={{ color: 'var(--ink-soft)' }}>{t('profile.learningLanguagesHint')}</p>
             </div>
             <div className="mb-4">
               <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('profile.timezone')}</label>
@@ -349,6 +359,7 @@ export default function Profile() {
             <button type="submit" disabled={saving} className="lp-btn-primary disabled:opacity-50">
               {saving ? t('profile.saving') : t('profile.save')}
             </button>
+            {saveError && <p className="text-sm" style={{ color: '#c1443d' }}>{saveError}</p>}
             {saved && (
               <span className="inline-flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--accent-2)' }}>
                 <CheckCircle2 size={15} /> {t('profile.saved')}

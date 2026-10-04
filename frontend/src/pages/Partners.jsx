@@ -1,10 +1,9 @@
-import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Globe2, Languages, MapPin, MessageCircle, Plus, Search, Send, Sparkles, Star, Trash2, Video, X } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Globe2, MapPin, MessageCircle, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
-import { LANGUAGES } from '../constants'
 import { useAuth } from '../context/AuthContext'
 import {
   dateToDayOfWeek,
@@ -19,6 +18,11 @@ import { resolveAvatarUrl } from '../utils/images'
 function AddAvailabilityModal({ onClose, onSaved }) {
   const { t, i18n } = useTranslation()
   const { user, refreshUser } = useAuth()
+  const profileLang = user?.profile
+  const speakOptions = [...new Set([profileLang?.native_language, ...(profileLang?.spoken_languages || [])].filter(Boolean))]
+  const learnOptions = profileLang?.learning_languages?.length
+    ? profileLang.learning_languages
+    : [profileLang?.learning_language].filter(Boolean)
   const [slot, setSlot] = useState(() => {
     const start = nowTimeStr()
     return {
@@ -26,8 +30,8 @@ function AddAvailabilityModal({ onClose, onSaved }) {
       start_time: start,
       end_time: timeStrPlusMinutes(start, 40),
       weekly: true,
-      native_language: user?.profile?.native_language || '',
-      learning_language: user?.profile?.learning_language || '',
+      native_language: speakOptions[0] || '',
+      learning_language: learnOptions[0] || '',
     }
   })
   const [saving, setSaving] = useState(false)
@@ -67,10 +71,8 @@ function AddAvailabilityModal({ onClose, onSaved }) {
     setSaving(true)
     try {
       const profile = user?.profile
-      if (slot.native_language !== profile?.native_language || slot.learning_language !== profile?.learning_language) {
-        await client.patch('/auth/me/', {
-          profile: { native_language: slot.native_language, learning_language: slot.learning_language },
-        })
+      if (slot.learning_language && slot.learning_language !== profile?.learning_language) {
+        await client.patch('/auth/me/', { profile: { learning_language: slot.learning_language } })
         await refreshUser()
       }
       await client.post('/auth/me/availability/', {
@@ -158,30 +160,36 @@ function AddAvailabilityModal({ onClose, onSaved }) {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partners.addAvailableTimeSubtitle')}</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iSpeak')}</label>
-                <select
-                  value={slot.native_language}
-                  onChange={(e) => setSlot({ ...slot, native_language: e.target.value })}
-                  className={fieldClass}
-                  style={fieldStyle}
-                >
-                  {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
+            {(speakOptions.length > 1 || learnOptions.length > 1) && (
+              <div className="grid grid-cols-2 gap-3">
+                {speakOptions.length > 1 && (
+                  <div>
+                    <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iSpeak')}</label>
+                    <select
+                      value={slot.native_language}
+                      onChange={(e) => setSlot({ ...slot, native_language: e.target.value })}
+                      className={fieldClass}
+                      style={fieldStyle}
+                    >
+                      {speakOptions.map((l) => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                  </div>
+                )}
+                {learnOptions.length > 1 && (
+                  <div>
+                    <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iAmLearning')}</label>
+                    <select
+                      value={slot.learning_language}
+                      onChange={(e) => setSlot({ ...slot, learning_language: e.target.value })}
+                      className={fieldClass}
+                      style={fieldStyle}
+                    >
+                      {learnOptions.map((l) => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iAmLearning')}</label>
-                <select
-                  value={slot.learning_language}
-                  onChange={(e) => setSlot({ ...slot, learning_language: e.target.value })}
-                  className={fieldClass}
-                  style={fieldStyle}
-                >
-                  {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
-            </div>
+            )}
             <div>
               <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.date')}</label>
               <input
@@ -250,21 +258,20 @@ function IconField({ icon: Icon, children }) {
   )
 }
 
-function PartnerCard({ p, i, t, i18n, filterDayOfWeek }) {
+function PartnerCard({ p, i, t, i18n, filterDayOfWeek, onMessage, onSchedule }) {
   const accent = p.match_type === 'exchange' ? 'var(--accent)' : 'var(--accent-2)'
   const visibleAvailability = (p.availability || [])
     .filter((slot) => !isSlotExpiredToday(slot))
     .filter((slot) => filterDayOfWeek == null || slot.day_of_week === filterDayOfWeek)
   return (
-    <Link
-      to={`/partners/${p.user_id}`}
+    <div
       className={`group relative flex flex-col p-5 -m-5 rounded-[28px] transition-all duration-300 hover:-translate-y-1 lp-animate-in lp-delay-${(i % 6) + 1}`}
     >
       <span
         className="absolute inset-0 rounded-[28px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 -z-10"
         style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-card)' }}
       />
-
+      <Link to={`/partners/${p.user_id}`} className="flex flex-col flex-1">
       <div className="relative mb-3">
         <span
           className="absolute -top-4 -start-4 h-24 w-24 rounded-full pointer-events-none transition-opacity duration-300 opacity-70 group-hover:opacity-100"
@@ -333,24 +340,36 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek }) {
         )}
       </div>
 
-      <div
-        className="flex items-center gap-1.5 mt-3 text-sm font-semibold opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0"
-        style={{ color: 'var(--accent)' }}
-      >
-        <MessageCircle size={14} /> {t('partners.viewProfile')}
+      </Link>
+
+      <div className="flex gap-2 mt-3 opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 focus-within:opacity-100 focus-within:translate-y-0 [@media(hover:none)]:opacity-100 [@media(hover:none)]:translate-y-0">
+        <Link to={`/partners/${p.user_id}`} className="lp-btn-secondary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
+          <User size={12} /> {t('partners.viewProfile')}
+        </Link>
+        <button type="button" onClick={() => onMessage(p)} className="lp-btn-primary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
+          <MessageCircle size={12} /> {t('partnerProfile.message')}
+        </button>
+        <button type="button" onClick={() => onSchedule(p)} className="lp-btn-secondary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
+          <CalendarPlus size={12} /> {t('partnerProfile.scheduleSession')}
+        </button>
       </div>
-    </Link>
+    </div>
   )
 }
 
 export default function Partners() {
   const { t, i18n } = useTranslation()
+  const { user } = useAuth()
+  const myLearning = user?.profile?.learning_languages?.length
+    ? user.profile.learning_languages
+    : (user?.profile?.learning_language ? [user.profile.learning_language] : [])
+  const navigate = useNavigate()
+  const [scheduleFor, setScheduleFor] = useState(null)
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
-  const [visibility, setVisibility] = useState('available')
+  const [visibility, setVisibility] = useState('now')
   const [filters, setFilters] = useState({ learning: '', date: '' })
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
-  const [showRequestModal, setShowRequestModal] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -362,10 +381,28 @@ export default function Partners() {
       .finally(() => setLoading(false))
   }
 
+  // With a single learning language in the profile, pre-select it in the filter.
+  useEffect(() => {
+    if (myLearning.length === 1) setFilters((f) => (f.learning ? f : { ...f, learning: myLearning[0] }))
+  }, [myLearning.join('|')])
+
   useEffect(load, [filters, t])
 
   const withAvailability = partners.filter((p) => p.availability?.length > 0)
-  const visiblePartners = visibility === 'available' ? withAvailability : partners
+  const availableNow = (p) => p.is_available_now
+  // Highest-rated first; unrated partners last. Array#sort is stable, so ties keep the
+  // server order (exchange matches first).
+  const byRating = (list) => [...list].sort((x, y) => (y.average_rating || 0) - (x.average_rating || 0))
+  const visiblePartners = byRating(
+    visibility === 'now'
+      ? partners.filter(availableNow)
+      : visibility === 'scheduled' ? withAvailability : partners,
+  )
+
+  const handleMessage = async (p) => {
+    const { data } = await client.post('/chat/conversations/start/', { partner_id: p.user_id })
+    navigate(`/messages/${data.id}`)
+  }
 
   const ghostFieldClass = 'w-full bg-transparent ps-6 pe-2 py-2 text-sm font-medium transition-colors focus:outline-none'
   const ghostFieldStyle = { borderBottom: '2px solid var(--line)', color: 'var(--ink)' }
@@ -405,37 +442,30 @@ export default function Partners() {
           <div className="lp-animate-in lp-delay-1">
             <div className="flex items-center justify-center sm:justify-between gap-4 mb-6 flex-wrap">
               <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setVisibility('available')}
-                  className="relative px-1 py-1.5 text-sm font-semibold transition-colors me-5"
-                  style={{ color: visibility === 'available' ? 'var(--ink)' : 'var(--ink-soft)' }}
-                >
-                  {t('partners.visibilityAvailable')}
-                  {visibility === 'available' && (
-                    <span className="absolute left-0 right-0 -bottom-0.5 h-[2.5px] rounded-full" style={{ background: 'var(--gradient-brand)' }} />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setVisibility('all')
-                    setFilters((f) => ({ ...f, date: '' }))
-                  }}
-                  className="relative px-1 py-1.5 text-sm font-semibold transition-colors"
-                  style={{ color: visibility === 'all' ? 'var(--ink)' : 'var(--ink-soft)' }}
-                >
-                  {t('partners.visibilityAll')}
-                  {visibility === 'all' && (
-                    <span className="absolute left-0 right-0 -bottom-0.5 h-[2.5px] rounded-full" style={{ background: 'var(--gradient-brand)' }} />
-                  )}
-                </button>
+                {[
+                  ['now', t('partners.visibilityNow')],
+                  ['scheduled', t('partners.visibilityScheduled')],
+                  ['all', t('partners.visibilityAll')],
+                ].map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setVisibility(key)
+                      if (key !== 'scheduled') setFilters((f) => ({ ...f, date: '' }))
+                    }}
+                    className="relative px-1 py-1.5 text-sm font-semibold transition-colors me-5 last:me-0"
+                    style={{ color: visibility === key ? 'var(--ink)' : 'var(--ink-soft)' }}
+                  >
+                    {label}
+                    {visibility === key && (
+                      <span className="absolute left-0 right-0 -bottom-0.5 h-[2.5px] rounded-full" style={{ background: 'var(--gradient-brand)' }} />
+                    )}
+                  </button>
+                ))}
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <button type="button" onClick={() => setShowRequestModal(true)} className="lp-btn-secondary shrink-0">
-                  <Send size={15} /> {t('schedule.sendRequestTitle')}
-                </button>
                 <button type="button" onClick={() => setShowAvailabilityModal(true)} className="lp-btn-primary shrink-0">
                   <CalendarPlus size={15} /> {t('partners.addAvailableTime')}
                 </button>
@@ -453,11 +483,11 @@ export default function Partners() {
                     style={ghostFieldStyle}
                   >
                     <option value="">{t('partners.anyLanguage')}</option>
-                    {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+                    {myLearning.map((l) => <option key={l} value={l}>{l}</option>)}
                   </select>
                 </IconField>
               </div>
-              {visibility === 'available' && (
+              {visibility === 'scheduled' && (
                 <div className="w-44">
                   <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.date')}</label>
                   <input
@@ -492,11 +522,11 @@ export default function Partners() {
               <Search size={20} />
             </span>
             <p className="text-sm max-w-sm" style={{ color: 'var(--ink-soft)' }}>
-              {visibility === 'available' ? t('partners.emptyAvailable') : t('partners.empty')}
+              {visibility === 'now' ? t('partners.emptyNow') : visibility === 'scheduled' ? t('partners.emptyAvailable') : t('partners.empty')}
             </p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-5">
+          <div className="grid sm:grid-cols-2 gap-x-14 gap-y-12">
             {visiblePartners.map((p, i) => (
               <PartnerCard
                 key={p.user_id}
@@ -505,12 +535,14 @@ export default function Partners() {
                 t={t}
                 i18n={i18n}
                 filterDayOfWeek={filters.date ? dateToDayOfWeek(filters.date) : null}
+                onMessage={handleMessage}
+                onSchedule={(partner) => setScheduleFor(partner)}
               />
             ))}
           </div>
         )}
 
-        {!loading && visiblePartners.length > 0 && visibility === 'available' && withAvailability.length < partners.length && (
+        {!loading && visiblePartners.length > 0 && visibility === 'scheduled' && withAvailability.length < partners.length && (
           <p className="flex items-center justify-center gap-1.5 text-xs mt-8 lp-animate-in" style={{ color: 'var(--ink-soft)' }}>
             <Sparkles size={13} style={{ color: 'var(--accent)' }} />
             {t('partners.moreWithAllHint', { count: partners.length - withAvailability.length })}
@@ -518,13 +550,18 @@ export default function Partners() {
         )}
       </div>
 
+      {scheduleFor && (
+        <SendSessionRequestModal
+          lockedPartnerId={scheduleFor.user_id}
+          onClose={() => setScheduleFor(null)}
+          onSent={load}
+        />
+      )}
+
       {showAvailabilityModal && (
         <AddAvailabilityModal onClose={() => setShowAvailabilityModal(false)} onSaved={load} />
       )}
 
-      {showRequestModal && (
-        <SendSessionRequestModal onClose={() => setShowRequestModal(false)} onSent={load} />
-      )}
     </div>
   )
 }

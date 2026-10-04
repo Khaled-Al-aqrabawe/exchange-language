@@ -12,6 +12,7 @@ from .views import (
     PasswordResetConfirmView,
     PasswordResetRequestView,
     RegisterView,
+    PresenceView,
     ResendVerificationView,
     VerifyEmailView,
 )
@@ -26,6 +27,7 @@ urlpatterns = [
     path('password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     path('me/', MeView.as_view(), name='me'),
     path('me/change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('me/presence/', PresenceView.as_view(), name='me-presence'),
     path('me/avatar/', AvatarUploadView.as_view(), name='me-avatar'),
     path('me/video/', IntroVideoUploadView.as_view(), name='me-video'),
     path('me/availability/', AvailabilityListCreateView.as_view(), name='me-availability'),

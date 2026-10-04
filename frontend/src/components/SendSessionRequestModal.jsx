@@ -2,7 +2,7 @@ import { CalendarPlus, CheckCircle2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
-import { LANGUAGES, LEVELS } from '../constants'
+import { LANGUAGES } from '../constants'
 import { DAYS, isSlotExpiredToday, isWithinAvailability } from '../utils/availability'
 
 const todayStr = () => new Date().toISOString().slice(0, 10)
@@ -60,7 +60,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!partnerFilters.language || !partnerFilters.level || !form.partner_id || !form.date || !form.start_time || !form.end_time) {
+    if (!partnerFilters.language || !form.partner_id || !form.date || !form.start_time || !form.end_time) {
       setError(t('schedule.errorMissing'))
       return
     }
@@ -124,7 +124,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div>
               <div>
                 <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('schedule.language')} *</label>
                 <select
@@ -137,20 +137,6 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
                 >
                   <option value="" disabled>{t('schedule.selectLanguage')}</option>
                   {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('schedule.level')} *</label>
-                <select
-                  required
-                  disabled={lockedFromPartner}
-                  value={partnerFilters.level}
-                  onChange={(e) => setPartnerFilters({ ...partnerFilters, level: e.target.value })}
-                  className={`${inputClass} ${lockedFromPartner ? 'cursor-not-allowed opacity-60' : ''}`}
-                  style={inputStyle}
-                >
-                  <option value="" disabled>{t('schedule.selectLevel')}</option>
-                  {LEVELS.map(([value]) => <option key={value} value={value}>{t(`levels.${value}`)}</option>)}
                 </select>
               </div>
             </div>

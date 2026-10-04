@@ -85,6 +85,14 @@ class Profile(models.Model):
     learning_language = models.CharField(max_length=50, blank=True)
     # Extra languages the user speaks besides native_language ("I speak" list).
     spoken_languages = models.JSONField(default=list, blank=True)
+    # Languages the user wants to learn (learning_language mirrors the first one).
+    learning_languages = models.JSONField(default=list, blank=True)
+    # CEFR level (A1-C2) per language, e.g. {"French": "B1"}; set by choice or placement exam.
+    language_levels = models.JSONField(default=dict, blank=True)
+    # Presence: the "Available now" header toggle. The client sends a heartbeat while
+    # the site is open, so a stale True (closed tab) expires after PRESENCE_TIMEOUT.
+    available_now = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(null=True, blank=True)
     # Proficiency in learning_language.
     proficiency_level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
     # Proficiency in native_language - not always a true native speaker (e.g. a

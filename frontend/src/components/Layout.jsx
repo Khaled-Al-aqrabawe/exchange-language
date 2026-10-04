@@ -16,6 +16,7 @@ import logoIcon from '../assets/logo-icon.png'
 import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
 import LanguageSwitcher from './LanguageSwitcher'
+import PresenceToggle from './PresenceToggle'
 import NotificationBell from './NotificationBell'
 import ThemeToggle from './ThemeToggle'
 
@@ -213,6 +214,7 @@ export default function Layout() {
                   ))}
                 </div>
                 <span className="mx-1 hidden sm:inline-block h-5 w-px shrink-0" style={{ background: 'var(--line)' }} />
+                <span className="shrink-0"><PresenceToggle /></span>
                 <span className="shrink-0"><NotificationBell /></span>
                 <span className="shrink-0"><ThemeToggle /></span>
                 <span className="shrink-0"><LanguageSwitcher /></span>

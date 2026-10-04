@@ -3,6 +3,10 @@ from rest_framework import serializers
 from .models import AvailabilitySlot, Profile, User
 
 
+CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+MIN_SPEAKING_LEVEL = 'B1'
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     age = serializers.ReadOnlyField()
 
@@ -10,10 +14,46 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = [
             'bio', 'gender', 'country', 'date_of_birth', 'age', 'ui_language', 'native_language',
-            'learning_language', 'spoken_languages', 'proficiency_level', 'timezone', 'learning_goals', 'avatar',
-            'intro_video', 'updated_at',
+            'learning_language', 'learning_languages', 'spoken_languages', 'language_levels', 'proficiency_level', 'timezone', 'learning_goals', 'avatar',
+            'intro_video', 'available_now', 'updated_at',
         ]
-        read_only_fields = ['avatar', 'intro_video', 'age', 'updated_at']
+        read_only_fields = ['avatar', 'intro_video', 'age', 'updated_at', 'available_now']
+
+    def validate(self, attrs):
+        langs = attrs.get('learning_languages')
+        if langs:
+            attrs['learning_language'] = langs[0]
+
+        if not any(k in attrs for k in ('spoken_languages', 'learning_languages', 'language_levels')):
+            return attrs
+
+        instance = self.instance
+        spoken = attrs.get('spoken_languages', getattr(instance, 'spoken_languages', None) or [])
+        learning = attrs.get('learning_languages', getattr(instance, 'learning_languages', None) or [])
+        levels = attrs.get('language_levels', getattr(instance, 'language_levels', None) or {})
+        native = attrs.get('native_language', getattr(instance, 'native_language', ''))
+
+        errors = {}
+        for lang, level in levels.items():
+            if level not in CEFR_LEVELS:
+                errors['language_levels'] = f'Invalid level for {lang}.'
+        for lang in learning:
+            if levels.get(lang) not in CEFR_LEVELS:
+                errors['language_levels'] = f'Choose your level in {lang} (or take the exam).'
+        for lang in spoken:
+            if lang == native:
+                continue
+            level = levels.get(lang)
+            if level not in CEFR_LEVELS:
+                errors['language_levels'] = f'Choose your level in {lang} (or take the exam).'
+            elif CEFR_LEVELS.index(level) < CEFR_LEVELS.index(MIN_SPEAKING_LEVEL):
+                errors['spoken_languages'] = (
+                    f'You need at least {MIN_SPEAKING_LEVEL} in {lang} to list it as a language you speak. '
+                    'Add it to the languages you want to learn instead.'
+                )
+        if errors:
+            raise serializers.ValidationError(errors)
+        return attrs
 
     def validate_date_of_birth(self, value):
         if value is None:

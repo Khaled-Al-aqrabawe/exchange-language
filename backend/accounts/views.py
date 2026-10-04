@@ -214,6 +214,19 @@ class ChangePasswordView(APIView):
         return Response({'detail': 'Password changed.'})
 
 
+class PresenceView(APIView):
+    """Heartbeat + 'Available now' toggle. Body: {"available": bool} (optional)."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        profile = request.user.profile
+        if 'available' in request.data:
+            profile.available_now = bool(request.data['available'])
+        profile.last_seen = timezone.now()
+        profile.save(update_fields=['available_now', 'last_seen'])
+        return Response({'available_now': profile.available_now})
+
+
 class AvatarUploadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser]
