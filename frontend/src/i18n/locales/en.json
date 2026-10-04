@@ -309,7 +309,8 @@
     "viewProfile": "View profile",
     "visibilityNow": "Available now",
     "visibilityScheduled": "Scheduled available",
-    "emptyNow": "Nobody is online and available right now. Check \"Scheduled available\" for upcoming times."
+    "emptyNow": "Nobody is online and available right now. Check \"Scheduled available\" for upcoming times.",
+    "time": "Time"
   },
   "partnerProfile": {
     "loading": "Loading...",

@@ -258,11 +258,12 @@ function IconField({ icon: Icon, children }) {
   )
 }
 
-function PartnerCard({ p, i, t, i18n, filterDayOfWeek, onMessage, onSchedule }) {
+function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, onSchedule }) {
   const accent = p.match_type === 'exchange' ? 'var(--accent)' : 'var(--accent-2)'
   const visibleAvailability = (p.availability || [])
     .filter((slot) => !isSlotExpiredToday(slot))
     .filter((slot) => filterDayOfWeek == null || slot.day_of_week === filterDayOfWeek)
+    .filter((slot) => !filterTime || (slot.start_time.slice(0, 5) <= filterTime && filterTime <= slot.end_time.slice(0, 5)))
   return (
     <div
       className={`group relative flex flex-col p-5 -m-5 rounded-[28px] transition-all duration-300 hover:-translate-y-1 lp-animate-in lp-delay-${(i % 6) + 1}`}
@@ -368,7 +369,7 @@ export default function Partners() {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibility, setVisibility] = useState('now')
-  const [filters, setFilters] = useState({ learning: '', date: '' })
+  const [filters, setFilters] = useState({ learning: '', date: '', time: '' })
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
 
   const load = () => {
@@ -388,7 +389,9 @@ export default function Partners() {
 
   useEffect(load, [filters, t])
 
-  const withAvailability = partners.filter((p) => p.availability?.length > 0)
+  const slotMatchesTime = (slot) =>
+    !filters.time || (slot.start_time.slice(0, 5) <= filters.time && filters.time <= slot.end_time.slice(0, 5))
+  const withAvailability = partners.filter((p) => p.availability?.some(slotMatchesTime))
   const availableNow = (p) => p.is_available_now
   // Highest-rated first; unrated partners last. Array#sort is stable, so ties keep the
   // server order (exchange matches first).
@@ -452,7 +455,7 @@ export default function Partners() {
                     type="button"
                     onClick={() => {
                       setVisibility(key)
-                      if (key !== 'scheduled') setFilters((f) => ({ ...f, date: '' }))
+                      if (key !== 'scheduled') setFilters((f) => ({ ...f, date: '', time: '' }))
                     }}
                     className="relative px-1 py-1.5 text-sm font-semibold transition-colors me-5 last:me-0"
                     style={{ color: visibility === key ? 'var(--ink)' : 'var(--ink-soft)' }}
@@ -500,6 +503,18 @@ export default function Partners() {
                   />
                 </div>
               )}
+              {visibility === 'scheduled' && (
+                <div className="w-36">
+                  <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.time')}</label>
+                  <input
+                    type="time"
+                    value={filters.time}
+                    onChange={(e) => setFilters({ ...filters, time: e.target.value })}
+                    className="w-full bg-transparent pe-2 py-2 text-sm font-medium transition-colors focus:outline-none"
+                    style={ghostFieldStyle}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -535,6 +550,7 @@ export default function Partners() {
                 t={t}
                 i18n={i18n}
                 filterDayOfWeek={filters.date ? dateToDayOfWeek(filters.date) : null}
+                filterTime={filters.time}
                 onMessage={handleMessage}
                 onSchedule={(partner) => setScheduleFor(partner)}
               />
