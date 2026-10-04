@@ -1,8 +1,9 @@
-import { Download, ExternalLink, FileText, Mic, MicOff, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Download, ExternalLink, FileText, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
+import { downloadFile } from '../utils/downloadFile'
 
 const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }]
 
@@ -24,13 +25,14 @@ function SharedMaterialStage({ material, onClose, t }) {
   const isPdf = ext === 'pdf'
   const isTextLike = ['txt', 'md', 'csv'].includes(ext)
   const canEmbed = isImage || isPdf || isTextLike
+  // Browsers may have cached an old blocked (X-Frame-Options: DENY) response
+  // for this exact URL from before that header was removed server-side - a
+  // fixed query param forces a fresh request instead of reusing that cache entry.
+  const embedSrc = `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
 
   return (
-    <div
-      className="relative mt-4 bg-slate-900 rounded-2xl overflow-hidden lp-animate-in-scale"
-      style={{ boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)', border: '1px solid rgb(255 255 255 / 0.1)' }}
-    >
-      <div className="flex items-center justify-between gap-3 px-4 py-3" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
+    <div className="absolute inset-0 z-10 flex flex-col bg-slate-900 lp-animate-in-scale">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
         <span className="inline-flex items-center gap-2 min-w-0 text-sm text-white">
           <FileText size={15} className="shrink-0 text-slate-400" />
           <span className="truncate">
@@ -48,14 +50,14 @@ function SharedMaterialStage({ material, onClose, t }) {
           >
             <ExternalLink size={15} />
           </a>
-          <a
-            href={material.file}
-            download
+          <button
+            type="button"
+            onClick={() => downloadFile(material.file, material.file_name)}
             className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
             title={t('materials.download')}
           >
             <Download size={15} />
-          </a>
+          </button>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
@@ -66,18 +68,20 @@ function SharedMaterialStage({ material, onClose, t }) {
         </div>
       </div>
 
-      {canEmbed ? (
-        isImage ? (
-          <img src={material.file} alt={material.title} className="w-full max-h-[480px] object-contain bg-black" />
+      <div className="relative flex-1 min-h-0">
+        {canEmbed ? (
+          isImage ? (
+            <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-black" />
+          ) : (
+            <iframe src={embedSrc} title={material.title} className="w-full h-full bg-white border-0" />
+          )
         ) : (
-          <iframe src={material.file} title={material.title} className="w-full h-[480px] bg-white" />
-        )
-      ) : (
-        <div className="flex flex-col items-center justify-center gap-3 py-16 text-slate-400">
-          <FileText size={32} />
-          <p className="text-sm">{name}</p>
-        </div>
-      )}
+          <div className="flex flex-col items-center justify-center gap-3 h-full text-slate-400">
+            <FileText size={32} />
+            <p className="text-sm">{name}</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -89,6 +93,7 @@ export default function Call() {
 
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
+  const stageRef = useRef(null)
   const pcRef = useRef(null)
   const socketRef = useRef(null)
   const pendingCandidatesRef = useRef([])
@@ -105,6 +110,7 @@ export default function Call() {
   const [materials, setMaterials] = useState([])
   const [materialsLoading, setMaterialsLoading] = useState(false)
   const [sharedMaterial, setSharedMaterial] = useState(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const [sessionEndTime, setSessionEndTime] = useState(null)
   const [sessionId, setSessionId] = useState(null)
@@ -352,6 +358,20 @@ export default function Call() {
     }
   }
 
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(document.fullscreenElement === stageRef.current)
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+    } else {
+      stageRef.current?.requestFullscreen().catch(() => {})
+    }
+  }
+
   const openMaterialPicker = () => {
     setShowMaterialPicker(true)
     if (materials.length === 0) {
@@ -413,6 +433,7 @@ export default function Call() {
           </div>
         ) : (
           <div
+            ref={stageRef}
             className="relative bg-slate-900 rounded-2xl overflow-hidden lp-animate-in-scale"
             style={{ aspectRatio: '16 / 9', boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)', border: '1px solid rgb(255 255 255 / 0.1)' }}
           >
@@ -422,18 +443,17 @@ export default function Call() {
                 {statusText}
               </div>
             )}
+            {sharedMaterial && <SharedMaterialStage material={sharedMaterial} onClose={closeSharedMaterial} t={t} />}
             <video
               ref={localVideoRef}
               autoPlay
               playsInline
               muted
-              className="absolute bottom-4 end-4 w-40 rounded-xl shadow-lg transition-transform hover:scale-105"
+              className="absolute bottom-4 end-4 w-40 rounded-xl shadow-lg transition-transform hover:scale-105 z-20"
               style={{ border: '2px solid var(--accent-2)' }}
             />
           </div>
         )}
-
-        {sharedMaterial && <SharedMaterialStage material={sharedMaterial} onClose={closeSharedMaterial} t={t} />}
 
         <div className="flex items-center justify-center gap-3 mt-8">
           <button
@@ -462,6 +482,13 @@ export default function Call() {
             title={screenSharing ? t('call.stopSharingScreen') : t('call.shareScreen')}
           >
             <MonitorUp size={18} />
+          </button>
+          <button
+            onClick={toggleFullscreen}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all hover:scale-105"
+            title={isFullscreen ? t('call.exitFullscreen') : t('call.fullscreen')}
+          >
+            {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
           </button>
           <button
             onClick={openMaterialPicker}

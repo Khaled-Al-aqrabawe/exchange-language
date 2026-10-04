@@ -15,7 +15,7 @@
     "messages": "Messages",
     "schedule": "Historique des sessions",
     "courses": "Cours",
-    "materials": "Matériel",
+    "materials": "Cours",
     "about": "À propos",
     "faq": "FAQ",
     "login": "Connexion",
@@ -437,7 +437,7 @@
     "lessonsCount": "{{count}} leçons"
   },
   "materials": {
-    "title": "Matériel",
+    "title": "Cours",
     "subtitle": "Fichiers téléchargeables à utiliser pendant vos sessions.",
     "loading": "Chargement du matériel...",
     "empty": "Aucun matériel trouvé. Essayez d'élargir vos filtres.",
@@ -545,6 +545,8 @@
     "leave": "Quitter",
     "shareScreen": "Partager l'écran",
     "stopSharingScreen": "Arrêter le partage",
+    "fullscreen": "Plein écran",
+    "exitFullscreen": "Quitter le plein écran",
     "screenShareError": "Impossible de partager votre écran.",
     "reminder5Min": "Il reste 5 minutes dans cette session",
     "reminder30Sec": "Il reste 30 secondes dans cette session",

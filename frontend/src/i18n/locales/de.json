@@ -15,7 +15,7 @@
     "messages": "Nachrichten",
     "schedule": "Sitzungsverlauf",
     "courses": "Kurse",
-    "materials": "Materialien",
+    "materials": "Kurse",
     "about": "Über uns",
     "faq": "FAQ",
     "login": "Anmelden",
@@ -437,7 +437,7 @@
     "lessonsCount": "{{count}} Lektionen"
   },
   "materials": {
-    "title": "Materialien",
+    "title": "Kurse",
     "subtitle": "Herunterladbare Dateien für deine Sitzungen.",
     "loading": "Materialien werden geladen...",
     "empty": "Keine Materialien gefunden. Filter erweitern.",
@@ -545,6 +545,8 @@
     "leave": "Verlassen",
     "shareScreen": "Bildschirm teilen",
     "stopSharingScreen": "Freigabe beenden",
+    "fullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild beenden",
     "screenShareError": "Bildschirm konnte nicht geteilt werden.",
     "reminder5Min": "Noch 5 Minuten in dieser Sitzung",
     "reminder30Sec": "Noch 30 Sekunden in dieser Sitzung",

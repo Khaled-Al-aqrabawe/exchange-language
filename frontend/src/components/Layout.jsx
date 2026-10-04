@@ -1,5 +1,4 @@
 import {
-  BookOpenCheck,
   CalendarClock,
   ChevronDown,
   FileText,
@@ -27,7 +26,6 @@ function useAuthedLinks() {
     ['/partners', t('nav.partners'), Users],
     ['/messages', t('nav.messages'), MessageCircle],
     ['/schedule', t('nav.schedule'), CalendarClock],
-    ['/courses', t('nav.courses'), BookOpenCheck],
     ['/materials', t('nav.materials'), FileText],
   ]
 }
@@ -291,7 +289,6 @@ export default function Layout() {
                   <>
                     <Link to="/home" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.home')}</Link>
                     <Link to="/partners" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.partners')}</Link>
-                    <Link to="/courses" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.courses')}</Link>
                     <Link to="/materials" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.materials')}</Link>
                   </>
                 ) : (

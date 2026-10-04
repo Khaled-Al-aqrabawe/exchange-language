@@ -15,7 +15,7 @@
     "messages": "Mesajlar",
     "schedule": "Seans geçmişi",
     "courses": "Kurslar",
-    "materials": "Materyaller",
+    "materials": "Kurslar",
     "about": "Hakkımızda",
     "faq": "SSS",
     "login": "Giriş yap",
@@ -437,7 +437,7 @@
     "lessonsCount": "{{count}} ders"
   },
   "materials": {
-    "title": "Materyaller",
+    "title": "Kurslar",
     "subtitle": "Seanslarında kullanabileceğin indirilebilir dosyalar.",
     "loading": "Materyaller yükleniyor...",
     "empty": "Materyal bulunamadı. Filtreleri genişletmeyi dene.",
@@ -545,6 +545,8 @@
     "leave": "Ayrıl",
     "shareScreen": "Ekranı paylaş",
     "stopSharingScreen": "Paylaşımı durdur",
+    "fullscreen": "Tam ekran",
+    "exitFullscreen": "Tam ekrandan çık",
     "screenShareError": "Ekranın paylaşılamadı.",
     "reminder5Min": "Bu seansta 5 dakika kaldı",
     "reminder30Sec": "Bu seansta 30 saniye kaldı",

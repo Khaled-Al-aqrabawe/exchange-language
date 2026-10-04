@@ -15,7 +15,7 @@
     "messages": "Mensajes",
     "schedule": "Historial de sesiones",
     "courses": "Cursos",
-    "materials": "Materiales",
+    "materials": "Cursos",
     "about": "Acerca de",
     "faq": "Preguntas frecuentes",
     "login": "Iniciar sesión",
@@ -437,7 +437,7 @@
     "lessonsCount": "{{count}} lecciones"
   },
   "materials": {
-    "title": "Materiales",
+    "title": "Cursos",
     "subtitle": "Archivos descargables para usar en tus sesiones.",
     "loading": "Cargando materiales...",
     "empty": "No se encontraron materiales. Prueba a ampliar los filtros.",
@@ -545,6 +545,8 @@
     "leave": "Salir",
     "shareScreen": "Compartir pantalla",
     "stopSharingScreen": "Dejar de compartir",
+    "fullscreen": "Pantalla completa",
+    "exitFullscreen": "Salir de pantalla completa",
     "screenShareError": "No se pudo compartir tu pantalla.",
     "reminder5Min": "Quedan 5 minutos de esta sesión",
     "reminder30Sec": "Quedan 30 segundos de esta sesión",

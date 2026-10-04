@@ -192,7 +192,7 @@ export default function Home() {
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
           <QuickAction to="/partners" icon={Users} title={t('dashboard.quickActions.findPartner')} subtitle={t('dashboard.quickActions.findPartnerSub')} accent="var(--accent)" delay={1} />
           <QuickAction to="/schedule" icon={CalendarClock} title={t('dashboard.quickActions.schedule')} subtitle={t('dashboard.quickActions.scheduleSub')} accent="var(--accent-2)" delay={2} />
-          <QuickAction to="/courses" icon={BookOpenCheck} title={t('dashboard.quickActions.courses')} subtitle={t('dashboard.quickActions.coursesSub')} accent="#c98a1c" delay={3} />
+          <QuickAction to="/materials" icon={BookOpenCheck} title={t('dashboard.quickActions.courses')} subtitle={t('dashboard.quickActions.coursesSub')} accent="#c98a1c" delay={3} />
         </div>
 
         {/* About / product showcase — the story behind the platform, paired with a live animated preview */}
@@ -305,7 +305,7 @@ export default function Home() {
         {/* Keep learning */}
         {keepLearningCourses.length > 0 && (
           <div className="lp-animate-in lp-delay-6">
-            <SectionHeader title={t('dashboard.keepLearning')} to="/courses" />
+            <SectionHeader title={t('dashboard.keepLearning')} to="/materials" />
             <div className="grid sm:grid-cols-3 gap-4">
               {keepLearningCourses.map((c) => (
                 <Link key={c.id} to={`/courses/${c.id}`} className="lp-surface lp-card--hover block overflow-hidden">

@@ -11,6 +11,8 @@ export const LEVELS = [
   ['fluent', 'Fluent'],
 ]
 
+export const MATERIAL_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+
 export const GENDERS = ['male', 'female']
 
 export const COUNTRIES = [

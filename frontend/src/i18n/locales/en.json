@@ -15,7 +15,7 @@
     "messages": "Messages",
     "schedule": "Session history",
     "courses": "Courses",
-    "materials": "Materials",
+    "materials": "Courses",
     "about": "About",
     "faq": "FAQ",
     "login": "Log in",
@@ -437,7 +437,7 @@
     "lessonsCount": "{{count}} lessons"
   },
   "materials": {
-    "title": "Materials",
+    "title": "Courses",
     "subtitle": "Downloadable files to use in your sessions.",
     "loading": "Loading materials...",
     "empty": "No materials found. Try widening your filters.",
@@ -447,7 +447,9 @@
     "sharedByPartner": "shared",
     "openFile": "Open file",
     "pickMaterial": "Choose a material to share",
-    "stopSharing": "Stop sharing"
+    "stopSharing": "Stop sharing",
+    "filesCount": "{{count}} lessons",
+    "allLevels": "All levels"
   },
   "coursePlayer": {
     "loading": "Loading...",
@@ -545,6 +547,8 @@
     "leave": "Leave",
     "shareScreen": "Share screen",
     "stopSharingScreen": "Stop sharing",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
     "screenShareError": "Could not share your screen.",
     "reminder5Min": "5 minutes left in this session",
     "reminder30Sec": "30 seconds left in this session",
