@@ -26,21 +26,14 @@ const dayOfYear = () => {
 function StatTile({ icon: Icon, value, label, accent, delay }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl p-5 lp-animate-in-scale lp-delay-${delay}`}
-      style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-card-hover)', border: '1px solid var(--line)' }}
+      className={`relative overflow-hidden p-5 lp-animate-in-scale lp-delay-${delay}`}
+      style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-card)', border: '1px solid var(--line)', borderRadius: 'var(--radius-card)', borderTop: '2px solid var(--gold)' }}
     >
-      <span
-        className="pointer-events-none absolute -top-6 -end-6 h-20 w-20 rounded-full blur-2xl"
-        style={{ background: accent, opacity: 0.18 }}
-      />
-      <span
-        className="relative flex h-10 w-10 items-center justify-center rounded-xl mb-3"
-        style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}
-      >
-        <Icon size={18} />
-      </span>
-      <p className="relative font-display text-3xl font-bold leading-none" style={{ color: 'var(--ink)' }}>{value}</p>
-      <p className="relative text-xs mt-1.5" style={{ color: 'var(--ink-soft)' }}>{label}</p>
+      <div className="relative flex items-start justify-between">
+        <p className="font-display text-4xl font-semibold leading-none" style={{ color: 'var(--ink)' }}>{value}</p>
+        <Icon size={18} strokeWidth={1.6} style={{ color: 'var(--ink-soft)' }} />
+      </div>
+      <p className="relative text-xs font-medium mt-3 uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{label}</p>
     </div>
   )
 }
@@ -52,10 +45,10 @@ function QuickAction({ to, icon: Icon, title, subtitle, accent, delay }) {
       className={`group lp-card lp-card--hover flex items-center gap-3.5 lp-animate-in lp-delay-${delay}`}
     >
       <span
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110"
-        style={{ background: accent, color: '#fff' }}
+        className="flex h-11 w-11 shrink-0 items-center justify-center"
+        style={{ border: '1px solid color-mix(in srgb, var(--gold) 55%, var(--line))', borderRadius: 'var(--radius-tag)', color: 'var(--gold)' }}
       >
-        <Icon size={19} />
+        <Icon size={19} strokeWidth={1.6} />
       </span>
       <div className="min-w-0 flex-1">
         <h3 className="font-semibold text-sm" style={{ color: 'var(--ink)' }}>{title}</h3>
@@ -133,37 +126,34 @@ export default function Home() {
       <div className="max-w-5xl mx-auto px-6 pt-8 pb-16">
         {/* Hero banner */}
         <div
-          className="relative overflow-hidden rounded-3xl bg-dots px-7 py-8 sm:px-9 sm:py-10 mb-6 lp-animate-in"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="lp-navy-panel bg-dots px-7 py-8 sm:px-10 sm:py-10 mb-6 lp-animate-in"
         >
-          <span className="pointer-events-none absolute -top-20 -end-10 h-64 w-64 rounded-full blur-3xl lp-blob-drift" style={{ background: 'rgb(255 255 255 / 0.2)' }} />
-          <span className="pointer-events-none absolute -bottom-24 -start-10 h-64 w-64 rounded-full blur-3xl lp-blob-drift" style={{ background: 'rgb(0 0 0 / 0.15)', animationDelay: '4s' }} />
 
           <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
             <div className="flex items-center gap-4">
               <img
                 src={resolveAvatarUrl(profile?.avatar, user?.id, 128)}
                 alt=""
-                className="h-16 w-16 shrink-0 rounded-2xl object-cover"
-                style={{ border: '2px solid rgb(255 255 255 / 0.7)' }}
+                className="h-16 w-16 shrink-0 rounded-full object-cover"
+                style={{ border: '2px solid var(--gold)', padding: '2px', background: 'var(--navy-deep)' }}
               />
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'rgb(255 255 255 / 0.75)' }}>{t('dashboard.eyebrow')}</p>
-                <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white mt-1">
+                <p className="lp-eyebrow">{t('dashboard.eyebrow')}</p>
+                <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight mt-2" style={{ color: 'var(--on-navy)' }}>
                   {user?.first_name ? t('dashboard.welcomeWithName', { name: user.first_name }) : t('dashboard.welcome')}
                 </h1>
                 {profile?.native_language && profile?.learning_language ? (
                   <div className="mt-2.5 flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: 'rgb(255 255 255 / 0.16)', color: '#fff' }}>
+                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: 'rgb(255 255 255 / 0.08)', border: '1px solid rgb(255 255 255 / 0.16)', color: 'var(--on-navy)' }}>
                       {t('dashboard.speaking')} {profile.native_language}
                     </span>
-                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: 'rgb(255 255 255 / 0.16)', color: '#fff' }}>
+                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: 'rgb(255 255 255 / 0.08)', border: '1px solid rgb(255 255 255 / 0.16)', color: 'var(--on-navy)' }}>
                       {t('dashboard.learning')} {profile.learning_language}
                     </span>
                   </div>
                 ) : (
                   <p className="mt-2.5 text-sm">
-                    <Link to="/profile" className="underline underline-offset-2 text-white">
+                    <Link to="/profile" className="underline underline-offset-2" style={{ color: 'var(--gold)' }}>
                       {t('dashboard.finishProfile')}
                     </Link>
                   </p>
@@ -172,8 +162,7 @@ export default function Home() {
             </div>
             <Link
               to="/partners"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white font-semibold text-sm hover:opacity-90 transition-opacity sm:ms-auto shrink-0 w-fit"
-              style={{ color: 'var(--accent)' }}
+              className="lp-btn-gold sm:ms-auto shrink-0 w-fit"
             >
               {t('dashboard.findAPartner')}
               <ArrowRight size={16} className="rtl:rotate-180" />
@@ -185,18 +174,18 @@ export default function Home() {
         <div className="grid grid-cols-3 gap-4 -mt-2 mb-8 relative">
           <StatTile icon={CalendarCheck} value={completedCount} label={t('dashboard.stats.completed')} accent="var(--accent)" delay={1} />
           <StatTile icon={CalendarClock} value={upcoming.length} label={t('dashboard.stats.upcoming')} accent="var(--accent-2)" delay={2} />
-          <StatTile icon={Users} value={connectedPartners.size} label={t('dashboard.stats.partners')} accent="#c98a1c" delay={3} />
+          <StatTile icon={Users} value={connectedPartners.size} label={t('dashboard.stats.partners')} accent="var(--gold)" delay={3} />
         </div>
 
         {/* Quick actions */}
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
           <QuickAction to="/partners" icon={Users} title={t('dashboard.quickActions.findPartner')} subtitle={t('dashboard.quickActions.findPartnerSub')} accent="var(--accent)" delay={1} />
           <QuickAction to="/schedule" icon={CalendarClock} title={t('dashboard.quickActions.schedule')} subtitle={t('dashboard.quickActions.scheduleSub')} accent="var(--accent-2)" delay={2} />
-          <QuickAction to="/materials" icon={BookOpenCheck} title={t('dashboard.quickActions.courses')} subtitle={t('dashboard.quickActions.coursesSub')} accent="#c98a1c" delay={3} />
+          <QuickAction to="/materials" icon={BookOpenCheck} title={t('dashboard.quickActions.courses')} subtitle={t('dashboard.quickActions.coursesSub')} accent="var(--gold)" delay={3} />
         </div>
 
         {/* About / product showcase — the story behind the platform, paired with a live animated preview */}
-        <div className="relative overflow-hidden rounded-3xl mb-8 lp-animate-in lp-delay-4" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+        <div className="relative overflow-hidden mb-8 lp-animate-in lp-delay-4" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-card)' }}>
           <div className="grid lg:grid-cols-2 gap-10 items-center px-7 py-9 sm:px-9">
             <div>
               <p className="lp-eyebrow mb-2" style={{ color: 'var(--accent-2)' }}>{t('landing.realConversations')}</p>

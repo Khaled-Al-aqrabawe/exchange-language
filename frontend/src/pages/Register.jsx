@@ -28,7 +28,7 @@ function StepHeader({ icon: Icon, title, subtitle }) {
       <span className="lp-icon-badge h-12 w-12 mb-4">
         <Icon size={20} />
       </span>
-      <h1 className="font-display text-2xl font-bold tracking-tight lp-gradient-text">{title}</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">{title}</h1>
       <p className="text-sm mt-1.5 max-w-xs" style={{ color: 'var(--ink-soft)' }}>{subtitle}</p>
     </div>
   )
@@ -109,7 +109,7 @@ export default function Register() {
     return (
       <div className="relative overflow-hidden lp-hero-bg bg-dots min-h-[calc(100vh-4rem)] flex flex-col items-center px-6 py-14">
         <AuthHeroBackground />
-        <div className="relative w-full max-w-sm m-auto lp-animate-in">
+        <div className="lp-auth-card relative w-full max-w-md m-auto lp-animate-in">
           <StepHeader icon={MailCheck} title={t('auth.register.checkEmailTitle')} subtitle={t('auth.register.checkEmailBody', { email: registeredEmail })} />
           <EmailVerifyForm email={registeredEmail} onVerified={() => navigate('/home')} />
           <p className="mt-6 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
@@ -124,7 +124,7 @@ export default function Register() {
     <div className="relative overflow-hidden lp-hero-bg bg-dots min-h-[calc(100vh-4rem)] flex flex-col items-center px-6 py-14">
       <AuthHeroBackground />
 
-      <div className="relative w-full max-w-sm m-auto">
+      <div className="lp-auth-card relative w-full max-w-md m-auto">
         <StepDots current={step} />
 
         <div key={step} className="lp-animate-in-scale">

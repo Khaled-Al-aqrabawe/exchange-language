@@ -34,16 +34,9 @@ function useAuthedLinks() {
 const SOCIAL_ICON_PATHS = {
   instagram: (
     <>
-      <defs>
-        <linearGradient id="lp-social-instagram" x1="0" y1="24" x2="24" y2="0">
-          <stop offset="0%" stopColor="#f9ce34" />
-          <stop offset="45%" stopColor="#ee2a7b" />
-          <stop offset="100%" stopColor="#6228d7" />
-        </linearGradient>
-      </defs>
-      <rect x="3" y="3" width="18" height="18" rx="5" stroke="url(#lp-social-instagram)" />
-      <circle cx="12" cy="12" r="4" stroke="url(#lp-social-instagram)" />
-      <circle cx="17.2" cy="6.8" r="0.6" fill="url(#lp-social-instagram)" stroke="none" />
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none" />
     </>
   ),
   x: (
@@ -69,10 +62,10 @@ const SOCIAL_ICON_PATHS = {
 }
 
 const SOCIAL_COLORS = {
-  instagram: '#ee2a7b',
-  x: 'var(--ink)',
-  facebook: '#1877F2',
-  linkedin: '#0A66C2',
+  instagram: 'var(--ink-soft)',
+  x: 'var(--ink-soft)',
+  facebook: 'var(--ink-soft)',
+  linkedin: 'var(--ink-soft)',
 }
 
 function SocialIcon({ name, href, label }) {
@@ -97,8 +90,8 @@ function SocialIcon({ name, href, label }) {
 function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-      <img src={logoIcon} alt="" className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-105" />
-      <span className="font-display text-[18px] font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
+      <img src={logoIcon} alt="" className="lp-logo h-9 w-9 object-contain" />
+      <span className="font-display text-[19px] font-semibold tracking-tight" style={{ color: 'var(--ink)' }}>
         Language Partner
       </span>
     </Link>
@@ -189,7 +182,7 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
       <nav
         className="sticky top-0 z-50"
-        style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)' }}
+        style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)', boxShadow: '0 1px 0 color-mix(in srgb, var(--gold) 22%, transparent)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Logo />
@@ -201,14 +194,13 @@ export default function Layout() {
                     <NavLink
                       key={to}
                       to={to}
-                      className="relative flex items-center gap-1.5 px-2.5 py-2 font-semibold transition-colors shrink-0"
+                      className="relative flex items-center gap-1.5 px-3 h-16 text-[13.5px] font-medium transition-colors shrink-0"
                       style={({ isActive }) => ({
-                        borderRadius: 'var(--radius-tag)',
-                        color: isActive ? 'var(--accent)' : 'var(--ink-soft)',
-                        background: isActive ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'transparent',
+                        color: isActive ? 'var(--ink)' : 'var(--ink-soft)',
+                        boxShadow: isActive ? 'inset 0 -2px 0 var(--gold)' : 'none',
                       })}
                     >
-                      <Icon size={15} strokeWidth={2.25} />
+                      <Icon size={15} strokeWidth={1.9} />
                       <span className="hidden lg:inline">{label}</span>
                     </NavLink>
                   ))}
@@ -232,21 +224,21 @@ export default function Layout() {
               <>
                 <Link
                   to="/about"
-                  className="px-3 py-2 font-medium transition-colors"
+                  className="px-3 py-2 text-[13.5px] font-medium transition-colors"
                   style={{ borderRadius: 'var(--radius-tag)', color: location.pathname === '/about' ? 'var(--ink)' : 'var(--ink-soft)' }}
                 >
                   {t('nav.about')}
                 </Link>
                 <Link
                   to="/faq"
-                  className="px-3 py-2 font-medium transition-colors"
+                  className="px-3 py-2 text-[13.5px] font-medium transition-colors"
                   style={{ borderRadius: 'var(--radius-tag)', color: location.pathname === '/faq' ? 'var(--ink)' : 'var(--ink-soft)' }}
                 >
                   {t('nav.faq')}
                 </Link>
                 <ThemeToggle />
                 <LanguageSwitcher />
-                <Link to="/login" className="px-3 py-2 font-medium" style={{ borderRadius: 'var(--radius-tag)', color: 'var(--ink-soft)' }}>
+                <Link to="/login" className="px-3 py-2 text-[13.5px] font-medium" style={{ borderRadius: 'var(--radius-tag)', color: 'var(--ink-soft)' }}>
                   {t('nav.login')}
                 </Link>
                 <Link to="/register" className="lp-btn-primary ms-1">
@@ -263,12 +255,12 @@ export default function Layout() {
       </main>
 
       {!hideFooter && (
-        <footer className="relative" style={{ background: 'var(--bg)', borderTop: '1px solid var(--line)' }}>
+        <footer className="lp-footer relative" style={{ borderTop: '3px solid var(--gold)' }}>
           <div className="max-w-6xl mx-auto px-6 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2.5 mb-3">
-                <img src={logoIcon} alt="" className="h-8 w-8 object-contain" />
-                <span className="font-display text-base font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
+                <img src={logoIcon} alt="" className="h-8 w-8 object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+                <span className="font-display text-lg font-semibold tracking-tight" style={{ color: 'var(--ink)' }}>
                   {t('footer.tagline')}
                 </span>
               </div>

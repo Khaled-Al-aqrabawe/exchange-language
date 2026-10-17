@@ -1,65 +1,83 @@
 @import "tailwindcss";
 
-/* ---- Design tokens: clean, trustworthy product look ---- */
+/* ---- Design tokens: formal, premium — ivory, deep navy, antique gold ---- */
+
+@theme {
+  /* Squarer, more formal corners across every Tailwind `rounded-*` utility */
+  --radius-md: 0.3125rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.625rem;
+  --radius-3xl: 0.75rem;
+}
 
 :root {
   color-scheme: light;
 
-  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', 'Amiri', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Inter', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
 
-  --bg: #f6f8fb;
+  --bg: #f7f6f2;
   --surface: #ffffff;
-  --surface-2: #eef2f7;
-  --ink: #0f172a;
-  --ink-soft: #566176;
-  --line: #e2e8f0;
-  --accent: #2b59e0;
+  --surface-2: #f1efe8;
+  --ink: #0c1a30;
+  --ink-soft: #596478;
+  --line: #e2ded3;
+  --accent: #15294b;
   --accent-ink: #ffffff;
-  --accent-2: #0d9488;
+  --accent-2: #8c6b20;
   --accent-2-ink: #ffffff;
-  --gradient-brand: linear-gradient(135deg, #3b6cf0, #2447c7);
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.05), 0 4px 12px -6px rgb(15 23 42 / 0.08);
-  --shadow-card-hover: 0 2px 6px rgb(15 23 42 / 0.06), 0 14px 30px -14px rgb(15 23 42 / 0.18);
-  --radius-card: 14px;
+  --gold: #b8923c;
+  --navy-deep: #0a1426;
+  --on-navy: #f3efe6;
+  --on-navy-soft: #a9b3c6;
+  --gradient-brand: linear-gradient(180deg, #1b3258, #112245);
+  --gradient-hero: linear-gradient(160deg, #11213f 0%, #0a1426 70%);
+  --shadow-card: 0 1px 2px rgb(12 26 48 / 0.04), 0 2px 10px -4px rgb(12 26 48 / 0.06);
+  --shadow-card-hover: 0 2px 4px rgb(12 26 48 / 0.05), 0 12px 28px -14px rgb(12 26 48 / 0.2);
+  --radius-card: 10px;
   --radius-pill: 999px;
-  --radius-tag: 9px;
+  --radius-tag: 6px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --bg: #0b1220;
-    --surface: #111a2c;
-    --surface-2: #17223a;
-    --ink: #e8edf6;
-    --ink-soft: #9aa7bd;
-    --line: #223049;
-    --accent: #6d93ff;
-    --accent-ink: #ffffff;
-    --accent-2: #2dd4bf;
-    --accent-2-ink: #04201c;
-    --gradient-brand: linear-gradient(135deg, #4a76f2, #2c4fd0);
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 18px -10px rgb(0 0 0 / 0.5);
+    --bg: #080f1e;
+    --surface: #0e182b;
+    --surface-2: #132038;
+    --ink: #eef0f4;
+    --ink-soft: #97a3b8;
+    --line: #1f2d46;
+    --accent: #d2b06b;
+    --accent-ink: #0a1426;
+    --accent-2: #8fa9d8;
+    --accent-2-ink: #0a1426;
+    --gold: #d2b06b;
+    --gradient-brand: linear-gradient(180deg, #dcbc79, #c19c52);
+    --gradient-hero: linear-gradient(160deg, #10203d 0%, #0a1426 70%);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 14px -8px rgb(0 0 0 / 0.5);
     --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.35), 0 18px 36px -16px rgb(0 0 0 / 0.65);
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0b1220;
-  --surface: #111a2c;
-  --surface-2: #17223a;
-  --ink: #e8edf6;
-  --ink-soft: #9aa7bd;
-  --line: #223049;
-  --accent: #6d93ff;
-  --accent-ink: #ffffff;
-  --accent-2: #2dd4bf;
-  --accent-2-ink: #04201c;
-  --gradient-brand: linear-gradient(135deg, #4a76f2, #2c4fd0);
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 18px -10px rgb(0 0 0 / 0.5);
+  --bg: #080f1e;
+  --surface: #0e182b;
+  --surface-2: #132038;
+  --ink: #eef0f4;
+  --ink-soft: #97a3b8;
+  --line: #1f2d46;
+  --accent: #d2b06b;
+  --accent-ink: #0a1426;
+  --accent-2: #8fa9d8;
+  --accent-2-ink: #0a1426;
+  --gold: #d2b06b;
+  --gradient-brand: linear-gradient(180deg, #dcbc79, #c19c52);
+  --gradient-hero: linear-gradient(160deg, #10203d 0%, #0a1426 70%);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 14px -8px rgb(0 0 0 / 0.5);
   --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.35), 0 18px 36px -16px rgb(0 0 0 / 0.65);
 }
 
@@ -78,25 +96,36 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'cv11', 'ss01';
-  letter-spacing: -0.005em;
 }
 
-h1, h2, h3, .font-display {
-  letter-spacing: -0.02em;
-}
-
-.font-display {
+h1, h2, .font-display {
   font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 .font-mono {
   font-family: var(--font-mono);
 }
 
+/* Arabic joins letters: any tracking breaks the script */
+[dir='rtl'] *,
+:lang(ar) * {
+  letter-spacing: 0 !important;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 /* ---- Motion ---- */
 
 @keyframes lp-fade-up {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -106,7 +135,7 @@ h1, h2, h3, .font-display {
 }
 
 @keyframes lp-scale-in {
-  from { opacity: 0; transform: scale(0.96); }
+  from { opacity: 0; transform: scale(0.985); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -115,34 +144,12 @@ h1, h2, h3, .font-display {
   100% { box-shadow: 0 0 0 10px color-mix(in srgb, currentColor 0%, transparent); }
 }
 
-@keyframes lp-float {
-  0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
-  33% { transform: translateY(-14px) translateX(6px) rotate(2deg); }
-  66% { transform: translateY(8px) translateX(-8px) rotate(-2deg); }
-}
-
-@keyframes lp-blob-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(24px, -18px) scale(1.08); }
-}
-
-.lp-float-1 { animation: lp-float 9s ease-in-out infinite; }
-.lp-float-2 { animation: lp-float 11s ease-in-out infinite 1.2s; }
-.lp-float-3 { animation: lp-float 7.5s ease-in-out infinite 0.6s; }
-.lp-blob-drift { animation: lp-blob-drift 14s ease-in-out infinite; }
-
-@media (prefers-reduced-motion: reduce) {
-  .lp-float-1, .lp-float-2, .lp-float-3, .lp-blob-drift {
-    animation: none;
-  }
-}
-
 .lp-animate-in {
-  animation: lp-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: lp-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .lp-animate-in-fade {
-  animation: lp-fade-in 0.5s ease both;
+  animation: lp-fade-in 0.45s ease both;
 }
 
 .lp-animate-in-scale {
@@ -174,7 +181,7 @@ h1, h2, h3, .font-display {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  padding: 1.25rem;
+  padding: 1.5rem;
   box-shadow: var(--shadow-card);
   transition: box-shadow 220ms ease, transform 220ms ease, border-color 220ms ease;
 }
@@ -183,16 +190,43 @@ h1, h2, h3, .font-display {
 a.lp-card:hover,
 button.lp-card:hover {
   box-shadow: var(--shadow-card-hover);
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
 }
 
+/* Small caps label with a gold rule — the signature of every section */
 .lp-eyebrow {
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--gold) !important;
+}
+
+.lp-eyebrow::before {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.8;
+}
+
+.lp-eyebrow--center::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.8;
+}
+
+.lp-rule {
+  width: 48px;
+  height: 2px;
+  background: var(--gold);
+  border: 0;
 }
 
 .lp-tag {
@@ -210,15 +244,15 @@ button.lp-card:hover {
 }
 
 .lp-tag--accent {
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
   color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
 }
 
 .lp-tag--accent2 {
-  border-color: color-mix(in srgb, var(--accent-2) 40%, var(--line));
+  border-color: color-mix(in srgb, var(--accent-2) 35%, var(--line));
   color: var(--accent-2);
-  background: color-mix(in srgb, var(--accent-2) 12%, var(--surface));
+  background: color-mix(in srgb, var(--accent-2) 9%, var(--surface));
 }
 
 .lp-btn-primary {
@@ -229,22 +263,23 @@ button.lp-card:hover {
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.875rem;
-  padding: 0.6rem 1.15rem;
+  letter-spacing: 0.01em;
+  padding: 0.7rem 1.4rem;
   border-radius: var(--radius-tag);
   background: var(--gradient-brand);
   color: var(--accent-ink);
-  transition: filter 180ms ease, transform 180ms ease, box-shadow 180ms ease;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12), 0 6px 14px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  transition: filter 180ms ease, box-shadow 180ms ease;
+  box-shadow: 0 1px 2px rgb(12 26 48 / 0.18), 0 8px 18px -10px rgb(12 26 48 / 0.5);
 }
 
 .lp-btn-primary:hover {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12), 0 10px 20px -8px color-mix(in srgb, var(--accent) 65%, transparent);
+  filter: brightness(1.12);
+  box-shadow: 0 1px 2px rgb(12 26 48 / 0.18), 0 12px 22px -10px rgb(12 26 48 / 0.55);
 }
 
 .lp-btn-primary:active {
-  transform: translateY(0);
+  filter: brightness(0.96);
 }
 
 .lp-btn-secondary {
@@ -255,41 +290,57 @@ button.lp-card:hover {
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.875rem;
-  padding: 0.6rem 1.15rem;
+  letter-spacing: 0.01em;
+  padding: 0.7rem 1.4rem;
   border-radius: var(--radius-tag);
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, var(--line));
   color: var(--ink);
-  background: var(--surface);
-  transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
+  background: transparent;
+  transition: border-color 180ms ease, background 180ms ease;
 }
 
 .lp-btn-secondary:hover {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
-  background: var(--surface-2);
-  transform: translateY(-1px);
+  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface));
+}
+
+/* Gold button for use on navy surfaces */
+.lp-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  padding: 0.8rem 1.8rem;
+  border-radius: var(--radius-tag);
+  background: linear-gradient(180deg, #dcbc79, #bf9a50);
+  color: #0a1426;
+  transition: filter 180ms ease;
+}
+
+.lp-btn-gold:hover {
+  filter: brightness(1.07);
 }
 
 .lp-social-icon {
-  transition: transform 200ms ease, background 200ms ease, border-color 200ms ease;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
 }
 
 .lp-social-icon:hover {
-  background: color-mix(in srgb, currentColor 14%, transparent);
-  border-color: color-mix(in srgb, currentColor 40%, var(--line));
-  transform: translateY(-2px);
+  color: var(--gold) !important;
+  border-color: var(--gold) !important;
 }
 
 .lp-avatar {
   border-radius: var(--radius-pill);
   object-fit: cover;
-  transition: transform 220ms ease;
 }
 
 .lp-gradient-text {
-  background: var(--gradient-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--gold);
+  font-style: italic;
 }
 
 .lp-gradient-ring {
@@ -301,22 +352,23 @@ button.lp-card:hover {
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  padding: 2px;
-  background: var(--gradient-brand);
+  padding: 1.5px;
+  background: linear-gradient(135deg, var(--gold), transparent 70%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
 }
 
+/* Navy tile with a gold glyph */
 .lp-icon-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-tag);
-  background: var(--gradient-brand);
-  color: var(--accent-ink);
-  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--navy-deep);
+  color: #d9b974;
+  border: 1px solid color-mix(in srgb, #d9b974 30%, transparent);
 }
 
 .lp-hero-bg {
@@ -331,29 +383,54 @@ button.lp-card:hover {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(60% 55% at 15% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 65%),
-    radial-gradient(55% 50% at 100% 20%, color-mix(in srgb, var(--accent-2) 7%, transparent), transparent 65%);
+    radial-gradient(60% 55% at 0% 0%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 65%),
+    radial-gradient(50% 45% at 100% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 65%);
+}
+
+/* Auth / form card */
+.lp-auth-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--gold);
+  border-radius: var(--radius-card);
+  padding: 2.5rem 2.25rem;
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Navy panel (hero banners, CTAs) */
+.lp-navy-panel {
+  position: relative;
+  background: var(--gradient-hero);
+  color: var(--on-navy);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+/* Re-skin everything inside the footer without touching each element */
+.lp-footer {
+  --ink: var(--on-navy);
+  --ink-soft: var(--on-navy-soft);
+  --line: rgb(255 255 255 / 0.12);
+  --accent: var(--gold);
+  background: var(--navy-deep);
+  color: var(--on-navy);
 }
 
 /* ---- Legacy utilities kept for backward compatibility ---- */
 
 .text-gradient {
-  background: var(--gradient-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--gold);
 }
 
 .bg-grid {
   background-image:
-    linear-gradient(to right, rgb(226 232 240 / 0.6) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(226 232 240 / 0.6) 1px, transparent 1px);
+    linear-gradient(to right, rgb(226 222 211 / 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(226 222 211 / 0.6) 1px, transparent 1px);
   background-size: 44px 44px;
 }
 
-/* A pseudo-element overlay rather than `background-image` directly, so it can
-   sit on top of a gradient/solid background set via Tailwind utilities or
-   inline styles instead of fighting them for the same CSS property. */
+/* Subtle texture; invisible on light surfaces, a fine grain on navy ones */
 .bg-dots {
   position: relative;
 }
@@ -363,14 +440,20 @@ button.lp-card:hover {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgb(255 255 255 / 0.10) 1px, transparent 1px);
-  background-size: 16px 16px;
+  background-image: radial-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 18px 18px;
 }
 
-/* Decorative motion (floating words, drifting blobs) is hidden for a calmer, product-grade look */
+/* Decorative motion (floating words, drifting blobs) is intentionally off */
 .lp-blob-drift,
 .lp-float-1,
 .lp-float-2,
 .lp-float-3 {
   display: none !important;
+}
+
+/* The mark is dark line-art: flip it to white on dark surfaces */
+:root[data-theme='dark'] .lp-logo { filter: brightness(0) invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .lp-logo { filter: brightness(0) invert(1); }
 }
