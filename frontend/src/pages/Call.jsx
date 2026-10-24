@@ -996,12 +996,23 @@ export default function Call() {
     navigate(sessionId ? '/schedule' : '/partners', { replace: true })
   }
 
-  // Leaving always ends with the chance to rate the other person (when there is a session).
-  const leaveCall = () => {
+  // Closes the call; the chance to rate the other person (when there is a session) comes next.
+  const finishLeaving = () => {
     if (noteLoadedRef.current) saveNote(noteTextRef.current)
     cleanupMedia()
     if (sessionId) setRatingOpen(true)
     else exitCall()
+  }
+
+  // Leaving first asks "Finished this lesson?" about the lesson on screen (your own lesson,
+  // or either one when studying together), so progress is saved even if the session ends early.
+  const leaveCall = () => {
+    const lesson = sharedRef.current
+    if (lesson?.id && (jointMode || lesson.from === 'you') && !finishPrompt) {
+      askFinished(lesson, 'leave')
+      return
+    }
+    finishLeaving()
   }
 
   const submitRating = async (score, comment) => {
@@ -1282,7 +1293,8 @@ export default function Call() {
       return
     }
     setFinishPrompt(null)
-    if (statusValue === 'complete' && reason === 'next') shareNextLesson()
+    if (reason === 'leave') finishLeaving()
+    else if (statusValue === 'complete' && reason === 'next') shareNextLesson()
   }
 
   // Tell the other side whenever our camera turns on/off (and once the call connects).
@@ -1672,6 +1684,14 @@ export default function Call() {
                 >
                   {t('call.finishedNone')}
                 </button>
+                {finishPrompt.reason === 'leave' && (
+                  <button
+                    onClick={() => { setFinishPrompt(null); finishLeaving() }}
+                    className="w-full rounded-xl px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors"
+                  >
+                    {t('call.skipAndLeave')}
+                  </button>
+                )}
               </div>
             ) : (
               <div className="flex flex-col gap-3">

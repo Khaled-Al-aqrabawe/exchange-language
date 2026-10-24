@@ -623,7 +623,8 @@
     "partnerGoesFirstProgress": "يبدأ شريكك لأنه أنهى دروساً أكثر.",
     "together": "نتعلم معاً",
     "togetherNote": "تتعلمان اللغة نفسها، لذلك تدرسان معاً دون أدوار. يبدأ الدرس من تقدم الأكثر إنجازاً.",
-    "sessionElapsed": "مرّت {{minutes}} دقيقة من الجلسة."
+    "sessionElapsed": "مرّت {{minutes}} دقيقة من الجلسة.",
+    "skipAndLeave": "تخطي والمغادرة"
   },
   "levels": {
     "beginner": "مبتدئ",

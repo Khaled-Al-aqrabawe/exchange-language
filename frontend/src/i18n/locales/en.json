@@ -633,7 +633,8 @@
     "partnerGoesFirstProgress": "Your partner goes first because they have completed more lessons.",
     "together": "Studying together",
     "togetherNote": "You both learn the same language, so you study together with no turns. The lesson starts from whoever has done more.",
-    "sessionElapsed": "{{minutes}} minutes of the session have passed."
+    "sessionElapsed": "{{minutes}} minutes of the session have passed.",
+    "skipAndLeave": "Skip and leave"
   },
   "levels": {
     "beginner": "Beginner",
