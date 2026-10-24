@@ -1,5 +1,10 @@
+import os
+import tempfile
+import zipfile
+
+from django.http import FileResponse
 from rest_framework import permissions, status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.generics import DestroyAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -37,7 +42,11 @@ class MaterialListView(ListCreateAPIView):
         return qs
 
     def get_serializer_context(self):
-        return {'request': self.request}
+        progress = {
+            p.material_id: (p.status, p.last_slide)
+            for p in MaterialProgress.objects.filter(user=self.request.user)
+        }
+        return {'request': self.request, 'progress': progress}
 
     def create(self, request, *args, **kwargs):
         language = request.data.get('language', '')
@@ -119,3 +128,30 @@ class MaterialProgressView(APIView):
             user=request.user, material=material, defaults={'status': status_value, 'last_slide': slide},
         )
         return Response({'material_id': material.id, 'status': status_value, 'last_slide': slide})
+
+
+class MaterialLevelDownloadView(APIView):
+    """One zip with every lesson file of a language and level."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        language = request.query_params.get('language', '')
+        level = request.query_params.get('level', '')
+        if language not in dict(MATERIAL_LANGUAGES) or level not in dict(MATERIAL_LEVELS):
+            raise ValidationError({'detail': 'Choose a language and a level.'})
+        materials = Material.objects.filter(language=language, level=level)
+        if not materials.exists():
+            raise NotFound('No lessons for this level yet.')
+
+        # PowerPoint/Office files are already compressed, so the zip just stores them.
+        archive = tempfile.SpooledTemporaryFile(max_size=64 * 1024 * 1024)
+        with zipfile.ZipFile(archive, 'w', zipfile.ZIP_STORED) as bundle:
+            for material in materials:
+                try:
+                    with material.file.open('rb') as f:
+                        bundle.writestr(os.path.basename(material.file.name), f.read())
+                except (FileNotFoundError, ValueError):
+                    continue
+        archive.seek(0)
+        return FileResponse(archive, as_attachment=True, filename=f'{language}-{level}.zip', content_type='application/zip')

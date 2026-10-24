@@ -2,6 +2,8 @@ import logging
 from datetime import timedelta
 from datetime import timezone as dt_timezone
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -11,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .emails import send_session_confirmed_email, send_session_invitation_email
-from .models import ScheduledSession, SessionNote, SessionRating
+from .models import ScheduledSession, SessionNote, SessionRating, SessionReport
 from .serializers import ScheduledSessionSerializer, SessionRatingSerializer
 
 logger = logging.getLogger(__name__)
@@ -278,6 +280,9 @@ class NotesListView(APIView):
             .select_related('session__host', 'session__partner')
             .order_by('-updated_at')
         )
+        with_user = request.query_params.get('with')
+        if with_user:
+            notes = notes.filter(Q(session__host_id=with_user) | Q(session__partner_id=with_user))
         items = []
         for note in notes:
             session = note.session
@@ -290,3 +295,50 @@ class NotesListView(APIView):
                 'other': {'id': other.id, 'full_name': other.full_name},
             })
         return Response(items)
+
+
+class SessionReportView(APIView):
+    """Report a problem with the other person in a session, or send a note to the admin."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            session = ScheduledSession.objects.select_related('host', 'partner').get(
+                Q(host=request.user) | Q(partner=request.user), pk=pk
+            )
+        except ScheduledSession.DoesNotExist:
+            raise PermissionDenied('Not a participant of this session.')
+
+        reason = request.data.get('reason')
+        if reason not in dict(SessionReport.REASON_CHOICES):
+            raise ValidationError({'reason': 'Choose what the problem was.'})
+        details = (request.data.get('details') or '').strip()
+        if reason in ('other', 'note_to_admin') and not details:
+            raise ValidationError({'details': 'Please write a few words.'})
+
+        other = session.partner if session.host_id == request.user.id else session.host
+        report = SessionReport.objects.create(
+            session=session, reporter=request.user, reported_user=other, reason=reason, details=details,
+        )
+
+        # Tell the admins by email too; the report is saved either way.
+        try:
+            from accounts.models import User
+
+            recipients = list(User.objects.filter(is_superuser=True, is_active=True).values_list('email', flat=True))
+            if recipients:
+                send_mail(
+                    subject=f'[Language Partner] {report.get_reason_display()} - session {session.id}',
+                    message=(
+                        f'{request.user.full_name} ({request.user.email}) about {other.full_name} ({other.email})\n'
+                        f'Session {session.id}, reason: {report.get_reason_display()}\n\n{details or "(no details)"}'
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=recipients,
+                    fail_silently=True,
+                )
+        except Exception:
+            logger.exception('Failed to email admins about report %s', report.id)
+
+        return Response({'id': report.id}, status=status.HTTP_201_CREATED)

@@ -132,6 +132,7 @@ export default function PartnerProfile() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [partner, setPartner] = useState(null)
+  const [myNotes, setMyNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [bookingSlot, setBookingSlot] = useState(null)
   const [showRequestModal, setShowRequestModal] = useState(false)
@@ -144,6 +145,13 @@ export default function PartnerProfile() {
     setVideoPlaying(false)
     loadPartner().finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
+
+  // Notes I wrote during past sessions with this person (private to me).
+  useEffect(() => {
+    client.get('/sessions/notes/', { params: { with: userId } })
+      .then(({ data }) => setMyNotes(data))
+      .catch(() => setMyNotes([]))
   }, [userId])
 
   const handleMessage = async () => {
@@ -318,6 +326,23 @@ export default function PartnerProfile() {
                 </p>
               </div>
             </div>
+
+            {myNotes.length > 0 && (
+              <div className="mb-8">
+                <p className="lp-eyebrow mb-1">{t('partnerProfile.myNotes')}</p>
+                <p className="text-xs mb-3" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.myNotesHint')}</p>
+                <div className="grid gap-3">
+                  {myNotes.map((n) => (
+                    <div key={n.session_id} className="lp-surface p-4">
+                      <p className="text-xs mb-1.5" style={{ color: 'var(--ink-soft)' }}>
+                        {new Date(n.scheduled_time).toLocaleDateString(i18n.resolvedLanguage, { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </p>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--ink)' }}>{n.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <p className="lp-eyebrow mb-2">{t('partnerProfile.availability')}</p>

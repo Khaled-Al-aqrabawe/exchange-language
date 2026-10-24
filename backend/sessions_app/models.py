@@ -72,3 +72,35 @@ class SessionNote(models.Model):
 
     def __str__(self):
         return f'SessionNote<{self.session_id}: {self.user_id}>'
+
+
+class SessionReport(models.Model):
+    """A problem reported about the other person in a session, or a note sent to the admin."""
+
+    REASON_CHOICES = [
+        ('harassment', 'Harassment or abuse'),
+        ('inappropriate_content', 'Inappropriate content'),
+        ('no_show', 'Did not show up'),
+        ('late_or_left_early', 'Late or left early'),
+        ('off_topic', 'Not practicing the language'),
+        ('technical', 'Audio or video problems'),
+        ('fake_profile', 'Fake profile'),
+        ('spam', 'Spam'),
+        ('other', 'Other'),
+        ('note_to_admin', 'Note to admin'),
+    ]
+
+    session = models.ForeignKey(ScheduledSession, related_name='reports', on_delete=models.CASCADE)
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='session_reports_made', on_delete=models.CASCADE)
+    # The other person in the session; the same for every reason, including a plain note to the admin.
+    reported_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='session_reports_received', on_delete=models.CASCADE)
+    reason = models.CharField(max_length=30, choices=REASON_CHOICES)
+    details = models.TextField(blank=True)
+    resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'SessionReport<{self.session_id}: {self.reporter_id} -> {self.reported_user_id} ({self.reason})>'

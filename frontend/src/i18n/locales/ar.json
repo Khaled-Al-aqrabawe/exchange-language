@@ -341,7 +341,9 @@
     "ratingSummary": "{{rating}} ({{count}})",
     "availability": "الأوقات المتاحة",
     "availabilityBookHint": "اضغط على وقت لإرسال طلب جلسة في ذلك الموعد.",
-    "book": "احجز"
+    "book": "احجز",
+    "myNotes": "ملاحظاتك عن هذا الشخص",
+    "myNotesHint": "من جلساتكما معاً. أنت فقط من يراها."
   },
   "messages": {
     "title": "الرسائل",
@@ -458,7 +460,13 @@
     "uploaded": "تم رفع {{count}} ملف.",
     "uploadError": "فشل الرفع. حاول مرة أخرى.",
     "delete": "حذف",
-    "confirmDelete": "حذف \"{{title}}\"؟"
+    "confirmDelete": "حذف \"{{title}}\"؟",
+    "completed": "مكتمل",
+    "inProgress": "قيد التقدم - شريحة {{slide}}",
+    "levelDone": "الدورة مكتملة",
+    "progressCount": "{{done}} من {{total}} مكتمل",
+    "downloadLevel": "تنزيل المستوى كاملاً",
+    "preparing": "جارٍ التحضير..."
   },
   "coursePlayer": {
     "loading": "جارٍ التحميل...",
@@ -605,7 +613,10 @@
     "downloadNotes": "تنزيل الملاحظات",
     "downloadsTitle": "تنزيل",
     "pen": "قلم",
-    "clearDrawing": "مسح الرسم"
+    "clearDrawing": "مسح الرسم",
+    "sendToAdmin": "إرسال للمسؤول",
+    "sentToAdmin": "تم الإرسال للمسؤول",
+    "text": "نص"
   },
   "levels": {
     "beginner": "مبتدئ",
@@ -639,5 +650,28 @@
     "saving": "جارٍ الحفظ...",
     "saved": "تم الحفظ",
     "error": "تعذّر الحفظ"
+  },
+  "report": {
+    "link": "الإبلاغ عن مشكلة",
+    "title": "الإبلاغ عن مشكلة مع {{name}}",
+    "subtitle": "اختر ما حدث. سيراه المسؤول.",
+    "chooseReason": "يرجى اختيار نوع المشكلة.",
+    "detailsRequired": "يرجى كتابة بضع كلمات عن المشكلة.",
+    "detailsPlaceholder": "أخبرنا المزيد (اختياري)...",
+    "send": "إرسال البلاغ",
+    "error": "تعذّر إرسال البلاغ. حاول مرة أخرى.",
+    "sentTitle": "تم إرسال البلاغ",
+    "sentBody": "شكراً لك. وصل البلاغ إلى المسؤول وسيتم النظر فيه.",
+    "reasons": {
+      "harassment": "تحرش أو إساءة",
+      "inappropriate_content": "محتوى غير لائق",
+      "no_show": "لم يحضر",
+      "late_or_left_early": "تأخر أو غادر مبكراً",
+      "off_topic": "لا يمارس اللغة",
+      "technical": "مشاكل في الصوت أو الفيديو",
+      "fake_profile": "حساب مزيف",
+      "spam": "رسائل مزعجة",
+      "other": "أخرى"
+    }
   }
 }

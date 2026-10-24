@@ -1,4 +1,4 @@
-import { Check, Clock, Download, Eraser, FileText, NotebookPen, Pen, Star, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, Download, Eraser, FileText, Flag, NotebookPen, Pen, Send, Star, Type, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -91,9 +91,11 @@ const PEN_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#facc15']
 
 // A transparent canvas over the shared file. Points are stored as fractions of the
 // canvas size, so a drawing lines up on screens of different sizes.
-function AnnotationLayer({ active, color, strokes, onDraw }) {
+function AnnotationLayer({ active, tool, color, strokes, onDraw }) {
   const canvasRef = useRef(null)
   const current = useRef(null)
+  const [textAt, setTextAt] = useState(null)
+  const [textValue, setTextValue] = useState('')
 
   const paint = () => {
     const canvas = canvasRef.current
@@ -107,6 +109,13 @@ function AnnotationLayer({ active, color, strokes, onDraw }) {
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     strokes.forEach((stroke) => {
+      if (stroke.type === 'text') {
+        ctx.fillStyle = stroke.color
+        ctx.font = `600 ${stroke.size * height}px sans-serif`
+        ctx.textBaseline = 'middle'
+        ctx.fillText(stroke.text, stroke.x * width, stroke.y * height)
+        return
+      }
       ctx.strokeStyle = stroke.color
       ctx.lineWidth = stroke.w
       ctx.beginPath()
@@ -136,7 +145,22 @@ function AnnotationLayer({ active, color, strokes, onDraw }) {
     c.last = performance.now()
   }
 
+  const commitText = () => {
+    const value = textValue.trim()
+    if (value && textAt) {
+      onDraw({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, type: 'text', x: textAt[0], y: textAt[1], text: value, color, size: 0.04 })
+    }
+    setTextAt(null)
+    setTextValue('')
+  }
+
   const onPointerDown = (e) => {
+    if (tool === 'text') {
+      e.preventDefault()
+      commitText()
+      setTextAt(point(e))
+      return
+    }
     e.currentTarget.setPointerCapture(e.pointerId)
     current.current = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, color, w: 3, last: 0, pending: [point(e)] }
     flush()
@@ -153,15 +177,71 @@ function AnnotationLayer({ active, color, strokes, onDraw }) {
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 h-full w-full z-[6]"
-      style={{ pointerEvents: active ? 'auto' : 'none', cursor: 'crosshair', touchAction: 'none' }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 h-full w-full z-[6]"
+        style={{ pointerEvents: active ? 'auto' : 'none', cursor: tool === 'text' ? 'text' : 'crosshair', touchAction: 'none' }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      />
+      {active && tool === 'text' && textAt && (
+        <input
+          autoFocus
+          value={textValue}
+          onChange={(e) => setTextValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commitText()
+            if (e.key === 'Escape') { setTextAt(null); setTextValue('') }
+          }}
+          onBlur={commitText}
+          className="absolute z-[7] w-52 rounded-md bg-black/70 px-2 py-1 text-sm text-white focus:outline-none"
+          style={{ left: `${textAt[0] * 100}%`, top: `${textAt[1] * 100}%`, transform: 'translateY(-50%)', border: `2px solid ${color}` }}
+        />
+      )}
+    </>
+  )
+}
+
+// Pen / text / colour / clear buttons, used in the shared-file header and over a shared screen.
+function AnnotationToolbar({ pen, t }) {
+  const toolButton = (name, Icon, title) => (
+    <button
+      type="button"
+      onClick={() => pen.onTool(name)}
+      className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${pen.on && pen.tool === name ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+      title={title}
+    >
+      <Icon size={14} />
+    </button>
+  )
+  return (
+    <>
+      {pen.on && PEN_COLORS.map((c) => (
+        <button
+          key={c}
+          type="button"
+          onClick={() => pen.onColor(c)}
+          className="h-5 w-5 rounded-full transition-transform hover:scale-110"
+          style={{ background: c, outline: pen.color === c ? '2px solid #fff' : 'none', outlineOffset: '1px' }}
+          aria-label={c}
+        />
+      ))}
+      {toolButton('pen', Pen, t('call.pen'))}
+      {toolButton('text', Type, t('call.text'))}
+      {pen.strokes.length > 0 && (
+        <button
+          type="button"
+          onClick={pen.onClear}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+          title={t('call.clearDrawing')}
+        >
+          <Eraser size={14} />
+        </button>
+      )}
+    </>
   )
 }
 
@@ -179,7 +259,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
   // for this exact URL from before that header was removed server-side - a
   // fixed query param forces a fresh request instead of reusing that cache entry.
   const embedSrc = isOffice
-    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(material.file)}${material.start_slide > 1 ? `&wdStartOn=${material.start_slide}` : ''}`
+    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(material.file)}&wdAr=1.7777777777777777${material.start_slide > 1 ? `&wdStartOn=${material.start_slide}` : ''}`
     : `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
 
   return (
@@ -193,34 +273,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
           </span>
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
-          {pen.on && PEN_COLORS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => pen.onColor(c)}
-              className="h-5 w-5 rounded-full transition-transform hover:scale-110"
-              style={{ background: c, outline: pen.color === c ? '2px solid #fff' : 'none', outlineOffset: '1px' }}
-              aria-label={c}
-            />
-          ))}
-          <button
-            type="button"
-            onClick={pen.onToggle}
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${pen.on ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
-            title={t('call.pen')}
-          >
-            <Pen size={14} />
-          </button>
-          {pen.strokes.length > 0 && (
-            <button
-              type="button"
-              onClick={pen.onClear}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-              title={t('call.clearDrawing')}
-            >
-              <Eraser size={14} />
-            </button>
-          )}
+          <AnnotationToolbar pen={pen} t={t} />
           {material.start_slide > 1 && (
             <span className="text-xs text-amber-300">{t('call.startAtSlide', { n: material.start_slide })}</span>
           )}
@@ -256,14 +309,99 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
             <p className="text-sm">{name}</p>
           </div>
         )}
-        <AnnotationLayer active={pen.on} color={pen.color} strokes={pen.strokes} onDraw={pen.onDraw} />
+        <AnnotationLayer active={pen.on} tool={pen.tool} color={pen.color} strokes={pen.strokes} onDraw={pen.onDraw} />
+      </div>
+    </div>
+  )
+}
+
+const REPORT_REASONS = [
+  'harassment', 'inappropriate_content', 'no_show', 'late_or_left_early', 'off_topic', 'technical', 'fake_profile', 'spam', 'other',
+]
+
+// Report a problem with the other person; the admin receives it with the chosen reason.
+function ReportModal({ sessionId, partnerName, onClose, t }) {
+  const [reason, setReason] = useState('')
+  const [details, setDetails] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  const submit = async () => {
+    if (!reason) {
+      setError(t('report.chooseReason'))
+      return
+    }
+    if (reason === 'other' && !details.trim()) {
+      setError(t('report.detailsRequired'))
+      return
+    }
+    setBusy(true)
+    try {
+      await client.post(`/sessions/${sessionId}/report/`, { reason, details })
+      setSent(true)
+    } catch {
+      setError(t('report.error'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4">
+      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-900 border border-white/10 p-6">
+        {sent ? (
+          <div className="text-center">
+            <p className="text-lg font-semibold text-white mb-2">{t('report.sentTitle')}</p>
+            <p className="text-sm text-slate-400 mb-5">{t('report.sentBody')}</p>
+            <button onClick={onClose} className="lp-btn-primary w-full justify-center">{t('common.close')}</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-lg font-semibold text-white mb-1">{t('report.title', { name: partnerName })}</p>
+            <p className="text-sm text-slate-400 mb-4">{t('report.subtitle')}</p>
+            <div className="flex flex-col gap-1.5 mb-4">
+              {REPORT_REASONS.map((r) => (
+                <label
+                  key={r}
+                  className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm cursor-pointer transition-colors ${reason === r ? 'bg-white/15 text-white' : 'text-slate-300 hover:bg-white/5'}`}
+                >
+                  <input
+                    type="radio"
+                    name="report-reason"
+                    checked={reason === r}
+                    onChange={() => { setReason(r); setError('') }}
+                    style={{ accentColor: 'var(--accent)' }}
+                  />
+                  {t(`report.reasons.${r}`)}
+                </label>
+              ))}
+            </div>
+            <textarea
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              rows={3}
+              placeholder={t('report.detailsPlaceholder')}
+              className="w-full rounded-xl px-3.5 py-2.5 text-sm bg-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            />
+            {error && <p className="text-sm mt-2" style={{ color: '#f87171' }}>{error}</p>}
+            <div className="flex justify-end gap-2 mt-5">
+              <button onClick={onClose} className="text-sm px-4 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-colors">
+                {t('common.cancel')}
+              </button>
+              <button onClick={submit} disabled={busy} className="lp-btn-primary text-sm px-4 py-2 disabled:opacity-50">
+                {busy ? t('schedule.submitting') : t('report.send')}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
 }
 
 // Shown when leaving a session (completed or not) so each person can rate the other.
-function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, t }) {
+function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, onReport, t }) {
   const [score, setScore] = useState(0)
   const [hoverScore, setHoverScore] = useState(0)
   const [comment, setComment] = useState('')
@@ -320,7 +458,7 @@ function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, t }) {
               onMouseLeave={() => setHoverScore(0)}
               aria-label={t('schedule.rateStars', { count: value })}
             >
-              <Star size={28} fill={value <= (hoverScore || score) ? 'var(--accent)' : 'none'} style={{ color: 'var(--accent)' }} />
+              <Star size={28} fill={value <= (hoverScore || score) ? '#e6b422' : 'none'} style={{ color: '#e6b422' }} />
             </button>
           ))}
         </div>
@@ -332,13 +470,18 @@ function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, t }) {
           className="w-full rounded-xl px-3.5 py-2.5 text-sm bg-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
         {error && <p className="text-sm mt-2" style={{ color: '#f87171' }}>{error}</p>}
-        <div className="flex justify-end gap-2 mt-5">
+        <div className="flex items-center justify-between gap-2 mt-5">
+          <button type="button" onClick={onReport} className="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80" style={{ color: '#f87171' }}>
+            <Flag size={14} /> {t('report.link')}
+          </button>
+          <div className="flex gap-2">
           <button onClick={onSkip} disabled={submitting} className="text-sm px-4 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-colors">
             {t('call.skipRating')}
           </button>
           <button onClick={submit} disabled={submitting} className="lp-btn-primary text-sm px-4 py-2 disabled:opacity-50">
             {submitting ? t('schedule.submitting') : t('schedule.rateSubmit')}
           </button>
+          </div>
         </div>
       </div>
     </div>
@@ -404,6 +547,8 @@ export default function Call() {
   const [showCompletedBox, setShowCompletedBox] = useState(false)
   const [ratingOpen, setRatingOpen] = useState(false)
   const [otherName, setOtherName] = useState('')
+  const [reportOpen, setReportOpen] = useState(false)
+  const [adminNoteState, setAdminNoteState] = useState('idle')
   // Notepad sidebar (saved on the server per session) and the files shared during the call.
   const [notesOpen, setNotesOpen] = useState(false)
   const [noteText, setNoteText] = useState('')
@@ -415,6 +560,8 @@ export default function Call() {
   const [strokes, setStrokes] = useState([])
   const [penOn, setPenOn] = useState(false)
   const [penColor, setPenColor] = useState(PEN_COLORS[0])
+  const [penTool, setPenTool] = useState('pen')
+  const [remoteSharing, setRemoteSharing] = useState(false)
   // Whether the other person's camera is on (their box is hidden while it is off).
   const [remoteCamOn, setRemoteCamOn] = useState(true)
 
@@ -569,6 +716,9 @@ export default function Call() {
           rememberFile(data.material)
         } else if (data.type === 'live-start') {
           setLiveStart((v) => v || Date.now())
+        } else if (data.type === 'screen-state') {
+          setRemoteSharing(!!data.on)
+          if (!data.on) setStrokes([])
         } else if (data.type === 'cam-state') {
           setRemoteCamOn(!!data.on)
         } else if (data.type === 'draw' && data.chunk) {
@@ -829,6 +979,16 @@ export default function Call() {
   }, [liveStart, roomId])
   noteTextRef.current = noteText
 
+  const sendNoteToAdmin = async () => {
+    setAdminNoteState('sending')
+    try {
+      await client.post(`/sessions/${sessionId}/report/`, { reason: 'note_to_admin', details: noteTextRef.current })
+      setAdminNoteState('sent')
+    } catch {
+      setAdminNoteState('error')
+    }
+  }
+
   const saveNote = (text) => {
     if (!sessionId) return Promise.resolve()
     setNoteState('saving')
@@ -942,6 +1102,11 @@ export default function Call() {
     if (joined && status === 'connected') send({ type: 'cam-state', on: camOn })
   }, [joined, status, camOn])
 
+  useEffect(() => {
+    if (joined && status === 'connected') send({ type: 'screen-state', on: screenSharing })
+    if (!screenSharing) setStrokes((list) => (list.length && !sharedRef.current ? [] : list))
+  }, [joined, status, screenSharing])
+
   const drawLocal = (chunk) => {
     addStrokeChunk(chunk)
     send({ type: 'draw', chunk })
@@ -951,6 +1116,22 @@ export default function Call() {
     setStrokes([])
     send({ type: 'draw-clear' })
   }
+
+  const penApi = {
+    on: penOn,
+    tool: penTool,
+    color: penColor,
+    strokes,
+    // choosing a tool turns drawing on; choosing the active tool again turns it off
+    onTool: (name) => {
+      if (penOn && penTool === name) setPenOn(false)
+      else { setPenTool(name); setPenOn(true) }
+    },
+    onColor: setPenColor,
+    onDraw: drawLocal,
+    onClear: clearDrawing,
+  }
+  const screenAnnotating = (screenSharing || remoteSharing) && !sharedMaterial
 
   const isConnected = status === 'connected'
   const statusText = t(statusKeys[status] || statusKeys.connecting)
@@ -1018,7 +1199,7 @@ export default function Call() {
 
   return (
     <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className={`${sharedMaterial ? 'max-w-[1400px]' : 'max-w-4xl'} mx-auto px-6 py-10 transition-[max-width] duration-300`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
@@ -1068,7 +1249,7 @@ export default function Call() {
           <div
             ref={stageRef}
             className="relative bg-slate-900 rounded-2xl overflow-hidden lp-animate-in-scale"
-            style={{ aspectRatio: '16 / 9', boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)', border: '1px solid rgb(255 255 255 / 0.1)' }}
+            style={{ aspectRatio: sharedMaterial ? '16 / 10' : '16 / 9', boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)', border: '1px solid rgb(255 255 255 / 0.1)' }}
           >
             {/* While a file is shared it covers the stage, so the other user shrinks into a box above yours. */}
             <video
@@ -1091,17 +1272,17 @@ export default function Call() {
                 material={sharedMaterial}
                 onClose={closeSharedMaterial}
                 onFinish={sharedMaterial.from === 'you' && sharedMaterial.id ? () => askFinished(sharedMaterial, 'next') : undefined}
-                pen={{
-                  on: penOn,
-                  color: penColor,
-                  strokes,
-                  onToggle: () => setPenOn((v) => !v),
-                  onColor: setPenColor,
-                  onDraw: drawLocal,
-                  onClear: clearDrawing,
-                }}
+                pen={penApi}
                 t={t}
               />
+            )}
+            {screenAnnotating && (
+              <>
+                <AnnotationLayer active={penOn} tool={penTool} color={penColor} strokes={strokes} onDraw={drawLocal} />
+                <div className="absolute top-3 start-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-slate-900/80 px-3 py-1.5">
+                  <AnnotationToolbar pen={penApi} t={t} />
+                </div>
+              </>
             )}
             <video
               ref={localVideoRef}
@@ -1157,6 +1338,15 @@ export default function Call() {
           >
             <FileText size={18} />
           </button>
+          {sessionId && (
+            <button
+              onClick={() => setReportOpen(true)}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all hover:scale-105"
+              title={t('report.link')}
+            >
+              <Flag size={18} />
+            </button>
+          )}
           <button
             onClick={() => setNotesOpen((v) => !v)}
             className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
@@ -1306,7 +1496,26 @@ export default function Call() {
             placeholder={t('call.notesPlaceholder')}
             className="flex-1 w-full resize-none bg-transparent p-4 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
           />
+          {sessionId && (
+            <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-white/10">
+              <span className="text-xs text-slate-400">
+                {adminNoteState === 'sent' ? t('call.sentToAdmin') : adminNoteState === 'error' ? t('call.notesError') : ''}
+              </span>
+              <button
+                type="button"
+                onClick={sendNoteToAdmin}
+                disabled={!noteText.trim() || adminNoteState === 'sending'}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 h-8 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-40 transition-colors"
+              >
+                <Send size={13} /> {t('call.sendToAdmin')}
+              </button>
+            </div>
+          )}
         </aside>
+      )}
+
+      {reportOpen && (
+        <ReportModal sessionId={sessionId} partnerName={otherName || t('call.yourPartner')} onClose={() => setReportOpen(false)} t={t} />
       )}
 
       {ratingOpen && (
@@ -1316,6 +1525,7 @@ export default function Call() {
           notes={noteText}
           onSubmit={submitRating}
           onSkip={exitCall}
+          onReport={() => setReportOpen(true)}
           t={t}
         />
       )}

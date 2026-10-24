@@ -27,3 +27,15 @@ export function downloadText(filename, text) {
   link.remove()
   URL.revokeObjectURL(objectUrl)
 }
+
+// Saves an in-memory blob (e.g. a zip returned by the API) under the given file name.
+export function downloadBlob(filename, blob) {
+  const objectUrl = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = objectUrl
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(objectUrl)
+}

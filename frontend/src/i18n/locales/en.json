@@ -345,7 +345,9 @@
     "ratingSummary": "{{rating}} ({{count}})",
     "availability": "Availability",
     "availabilityBookHint": "Tap a time to send a session request for that slot.",
-    "book": "Book"
+    "book": "Book",
+    "myNotes": "Your notes about this person",
+    "myNotesHint": "From your sessions together. Only you can see these."
   },
   "messages": {
     "title": "Messages",
@@ -464,7 +466,13 @@
     "uploaded": "{{count}} file(s) uploaded.",
     "uploadError": "Upload failed. Please try again.",
     "delete": "Delete",
-    "confirmDelete": "Delete \"{{title}}\"?"
+    "confirmDelete": "Delete \"{{title}}\"?",
+    "completed": "Completed",
+    "inProgress": "In progress - slide {{slide}}",
+    "levelDone": "Course completed",
+    "progressCount": "{{done}} of {{total}} done",
+    "downloadLevel": "Download full level",
+    "preparing": "Preparing..."
   },
   "coursePlayer": {
     "loading": "Loading...",
@@ -615,7 +623,10 @@
     "downloadNotes": "Download notes",
     "downloadsTitle": "Download",
     "pen": "Pen",
-    "clearDrawing": "Clear drawing"
+    "clearDrawing": "Clear drawing",
+    "sendToAdmin": "Send to admin",
+    "sentToAdmin": "Sent to admin",
+    "text": "Text"
   },
   "levels": {
     "beginner": "Beginner",
@@ -665,5 +676,28 @@
     "saving": "Saving...",
     "saved": "Saved",
     "error": "Could not save"
+  },
+  "report": {
+    "link": "Report a problem",
+    "title": "Report a problem with {{name}}",
+    "subtitle": "Choose what happened. The admin will see this.",
+    "chooseReason": "Please choose what the problem was.",
+    "detailsRequired": "Please write a few words about the problem.",
+    "detailsPlaceholder": "Tell us more (optional)...",
+    "send": "Send report",
+    "error": "Could not send the report. Please try again.",
+    "sentTitle": "Report sent",
+    "sentBody": "Thank you. The admin has received it and will look into it.",
+    "reasons": {
+      "harassment": "Harassment or abuse",
+      "inappropriate_content": "Inappropriate content",
+      "no_show": "Did not show up",
+      "late_or_left_early": "Late or left early",
+      "off_topic": "Not practicing the language",
+      "technical": "Audio or video problems",
+      "fake_profile": "Fake profile",
+      "spam": "Spam",
+      "other": "Other"
+    }
   }
 }

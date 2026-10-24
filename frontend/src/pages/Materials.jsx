@@ -1,10 +1,10 @@
-import { ArrowLeft, Download, ExternalLink, FileText, FolderOpen, SlidersHorizontal, Trash2, Upload, X } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Download, ExternalLink, FileText, FolderOpen, SlidersHorizontal, Trash2, Upload, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { LANGUAGES, MATERIAL_LEVELS } from '../constants'
-import { downloadFile } from '../utils/downloadFile'
+import { downloadBlob, downloadFile } from '../utils/downloadFile'
 
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
 const OFFICE_EXTENSIONS = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx']
@@ -140,6 +140,24 @@ export default function Materials() {
   const [openLevel, setOpenLevel] = useState(null)
   const [openLang, setOpenLang] = useState(null)
   const [viewing, setViewing] = useState(null)
+  const [zipBusy, setZipBusy] = useState(false)
+
+  // How many lessons of a language/level the user has completed.
+  const levelProgress = (lang, lvl) => {
+    const lessons = materials.filter((m) => m.language === lang && m.level === lvl)
+    const done = lessons.filter((m) => m.my_status === 'complete').length
+    return { total: lessons.length, done, finished: lessons.length > 0 && done === lessons.length }
+  }
+
+  const downloadLevel = async (lang, lvl) => {
+    setZipBusy(true)
+    try {
+      const { data } = await client.get('/courses/materials/download/', { params: { language: lang, level: lvl }, responseType: 'blob' })
+      downloadBlob(`${lang}-${lvl}.zip`, data)
+    } finally {
+      setZipBusy(false)
+    }
+  }
 
   const language = filters.language || openLang
   const scoped = materials.filter((m) => !language || m.language === language)
@@ -208,6 +226,7 @@ export default function Materials() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                   {MATERIAL_LEVELS.map((lvl) => {
                     const count = materials.filter((m) => m.language === lang && m.level === lvl).length
+                    const progress = levelProgress(lang, lvl)
                     return (
                       <button
                         key={lvl}
@@ -219,6 +238,17 @@ export default function Materials() {
                       >
                         <span className="block text-lg font-bold lp-gradient-text mx-auto w-fit">{lvl}</span>
                         <span className="block text-xs" style={{ color: 'var(--ink-soft)' }}>{t('materials.filesCount', { count })}</span>
+                        {count > 0 && (
+                          progress.finished ? (
+                            <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--accent-2)' }}>
+                              <CheckCircle2 size={12} /> {t('materials.levelDone')}
+                            </span>
+                          ) : (
+                            <span className="mt-1 block text-xs" style={{ color: 'var(--ink-soft)' }}>
+                              {t('materials.progressCount', { done: progress.done, total: progress.total })}
+                            </span>
+                          )
+                        )}
                       </button>
                     )
                   })}
@@ -228,14 +258,35 @@ export default function Materials() {
           </div>
         ) : (
           <>
-          <button
-            type="button"
-            onClick={() => { setOpenLevel(null); setOpenLang(null) }}
-            className="inline-flex items-center gap-1.5 text-sm font-medium mb-4"
-            style={{ color: 'var(--ink-soft)' }}
-          >
-            <ArrowLeft size={15} /> <span className="lp-gradient-text">{language} · {openLevel}</span>
-          </button>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => { setOpenLevel(null); setOpenLang(null) }}
+                className="inline-flex items-center gap-1.5 text-sm font-medium"
+                style={{ color: 'var(--ink-soft)' }}
+              >
+                <ArrowLeft size={15} /> <span className="lp-gradient-text">{language} · {openLevel}</span>
+              </button>
+              {levelProgress(language, openLevel).finished ? (
+                <span className="lp-tag lp-tag--accent2 inline-flex items-center gap-1">
+                  <CheckCircle2 size={12} /> {t('materials.levelDone')}
+                </span>
+              ) : (
+                <span className="lp-tag">
+                  {t('materials.progressCount', { done: levelProgress(language, openLevel).done, total: levelProgress(language, openLevel).total })}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => downloadLevel(language, openLevel)}
+              disabled={zipBusy}
+              className="lp-btn-primary text-sm disabled:opacity-50"
+            >
+              <Download size={15} /> {zipBusy ? t('materials.preparing') : t('materials.downloadLevel')}
+            </button>
+          </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {scoped.filter((m) => m.level === openLevel).map((m, i) => (
               <div
@@ -247,19 +298,29 @@ export default function Materials() {
                 </span>
                 <h3 className="font-semibold mb-1" style={{ color: 'var(--ink)' }}>{m.title}</h3>
                 <p className="text-sm mb-2 font-medium lp-gradient-text w-fit">{m.language} · {m.level}</p>
+                {m.my_status === 'complete' && (
+                  <span className="lp-tag lp-tag--accent2 mb-2 inline-flex w-fit items-center gap-1">
+                    <CheckCircle2 size={12} /> {t('materials.completed')}
+                  </span>
+                )}
+                {m.my_status === 'partial' && (
+                  <span className="lp-tag mb-2 inline-flex w-fit items-center gap-1">
+                    {t('materials.inProgress', { slide: m.my_slide })}
+                  </span>
+                )}
                 <p className="text-sm line-clamp-2 flex-1" style={{ color: 'var(--ink-soft)' }}>{m.description}</p>
-                <div className="flex gap-2 mt-4">
+                <div className="flex flex-wrap gap-2 mt-4">
                   <button
                     type="button"
                     onClick={() => setViewing(m)}
-                    className="lp-btn-secondary flex-1 justify-center text-sm"
+                    className="lp-btn-secondary flex-1 justify-center text-sm whitespace-nowrap"
                   >
                     <ExternalLink size={15} /> {t('materials.openFile')}
                   </button>
                   <button
                     type="button"
                     onClick={() => downloadFile(m.file, m.file_name)}
-                    className="lp-btn-secondary flex-1 justify-center text-sm"
+                    className="lp-btn-secondary flex-1 justify-center text-sm whitespace-nowrap"
                   >
                     <Download size={15} /> {t('materials.download')}
                   </button>

@@ -115,8 +115,8 @@ function RatingModal({ partnerName, onDismiss, onConfirm }) {
             >
               <Star
                 size={26}
-                fill={value <= (hoverScore || score) ? 'var(--accent)' : 'none'}
-                style={{ color: 'var(--accent)' }}
+                fill={value <= (hoverScore || score) ? 'var(--gold)' : 'none'}
+                style={{ color: 'var(--gold)' }}
               />
             </button>
           ))}

@@ -91,3 +91,31 @@ class NextLessonTests(APITestCase):
         self.assertIsNone(self._next()['material'])
         self.assertEqual(self._save(self.lessons[0], 'partial').status_code, 400)
         self.assertEqual(self._save(self.lessons[0], 'bogus').status_code, 400)
+
+
+class LevelDownloadAndStatusTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('z@example.com', 'pw12345678')
+        self.l1 = Material.objects.create(language='English', level='A1', title='L1', order=1,
+                                          file=SimpleUploadedFile('English-A1-Lesson-01-x.pptx', b'one'))
+        self.l2 = Material.objects.create(language='English', level='A1', title='L2', order=2,
+                                          file=SimpleUploadedFile('English-A1-Lesson-02-y.pptx', b'two'))
+        self.client.force_authenticate(self.user)
+
+    def test_list_shows_my_status(self):
+        MaterialProgress.objects.create(user=self.user, material=self.l1, status='complete')
+        MaterialProgress.objects.create(user=self.user, material=self.l2, status='partial', last_slide=5)
+        rows = {m['id']: m for m in self.client.get('/api/courses/materials/').data}
+        self.assertEqual(rows[self.l1.id]['my_status'], 'complete')
+        self.assertEqual((rows[self.l2.id]['my_status'], rows[self.l2.id]['my_slide']), ('partial', 5))
+
+    def test_full_level_zip(self):
+        import io
+        import zipfile
+
+        r = self.client.get('/api/courses/materials/download/', {'language': 'English', 'level': 'A1'})
+        self.assertEqual(r.status_code, 200)
+        names = zipfile.ZipFile(io.BytesIO(b''.join(r.streaming_content))).namelist()
+        self.assertEqual(len(names), 2)
+        self.assertEqual(self.client.get('/api/courses/materials/download/', {'language': 'English', 'level': 'C2'}).status_code, 404)
+        self.assertEqual(self.client.get('/api/courses/materials/download/', {'language': 'Klingon', 'level': 'A1'}).status_code, 400)

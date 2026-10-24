@@ -93,3 +93,39 @@ class SessionNotesTests(TransactionTestCase):
         self.assertEqual(listed[0]['text'], 'my words v2')
         self.assertEqual(listed[0]['other']['full_name'], 'Hal')
         self.assertEqual(cb.get('/api/sessions/notes/').data, [])
+
+
+class SessionReportTests(TransactionTestCase):
+    def test_report_and_note_to_admin(self):
+        a = User.objects.create_user('j@example.com', 'pw12345678')
+        b = User.objects.create_user('k@example.com', 'pw12345678')
+        outsider = User.objects.create_user('l@example.com', 'pw12345678')
+        ca, co = APIClient(), APIClient()
+        ca.force_authenticate(a)
+        co.force_authenticate(outsider)
+        room = ca.post('/api/calls/ring/', {'partner_id': b.id}, format='json').data['room_id']
+        sid = ca.get('/api/sessions/', {'room_id': room}).data[0]['id']
+
+        ok = ca.post(f'/api/sessions/{sid}/report/', {'reason': 'harassment', 'details': 'rude'}, format='json')
+        self.assertEqual(ok.status_code, 201)
+        self.assertEqual(ca.post(f'/api/sessions/{sid}/report/', {'reason': 'bogus'}, format='json').status_code, 400)
+        self.assertEqual(ca.post(f'/api/sessions/{sid}/report/', {'reason': 'other'}, format='json').status_code, 400)
+        self.assertEqual(ca.post(f'/api/sessions/{sid}/report/', {'reason': 'note_to_admin', 'details': 'hi admin'}, format='json').status_code, 201)
+        self.assertEqual(co.post(f'/api/sessions/{sid}/report/', {'reason': 'spam'}, format='json').status_code, 403)
+
+        from sessions_app.models import SessionReport
+        self.assertEqual(SessionReport.objects.filter(reported_user=b).count(), 2)
+
+    def test_notes_can_be_filtered_by_partner(self):
+        a = User.objects.create_user('m@example.com', 'pw12345678')
+        b = User.objects.create_user('n@example.com', 'pw12345678')
+        c = User.objects.create_user('o@example.com', 'pw12345678')
+        client = APIClient()
+        client.force_authenticate(a)
+        for other, text in ((b, 'about b'), (c, 'about c')):
+            room = client.post('/api/calls/ring/', {'partner_id': other.id}, format='json').data['room_id']
+            sid = client.get('/api/sessions/', {'room_id': room}).data[0]['id']
+            client.put(f'/api/sessions/{sid}/note/', {'text': text}, format='json')
+        only_b = client.get('/api/sessions/notes/', {'with': b.id}).data
+        self.assertEqual([n['text'] for n in only_b], ['about b'])
+        self.assertEqual(len(client.get('/api/sessions/notes/').data), 2)
