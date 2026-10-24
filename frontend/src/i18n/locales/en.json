@@ -640,7 +640,8 @@
     "chat": "Chat",
     "chatPlaceholder": "Write a message...",
     "chatSend": "Send",
-    "downloadSummary": "Download session summary"
+    "downloadSummary": "Download session summary",
+    "chatAndNotes": "Chat and notes"
   },
   "levels": {
     "beginner": "Beginner",

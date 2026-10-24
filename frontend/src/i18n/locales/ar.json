@@ -630,7 +630,8 @@
     "chat": "المحادثة",
     "chatPlaceholder": "اكتب رسالة...",
     "chatSend": "إرسال",
-    "downloadSummary": "تنزيل ملخص الجلسة"
+    "downloadSummary": "تنزيل ملخص الجلسة",
+    "chatAndNotes": "المحادثة والملاحظات"
   },
   "levels": {
     "beginner": "مبتدئ",

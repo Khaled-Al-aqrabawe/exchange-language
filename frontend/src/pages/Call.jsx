@@ -1,4 +1,4 @@
-import { Check, Clock, Download, FileText, Flag, MessageCircle, NotebookPen, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, Download, FileText, Flag, MessageCircle, MessageSquareText, NotebookPen, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -407,7 +407,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
     : `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
 
   return (
-    <div className="absolute inset-0 z-10 flex flex-col bg-slate-900 lp-animate-in-scale">
+    <div className="absolute inset-y-0 start-0 end-[9.75rem] z-10 flex flex-col bg-slate-900 lp-animate-in-scale">
       <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
         <span className="inline-flex items-center gap-2 min-w-0 text-sm text-white">
           <FileText size={15} className="shrink-0 text-slate-400" />
@@ -557,43 +557,18 @@ function ReportModal({ sessionId, partnerName, onClose, onSent, t }) {
 
 // The conversation with the other person, inside the call sidebar. It is the same chat
 // as on the Messages page, so what is said here is also kept there.
-function CallChat({ partnerId, myId, t }) {
-  const [conversationId, setConversationId] = useState(null)
-  const [messages, setMessages] = useState([])
+function CallChat({ messages, onSend, myId, t }) {
   const [text, setText] = useState('')
-  const socketRef = useRef(null)
   const bottomRef = useRef(null)
-
-  useEffect(() => {
-    if (!partnerId) return
-    client.post('/chat/conversations/start/', { partner_id: partnerId })
-      .then(({ data }) => setConversationId(data.id))
-      .catch(() => {})
-  }, [partnerId])
-
-  useEffect(() => {
-    if (!conversationId) return undefined
-    let cancelled = false
-    client.get(`/chat/conversations/${conversationId}/messages/`).then(({ data }) => {
-      if (!cancelled) setMessages(data)
-    })
-    const socket = new WebSocket(wsUrl(`/ws/chat/${conversationId}/`))
-    socketRef.current = socket
-    socket.onmessage = (event) => setMessages((prev) => [...prev, JSON.parse(event.data)])
-    return () => {
-      cancelled = true
-      socket.close()
-    }
-  }, [conversationId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const send = (e) => {
+  const submit = (e) => {
     e.preventDefault()
-    if (!text.trim() || socketRef.current?.readyState !== WebSocket.OPEN) return
-    socketRef.current.send(JSON.stringify({ text }))
+    if (!text.trim()) return
+    onSend(text)
     setText('')
   }
 
@@ -615,7 +590,7 @@ function CallChat({ partnerId, myId, t }) {
         })}
         <div ref={bottomRef} />
       </div>
-      <form onSubmit={send} className="flex gap-2 border-t border-white/10 p-3">
+      <form onSubmit={submit} className="flex gap-2 border-t border-white/10 p-3">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -734,8 +709,8 @@ export default function Call() {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const stageRef = useRef(null)
+  const rootRef = useRef(null)
   const localDrag = useDraggable(stageRef)
-  const remoteDrag = useDraggable(stageRef)
   const pcRef = useRef(null)
   const socketRef = useRef(null)
   const pendingCandidatesRef = useRef([])
@@ -785,6 +760,11 @@ export default function Call() {
   const [otherName, setOtherName] = useState('')
   const [otherId, setOtherId] = useState(null)
   const [sidebarTab, setSidebarTab] = useState('notes')
+  const [chatMessages, setChatMessages] = useState([])
+  const [chatUnread, setChatUnread] = useState(0)
+  const [chatToast, setChatToast] = useState(null)
+  const chatSocketRef = useRef(null)
+  const chatVisibleRef = useRef(false)
   const [reportOpen, setReportOpen] = useState(false)
   // Who takes the first turn: the one who completed more lessons when both learn the same language.
   const [turnInfo, setTurnInfo] = useState(null)
@@ -1078,6 +1058,57 @@ export default function Call() {
 
   // Always lands on a real page: navigate(-1) does nothing when the call was opened
   // in a fresh tab (no history to go back to).
+  chatVisibleRef.current = notesOpen && sidebarTab === 'chat'
+
+  // The chat connection stays open for the whole call, so a message can be announced
+  // even while the chat tab is closed.
+  useEffect(() => {
+    if (!joined || !otherId) return undefined
+    let cancelled = false
+    let socket
+    client.post('/chat/conversations/start/', { partner_id: otherId })
+      .then(({ data }) => {
+        if (cancelled) return
+        client.get(`/chat/conversations/${data.id}/messages/`).then(({ data: history }) => {
+          if (!cancelled) setChatMessages(history)
+        })
+        socket = new WebSocket(wsUrl(`/ws/chat/${data.id}/`))
+        chatSocketRef.current = socket
+        socket.onmessage = (event) => {
+          const message = JSON.parse(event.data)
+          setChatMessages((prev) => [...prev, message])
+          if (message.sender.id !== user?.id && !chatVisibleRef.current) {
+            setChatUnread((n) => n + 1)
+            setChatToast(message)
+          }
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+      socket?.close()
+      chatSocketRef.current = null
+    }
+  }, [joined, otherId])
+
+  const sendChat = (text) => {
+    if (chatSocketRef.current?.readyState === WebSocket.OPEN) chatSocketRef.current.send(JSON.stringify({ text }))
+  }
+
+  // Looking at the chat clears its unread count; the pop-up fades by itself.
+  useEffect(() => {
+    if (notesOpen && sidebarTab === 'chat') {
+      setChatUnread(0)
+      setChatToast(null)
+    }
+  }, [notesOpen, sidebarTab, chatMessages.length])
+
+  useEffect(() => {
+    if (!chatToast) return undefined
+    const id = setTimeout(() => setChatToast(null), 5000)
+    return () => clearTimeout(id)
+  }, [chatToast])
+
   const openSidebar = (tab) => {
     if (notesOpen && sidebarTab === tab) setNotesOpen(false)
     else {
@@ -1206,7 +1237,7 @@ export default function Call() {
   }
 
   useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(document.fullscreenElement === stageRef.current)
+    const handleFullscreenChange = () => setIsFullscreen(document.fullscreenElement === rootRef.current)
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }, [])
@@ -1215,7 +1246,7 @@ export default function Call() {
     if (document.fullscreenElement) {
       document.exitFullscreen()
     } else {
-      stageRef.current?.requestFullscreen().catch(() => {})
+      rootRef.current?.requestFullscreen().catch(() => {})
     }
   }
 
@@ -1550,8 +1581,13 @@ export default function Call() {
   }
 
   return (
-    <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
-      <div className="max-w-4xl mx-auto px-6 py-10">
+    <div
+      ref={rootRef}
+      className={`bg-slate-950 ${isFullscreen ? 'h-screen overflow-y-auto' : 'min-h-[calc(100vh-4rem)]'}`}
+      // an open sidebar takes its width, so the call picture becomes smaller instead of being covered
+      style={{ paddingInlineEnd: notesOpen ? '20rem' : 0 }}
+    >
+      <div className={`${isFullscreen ? 'max-w-none px-4 py-4' : 'max-w-4xl px-6 py-10'} mx-auto`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
@@ -1601,7 +1637,12 @@ export default function Call() {
           <div
             ref={stageRef}
             className="relative bg-slate-900 rounded-2xl overflow-hidden lp-animate-in-scale"
-            style={{ aspectRatio: '16 / 9', boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)', border: '1px solid rgb(255 255 255 / 0.1)' }}
+            style={{
+              aspectRatio: '16 / 9',
+              boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)',
+              border: '1px solid rgb(255 255 255 / 0.1)',
+              ...(isFullscreen ? { width: 'min(100%, calc((100vh - 9rem) * 16 / 9))', margin: '0 auto' } : {}),
+            }}
           >
             {/* While a file is shared it covers the stage, so the other user shrinks into a box above yours. */}
             <video
@@ -1609,10 +1650,9 @@ export default function Call() {
               autoPlay
               playsInline
               className={sharedMaterial
-                ? `absolute bottom-[12rem] end-4 w-40 aspect-[4/3] object-cover rounded-xl shadow-lg z-20 ${remoteCamOn ? '' : 'hidden'}`
+                ? `absolute top-2 end-2 w-[8.5rem] aspect-[4/3] object-cover rounded-xl z-20 ${remoteCamOn ? '' : 'hidden'}`
                 : 'w-full h-full object-cover'}
-              style={sharedMaterial ? { border: '2px solid var(--accent)', ...remoteDrag.style } : undefined}
-              {...(sharedMaterial ? remoteDrag.handlers : {})}
+              style={sharedMaterial ? { border: '2px solid var(--accent)' } : undefined}
             />
             {!isConnected && (
               <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">
@@ -1641,9 +1681,9 @@ export default function Call() {
               autoPlay
               playsInline
               muted
-              className={`absolute ${sharedMaterial ? 'bottom-14' : 'bottom-4'} end-4 w-40 rounded-xl shadow-lg z-20 ${screenSharing || !camOn ? 'hidden' : ''}`}
-              style={{ border: '2px solid var(--accent-2)', ...localDrag.style }}
-              {...localDrag.handlers}
+              className={`absolute ${sharedMaterial ? 'top-[7.5rem] end-2 w-[8.5rem] aspect-[4/3] object-cover' : 'bottom-4 end-4 w-40'} rounded-xl shadow-lg z-20 ${screenSharing || !camOn ? 'hidden' : ''}`}
+              style={sharedMaterial ? { border: '2px solid var(--accent-2)' } : { border: '2px solid var(--accent-2)', ...localDrag.style }}
+              {...(sharedMaterial ? {} : localDrag.handlers)}
             />
           </div>
         )}
@@ -1699,23 +1739,20 @@ export default function Call() {
               <Flag size={18} />
             </button>
           )}
+          {/* One button for the sidebar; it opens on the chat when a message is waiting, otherwise where you left off. */}
           <button
-            onClick={() => openSidebar('chat')}
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-              notesOpen && sidebarTab === 'chat' ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
+            onClick={() => (notesOpen ? setNotesOpen(false) : openSidebar(chatUnread > 0 ? 'chat' : sidebarTab))}
+            className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
+              notesOpen ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
             }`}
-            title={t('call.chat')}
+            title={t('call.chatAndNotes')}
           >
-            <MessageCircle size={18} />
-          </button>
-          <button
-            onClick={() => openSidebar('notes')}
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-              notesOpen && sidebarTab === 'notes' ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
-            }`}
-            title={t('call.notes')}
-          >
-            <NotebookPen size={18} />
+            <MessageSquareText size={18} />
+            {chatUnread > 0 && (
+              <span className="absolute -top-1 -end-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
+                {chatUnread > 9 ? '9+' : chatUnread}
+              </span>
+            )}
           </button>
           <button
             onClick={handleLeaveClick}
@@ -1835,8 +1872,19 @@ export default function Call() {
         </div>
       )}
 
+      {chatToast && (
+        <button
+          type="button"
+          onClick={() => { setChatToast(null); openSidebar('chat') }}
+          className="fixed top-20 start-1/2 z-[55] flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-slate-900 px-4 py-2 text-sm text-white shadow-lg lp-animate-in"
+        >
+          <MessageCircle size={15} style={{ color: 'var(--accent)' }} />
+          <span className="max-w-[16rem] truncate"><strong>{chatToast.sender.full_name}:</strong> {chatToast.text}</span>
+        </button>
+      )}
+
       {notesOpen && (
-        <aside className="fixed top-16 bottom-0 end-0 z-40 w-80 max-w-full flex flex-col bg-slate-900 border-s border-white/10 lp-animate-in">
+        <aside className={`fixed ${isFullscreen ? 'top-0' : 'top-16'} bottom-0 end-0 z-40 w-80 max-w-full flex flex-col bg-slate-900 border-s border-white/10 lp-animate-in`}>
           <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10">
             <div className="flex items-center gap-1">
               {[['notes', NotebookPen, t('call.notes')], ['chat', MessageCircle, t('call.chat')]].map(([tab, Icon, label]) => (
@@ -1873,7 +1921,7 @@ export default function Call() {
             </div>
           </div>
           {sidebarTab === 'chat' ? (
-            <CallChat partnerId={otherId} myId={user?.id} t={t} />
+            <CallChat messages={chatMessages} onSend={sendChat} myId={user?.id} t={t} />
           ) : (
             <>
               <textarea
