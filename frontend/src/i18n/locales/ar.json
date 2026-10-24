@@ -306,7 +306,8 @@
     "exchangeMatch": "مطابقة تبادل",
     "peerPractice": "ممارسة أقران",
     "speaksLearning": "يتحدث {{native}} · يتعلم {{learning}}",
-    "viewProfile": "عرض الملف الشخصي"
+    "viewProfile": "عرض الملف الشخصي",
+    "callNow": "اتصل الآن"
   },
   "partnerProfile": {
     "loading": "جارٍ التحميل...",
@@ -557,7 +558,10 @@
     "leaveChoiceBody": "لم ينتهِ الوقت المحدد بعد. كيف تريد وضع علامة على هذه الجلسة؟",
     "markComplete": "وضع علامة كمكتملة",
     "markIncomplete": "وضع علامة كغير مكتملة",
-    "cancelLeave": "البقاء في المكالمة"
+    "cancelLeave": "البقاء في المكالمة",
+    "incoming": "{{name}} يريد الاتصال بك",
+    "answer": "رد",
+    "decline": "رفض"
   },
   "levels": {
     "beginner": "مبتدئ",

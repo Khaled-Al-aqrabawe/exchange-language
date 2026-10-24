@@ -310,7 +310,8 @@
     "visibilityNow": "Available now",
     "visibilityScheduled": "Scheduled available",
     "emptyNow": "Nobody is online and available right now. Check \"Scheduled available\" for upcoming times.",
-    "time": "Time"
+    "time": "Time",
+    "callNow": "Call now"
   },
   "partnerProfile": {
     "loading": "Loading...",
@@ -567,7 +568,10 @@
     "leaveChoiceBody": "The scheduled time isn't over yet. How would you like to mark this session?",
     "markComplete": "Mark as completed",
     "markIncomplete": "Mark as not completed",
-    "cancelLeave": "Stay in call"
+    "cancelLeave": "Stay in call",
+    "incoming": "{{name}} wants to call you",
+    "answer": "Answer",
+    "decline": "Decline"
   },
   "levels": {
     "beginner": "Beginner",

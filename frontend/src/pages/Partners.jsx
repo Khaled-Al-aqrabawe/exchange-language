@@ -1,4 +1,4 @@
-import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Globe2, MapPin, MessageCircle, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Phone, Globe2, MapPin, MessageCircle, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
@@ -258,7 +258,7 @@ function IconField({ icon: Icon, children }) {
   )
 }
 
-function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, onSchedule }) {
+function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, onSchedule, onCall }) {
   const accent = p.match_type === 'exchange' ? 'var(--accent)' : 'var(--accent-2)'
   const visibleAvailability = (p.availability || [])
     .filter((slot) => !isSlotExpiredToday(slot))
@@ -350,6 +350,11 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, on
         <button type="button" onClick={() => onMessage(p)} className="lp-btn-primary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
           <MessageCircle size={12} /> {t('partnerProfile.message')}
         </button>
+        {p.is_available_now && (
+          <button type="button" onClick={() => onCall(p)} className="lp-btn-primary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
+            <Phone size={12} /> {t('partners.callNow')}
+          </button>
+        )}
         <button type="button" onClick={() => onSchedule(p)} className="lp-btn-secondary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
           <CalendarPlus size={12} /> {t('partnerProfile.scheduleSession')}
         </button>
@@ -401,6 +406,11 @@ export default function Partners() {
       ? partners.filter(availableNow)
       : visibility === 'scheduled' ? withAvailability : partners,
   )
+
+  const handleCall = async (p) => {
+    const { data } = await client.post('/calls/ring/', { partner_id: p.user_id })
+    navigate(`/call/${data.room_id}`)
+  }
 
   const handleMessage = async (p) => {
     const { data } = await client.post('/chat/conversations/start/', { partner_id: p.user_id })
@@ -552,6 +562,7 @@ export default function Partners() {
                 filterDayOfWeek={filters.date ? dateToDayOfWeek(filters.date) : null}
                 filterTime={filters.time}
                 onMessage={handleMessage}
+                onCall={handleCall}
                 onSchedule={(partner) => setScheduleFor(partner)}
               />
             ))}

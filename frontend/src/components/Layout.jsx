@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
 import LanguageSwitcher from './LanguageSwitcher'
 import PresenceToggle from './PresenceToggle'
+import IncomingCallBox from './IncomingCallBox'
 import NotificationBell from './NotificationBell'
 import ThemeToggle from './ThemeToggle'
 
@@ -249,6 +250,8 @@ export default function Layout() {
           </div>
         </div>
       </nav>
+
+      <IncomingCallBox />
 
       <main className="flex-1">
         <Outlet />

@@ -1,4 +1,4 @@
-import { CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, Play, Sparkles, Star, Target, Video, X } from 'lucide-react'
+import { CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, Phone, Play, Sparkles, Star, Target, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -149,6 +149,11 @@ export default function PartnerProfile() {
     navigate(`/messages/${data.id}`)
   }
 
+  const handleCall = async () => {
+    const { data } = await client.post('/calls/ring/', { partner_id: userId })
+    navigate(`/call/${data.room_id}`)
+  }
+
   if (loading) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.loading')}</div>
   if (!partner) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.notFound')}</div>
 
@@ -213,6 +218,11 @@ export default function PartnerProfile() {
               <button onClick={handleMessage} className="lp-btn-primary flex-1 lg:w-full justify-center">
                 <MessageCircle size={16} /> {t('partnerProfile.message')}
               </button>
+              {partner.is_available_now && (
+                <button onClick={handleCall} className="lp-btn-primary flex-1 lg:w-full justify-center">
+                  <Phone size={16} /> {t('partners.callNow')}
+                </button>
+              )}
               <button onClick={() => setShowRequestModal(true)} className="lp-btn-secondary flex-1 lg:w-full justify-center">
                 <CalendarClock size={16} /> {t('partnerProfile.scheduleSession')}
               </button>
