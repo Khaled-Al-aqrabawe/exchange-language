@@ -603,7 +603,9 @@
     "notesError": "لم يتم الحفظ",
     "notesNotSaved": "غير محفوظة في حسابك",
     "downloadNotes": "تنزيل الملاحظات",
-    "downloadsTitle": "تنزيل"
+    "downloadsTitle": "تنزيل",
+    "pen": "قلم",
+    "clearDrawing": "مسح الرسم"
   },
   "levels": {
     "beginner": "مبتدئ",

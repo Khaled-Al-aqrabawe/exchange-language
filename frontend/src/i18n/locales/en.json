@@ -613,7 +613,9 @@
     "notesError": "Not saved",
     "notesNotSaved": "Not saved to your account",
     "downloadNotes": "Download notes",
-    "downloadsTitle": "Download"
+    "downloadsTitle": "Download",
+    "pen": "Pen",
+    "clearDrawing": "Clear drawing"
   },
   "levels": {
     "beginner": "Beginner",
