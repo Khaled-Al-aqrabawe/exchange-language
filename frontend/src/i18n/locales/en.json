@@ -597,7 +597,11 @@
     "finishedNone": "I did not study it at all",
     "stoppedAtLabel": "Which slide did you stop at?",
     "stoppedAtSave": "Save",
-    "progressError": "Could not save your progress. Please try again."
+    "progressError": "Could not save your progress. Please try again.",
+    "joinTitle": "Ready to join?",
+    "joinHint": "Check your camera and microphone before you join.",
+    "joinNow": "Join now",
+    "back": "Back"
   },
   "levels": {
     "beginner": "Beginner",

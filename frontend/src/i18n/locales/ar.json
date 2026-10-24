@@ -587,7 +587,11 @@
     "finishedNone": "لم أدرسه إطلاقاً",
     "stoppedAtLabel": "عند أي شريحة توقفت؟",
     "stoppedAtSave": "حفظ",
-    "progressError": "تعذّر حفظ تقدمك. حاول مرة أخرى."
+    "progressError": "تعذّر حفظ تقدمك. حاول مرة أخرى.",
+    "joinTitle": "هل أنت جاهز للانضمام؟",
+    "joinHint": "تحقق من الكاميرا والميكروفون قبل الانضمام.",
+    "joinNow": "انضم الآن",
+    "back": "رجوع"
   },
   "levels": {
     "beginner": "مبتدئ",

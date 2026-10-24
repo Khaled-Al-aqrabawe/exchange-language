@@ -1,10 +1,9 @@
-import { Check, Clock, Download, ExternalLink, FileText, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, FileText, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
 import { useAuth } from '../context/AuthContext'
-import { downloadFile } from '../utils/downloadFile'
 
 const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }]
 
@@ -68,23 +67,6 @@ function SharedMaterialStage({ material, onClose, onFinish, t }) {
               <Check size={13} /> {t('call.finishLesson')}
             </button>
           )}
-          <a
-            href={material.file}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-            title={t('materials.openFile')}
-          >
-            <ExternalLink size={15} />
-          </a>
-          <button
-            type="button"
-            onClick={() => downloadFile(material.file, material.file_name)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-            title={t('materials.download')}
-          >
-            <Download size={15} />
-          </button>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
@@ -127,8 +109,12 @@ export default function Call() {
   const socketRef = useRef(null)
   const pendingCandidatesRef = useRef([])
   const cameraStreamRef = useRef(null)
+  const previewStreamRef = useRef(null)
+  const lobbyVideoRef = useRef(null)
   const screenStreamRef = useRef(null)
 
+  const [joined, setJoined] = useState(false)
+  const [previewReady, setPreviewReady] = useState(false)
   const [status, setStatus] = useState('connecting')
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
@@ -179,13 +165,39 @@ export default function Call() {
       .catch(() => {})
   }, [roomId])
 
+  // Lobby: preview the camera so the user can set mic/camera before joining.
   useEffect(() => {
+    if (joined) return undefined
+    let cancelled = false
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop())
+          return
+        }
+        previewStreamRef.current = stream
+        if (lobbyVideoRef.current) lobbyVideoRef.current.srcObject = stream
+        setPreviewReady(true)
+      })
+      .catch(() => {
+        if (!cancelled) setError(t('call.micError'))
+      })
+    return () => { cancelled = true }
+  }, [joined, t])
+
+  useEffect(() => {
+    if (!joined) return undefined
     let cancelled = false
     let localStream
 
     async function start() {
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        // Reuse the lobby preview (keeps the mic/camera choices); ask again if it was stopped.
+        const preview = previewStreamRef.current
+        localStream = preview && preview.getTracks().every((track) => track.readyState === 'live')
+          ? preview
+          : await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        previewStreamRef.current = null
       } catch {
         if (!cancelled) setError(t('call.micError'))
         return
@@ -290,7 +302,7 @@ export default function Call() {
       screenStreamRef.current?.getTracks().forEach((track) => track.stop())
       screenStreamRef.current = null
     }
-  }, [roomId, t])
+  }, [roomId, t, joined])
 
   const send = (payload) => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -368,12 +380,14 @@ export default function Call() {
   }
 
   const toggleMic = () => {
-    cameraStreamRef.current?.getAudioTracks().forEach((tr) => (tr.enabled = !tr.enabled))
+    const stream = cameraStreamRef.current || previewStreamRef.current
+    stream?.getAudioTracks().forEach((tr) => (tr.enabled = !tr.enabled))
     setMicOn((v) => !v)
   }
 
   const toggleCam = () => {
-    cameraStreamRef.current?.getVideoTracks().forEach((tr) => (tr.enabled = !tr.enabled))
+    const stream = cameraStreamRef.current || previewStreamRef.current
+    stream?.getVideoTracks().forEach((tr) => (tr.enabled = !tr.enabled))
     setCamOn((v) => !v)
   }
 
@@ -544,6 +558,72 @@ export default function Call() {
   const isConnected = status === 'connected'
   const statusText = t(statusKeys[status] || statusKeys.connecting)
 
+  const leaveLobby = () => {
+    previewStreamRef.current?.getTracks().forEach((track) => track.stop())
+    previewStreamRef.current = null
+    navigate(sessionId ? '/schedule' : '/partners', { replace: true })
+  }
+
+  if (!joined) {
+    return (
+      <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
+        <div className="max-w-xl mx-auto px-6 py-10 text-center">
+          <h1 className="text-lg font-semibold text-white mb-1">{t('call.joinTitle')}</h1>
+          <p className="text-sm text-slate-400 mb-6">{t('call.joinHint')}</p>
+          {error ? (
+            <div className="rounded-2xl border border-red-900/50 bg-red-950/40 px-5 py-4 text-red-300 text-sm">{error}</div>
+          ) : (
+            <div className="relative bg-slate-900 rounded-2xl overflow-hidden" style={{ aspectRatio: '16 / 9', border: '1px solid rgb(255 255 255 / 0.1)' }}>
+              <video ref={lobbyVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              {!previewReady && (
+                <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">{t('call.connecting')}</div>
+              )}
+              {previewReady && !camOn && (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400">
+                  <VideoOff size={32} />
+                </div>
+              )}
+            </div>
+          )}
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <button
+              onClick={toggleMic}
+              disabled={!previewReady}
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 disabled:opacity-40 ${
+                micOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
+              }`}
+              title={micOn ? t('call.mute') : t('call.unmute')}
+            >
+              {micOn ? <Mic size={18} /> : <MicOff size={18} />}
+            </button>
+            <button
+              onClick={toggleCam}
+              disabled={!previewReady}
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 disabled:opacity-40 ${
+                camOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
+              }`}
+              title={camOn ? t('call.turnOffCamera') : t('call.turnOnCamera')}
+            >
+              {camOn ? <Video size={18} /> : <VideoOff size={18} />}
+            </button>
+          </div>
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <button onClick={leaveLobby} className="rounded-full px-6 h-11 text-sm font-medium text-slate-300 bg-white/10 hover:bg-white/20 transition-colors">
+              {t('call.back')}
+            </button>
+            <button
+              onClick={() => setJoined(true)}
+              disabled={!previewReady}
+              className="lp-btn-primary disabled:opacity-50"
+            >
+              {t('call.joinNow')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
       <div className="max-w-4xl mx-auto px-6 py-10">
@@ -598,7 +678,16 @@ export default function Call() {
             className="relative bg-slate-900 rounded-2xl overflow-hidden lp-animate-in-scale"
             style={{ aspectRatio: '16 / 9', boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)', border: '1px solid rgb(255 255 255 / 0.1)' }}
           >
-            <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+            {/* While a file is shared it covers the stage, so the other user shrinks into a box above yours. */}
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className={sharedMaterial
+                ? 'absolute bottom-[10rem] end-4 w-40 aspect-[4/3] object-cover rounded-xl shadow-lg z-20'
+                : 'w-full h-full object-cover'}
+              style={sharedMaterial ? { border: '2px solid var(--accent)' } : undefined}
+            />
             {!isConnected && (
               <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">
                 {statusText}
@@ -617,7 +706,7 @@ export default function Call() {
               autoPlay
               playsInline
               muted
-              className="absolute bottom-4 end-4 w-40 rounded-xl shadow-lg transition-transform hover:scale-105 z-20"
+              className={`absolute bottom-4 end-4 w-40 rounded-xl shadow-lg transition-transform hover:scale-105 z-20 ${screenSharing ? 'hidden' : ''}`}
               style={{ border: '2px solid var(--accent-2)' }}
             />
           </div>
