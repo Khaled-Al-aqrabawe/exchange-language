@@ -342,3 +342,45 @@ class SessionReportView(APIView):
             logger.exception('Failed to email admins about report %s', report.id)
 
         return Response({'id': report.id}, status=status.HTTP_201_CREATED)
+
+
+class SessionFirstTurnView(APIView):
+    """Who takes the first turn of a session.
+
+    When both people are learning the same language, the one who has completed more of
+    its lessons goes first (and so the course continues from their progress). Otherwise,
+    or on a tie, the person who requested the session goes first.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        from courses.models import Material, MaterialProgress
+
+        try:
+            session = ScheduledSession.objects.select_related('host__profile', 'partner__profile').get(
+                Q(host=request.user) | Q(partner=request.user), pk=pk
+            )
+        except ScheduledSession.DoesNotExist:
+            raise PermissionDenied('Not a participant of this session.')
+
+        host, partner = session.host, session.partner
+        language = (host.profile.learning_language or '').strip().lower()
+        same_language = bool(language) and language == (partner.profile.learning_language or '').strip().lower()
+
+        counts = {}
+        first = host.id
+        if same_language:
+            lessons = Material.objects.filter(language__iexact=language)
+            counts = {
+                user.id: MaterialProgress.objects.filter(user=user, status='complete', material__in=lessons).count()
+                for user in (host, partner)
+            }
+            if counts[partner.id] > counts[host.id]:
+                first = partner.id
+        return Response({
+            'first_user_id': first,
+            'requester_id': host.id,
+            'same_language': same_language,
+            'counts': counts,
+        })

@@ -628,7 +628,12 @@
     "sentToAdmin": "Sent to admin",
     "text": "Text",
     "selectText": "Select, move or edit",
-    "undo": "Undo"
+    "undo": "Undo",
+    "youGoFirstProgress": "You go first because you have completed more lessons.",
+    "partnerGoesFirstProgress": "Your partner goes first because they have completed more lessons.",
+    "together": "Studying together",
+    "togetherNote": "You both learn the same language, so you study together with no turns. The lesson starts from whoever has done more.",
+    "sessionElapsed": "{{minutes}} minutes of the session have passed."
   },
   "levels": {
     "beginner": "Beginner",

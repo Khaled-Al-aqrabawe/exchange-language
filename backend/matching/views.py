@@ -7,6 +7,32 @@ from accounts.models import AvailabilitySlot, Profile
 from .serializers import PartnerSerializer
 
 
+LEGACY_LEVELS = {'beginner': 'A1', 'elementary': 'A2', 'intermediate': 'B1', 'advanced': 'B2', 'fluent': 'C1'}
+
+
+def learning_levels(profile):
+    """{language (lower-case): CEFR level} for every language the profile is learning."""
+    languages = profile.learning_languages or ([profile.learning_language] if profile.learning_language else [])
+    chosen = {k.lower(): v for k, v in (profile.language_levels or {}).items()}
+    levels = {}
+    for lang in languages:
+        key = lang.lower()
+        # profiles from before per-language levels only have the single legacy level
+        fallback = LEGACY_LEVELS.get(profile.proficiency_level, 'A1') if key == (profile.learning_language or '').lower() else None
+        levels[key] = chosen.get(key) or fallback
+    return levels
+
+
+def levels_compatible(me, other):
+    """Two people learning the same language must be at the same level of it.
+
+    With no learning language in common (e.g. a language exchange) there is nothing to
+    compare, so they stay visible to each other."""
+    mine, theirs = learning_levels(me), learning_levels(other)
+    shared = mine.keys() & theirs.keys()
+    return not shared or any(mine[lang] == theirs[lang] for lang in shared)
+
+
 class PartnerListView(generics.ListAPIView):
     serializer_class = PartnerSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -65,7 +91,7 @@ class PartnerListView(generics.ListAPIView):
                 ).values_list('id', flat=True)
             )
 
-        ordering = list(qs)
+        ordering = [p for p in qs if levels_compatible(my_profile, p)]
         ordering.sort(key=lambda p: 0 if p.id in exchange_ids else 1)
         return ordering
 

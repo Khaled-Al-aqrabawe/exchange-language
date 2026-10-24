@@ -129,3 +129,49 @@ class SessionReportTests(TransactionTestCase):
         only_b = client.get('/api/sessions/notes/', {'with': b.id}).data
         self.assertEqual([n['text'] for n in only_b], ['about b'])
         self.assertEqual(len(client.get('/api/sessions/notes/').data), 2)
+
+
+class FirstTurnTests(TransactionTestCase):
+    def _users(self, a_lang, b_lang):
+        a = User.objects.create_user('p@example.com', 'pw12345678')
+        b = User.objects.create_user('q@example.com', 'pw12345678')
+        for user, lang in ((a, a_lang), (b, b_lang)):
+            user.profile.learning_language = lang
+            user.profile.save()
+        return a, b
+
+    def _first_turn(self, caller, callee):
+        client = APIClient()
+        client.force_authenticate(caller)
+        room = client.post('/api/calls/ring/', {'partner_id': callee.id}, format='json').data['room_id']
+        sid = client.get('/api/sessions/', {'room_id': room}).data[0]['id']
+        return client.get(f'/api/sessions/{sid}/first-turn/').data
+
+    def _complete(self, user, count):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from courses.models import Material, MaterialProgress
+        for n in range(1, count + 1):
+            m = Material.objects.get_or_create(language='English', level='A1', order=n, defaults={
+                'title': f'L{n}', 'file': SimpleUploadedFile(f'English-A1-Lesson-{n:02d}.pptx', b'x')})[0]
+            MaterialProgress.objects.update_or_create(user=user, material=m, defaults={'status': 'complete'})
+
+    def test_more_lessons_goes_first_even_if_not_the_caller(self):
+        caller, callee = self._users('English', 'English')
+        self._complete(caller, 2)
+        self._complete(callee, 5)
+        data = self._first_turn(caller, callee)
+        self.assertTrue(data['same_language'])
+        self.assertEqual(data['first_user_id'], callee.id)
+
+    def test_tie_goes_to_the_requester(self):
+        caller, callee = self._users('English', 'English')
+        self._complete(caller, 3)
+        self._complete(callee, 3)
+        self.assertEqual(self._first_turn(caller, callee)['first_user_id'], caller.id)
+
+    def test_different_languages_requester_first(self):
+        caller, callee = self._users('English', 'French')
+        self._complete(callee, 9)
+        data = self._first_turn(caller, callee)
+        self.assertFalse(data['same_language'])
+        self.assertEqual(data['first_user_id'], caller.id)

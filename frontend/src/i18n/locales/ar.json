@@ -618,7 +618,12 @@
     "sentToAdmin": "تم الإرسال للمسؤول",
     "text": "نص",
     "selectText": "تحديد أو نقل أو تعديل",
-    "undo": "تراجع"
+    "undo": "تراجع",
+    "youGoFirstProgress": "تبدأ أنت لأنك أنهيت دروساً أكثر.",
+    "partnerGoesFirstProgress": "يبدأ شريكك لأنه أنهى دروساً أكثر.",
+    "together": "نتعلم معاً",
+    "togetherNote": "تتعلمان اللغة نفسها، لذلك تدرسان معاً دون أدوار. يبدأ الدرس من تقدم الأكثر إنجازاً.",
+    "sessionElapsed": "مرّت {{minutes}} دقيقة من الجلسة."
   },
   "levels": {
     "beginner": "مبتدئ",

@@ -447,7 +447,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
             <>
               <iframe src={embedSrc} title={material.title} className="w-full h-full bg-white border-0" />
               {/* Hides the viewer's own menu (download / print) and full-screen icons; same colour as its bar so it blends in. */}
-              {isOffice && <div className="absolute bottom-0 end-0 z-[5] h-9 w-28" style={{ background: 'rgb(36 36 36)' }} />}
+              {isOffice && <div className="absolute bottom-0 end-0 z-[5] h-[30px] w-28" style={{ background: 'rgb(68 68 68)' }} />}
             </>
           )
         ) : (
@@ -657,6 +657,7 @@ export default function Call() {
   const joinedRef = useRef(false)
   const micOnRef = useRef(!!saved?.mic)
   const camOnRef = useRef(!!saved?.cam)
+  const screenSharingRef = useRef(false)
   const lobbyVideoRef = useRef(null)
   const screenStreamRef = useRef(null)
 
@@ -696,6 +697,8 @@ export default function Call() {
   const [ratingOpen, setRatingOpen] = useState(false)
   const [otherName, setOtherName] = useState('')
   const [reportOpen, setReportOpen] = useState(false)
+  // Who takes the first turn: the one who completed more lessons when both learn the same language.
+  const [turnInfo, setTurnInfo] = useState(null)
   const [adminNoteState, setAdminNoteState] = useState('idle')
   // Notepad sidebar (saved on the server per session) and the files shared during the call.
   const [notesOpen, setNotesOpen] = useState(false)
@@ -847,6 +850,8 @@ export default function Call() {
           const offer = await pc.createOffer()
           await pc.setLocalDescription(offer)
           send({ type: 'offer', sdp: offer })
+          send({ type: 'cam-state', on: camOnRef.current })
+          send({ type: 'screen-state', on: screenSharingRef.current })
         } else if (data.type === 'offer') {
           if (pc.remoteDescription) pc = replacePeer()
           await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
@@ -869,6 +874,10 @@ export default function Call() {
           rememberFile(data.material)
         } else if (data.type === 'live-start') {
           setLiveStart((v) => v || Date.now())
+        } else if (data.type === 'ask-finished' && data.material) {
+          setStoppedSlide('')
+          setPromptError('')
+          setFinishPrompt({ material: data.material, reason: 'joint', step: 'ask' })
         } else if (data.type === 'screen-state') {
           setRemoteSharing(!!data.on)
           if (!data.on) setStrokes([])
@@ -1172,6 +1181,7 @@ export default function Call() {
   }, [noteText])
   micOnRef.current = micOn
   camOnRef.current = camOn
+  screenSharingRef.current = screenSharing
   joinedRef.current = joined
   sharedRef.current = sharedMaterial
 
@@ -1189,46 +1199,67 @@ export default function Call() {
   }, [liveStart])
 
   const elapsedMs = liveStart ? Math.max(0, now - liveStart) : 0
-  const liveTurn = Math.min(Math.floor(elapsedMs / TURN_MS), 1)
-  const turnRemaining = liveStart ? Math.ceil((TURN_MS - (elapsedMs - liveTurn * TURN_MS)) / 1000) : null
-  const isMyTurn = liveTurn === 0 ? iAmRequester : !iAmRequester
-  const liveActive = !!liveStart && !!requester && !liveEnded
+  // Learners of the same language study together for the whole 50 minutes: no turns.
+  const jointMode = !!turnInfo?.same_language
+  const liveTurn = jointMode ? 0 : Math.min(Math.floor(elapsedMs / TURN_MS), 1)
+  const turnRemaining = liveStart ? Math.ceil(((jointMode ? 2 * TURN_MS : TURN_MS) - (elapsedMs - liveTurn * TURN_MS)) / 1000) : null
+  const firstUserId = turnInfo ? turnInfo.first_user_id : (sessionId ? null : requester?.id ?? null)
+  const orderReady = firstUserId != null
+  const iGoFirst = firstUserId === user?.id
+  const isMyTurn = liveTurn === 0 ? iGoFirst : !iGoFirst
+  const liveActive = !!liveStart && !!requester && orderReady && !liveEnded
   const turnCountdown = liveActive && turnRemaining > 0 && turnRemaining <= 60 && countdownValue == null ? turnRemaining : null
 
   const askFinished = (material, reason) => {
     setStoppedSlide('')
     setPromptError('')
     setFinishPrompt({ material, reason, step: 'ask' })
+    if (jointMode && reason === 'next') send({ type: 'ask-finished', material })
   }
+
+  useEffect(() => {
+    if (!sessionId) return
+    client.get(`/sessions/${sessionId}/first-turn/`)
+      .then(({ data }) => setTurnInfo(data))
+      .catch(() => setTurnInfo({ first_user_id: requester?.id ?? null, same_language: false, counts: {} }))
+  }, [sessionId])
 
   // Note of who sent the request, shown when the session starts.
   useEffect(() => {
-    if (!liveStart || !requester) return undefined
-    setStartNote(iAmRequester ? t('call.youStartedNote') : t('call.requestedByNote', { name: requester.name || t('call.yourPartner') }))
+    if (!liveStart || !requester || !orderReady) return undefined
+    const byProgress = turnInfo?.same_language && turnInfo.counts[turnInfo.first_user_id] > Math.min(...Object.values(turnInfo.counts))
+    const who = requester.name || t('call.yourPartner')
+    setStartNote(
+      turnInfo?.same_language
+        ? t('call.togetherNote')
+        : byProgress
+          ? t(iGoFirst ? 'call.youGoFirstProgress' : 'call.partnerGoesFirstProgress')
+          : iAmRequester ? t('call.youStartedNote') : t('call.requestedByNote', { name: who }),
+    )
     const id = setTimeout(() => setStartNote(''), 10000)
     return () => clearTimeout(id)
-  }, [liveStart, requester?.id])
+  }, [liveStart, requester?.id, orderReady])
 
   // A turn begins: its owner opens their next lesson; the previous owner is asked how it went.
   useEffect(() => {
-    if (!liveStart || !requester) return
+    if (!liveStart || !requester || !orderReady) return
     const key = `turn-${liveTurn}`
     if (firedRef.current.has(key)) return
     firedRef.current.add(key)
     const prev = sharedRef.current
     if (liveTurn === 1 && !isMyTurn && prev?.from === 'you' && prev.id) askFinished(prev, 'turn')
     if (isMyTurn) shareNextLesson()
-  }, [liveStart, liveTurn, requester?.id])
+  }, [liveStart, liveTurn, requester?.id, orderReady])
 
   // Toasts at 10 and 20 minutes into each turn, and the end of the session.
   useEffect(() => {
-    if (!liveStart || !requester) return
+    if (!liveStart || !requester || !orderReady) return
     const inTurnMin = (elapsedMs - liveTurn * TURN_MS) / 60000
-    for (const mark of [10, 20]) {
+    for (const mark of jointMode ? [10, 20, 30, 40] : [10, 20]) {
       const key = `${liveTurn}-${mark}`
       if (inTurnMin >= mark && inTurnMin < mark + 1 && !firedRef.current.has(key)) {
         firedRef.current.add(key)
-        setReminderBanner(t(isMyTurn ? 'call.turnElapsedMine' : 'call.turnElapsedPartner', { minutes: mark }))
+        setReminderBanner(jointMode ? t('call.sessionElapsed', { minutes: mark }) : t(isMyTurn ? 'call.turnElapsedMine' : 'call.turnElapsedPartner', { minutes: mark }))
         setTimeout(() => setReminderBanner(''), 6000)
       }
     }
@@ -1236,7 +1267,7 @@ export default function Call() {
       firedRef.current.add('end')
       setLiveEnded(true)
       const mine = sharedRef.current
-      if (isMyTurn && mine?.from === 'you' && mine.id) askFinished(mine, 'turn')
+      if (jointMode ? mine?.id : isMyTurn && mine?.from === 'you' && mine.id) askFinished(mine, 'turn')
     }
   }, [now])
 
@@ -1256,7 +1287,10 @@ export default function Call() {
 
   // Tell the other side whenever our camera turns on/off (and once the call connects).
   useEffect(() => {
-    if (joined && status === 'connected') send({ type: 'cam-state', on: camOn })
+    if (!joined || status !== 'connected') return undefined
+    send({ type: 'cam-state', on: camOn })
+    const id = setInterval(() => send({ type: 'cam-state', on: camOnRef.current }), 4000)
+    return () => clearInterval(id)
   }, [joined, status, camOn])
 
   useEffect(() => {
@@ -1397,16 +1431,16 @@ export default function Call() {
 
   return (
     <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
-      <div className={`${sharedMaterial ? 'max-w-[1400px]' : 'max-w-4xl'} mx-auto px-6 py-10 transition-[max-width] duration-300`}>
+      <div className="max-w-4xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
             {liveActive && (
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums"
-                style={{ background: isMyTurn ? 'var(--accent)' : 'rgb(255 255 255 / 0.1)', color: '#fff' }}
+                style={{ background: jointMode || isMyTurn ? 'var(--accent)' : 'rgb(255 255 255 / 0.1)', color: '#fff' }}
               >
-                <Clock size={12} /> {isMyTurn ? t('call.yourTurn') : t('call.partnerTurn')} · {formatClock(turnRemaining)}
+                <Clock size={12} /> {jointMode ? t('call.together') : isMyTurn ? t('call.yourTurn') : t('call.partnerTurn')} · {formatClock(turnRemaining)}
               </span>
             )}
           </div>
@@ -1447,7 +1481,7 @@ export default function Call() {
           <div
             ref={stageRef}
             className="relative bg-slate-900 rounded-2xl overflow-hidden lp-animate-in-scale"
-            style={{ aspectRatio: sharedMaterial ? '16 / 10' : '16 / 9', boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)', border: '1px solid rgb(255 255 255 / 0.1)' }}
+            style={{ aspectRatio: '16 / 9', boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)', border: '1px solid rgb(255 255 255 / 0.1)' }}
           >
             {/* While a file is shared it covers the stage, so the other user shrinks into a box above yours. */}
             <video
