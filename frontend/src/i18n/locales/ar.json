@@ -616,7 +616,9 @@
     "clearDrawing": "مسح الرسم",
     "sendToAdmin": "إرسال للمسؤول",
     "sentToAdmin": "تم الإرسال للمسؤول",
-    "text": "نص"
+    "text": "نص",
+    "selectText": "تحديد أو نقل أو تعديل",
+    "undo": "تراجع"
   },
   "levels": {
     "beginner": "مبتدئ",

@@ -1,4 +1,4 @@
-import { Check, Clock, Download, Eraser, FileText, Flag, NotebookPen, Pen, Send, Star, Type, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, Download, FileText, Flag, NotebookPen, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -91,11 +91,16 @@ const PEN_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#facc15']
 
 // A transparent canvas over the shared file. Points are stored as fractions of the
 // canvas size, so a drawing lines up on screens of different sizes.
-function AnnotationLayer({ active, tool, color, strokes, onDraw }) {
+function AnnotationLayer({ active, tool, color, strokes, onDraw, onUpdate, onDelete }) {
   const canvasRef = useRef(null)
   const current = useRef(null)
+  const bounds = useRef({})
+  const drag = useRef(null)
   const [textAt, setTextAt] = useState(null)
   const [textValue, setTextValue] = useState('')
+  const [editingId, setEditingId] = useState(null)
+  const [selectedId, setSelectedId] = useState(null)
+  const [selBox, setSelBox] = useState(null)
 
   const paint = () => {
     const canvas = canvasRef.current
@@ -108,12 +113,24 @@ function AnnotationLayer({ active, tool, color, strokes, onDraw }) {
     ctx.scale(dpr, dpr)
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
+    bounds.current = {}
     strokes.forEach((stroke) => {
+      if (stroke.type !== 'text') {
+        const xs = stroke.pts.map(([x]) => x * width)
+        const ys = stroke.pts.map(([, y]) => y * height)
+        bounds.current[stroke.id] = {
+          x: Math.min(...xs) - 6, y: Math.min(...ys) - 6, w: Math.max(...xs) - Math.min(...xs) + 12, h: Math.max(...ys) - Math.min(...ys) + 12,
+        }
+      }
       if (stroke.type === 'text') {
+        const px = stroke.size * height
         ctx.fillStyle = stroke.color
-        ctx.font = `600 ${stroke.size * height}px sans-serif`
+        ctx.font = `600 ${px}px sans-serif`
         ctx.textBaseline = 'middle'
-        ctx.fillText(stroke.text, stroke.x * width, stroke.y * height)
+        const x = stroke.x * width
+        const y = stroke.y * height
+        ctx.fillText(stroke.text, x, y)
+        bounds.current[stroke.id] = { x: x - 4, y: y - px / 2 - 4, w: ctx.measureText(stroke.text).width + 8, h: px + 8 }
         return
       }
       ctx.strokeStyle = stroke.color
@@ -123,6 +140,14 @@ function AnnotationLayer({ active, tool, color, strokes, onDraw }) {
       if (stroke.pts.length === 1) ctx.lineTo(stroke.pts[0][0] * width + 0.1, stroke.pts[0][1] * height)
       ctx.stroke()
     })
+    const box = selectedId && bounds.current[selectedId]
+    if (box) {
+      ctx.setLineDash([5, 4])
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 1.5
+      ctx.strokeRect(box.x, box.y, box.w, box.h)
+    }
+    setSelBox((old) => (box && (!old || old.x !== box.x || old.y !== box.y || old.w !== box.w) ? box : box ? old : null))
   }
 
   useEffect(() => {
@@ -130,11 +155,46 @@ function AnnotationLayer({ active, tool, color, strokes, onDraw }) {
     const observer = new ResizeObserver(paint)
     observer.observe(canvasRef.current)
     return () => observer.disconnect()
-  }, [strokes])
+  }, [strokes, selectedId])
+
+  // leaving the select tool drops the selection
+  useEffect(() => {
+    if (tool !== 'select' || !active) setSelectedId(null)
+  }, [tool, active])
 
   const point = (e) => {
     const rect = canvasRef.current.getBoundingClientRect()
     return [(e.clientX - rect.left) / rect.width, (e.clientY - rect.top) / rect.height]
+  }
+
+  // Distance from a point to a line segment, in pixels.
+  const distToSegment = (px, py, [ax, ay], [bx, by]) => {
+    const dx = bx - ax
+    const dy = by - ay
+    const len2 = dx * dx + dy * dy
+    const t = len2 ? Math.min(Math.max(((px - ax) * dx + (py - ay) * dy) / len2, 0), 1) : 0
+    return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+  }
+
+  // The top-most text or pen stroke under the pointer, if any.
+  const hitAny = (e) => {
+    const rect = canvasRef.current.getBoundingClientRect()
+    const px = e.clientX - rect.left
+    const py = e.clientY - rect.top
+    for (let i = strokes.length - 1; i >= 0; i -= 1) {
+      const stroke = strokes[i]
+      if (stroke.type === 'text') {
+        const b = bounds.current[stroke.id]
+        if (b && px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) return stroke.id
+      } else {
+        const pts = stroke.pts.map(([x, y]) => [x * rect.width, y * rect.height])
+        const near = pts.length === 1
+          ? Math.hypot(px - pts[0][0], py - pts[0][1]) <= 9
+          : pts.some((pt, k) => k > 0 && distToSegment(px, py, pts[k - 1], pt) <= 9)
+        if (near) return stroke.id
+      }
+    }
+    return undefined
   }
 
   const flush = () => {
@@ -145,13 +205,21 @@ function AnnotationLayer({ active, tool, color, strokes, onDraw }) {
     c.last = performance.now()
   }
 
-  const commitText = () => {
-    const value = textValue.trim()
-    if (value && textAt) {
-      onDraw({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, type: 'text', x: textAt[0], y: textAt[1], text: value, color, size: 0.04 })
-    }
+  const closeInput = () => {
     setTextAt(null)
     setTextValue('')
+    setEditingId(null)
+  }
+
+  const commitText = () => {
+    const value = textValue.trim()
+    if (editingId) {
+      if (value) onUpdate(editingId, { text: value })
+      else onDelete(editingId)
+    } else if (value && textAt) {
+      onDraw({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, type: 'text', x: textAt[0], y: textAt[1], text: value, color, size: 0.024 })
+    }
+    closeInput()
   }
 
   const onPointerDown = (e) => {
@@ -161,45 +229,120 @@ function AnnotationLayer({ active, tool, color, strokes, onDraw }) {
       setTextAt(point(e))
       return
     }
+    if (tool === 'select') {
+      const id = hitAny(e)
+      setSelectedId(id || null)
+      const stroke = strokes.find((st) => st.id === id)
+      if (stroke?.type === 'text') {
+        e.currentTarget.setPointerCapture(e.pointerId)
+        const [px, py] = point(e)
+        drag.current = { id, dx: stroke.x - px, dy: stroke.y - py, started: false }
+      }
+      return
+    }
     e.currentTarget.setPointerCapture(e.pointerId)
     current.current = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, color, w: 3, last: 0, pending: [point(e)] }
     flush()
   }
   const onPointerMove = (e) => {
+    if (drag.current) {
+      const [px, py] = point(e)
+      // only the first step of a drag is recorded for undo
+      onUpdate(drag.current.id, { x: Math.min(Math.max(px + drag.current.dx, 0), 1), y: Math.min(Math.max(py + drag.current.dy, 0), 1) }, !drag.current.started)
+      drag.current.started = true
+      return
+    }
     const c = current.current
     if (!c) return
     c.pending.push(point(e))
     if (performance.now() - c.last > 40) flush()
   }
   const onPointerUp = () => {
+    drag.current = null
     flush()
     current.current = null
   }
+
+  const onDoubleClick = (e) => {
+    if (tool !== 'select') return
+    const id = hitAny(e)
+    if (!id) return
+    const stroke = strokes.find((st) => st.id === id)
+    if (stroke.type !== 'text') return
+    setEditingId(id)
+    setTextValue(stroke.text)
+    setTextAt([stroke.x, stroke.y])
+  }
+
+  const selected = strokes.find((st) => st.id === selectedId)
+  const resize = (factor) => onUpdate(selectedId, { size: Math.min(Math.max(selected.size * factor, 0.012), 0.12) })
+
+  // Delete / Backspace removes the selected text
+  useEffect(() => {
+    if (!selectedId || textAt) return undefined
+    const onKey = (e) => {
+      // never act while the user is typing in the notepad or another field
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        onDelete(selectedId)
+        setSelectedId(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selectedId, textAt])
+
+  const inputColor = editingId ? selected?.color || color : color
 
   return (
     <>
       <canvas
         ref={canvasRef}
         className="absolute inset-0 h-full w-full z-[6]"
-        style={{ pointerEvents: active ? 'auto' : 'none', cursor: tool === 'text' ? 'text' : 'crosshair', touchAction: 'none' }}
+        style={{
+          pointerEvents: active ? 'auto' : 'none',
+          cursor: tool === 'text' ? 'text' : tool === 'select' ? 'default' : 'crosshair',
+          touchAction: 'none',
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
+        onDoubleClick={onDoubleClick}
       />
-      {active && tool === 'text' && textAt && (
+      {active && textAt && (
         <input
           autoFocus
           value={textValue}
           onChange={(e) => setTextValue(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') commitText()
-            if (e.key === 'Escape') { setTextAt(null); setTextValue('') }
+            if (e.key === 'Escape') closeInput()
           }}
           onBlur={commitText}
           className="absolute z-[7] w-52 rounded-md bg-black/70 px-2 py-1 text-sm text-white focus:outline-none"
-          style={{ left: `${textAt[0] * 100}%`, top: `${textAt[1] * 100}%`, transform: 'translateY(-50%)', border: `2px solid ${color}` }}
+          style={{ left: `${textAt[0] * 100}%`, top: `${textAt[1] * 100}%`, transform: 'translateY(-50%)', border: `2px solid ${inputColor}` }}
         />
+      )}
+      {active && tool === 'select' && selected && selBox && !textAt && (
+        <div
+          className="absolute z-[7] flex items-center gap-1 rounded-full bg-slate-900/90 px-1.5 py-1"
+          style={{ left: selBox.x, top: Math.max(selBox.y - 36, 2) }}
+        >
+          {selected.type === 'text' && (
+            <>
+              <button type="button" onClick={() => resize(1 / 1.2)} className="h-6 w-6 rounded-full text-xs font-bold text-white hover:bg-white/15">A-</button>
+              <button type="button" onClick={() => resize(1.2)} className="h-6 w-6 rounded-full text-sm font-bold text-white hover:bg-white/15">A+</button>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => { onDelete(selectedId); setSelectedId(null) }}
+            className="flex h-6 w-6 items-center justify-center rounded-full text-red-400 hover:bg-white/15"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
       )}
     </>
   )
@@ -231,16 +374,16 @@ function AnnotationToolbar({ pen, t }) {
       ))}
       {toolButton('pen', Pen, t('call.pen'))}
       {toolButton('text', Type, t('call.text'))}
-      {pen.strokes.length > 0 && (
-        <button
-          type="button"
-          onClick={pen.onClear}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-          title={t('call.clearDrawing')}
-        >
-          <Eraser size={14} />
-        </button>
-      )}
+      {toolButton('select', MousePointer2, t('call.selectText'))}
+      <button
+        type="button"
+        onClick={pen.onUndo}
+        disabled={!pen.canUndo}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-30 transition-colors"
+        title={t('call.undo')}
+      >
+        <Undo2 size={14} />
+      </button>
     </>
   )
 }
@@ -301,7 +444,11 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
           isImage ? (
             <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-black" />
           ) : (
-            <iframe src={embedSrc} title={material.title} className="w-full h-full bg-white border-0" />
+            <>
+              <iframe src={embedSrc} title={material.title} className="w-full h-full bg-white border-0" />
+              {/* Hides the viewer's own menu (download / print) and full-screen icons; same colour as its bar so it blends in. */}
+              {isOffice && <div className="absolute bottom-0 end-0 z-[5] h-9 w-28" style={{ background: 'rgb(36 36 36)' }} />}
+            </>
           )
         ) : (
           <div className="flex flex-col items-center justify-center gap-3 h-full text-slate-400">
@@ -309,7 +456,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
             <p className="text-sm">{name}</p>
           </div>
         )}
-        <AnnotationLayer active={pen.on} tool={pen.tool} color={pen.color} strokes={pen.strokes} onDraw={pen.onDraw} />
+        <AnnotationLayer active={pen.on} tool={pen.tool} color={pen.color} strokes={pen.strokes} onDraw={pen.onDraw} onUpdate={pen.onUpdate} onDelete={pen.onDelete} />
       </div>
     </div>
   )
@@ -563,6 +710,11 @@ export default function Call() {
   const [penColor, setPenColor] = useState(PEN_COLORS[0])
   const [penTool, setPenTool] = useState('pen')
   const [remoteSharing, setRemoteSharing] = useState(false)
+  // Undo history of my own drawing changes (added / edited / deleted), newest last.
+  const historyRef = useRef([])
+  const myStrokeIds = useRef(new Set())
+  const strokesRef = useRef([])
+  const [historyLen, setHistoryLen] = useState(0)
   // Whether the other person's camera is on (their box is hidden while it is off).
   const [remoteCamOn, setRemoteCamOn] = useState(true)
 
@@ -724,6 +876,10 @@ export default function Call() {
           setRemoteCamOn(!!data.on)
         } else if (data.type === 'draw' && data.chunk) {
           addStrokeChunk(data.chunk)
+        } else if (data.type === 'draw-update') {
+          setStrokes((list) => list.map((st) => (st.id === data.id ? { ...st, ...data.patch } : st)))
+        } else if (data.type === 'draw-delete') {
+          setStrokes((list) => list.filter((st) => st.id !== data.id))
         } else if (data.type === 'draw-clear') {
           setStrokes([])
         } else if (data.type === 'material-share-stop') {
@@ -1108,14 +1264,52 @@ export default function Call() {
     if (!screenSharing) setStrokes((list) => (list.length && !sharedRef.current ? [] : list))
   }, [joined, status, screenSharing])
 
+  strokesRef.current = strokes
+
+  // Undo entries only apply to the file/screen they were made on.
+  const surfaceKey = () => sharedRef.current?.file || 'screen'
+  const pushHistory = (entry) => {
+    historyRef.current = [...historyRef.current.slice(-49), { ...entry, surface: surfaceKey() }]
+    setHistoryLen(historyRef.current.length)
+  }
+
   const drawLocal = (chunk) => {
+    if (!myStrokeIds.current.has(chunk.id)) {
+      myStrokeIds.current.add(chunk.id)
+      pushHistory({ type: 'add', id: chunk.id })
+    }
     addStrokeChunk(chunk)
     send({ type: 'draw', chunk })
   }
 
-  const clearDrawing = () => {
-    setStrokes([])
-    send({ type: 'draw-clear' })
+  const updateStroke = (id, patch, record = true) => {
+    if (record) {
+      const old = strokesRef.current.find((st) => st.id === id)
+      if (old) pushHistory({ type: 'update', id, prev: Object.fromEntries(Object.keys(patch).map((k) => [k, old[k]])) })
+    }
+    setStrokes((list) => list.map((st) => (st.id === id ? { ...st, ...patch } : st)))
+    send({ type: 'draw-update', id, patch })
+  }
+
+  const deleteStroke = (id, record = true) => {
+    const old = strokesRef.current.find((st) => st.id === id)
+    if (record && old) pushHistory({ type: 'delete', stroke: old })
+    setStrokes((list) => list.filter((st) => st.id !== id))
+    send({ type: 'draw-delete', id })
+  }
+
+  const undoDrawing = () => {
+    const entry = historyRef.current[historyRef.current.length - 1]
+    if (!entry) return
+    historyRef.current = historyRef.current.slice(0, -1)
+    setHistoryLen(historyRef.current.length)
+    if (entry.surface !== surfaceKey()) return
+    if (entry.type === 'add') deleteStroke(entry.id, false)
+    else if (entry.type === 'update') updateStroke(entry.id, entry.prev, false)
+    else if (entry.type === 'delete') {
+      addStrokeChunk(entry.stroke)
+      send({ type: 'draw', chunk: entry.stroke })
+    }
   }
 
   const penApi = {
@@ -1130,7 +1324,10 @@ export default function Call() {
     },
     onColor: setPenColor,
     onDraw: drawLocal,
-    onClear: clearDrawing,
+    onUpdate: updateStroke,
+    onDelete: deleteStroke,
+    onUndo: undoDrawing,
+    canUndo: historyLen > 0,
   }
   const screenAnnotating = (screenSharing || remoteSharing) && !sharedMaterial
 
@@ -1279,7 +1476,7 @@ export default function Call() {
             )}
             {screenAnnotating && (
               <>
-                <AnnotationLayer active={penOn} tool={penTool} color={penColor} strokes={strokes} onDraw={drawLocal} />
+                <AnnotationLayer active={penOn} tool={penTool} color={penColor} strokes={strokes} onDraw={drawLocal} onUpdate={penApi.onUpdate} onDelete={penApi.onDelete} />
                 <div className="absolute top-3 start-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-slate-900/80 px-3 py-1.5">
                   <AnnotationToolbar pen={penApi} t={t} />
                 </div>

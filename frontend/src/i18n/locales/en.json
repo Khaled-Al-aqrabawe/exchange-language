@@ -626,7 +626,9 @@
     "clearDrawing": "Clear drawing",
     "sendToAdmin": "Send to admin",
     "sentToAdmin": "Sent to admin",
-    "text": "Text"
+    "text": "Text",
+    "selectText": "Select, move or edit",
+    "undo": "Undo"
   },
   "levels": {
     "beginner": "Beginner",
