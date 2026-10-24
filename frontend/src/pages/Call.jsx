@@ -17,6 +17,7 @@ const statusKeys = {
 }
 
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
+const OFFICE_EXTENSIONS = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx']
 
 function SharedMaterialStage({ material, onClose, t }) {
   const name = material.file_name || material.title
@@ -24,11 +25,16 @@ function SharedMaterialStage({ material, onClose, t }) {
   const isImage = IMAGE_EXTENSIONS.includes(ext)
   const isPdf = ext === 'pdf'
   const isTextLike = ['txt', 'md', 'csv'].includes(ext)
-  const canEmbed = isImage || isPdf || isTextLike
+  const isOffice = OFFICE_EXTENSIONS.includes(ext)
+  // Office Online can only fetch publicly reachable URLs, so it won't work on localhost
+  const isLocal = ['localhost', '127.0.0.1'].includes(new URL(material.file, window.location.href).hostname)
+  const canEmbed = isImage || isPdf || isTextLike || (isOffice && !isLocal)
   // Browsers may have cached an old blocked (X-Frame-Options: DENY) response
   // for this exact URL from before that header was removed server-side - a
   // fixed query param forces a fresh request instead of reusing that cache entry.
-  const embedSrc = `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
+  const embedSrc = isOffice
+    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(material.file)}`
+    : `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col bg-slate-900 lp-animate-in-scale">

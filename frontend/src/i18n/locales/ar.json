@@ -570,7 +570,8 @@
     "cancelLeave": "البقاء في المكالمة",
     "incoming": "{{name}} يريد الاتصال بك",
     "answer": "رد",
-    "decline": "رفض"
+    "decline": "رفض",
+    "ringError": "تعذّر بدء المكالمة. حاول مرة أخرى."
   },
   "levels": {
     "beginner": "مبتدئ",

@@ -408,8 +408,12 @@ export default function Partners() {
   )
 
   const handleCall = async (p) => {
-    const { data } = await client.post('/calls/ring/', { partner_id: p.user_id })
-    navigate(`/call/${data.room_id}`)
+    try {
+      const { data } = await client.post('/calls/ring/', { partner_id: p.user_id })
+      navigate(`/call/${data.room_id}`)
+    } catch {
+      window.alert(t('call.ringError'))
+    }
   }
 
   const handleMessage = async (p) => {

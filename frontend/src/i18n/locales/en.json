@@ -580,7 +580,8 @@
     "cancelLeave": "Stay in call",
     "incoming": "{{name}} wants to call you",
     "answer": "Answer",
-    "decline": "Decline"
+    "decline": "Decline",
+    "ringError": "Could not start the call. Please try again."
   },
   "levels": {
     "beginner": "Beginner",

@@ -2,11 +2,12 @@ import { Phone, PhoneOff } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { wsUrl } from '../api/client'
+import client, { wsUrl } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { resolveAvatarUrl } from '../utils/images'
 
 const RING_TIMEOUT_MS = 30000
+const POLL_MS = 4000
 
 // Listens on the user's notify socket and shows a box when someone calls them.
 export default function IncomingCallBox() {
@@ -15,6 +16,25 @@ export default function IncomingCallBox() {
   const navigate = useNavigate()
   const [call, setCall] = useState(null)
   const timer = useRef(null)
+  const handled = useRef(new Set())
+
+  const show = (data) => {
+    if (handled.current.has(data.room_id)) return
+    handled.current.add(data.room_id)
+    setCall(data)
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setCall(null), RING_TIMEOUT_MS)
+  }
+
+  // Backup for when the socket can't connect: ask the server for a ringing call.
+  useEffect(() => {
+    if (!user) return undefined
+    const poll = () => client.get('/calls/incoming/').then(({ data }) => { if (data) show(data) }).catch(() => {})
+    poll()
+    const id = setInterval(poll, POLL_MS)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   useEffect(() => {
     if (!user) return undefined
@@ -26,10 +46,7 @@ export default function IncomingCallBox() {
       socket.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data)
-          if (data.event !== 'incoming-call') return
-          setCall(data)
-          clearTimeout(timer.current)
-          timer.current = setTimeout(() => setCall(null), RING_TIMEOUT_MS)
+          if (data.event === 'incoming-call') show(data)
         } catch { /* ignore malformed messages */ }
       }
       socket.onclose = () => { if (!closed) retry = setTimeout(connect, 3000) }
@@ -47,11 +64,13 @@ export default function IncomingCallBox() {
 
   const answer = () => {
     clearTimeout(timer.current)
+    client.delete('/calls/incoming/').catch(() => {})
     setCall(null)
     navigate(`/call/${call.room_id}`)
   }
   const decline = () => {
     clearTimeout(timer.current)
+    client.delete('/calls/incoming/').catch(() => {})
     setCall(null)
   }
 

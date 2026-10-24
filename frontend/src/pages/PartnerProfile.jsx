@@ -150,8 +150,12 @@ export default function PartnerProfile() {
   }
 
   const handleCall = async () => {
-    const { data } = await client.post('/calls/ring/', { partner_id: userId })
-    navigate(`/call/${data.room_id}`)
+    try {
+      const { data } = await client.post('/calls/ring/', { partner_id: userId })
+      navigate(`/call/${data.room_id}`)
+    } catch {
+      window.alert(t('call.ringError'))
+    }
   }
 
   if (loading) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.loading')}</div>
