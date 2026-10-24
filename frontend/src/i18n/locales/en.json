@@ -641,7 +641,10 @@
     "chatPlaceholder": "Write a message...",
     "chatSend": "Send",
     "downloadSummary": "Download session summary",
-    "chatAndNotes": "Chat and notes"
+    "chatAndNotes": "Chat and notes",
+    "share": "Share",
+    "shareFile": "Share a lesson file",
+    "stopShareFile": "Stop sharing the file"
   },
   "levels": {
     "beginner": "Beginner",

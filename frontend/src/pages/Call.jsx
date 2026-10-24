@@ -1,4 +1,4 @@
-import { Check, Clock, Download, FileText, Flag, MessageCircle, MessageSquareText, NotebookPen, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, Download, FileText, Flag, MessageCircle, MessageSquareText, NotebookPen, Share2, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -389,7 +389,7 @@ function AnnotationToolbar({ pen, t }) {
   )
 }
 
-function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
+function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t }) {
   const name = material.file_name || material.title
   const ext = name.split('.').pop()?.toLowerCase()
   const isImage = IMAGE_EXTENSIONS.includes(ext)
@@ -407,7 +407,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
     : `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
 
   return (
-    <div className="absolute inset-y-0 start-0 end-[9.75rem] z-10 flex flex-col bg-slate-900 lp-animate-in-scale">
+    <div className={`absolute inset-y-0 start-0 ${fullWidth ? 'end-0' : 'end-[9.75rem]'} z-10 flex flex-col bg-slate-900 lp-animate-in-scale`}>
       <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
         <span className="inline-flex items-center gap-2 min-w-0 text-sm text-white">
           <FileText size={15} className="shrink-0 text-slate-400" />
@@ -760,6 +760,7 @@ export default function Call() {
   const [otherName, setOtherName] = useState('')
   const [otherId, setOtherId] = useState(null)
   const [sidebarTab, setSidebarTab] = useState('notes')
+  const [shareMenuOpen, setShareMenuOpen] = useState(false)
   const [chatMessages, setChatMessages] = useState([])
   const [chatUnread, setChatUnread] = useState(0)
   const [chatToast, setChatToast] = useState(null)
@@ -1058,7 +1059,8 @@ export default function Call() {
 
   // Always lands on a real page: navigate(-1) does nothing when the call was opened
   // in a fresh tab (no history to go back to).
-  chatVisibleRef.current = notesOpen && sidebarTab === 'chat'
+  const sidebarShown = notesOpen || (typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches)
+  chatVisibleRef.current = sidebarShown && sidebarTab === 'chat'
 
   // The chat connection stays open for the whole call, so a message can be announced
   // even while the chat tab is closed.
@@ -1097,11 +1099,11 @@ export default function Call() {
 
   // Looking at the chat clears its unread count; the pop-up fades by itself.
   useEffect(() => {
-    if (notesOpen && sidebarTab === 'chat') {
+    if (sidebarShown && sidebarTab === 'chat') {
       setChatUnread(0)
       setChatToast(null)
     }
-  }, [notesOpen, sidebarTab, chatMessages.length])
+  }, [notesOpen, sidebarShown, sidebarTab, chatMessages.length])
 
   useEffect(() => {
     if (!chatToast) return undefined
@@ -1583,11 +1585,10 @@ export default function Call() {
   return (
     <div
       ref={rootRef}
-      className={`bg-slate-950 ${isFullscreen ? 'h-screen overflow-y-auto' : 'min-h-[calc(100vh-4rem)]'}`}
-      // an open sidebar takes its width, so the call picture becomes smaller instead of being covered
-      style={{ paddingInlineEnd: notesOpen ? '20rem' : 0 }}
+      // the sidebar is always shown beside the call and takes its width, so the picture never sits under it
+      className={`bg-slate-950 md:pe-80 ${isFullscreen ? 'h-screen overflow-y-auto' : 'min-h-[calc(100vh-4rem)]'}`}
     >
-      <div className={`${isFullscreen ? 'max-w-none px-4 py-4' : 'max-w-4xl px-6 py-10'} mx-auto`}>
+      <div className={`${isFullscreen ? 'max-w-none px-4 py-4' : 'max-w-5xl px-6 py-10'} mx-auto`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
@@ -1665,6 +1666,7 @@ export default function Call() {
                 onClose={closeSharedMaterial}
                 onFinish={sharedMaterial.from === 'you' && sharedMaterial.id ? () => askFinished(sharedMaterial, 'next') : undefined}
                 pen={penApi}
+                fullWidth={!(remoteCamOn || (camOn && !screenSharing))}
                 t={t}
               />
             )}
@@ -1708,41 +1710,55 @@ export default function Call() {
             {camOn ? <Video size={18} /> : <VideoOff size={18} />}
           </button>
           <button
-            onClick={toggleScreenShare}
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-              screenSharing ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
-            }`}
-            title={screenSharing ? t('call.stopSharingScreen') : t('call.shareScreen')}
-          >
-            <MonitorUp size={18} />
-          </button>
-          <button
             onClick={toggleFullscreen}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all hover:scale-105"
             title={isFullscreen ? t('call.exitFullscreen') : t('call.fullscreen')}
           >
             {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
           </button>
-          <button
-            onClick={openMaterialPicker}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all hover:scale-105"
-            title={t('materials.shareInCall')}
-          >
-            <FileText size={18} />
-          </button>
-          {sessionId && (
+          <div className="relative">
+            {shareMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setShareMenuOpen(false)} />}
+            {shareMenuOpen && (
+              <div className="absolute bottom-full start-1/2 z-50 mb-3 w-60 -translate-x-1/2 rounded-2xl border border-white/10 bg-slate-900 p-1.5 shadow-xl">
+                <button
+                  type="button"
+                  onClick={() => { setShareMenuOpen(false); openMaterialPicker() }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-slate-100 hover:bg-white/10"
+                >
+                  <FileText size={16} className="shrink-0 text-slate-400" /> {t('call.shareFile')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShareMenuOpen(false); toggleScreenShare() }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-slate-100 hover:bg-white/10"
+                >
+                  <MonitorUp size={16} className="shrink-0 text-slate-400" /> {screenSharing ? t('call.stopSharingScreen') : t('call.shareScreen')}
+                </button>
+                {sharedMaterial?.from === 'you' && (
+                  <button
+                    type="button"
+                    onClick={() => { setShareMenuOpen(false); closeSharedMaterial() }}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-red-300 hover:bg-white/10"
+                  >
+                    <X size={16} className="shrink-0" /> {t('call.stopShareFile')}
+                  </button>
+                )}
+              </div>
+            )}
             <button
-              onClick={() => setReportOpen(true)}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all hover:scale-105"
-              title={t('report.link')}
+              onClick={() => setShareMenuOpen((v) => !v)}
+              className={`relative z-50 flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
+                screenSharing || sharedMaterial?.from === 'you' ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
+              }`}
+              title={t('call.share')}
             >
-              <Flag size={18} />
+              <Share2 size={18} />
             </button>
-          )}
+          </div>
           {/* One button for the sidebar; it opens on the chat when a message is waiting, otherwise where you left off. */}
           <button
             onClick={() => (notesOpen ? setNotesOpen(false) : openSidebar(chatUnread > 0 ? 'chat' : sidebarTab))}
-            className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
+            className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 md:hidden ${
               notesOpen ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
             }`}
             title={t('call.chatAndNotes')}
@@ -1883,8 +1899,8 @@ export default function Call() {
         </button>
       )}
 
-      {notesOpen && (
-        <aside className={`fixed ${isFullscreen ? 'top-0' : 'top-16'} bottom-0 end-0 z-40 w-80 max-w-full flex flex-col bg-slate-900 border-s border-white/10 lp-animate-in`}>
+      {(
+        <aside className={`fixed ${isFullscreen ? 'top-0' : 'top-16'} bottom-0 end-0 z-40 w-80 max-w-full ${notesOpen ? 'flex' : 'hidden md:flex'} flex-col bg-slate-900 border-s border-white/10`}>
           <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10">
             <div className="flex items-center gap-1">
               {[['notes', NotebookPen, t('call.notes')], ['chat', MessageCircle, t('call.chat')]].map(([tab, Icon, label]) => (
@@ -1895,6 +1911,11 @@ export default function Call() {
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${sidebarTab === tab ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white'}`}
                 >
                   <Icon size={13} /> {label}
+                  {tab === 'chat' && chatUnread > 0 && (
+                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                      {chatUnread > 9 ? '9+' : chatUnread}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -1915,7 +1936,7 @@ export default function Call() {
                   </button>
                 </>
               )}
-              <button type="button" onClick={() => setNotesOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white">
+              <button type="button" onClick={() => setNotesOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white md:hidden">
                 <X size={14} />
               </button>
             </div>

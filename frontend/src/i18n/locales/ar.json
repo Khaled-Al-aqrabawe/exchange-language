@@ -631,7 +631,10 @@
     "chatPlaceholder": "اكتب رسالة...",
     "chatSend": "إرسال",
     "downloadSummary": "تنزيل ملخص الجلسة",
-    "chatAndNotes": "المحادثة والملاحظات"
+    "chatAndNotes": "المحادثة والملاحظات",
+    "share": "مشاركة",
+    "shareFile": "مشاركة ملف درس",
+    "stopShareFile": "إيقاف مشاركة الملف"
   },
   "levels": {
     "beginner": "مبتدئ",
