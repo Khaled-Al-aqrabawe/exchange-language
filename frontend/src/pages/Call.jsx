@@ -606,7 +606,7 @@ function CallChat({ messages, onSend, myId, t }) {
 }
 
 // Shown when leaving a session (completed or not) so each person can rate the other.
-function CallRatingModal({ partnerName, files, notes, onSubmit, onReport, onSummary, t }) {
+function CallRatingModal({ partnerName, onSubmit, onReport, onSummary, t }) {
   const [score, setScore] = useState(0)
   const [hoverScore, setHoverScore] = useState(0)
   const [comment, setComment] = useState('')
@@ -638,25 +638,6 @@ function CallRatingModal({ partnerName, files, notes, onSubmit, onReport, onSumm
               >
                 <Download size={14} className="shrink-0 text-slate-300" /> <span className="truncate">{t('call.downloadSummary')}</span>
               </button>
-              {notes.trim() && (
-                <button
-                  type="button"
-                  onClick={() => downloadText('session-notes.txt', notes)}
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm text-slate-200 hover:bg-white/10 transition-colors"
-                >
-                  <Download size={14} className="shrink-0 text-slate-400" /> <span className="truncate">{t('call.downloadNotes')}</span>
-                </button>
-              )}
-              {files.map((f) => (
-                <button
-                  key={f.file}
-                  type="button"
-                  onClick={() => downloadFile(f.file, f.file_name)}
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm text-slate-200 hover:bg-white/10 transition-colors"
-                >
-                  <Download size={14} className="shrink-0 text-slate-400" /> <span className="truncate">{f.title}</span>
-                </button>
-              ))}
             </div>
           </div>
         )}
@@ -769,7 +750,6 @@ export default function Call() {
   const [reportOpen, setReportOpen] = useState(false)
   // Who takes the first turn: the one who completed more lessons when both learn the same language.
   const [turnInfo, setTurnInfo] = useState(null)
-  const [adminNoteState, setAdminNoteState] = useState('idle')
   // Notepad sidebar (saved on the server per session) and the files shared during the call.
   const [notesOpen, setNotesOpen] = useState(false)
   const [noteText, setNoteText] = useState('')
@@ -1301,16 +1281,6 @@ export default function Call() {
     if (liveStart) writeCallState(roomId, { liveStart })
   }, [liveStart, roomId])
   noteTextRef.current = noteText
-
-  const sendNoteToAdmin = async () => {
-    setAdminNoteState('sending')
-    try {
-      await client.post(`/sessions/${sessionId}/report/`, { reason: 'note_to_admin', details: noteTextRef.current })
-      setAdminNoteState('sent')
-    } catch {
-      setAdminNoteState('error')
-    }
-  }
 
   const saveNote = (text) => {
     if (!sessionId) return Promise.resolve()
@@ -1951,21 +1921,6 @@ export default function Call() {
                 placeholder={t('call.notesPlaceholder')}
                 className="flex-1 w-full resize-none bg-transparent p-4 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
               />
-              {sessionId && (
-                <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-white/10">
-                  <span className="text-xs text-slate-400">
-                    {adminNoteState === 'sent' ? t('call.sentToAdmin') : adminNoteState === 'error' ? t('call.notesError') : ''}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={sendNoteToAdmin}
-                    disabled={!noteText.trim() || adminNoteState === 'sending'}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 h-8 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-40 transition-colors"
-                  >
-                    <Send size={13} /> {t('call.sendToAdmin')}
-                  </button>
-                </div>
-              )}
             </>
           )}
         </aside>
@@ -1978,8 +1933,6 @@ export default function Call() {
       {ratingOpen && (
         <CallRatingModal
           partnerName={otherName || t('call.yourPartner')}
-          files={sharedFiles}
-          notes={noteText}
           onSubmit={submitRating}
           onReport={() => setReportOpen(true)}
           onSummary={downloadSummary}
