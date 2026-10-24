@@ -15,3 +15,15 @@ export async function downloadFile(url, filename) {
   link.remove()
   URL.revokeObjectURL(objectUrl)
 }
+
+// Saves plain text (e.g. session notes) as a .txt file.
+export function downloadText(filename, text) {
+  const objectUrl = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }))
+  const link = document.createElement('a')
+  link.href = objectUrl
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(objectUrl)
+}

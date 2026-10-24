@@ -1,9 +1,10 @@
-import { Check, Clock, FileText, Star, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, Download, FileText, NotebookPen, Star, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { downloadFile, downloadText } from '../utils/downloadFile'
 
 const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }]
 
@@ -135,7 +136,7 @@ function SharedMaterialStage({ material, onClose, onFinish, t }) {
 }
 
 // Shown when leaving a session (completed or not) so each person can rate the other.
-function CallRatingModal({ partnerName, onSubmit, onSkip, t }) {
+function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, t }) {
   const [score, setScore] = useState(0)
   const [hoverScore, setHoverScore] = useState(0)
   const [comment, setComment] = useState('')
@@ -156,6 +157,32 @@ function CallRatingModal({ partnerName, onSubmit, onSkip, t }) {
       <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6">
         <p className="text-lg font-semibold text-white mb-1">{t('schedule.rateModalTitle', { name: partnerName })}</p>
         <p className="text-sm text-slate-400 mb-4">{t('schedule.rateModalSubtitle')}</p>
+        {(files.length > 0 || notes.trim()) && (
+          <div className="mb-4 rounded-xl bg-white/5 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">{t('call.downloadsTitle')}</p>
+            <div className="flex flex-col gap-1.5">
+              {notes.trim() && (
+                <button
+                  type="button"
+                  onClick={() => downloadText('session-notes.txt', notes)}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm text-slate-200 hover:bg-white/10 transition-colors"
+                >
+                  <Download size={14} className="shrink-0 text-slate-400" /> <span className="truncate">{t('call.downloadNotes')}</span>
+                </button>
+              )}
+              {files.map((f) => (
+                <button
+                  key={f.file}
+                  type="button"
+                  onClick={() => downloadFile(f.file, f.file_name)}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm text-slate-200 hover:bg-white/10 transition-colors"
+                >
+                  <Download size={14} className="shrink-0 text-slate-400" /> <span className="truncate">{f.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="flex items-center gap-1 mb-4">
           {[1, 2, 3, 4, 5].map((value) => (
             <button
@@ -249,6 +276,17 @@ export default function Call() {
   const [showCompletedBox, setShowCompletedBox] = useState(false)
   const [ratingOpen, setRatingOpen] = useState(false)
   const [otherName, setOtherName] = useState('')
+  // Notepad sidebar (saved on the server per session) and the files shared during the call.
+  const [notesOpen, setNotesOpen] = useState(false)
+  const [noteText, setNoteText] = useState('')
+  const [noteState, setNoteState] = useState('idle')
+  const [sharedFiles, setSharedFiles] = useState([])
+  const noteLoadedRef = useRef(false)
+  const noteTextRef = useRef('')
+
+  const rememberFile = (material) => {
+    setSharedFiles((list) => (list.some((f) => f.file === material.file) ? list : [...list, material]))
+  }
   const [showLeaveChoice, setShowLeaveChoice] = useState(false)
   const reminder5FiredRef = useRef(false)
   const reminder30FiredRef = useRef(false)
@@ -364,6 +402,7 @@ export default function Call() {
           }
         } else if (data.type === 'material-share' && data.material) {
           setSharedMaterial({ ...data.material, from: 'partner' })
+          rememberFile(data.material)
         } else if (data.type === 'live-start') {
           setLiveStart((v) => v || Date.now())
         } else if (data.type === 'material-share-stop') {
@@ -464,6 +503,7 @@ export default function Call() {
 
   // Leaving always ends with the chance to rate the other person (when there is a session).
   const leaveCall = () => {
+    if (noteLoadedRef.current) saveNote(noteTextRef.current)
     cleanupMedia()
     if (sessionId) setRatingOpen(true)
     else exitCall()
@@ -574,6 +614,7 @@ export default function Call() {
   const shareMaterial = (m, startSlide = 1) => {
     const material = { id: m.id, title: m.title, file: m.file, file_name: m.file_name, start_slide: startSlide }
     send({ type: 'material-share', material })
+    rememberFile(material)
     setSharedMaterial({ ...material, from: 'you' })
     setShowMaterialPicker(false)
   }
@@ -596,6 +637,32 @@ export default function Call() {
   }
 
   const iAmRequester = !!requester && requester.id === user?.id
+  noteTextRef.current = noteText
+
+  const saveNote = (text) => {
+    if (!sessionId) return Promise.resolve()
+    setNoteState('saving')
+    return client.put(`/sessions/${sessionId}/note/`, { text })
+      .then(() => setNoteState('saved'))
+      .catch(() => setNoteState('error'))
+  }
+
+  useEffect(() => {
+    if (!sessionId) return
+    client.get(`/sessions/${sessionId}/note/`)
+      .then(({ data }) => {
+        setNoteText((current) => current || data.text)
+        noteLoadedRef.current = true
+      })
+      .catch(() => {})
+  }, [sessionId])
+
+  // Autosave about a second after the user stops typing.
+  useEffect(() => {
+    if (!noteLoadedRef.current) return undefined
+    const id = setTimeout(() => saveNote(noteText), 1000)
+    return () => clearTimeout(id)
+  }, [noteText])
   micOnRef.current = micOn
   camOnRef.current = camOn
   joinedRef.current = joined
@@ -877,6 +944,15 @@ export default function Call() {
             <FileText size={18} />
           </button>
           <button
+            onClick={() => setNotesOpen((v) => !v)}
+            className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
+              notesOpen ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
+            }`}
+            title={t('call.notes')}
+          >
+            <NotebookPen size={18} />
+          </button>
+          <button
             onClick={handleLeaveClick}
             className="flex h-12 items-center gap-2 rounded-full bg-red-600 px-6 text-white font-medium hover:bg-red-700 transition-all hover:scale-105"
           >
@@ -986,9 +1062,44 @@ export default function Call() {
         </div>
       )}
 
+      {notesOpen && (
+        <aside className="fixed top-16 bottom-0 end-0 z-40 w-80 max-w-full flex flex-col bg-slate-900 border-s border-white/10 lp-animate-in">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+              <NotebookPen size={15} /> {t('call.notes')}
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">
+                {!sessionId ? t('call.notesNotSaved') : noteState === 'saving' ? t('call.notesSaving') : noteState === 'saved' ? t('call.notesSaved') : noteState === 'error' ? t('call.notesError') : ''}
+              </span>
+              <button
+                type="button"
+                onClick={() => downloadText('session-notes.txt', noteText)}
+                disabled={!noteText.trim()}
+                className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white disabled:opacity-30"
+                title={t('call.downloadNotes')}
+              >
+                <Download size={14} />
+              </button>
+              <button type="button" onClick={() => setNotesOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white">
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+          <textarea
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            placeholder={t('call.notesPlaceholder')}
+            className="flex-1 w-full resize-none bg-transparent p-4 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+          />
+        </aside>
+      )}
+
       {ratingOpen && (
         <CallRatingModal
           partnerName={otherName || t('call.yourPartner')}
+          files={sharedFiles}
+          notes={noteText}
           onSubmit={submitRating}
           onSkip={exitCall}
           t={t}

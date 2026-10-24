@@ -22,7 +22,8 @@
     "signUpFree": "اشترك مجانًا",
     "profile": "الملف الشخصي",
     "settings": "الإعدادات",
-    "logOut": "تسجيل الخروج"
+    "logOut": "تسجيل الخروج",
+    "notes": "ملاحظاتي"
   },
   "footer": {
     "tagline": "Language Partner",
@@ -594,7 +595,15 @@
     "back": "رجوع",
     "cameraOff": "الكاميرا مغلقة",
     "skipRating": "تخطي",
-    "rateAndContinue": "قيّم شريكك"
+    "rateAndContinue": "قيّم شريكك",
+    "notes": "الملاحظات",
+    "notesPlaceholder": "اكتب ملاحظاتك هنا. تُحفظ تلقائياً.",
+    "notesSaving": "جارٍ الحفظ...",
+    "notesSaved": "تم الحفظ",
+    "notesError": "لم يتم الحفظ",
+    "notesNotSaved": "غير محفوظة في حسابك",
+    "downloadNotes": "تنزيل الملاحظات",
+    "downloadsTitle": "تنزيل"
   },
   "levels": {
     "beginner": "مبتدئ",
@@ -618,5 +627,15 @@
     "seeAll": "عرض جميع الإشعارات",
     "pageTitle": "الإشعارات",
     "pageSubtitle": "كل ما يخص جلساتك، في مكان واحد."
+  },
+  "notes": {
+    "title": "ملاحظاتي",
+    "subtitle": "كل ما كتبته أثناء جلساتك، محفوظ في حسابك.",
+    "empty": "لا توجد ملاحظات بعد. افتح دفتر الملاحظات أثناء المكالمة وسيظهر ما تكتبه هنا.",
+    "with": "جلسة مع {{name}}",
+    "download": "تنزيل",
+    "saving": "جارٍ الحفظ...",
+    "saved": "تم الحفظ",
+    "error": "تعذّر الحفظ"
   }
 }

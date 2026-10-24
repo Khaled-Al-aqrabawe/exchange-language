@@ -57,3 +57,18 @@ class SessionRating(models.Model):
 
     def __str__(self):
         return f'SessionRating<{self.session_id}: {self.rater_id} -> {self.ratee_id} = {self.score}>'
+
+
+class SessionNote(models.Model):
+    """A participant's private notepad for one session (each person has their own)."""
+
+    session = models.ForeignKey(ScheduledSession, related_name='personal_notes', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='session_notes', on_delete=models.CASCADE)
+    text = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('session', 'user')
+
+    def __str__(self):
+        return f'SessionNote<{self.session_id}: {self.user_id}>'

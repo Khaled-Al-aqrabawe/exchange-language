@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .emails import send_session_confirmed_email, send_session_invitation_email
-from .models import ScheduledSession, SessionRating
+from .models import ScheduledSession, SessionNote, SessionRating
 from .serializers import ScheduledSessionSerializer, SessionRatingSerializer
 
 logger = logging.getLogger(__name__)
@@ -241,3 +241,52 @@ class NotificationsSeenView(APIView):
         profile.notifications_seen_at = timezone.now()
         profile.save(update_fields=['notifications_seen_at'])
         return Response({'notifications_seen_at': profile.notifications_seen_at})
+
+
+class SessionNoteView(APIView):
+    """The signed-in user's own notes for a session they took part in."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _session(self, request, pk):
+        try:
+            return ScheduledSession.objects.get(Q(host=request.user) | Q(partner=request.user), pk=pk)
+        except ScheduledSession.DoesNotExist:
+            raise PermissionDenied('Not a participant of this session.')
+
+    def get(self, request, pk):
+        note = SessionNote.objects.filter(session=self._session(request, pk), user=request.user).first()
+        return Response({'text': note.text if note else '', 'updated_at': note.updated_at if note else None})
+
+    def put(self, request, pk):
+        session = self._session(request, pk)
+        text = request.data.get('text', '')
+        if not isinstance(text, str):
+            raise ValidationError({'text': 'Notes must be text.'})
+        note, _ = SessionNote.objects.update_or_create(session=session, user=request.user, defaults={'text': text})
+        return Response({'text': note.text, 'updated_at': note.updated_at})
+
+
+class NotesListView(APIView):
+    """Every non-empty note the signed-in user has written, newest first."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        notes = (
+            SessionNote.objects.filter(user=request.user).exclude(text='')
+            .select_related('session__host', 'session__partner')
+            .order_by('-updated_at')
+        )
+        items = []
+        for note in notes:
+            session = note.session
+            other = session.partner if session.host_id == request.user.id else session.host
+            items.append({
+                'session_id': session.id,
+                'text': note.text,
+                'updated_at': note.updated_at,
+                'scheduled_time': session.scheduled_time,
+                'other': {'id': other.id, 'full_name': other.full_name},
+            })
+        return Response(items)

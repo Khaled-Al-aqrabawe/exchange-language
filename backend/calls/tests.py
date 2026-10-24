@@ -66,3 +66,30 @@ class InstantCallSessionTests(TransactionTestCase):
         # ... but rateable once it ended, completed or not
         c2.patch(f"/api/sessions/{session['id']}/status/", {'status': 'not_completed'}, format='json')
         self.assertEqual(c2.post(f"/api/sessions/{session['id']}/rate/", {'score': 4, 'comment': 'ok'}, format='json').status_code, 201)
+
+
+class SessionNotesTests(TransactionTestCase):
+    def test_notes_are_private_saved_and_listed(self):
+        a = User.objects.create_user('g@example.com', 'pw12345678', first_name='Gina')
+        b = User.objects.create_user('h@example.com', 'pw12345678', first_name='Hal')
+        outsider = User.objects.create_user('i@example.com', 'pw12345678')
+        ca, cb, co = APIClient(), APIClient(), APIClient()
+        ca.force_authenticate(a)
+        cb.force_authenticate(b)
+        co.force_authenticate(outsider)
+        room = ca.post('/api/calls/ring/', {'partner_id': b.id}, format='json').data['room_id']
+        sid = ca.get('/api/sessions/', {'room_id': room}).data[0]['id']
+
+        self.assertEqual(ca.get(f'/api/sessions/{sid}/note/').data['text'], '')
+        self.assertEqual(ca.put(f'/api/sessions/{sid}/note/', {'text': 'my words'}, format='json').status_code, 200)
+        ca.put(f'/api/sessions/{sid}/note/', {'text': 'my words v2'}, format='json')
+
+        self.assertEqual(ca.get(f'/api/sessions/{sid}/note/').data['text'], 'my words v2')
+        self.assertEqual(cb.get(f'/api/sessions/{sid}/note/').data['text'], '')  # private
+        self.assertEqual(co.get(f'/api/sessions/{sid}/note/').status_code, 403)
+
+        listed = ca.get('/api/sessions/notes/').data
+        self.assertEqual(len(listed), 1)
+        self.assertEqual(listed[0]['text'], 'my words v2')
+        self.assertEqual(listed[0]['other']['full_name'], 'Hal')
+        self.assertEqual(cb.get('/api/sessions/notes/').data, [])

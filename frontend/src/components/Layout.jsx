@@ -5,6 +5,7 @@ import {
   Home,
   LogOut,
   MessageCircle,
+  NotebookPen,
   Settings,
   UserRound,
   Users,
@@ -142,6 +143,15 @@ function UserMenu({ user, onLogout }) {
           >
             <UserRound size={15} />
             {t('nav.profile')}
+          </Link>
+          <Link
+            to="/notes"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
+            style={{ color: 'var(--ink-soft)' }}
+          >
+            <NotebookPen size={15} />
+            {t('nav.notes')}
           </Link>
           <Link
             to="/settings"

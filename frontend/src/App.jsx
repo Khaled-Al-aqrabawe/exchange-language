@@ -10,6 +10,7 @@ import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Materials from './pages/Materials'
 import Messages from './pages/Messages'
+import Notes from './pages/Notes'
 import Notifications from './pages/Notifications'
 import Partners from './pages/Partners'
 import PartnerProfile from './pages/PartnerProfile'
@@ -41,6 +42,7 @@ function App() {
 
           <Route path="/materials" element={<Materials />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/notes" element={<Notes />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
