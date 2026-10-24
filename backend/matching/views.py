@@ -21,13 +21,17 @@ class PartnerListView(generics.ListAPIView):
         day_of_week = self.request.query_params.get('day')
 
         if explicit_language:
-            # "I'm learning" filter: partners who speak that language on their profile
-            # (native or any extra spoken language) plus those also learning it.
+            # "I'm learning" filter: everyone who speaks that language (native or any extra
+            # spoken language) or is learning it (primary or any of their learning languages).
             wanted = explicit_language.lower()
             ids = [
                 p.id for p in qs
-                if wanted in {l.lower() for l in [p.native_language, *(p.spoken_languages or [])] if l}
-                or p.learning_language.lower() == wanted
+                if wanted in {
+                    l.lower() for l in [
+                        p.native_language, p.learning_language,
+                        *(p.spoken_languages or []), *(p.learning_languages or []),
+                    ] if l
+                }
             ]
             qs = qs.filter(id__in=ids)
         elif my_profile.learning_language:
@@ -35,10 +39,10 @@ class PartnerListView(generics.ListAPIView):
             qs = qs.filter(learning_language__iexact=my_profile.learning_language) | qs.filter(
                 native_language__iexact=my_profile.learning_language
             )
-        # "I speak" filter always comes from the profile: only show partners who are
-        # learning a language the user speaks (native + extra spoken languages).
+        # Without an explicit language, only show partners who are learning a language
+        # the user speaks. With one, show everyone who speaks or learns it.
         my_spoken = {l.lower() for l in [my_profile.native_language, *(my_profile.spoken_languages or [])] if l}
-        if my_spoken:
+        if my_spoken and not explicit_language:
             qs = qs.annotate(_learning_lower=Lower('learning_language')).filter(_learning_lower__in=my_spoken)
         if level:
             qs = qs.filter(proficiency_level=level)
