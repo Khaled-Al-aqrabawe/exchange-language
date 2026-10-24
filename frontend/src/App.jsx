@@ -3,8 +3,6 @@ import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import About from './pages/About'
 import Call from './pages/Call'
-import CoursePlayer from './pages/CoursePlayer'
-import Courses from './pages/Courses'
 import FAQ from './pages/FAQ'
 import ForgotPassword from './pages/ForgotPassword'
 import Home from './pages/Home'
@@ -40,8 +38,7 @@ function App() {
           <Route path="/messages/:conversationId" element={<Messages />} />
           <Route path="/call/:roomId" element={<Call />} />
           <Route path="/schedule" element={<Schedule />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:courseId" element={<CoursePlayer />} />
+
           <Route path="/materials" element={<Materials />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<Settings />} />

@@ -15,12 +15,12 @@ urlpatterns = [
     path('api/courses/', include('courses.urls')),
 ]
 
-if settings.DEBUG:
-    # Plain static() applies the default XFrameOptionsMiddleware (X-Frame-Options:
-    # DENY), which silently blocks course materials from rendering in the <iframe>
-    # preview used when sharing a material in a call - exempt just this route
-    # rather than weakening clickjacking protection site-wide. never_cache avoids
-    # the browser reusing an old (pre-fix, blocked) cached response across reloads.
-    urlpatterns += [
-        re_path(r'^media/(?P<path>.*)$', never_cache(xframe_options_exempt(serve)), {'document_root': settings.MEDIA_ROOT}),
-    ]
+# Uploaded media (course materials, avatars, videos) is served by Django itself.
+# Plain static() applies the default XFrameOptionsMiddleware (X-Frame-Options:
+# DENY), which silently blocks course materials from rendering in the <iframe>
+# preview used when sharing a material in a call - exempt just this route
+# rather than weakening clickjacking protection site-wide. never_cache avoids
+# the browser reusing an old (pre-fix, blocked) cached response across reloads.
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', never_cache(xframe_options_exempt(serve)), {'document_root': settings.MEDIA_ROOT}),
+]

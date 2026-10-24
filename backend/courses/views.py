@@ -1,39 +1,29 @@
-from django.utils import timezone
-from rest_framework import generics, permissions
+from rest_framework import permissions, status
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListCreateAPIView, DestroyAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from .models import Course, Lesson, LessonProgress, Material
-from .serializers import CourseDetailSerializer, CourseListSerializer, MaterialSerializer
-
-
-class CourseListView(generics.ListAPIView):
-    serializer_class = CourseListSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        qs = Course.objects.all()
-        language = self.request.query_params.get('language')
-        level = self.request.query_params.get('level')
-        if language:
-            qs = qs.filter(language__iexact=language)
-        if level:
-            qs = qs.filter(level=level)
-        return qs
+from .models import MATERIAL_LANGUAGES, MATERIAL_LEVELS, Material
+from .serializers import MaterialSerializer
 
 
-class CourseDetailView(generics.RetrieveAPIView):
-    queryset = Course.objects.prefetch_related('lessons')
-    serializer_class = CourseDetailSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_serializer_context(self):
-        return {'request': self.request}
+class IsSuperuserOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated):
+            return False
+        return request.method in permissions.SAFE_METHODS or request.user.is_superuser
 
 
-class MaterialListView(generics.ListAPIView):
+class IsSuperuser(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and request.user.is_superuser)
+
+
+class MaterialListView(ListCreateAPIView):
+    """Anyone logged in can list; only superusers can upload (one or many files)."""
+
     serializer_class = MaterialSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsSuperuserOrReadOnly]
 
     def get_queryset(self):
         qs = Material.objects.all()
@@ -48,15 +38,26 @@ class MaterialListView(generics.ListAPIView):
     def get_serializer_context(self):
         return {'request': self.request}
 
+    def create(self, request, *args, **kwargs):
+        language = request.data.get('language', '')
+        level = request.data.get('level', '')
+        files = request.FILES.getlist('files')
+        if language not in dict(MATERIAL_LANGUAGES):
+            raise ValidationError({'language': 'Choose a valid language.'})
+        if level not in dict(MATERIAL_LEVELS):
+            raise ValidationError({'level': 'Choose a valid level.'})
+        if not files:
+            raise ValidationError({'files': 'Select at least one file.'})
+        created = [
+            Material.objects.create(
+                language=language, level=level, description=request.data.get('description', ''), file=f,
+            )
+            for f in files
+        ]
+        data = MaterialSerializer(created, many=True, context=self.get_serializer_context()).data
+        return Response(data, status=status.HTTP_201_CREATED)
 
-class LessonProgressToggleView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, lesson_id):
-        lesson = Lesson.objects.get(id=lesson_id)
-        completed = bool(request.data.get('completed', True))
-        progress, _ = LessonProgress.objects.update_or_create(
-            user=request.user, lesson=lesson,
-            defaults={'completed': completed, 'completed_at': timezone.now() if completed else None},
-        )
-        return Response({'lesson_id': lesson.id, 'completed': progress.completed})
+class MaterialDetailView(DestroyAPIView):
+    queryset = Material.objects.all()
+    permission_classes = [IsSuperuser]

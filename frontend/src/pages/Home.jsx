@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import client from '../api/client'
-import CourseCover from '../components/CourseCover'
 import MessageMockup from '../components/MessageMockup'
 import { useAuth } from '../context/AuthContext'
 import { resolveAvatarUrl } from '../utils/images'
@@ -76,18 +75,15 @@ export default function Home() {
 
   const [sessions, setSessions] = useState([])
   const [partners, setPartners] = useState([])
-  const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
       client.get('/sessions/').then(({ data }) => data).catch(() => []),
       client.get('/matching/partners/').then(({ data }) => data).catch(() => []),
-      client.get('/courses/').then(({ data }) => data).catch(() => []),
-    ]).then(([s, p, c]) => {
+    ]).then(([s, p]) => {
       setSessions(s)
       setPartners(p)
-      setCourses(c)
     }).finally(() => setLoading(false))
   }, [])
 
@@ -111,9 +107,8 @@ export default function Home() {
 
   const suggestedPartners = partners.slice(0, 3)
   const upcomingSessions = upcoming.slice(0, 3)
-  const keepLearningCourses = courses.slice(0, 3)
 
-  const nothingYet = !loading && suggestedPartners.length === 0 && upcomingSessions.length === 0 && keepLearningCourses.length === 0
+  const nothingYet = !loading && suggestedPartners.length === 0 && upcomingSessions.length === 0
 
   const practiceList = [
     t('landing.practiceList.matched'),
@@ -287,24 +282,6 @@ export default function Home() {
               ) : (
                 <p className="text-sm lp-card" style={{ color: 'var(--ink-soft)' }}>{t('dashboard.suggestedPartnersEmpty')}</p>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Keep learning */}
-        {keepLearningCourses.length > 0 && (
-          <div className="lp-animate-in lp-delay-6">
-            <SectionHeader title={t('dashboard.keepLearning')} to="/materials" />
-            <div className="grid sm:grid-cols-3 gap-4">
-              {keepLearningCourses.map((c) => (
-                <Link key={c.id} to={`/courses/${c.id}`} className="lp-surface lp-card--hover block overflow-hidden">
-                  <CourseCover course={c} className="aspect-video" />
-                  <div className="p-3.5">
-                    <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--ink)' }}>{c.title}</h3>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--ink-soft)' }}>{c.language}</p>
-                  </div>
-                </Link>
-              ))}
             </div>
           </div>
         )}

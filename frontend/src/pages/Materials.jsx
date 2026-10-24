@@ -1,7 +1,8 @@
-import { ArrowLeft, Download, ExternalLink, FileText, FolderOpen, SlidersHorizontal, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ArrowLeft, Download, ExternalLink, FileText, FolderOpen, SlidersHorizontal, Trash2, Upload, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import { LANGUAGES, MATERIAL_LEVELS } from '../constants'
 import { downloadFile } from '../utils/downloadFile'
 
@@ -64,8 +65,75 @@ function MaterialViewer({ material, onClose, t }) {
   )
 }
 
+function UploadPanel({ t, onUploaded }) {
+  const [form, setForm] = useState({ language: LANGUAGES[0], level: MATERIAL_LEVELS[0] })
+  const [files, setFiles] = useState([])
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState(null)
+  const inputRef = useRef(null)
+  const fieldStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
+
+  const submit = async (e) => {
+    e.preventDefault()
+    if (files.length === 0) return
+    setBusy(true)
+    setMessage(null)
+    const body = new FormData()
+    body.append('language', form.language)
+    body.append('level', form.level)
+    files.forEach((f) => body.append('files', f))
+    try {
+      const { data } = await client.post('/courses/materials/', body, { headers: { 'Content-Type': 'multipart/form-data' } })
+      setMessage({ ok: true, text: t('materials.uploaded', { count: data.length }) })
+      setFiles([])
+      if (inputRef.current) inputRef.current.value = ''
+      onUploaded()
+    } catch (err) {
+      const d = err.response?.data
+      setMessage({ ok: false, text: d && typeof d === 'object' ? Object.values(d).flat().join(' ') : t('materials.uploadError') })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="lp-surface p-5 mt-6 flex flex-wrap items-end gap-3">
+      <div>
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('materials.language')}</label>
+        <select value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} className="rounded-xl px-3.5 py-2.5 text-sm" style={fieldStyle}>
+          {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('materials.level')}</label>
+        <select value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} className="rounded-xl px-3.5 py-2.5 text-sm" style={fieldStyle}>
+          {MATERIAL_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+        </select>
+      </div>
+      <div className="min-w-0">
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('materials.files')}</label>
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          onChange={(e) => setFiles([...e.target.files])}
+          className="text-sm max-w-64"
+          style={{ color: 'var(--ink-soft)' }}
+        />
+      </div>
+      <button type="submit" disabled={busy || files.length === 0} className="lp-btn-primary disabled:opacity-50">
+        <Upload size={15} /> {busy ? t('materials.uploading') : t('materials.upload')}
+      </button>
+      {message && (
+        <p className="w-full text-sm" style={{ color: message.ok ? 'var(--accent-2)' : '#c1443d' }}>{message.text}</p>
+      )}
+    </form>
+  )
+}
+
 export default function Materials() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [materials, setMaterials] = useState([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ language: '' })
@@ -77,14 +145,22 @@ export default function Materials() {
   const scoped = materials.filter((m) => !language || m.language === language)
   const languagesPresent = LANGUAGES.filter((l) => materials.some((m) => m.language === l))
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true)
     const params = {}
     if (filters.language) params.language = filters.language
     client.get('/courses/materials/', { params })
       .then(({ data }) => setMaterials(data))
       .finally(() => setLoading(false))
-  }, [filters])
+  }
+
+  useEffect(load, [filters])
+
+  const handleDelete = async (m) => {
+    if (!window.confirm(t('materials.confirmDelete', { title: m.title }))) return
+    await client.delete(`/courses/materials/${m.id}/`)
+    load()
+  }
 
   const selectStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
 
@@ -107,6 +183,7 @@ export default function Materials() {
               {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
+          {user?.is_superuser && <UploadPanel t={t} onUploaded={load} />}
         </div>
       </div>
 
@@ -186,6 +263,17 @@ export default function Materials() {
                   >
                     <Download size={15} /> {t('materials.download')}
                   </button>
+                  {user?.is_superuser && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(m)}
+                      className="lp-btn-secondary justify-center"
+                      style={{ color: '#c1443d' }}
+                      aria-label={t('materials.delete')}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

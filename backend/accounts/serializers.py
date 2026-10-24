@@ -69,8 +69,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'full_name', 'date_joined', 'email_verified', 'profile']
-        read_only_fields = ['id', 'email', 'date_joined', 'full_name', 'email_verified']
+        fields = ['id', 'email', 'first_name', 'last_name', 'full_name', 'date_joined', 'email_verified', 'is_superuser', 'profile']
+        read_only_fields = ['id', 'email', 'date_joined', 'full_name', 'email_verified', 'is_superuser']
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', None)

@@ -454,7 +454,16 @@
     "pickMaterial": "Choose a material to share",
     "stopSharing": "Stop sharing",
     "filesCount": "{{count}} lessons",
-    "allLevels": "All levels"
+    "allLevels": "All levels",
+    "language": "Language",
+    "level": "Level",
+    "files": "Files",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "uploaded": "{{count}} file(s) uploaded.",
+    "uploadError": "Upload failed. Please try again.",
+    "delete": "Delete",
+    "confirmDelete": "Delete \"{{title}}\"?"
   },
   "coursePlayer": {
     "loading": "Loading...",

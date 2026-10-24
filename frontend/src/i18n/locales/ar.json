@@ -448,7 +448,16 @@
     "sharedByPartner": "شارك",
     "openFile": "فتح الملف",
     "pickMaterial": "اختر مادة لمشاركتها",
-    "stopSharing": "إيقاف المشاركة"
+    "stopSharing": "إيقاف المشاركة",
+    "language": "اللغة",
+    "level": "المستوى",
+    "files": "الملفات",
+    "upload": "رفع",
+    "uploading": "جارٍ الرفع...",
+    "uploaded": "تم رفع {{count}} ملف.",
+    "uploadError": "فشل الرفع. حاول مرة أخرى.",
+    "delete": "حذف",
+    "confirmDelete": "حذف \"{{title}}\"؟"
   },
   "coursePlayer": {
     "loading": "جارٍ التحميل...",
