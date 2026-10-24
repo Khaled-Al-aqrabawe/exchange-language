@@ -248,13 +248,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, t }) {
           isImage ? (
             <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-black" />
           ) : (
-            <>
-              <iframe src={embedSrc} title={material.title} className="w-full h-full bg-white border-0" />
-              {/* Covers the viewer's own menu (download / print) and full-screen icons in its bottom bar. */}
-              {isOffice && (
-                <div className="absolute bottom-0 end-0 z-[5] h-10 w-28" style={{ background: 'rgb(60 60 60)' }} />
-              )}
-            </>
+            <iframe src={embedSrc} title={material.title} className="w-full h-full bg-white border-0" />
           )
         ) : (
           <div className="flex flex-col items-center justify-center gap-3 h-full text-slate-400">

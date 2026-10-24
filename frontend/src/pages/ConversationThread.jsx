@@ -1,7 +1,7 @@
 import { Send, Video } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
@@ -9,11 +9,22 @@ import { avatarUrl } from '../utils/images'
 export default function ConversationThread({ conversationId, partner }) {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
   const [connected, setConnected] = useState(false)
   const socketRef = useRef(null)
   const bottomRef = useRef(null)
+
+  // Same as "Call now": rings the partner and opens a real session (notes, rating, timer).
+  const startCall = async () => {
+    try {
+      const { data } = await client.post('/calls/ring/', { partner_id: partner.id })
+      navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
+    } catch {
+      window.alert(t('call.ringError'))
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -64,15 +75,14 @@ export default function ConversationThread({ conversationId, partner }) {
           </div>
         </div>
         {partner && (
-          <Link
-            to={`/call/${[user.id, partner.id].sort((a, b) => a - b).join('-')}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={startCall}
             className="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-70"
             style={{ color: 'var(--accent)' }}
           >
             <Video size={15} /> {t('conversationThread.videoCall')}
-          </Link>
+          </button>
         )}
       </div>
 
