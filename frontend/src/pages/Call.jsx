@@ -59,6 +59,26 @@ function useDraggable(stageRef) {
   }
 }
 
+// A refresh must put the user straight back into the call, so the joined state, mic/camera
+// choice and the shared clock start are kept in sessionStorage for this room.
+function readCallState(roomId) {
+  try {
+    return JSON.parse(sessionStorage.getItem(`call-${roomId}`)) || null
+  } catch {
+    return null
+  }
+}
+
+function writeCallState(roomId, patch) {
+  try {
+    const next = patch === null ? null : { ...readCallState(roomId), ...patch }
+    if (next) sessionStorage.setItem(`call-${roomId}`, JSON.stringify(next))
+    else sessionStorage.removeItem(`call-${roomId}`)
+  } catch {
+    // storage unavailable - the call still works, it just won't survive a refresh
+  }
+}
+
 function formatClock(totalSeconds) {
   const secs = Math.max(0, totalSeconds)
   return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`
@@ -349,15 +369,16 @@ export default function Call() {
   const cameraStreamRef = useRef(null)
   const previewStreamRef = useRef(null)
   const joinedRef = useRef(false)
-  const micOnRef = useRef(false)
-  const camOnRef = useRef(false)
+  const micOnRef = useRef(!!saved?.mic)
+  const camOnRef = useRef(!!saved?.cam)
   const lobbyVideoRef = useRef(null)
   const screenStreamRef = useRef(null)
 
-  const [joined, setJoined] = useState(false)
+  const [saved] = useState(() => readCallState(roomId))
+  const [joined, setJoined] = useState(() => !!saved?.joined)
   const [status, setStatus] = useState('connecting')
-  const [micOn, setMicOn] = useState(false)
-  const [camOn, setCamOn] = useState(false)
+  const [micOn, setMicOn] = useState(!!saved?.mic)
+  const [camOn, setCamOn] = useState(!!saved?.cam)
   const [error, setError] = useState('')
   const [screenSharing, setScreenSharing] = useState(false)
   const [screenShareError, setScreenShareError] = useState('')
@@ -372,7 +393,7 @@ export default function Call() {
     const id = Number(searchParams.get('from'))
     return id ? { id, name: searchParams.get('name') || '' } : null
   })
-  const [liveStart, setLiveStart] = useState(null)
+  const [liveStart, setLiveStart] = useState(() => saved?.liveStart || null)
   const [now, setNow] = useState(() => Date.now())
   const [liveEnded, setLiveEnded] = useState(false)
   const [startNote, setStartNote] = useState('')
@@ -476,27 +497,44 @@ export default function Call() {
       cameraStreamRef.current = localStream
       if (localVideoRef.current) localVideoRef.current.srcObject = localStream
 
-      const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS })
-      pcRef.current = pc
-      localStream.getTracks().forEach((track) => pc.addTrack(track, localStream))
+      // One connection per remote peer. When the other person refreshes and comes back,
+      // the old connection is useless, so a fresh one is built for them.
+      const buildPeer = () => {
+        const peer = new RTCPeerConnection({ iceServers: ICE_SERVERS })
+        pcRef.current = peer
+        pendingCandidatesRef.current = []
+        localStream.getTracks().forEach((track) => peer.addTrack(track, localStream))
 
-      pc.ontrack = (event) => {
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = event.streams[0]
-        setStatus('connected')
-      }
-
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          send({ type: 'ice-candidate', candidate: event.candidate })
+        peer.ontrack = (event) => {
+          if (peer !== pcRef.current) return
+          if (remoteVideoRef.current) remoteVideoRef.current.srcObject = event.streams[0]
+          setStatus('connected')
         }
+
+        peer.onicecandidate = (event) => {
+          if (peer === pcRef.current && event.candidate) {
+            send({ type: 'ice-candidate', candidate: event.candidate })
+          }
+        }
+
+        peer.onconnectionstatechange = () => {
+          if (peer !== pcRef.current) return
+          if (peer.connectionState === 'connected') setStatus('connected')
+          if (['disconnected', 'failed', 'closed'].includes(peer.connectionState)) {
+            setStatus('ended')
+          }
+        }
+        return peer
       }
 
-      pc.onconnectionstatechange = () => {
-        if (pc.connectionState === 'connected') setStatus('connected')
-        if (['disconnected', 'failed', 'closed'].includes(pc.connectionState)) {
-          setStatus('ended')
-        }
+      const replacePeer = () => {
+        const old = pcRef.current
+        const fresh = buildPeer()
+        old?.close()
+        return fresh
       }
+
+      let pc = buildPeer()
 
       const socket = new WebSocket(wsUrl(`/ws/call/${roomId}/`))
       socketRef.current = socket
@@ -511,10 +549,12 @@ export default function Call() {
 
         if (data.event === 'peer-joined') {
           setStatus('joined')
+          pc = replacePeer()
           const offer = await pc.createOffer()
           await pc.setLocalDescription(offer)
           send({ type: 'offer', sdp: offer })
         } else if (data.type === 'offer') {
+          if (pc.remoteDescription) pc = replacePeer()
           await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
           await flushCandidates(pc)
           const answer = await pc.createAnswer()
@@ -545,8 +585,13 @@ export default function Call() {
           setSharedMaterial(null)
           setStrokes([])
         } else if (data.event === 'peer-left') {
-          setStatus('left')
-          if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
+          // A refreshing partner leaves and rejoins within a moment: only treat it as a
+          // real departure if no working connection has been re-established by then.
+          setTimeout(() => {
+            if (cancelled || pcRef.current?.connectionState === 'connected') return
+            setStatus('left')
+            if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
+          }, 1500)
         }
       }
 
@@ -636,7 +681,10 @@ export default function Call() {
 
   // Always lands on a real page: navigate(-1) does nothing when the call was opened
   // in a fresh tab (no history to go back to).
-  const exitCall = () => navigate(sessionId ? '/schedule' : '/partners', { replace: true })
+  const exitCall = () => {
+    writeCallState(roomId, null)
+    navigate(sessionId ? '/schedule' : '/partners', { replace: true })
+  }
 
   // Leaving always ends with the chance to rate the other person (when there is a session).
   const leaveCall = () => {
@@ -777,6 +825,14 @@ export default function Call() {
   }
 
   const iAmRequester = !!requester && requester.id === user?.id
+
+  useEffect(() => {
+    if (joined) writeCallState(roomId, { joined: true, mic: micOn, cam: camOn })
+  }, [joined, micOn, camOn, roomId])
+
+  useEffect(() => {
+    if (liveStart) writeCallState(roomId, { liveStart })
+  }, [liveStart, roomId])
   noteTextRef.current = noteText
 
   const saveNote = (text) => {
