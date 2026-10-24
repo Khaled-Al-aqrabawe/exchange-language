@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import client from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import { bookableStartTimes, DAYS, isSlotExpiredToday, slotOccurrenceUtcInstant } from '../utils/availability'
 import { resolveAvatarUrl } from '../utils/images'
@@ -128,6 +129,7 @@ function StatChip({ icon: Icon, value, label, accent }) {
 export default function PartnerProfile() {
   const { t, i18n } = useTranslation()
   const { userId } = useParams()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [partner, setPartner] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -152,7 +154,7 @@ export default function PartnerProfile() {
   const handleCall = async () => {
     try {
       const { data } = await client.post('/calls/ring/', { partner_id: userId })
-      navigate(`/call/${data.room_id}`)
+      navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
     } catch {
       window.alert(t('call.ringError'))
     }

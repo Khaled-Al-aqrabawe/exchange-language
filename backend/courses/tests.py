@@ -3,7 +3,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from accounts.models import User
-from .models import Material
+from .models import Material, MaterialProgress
 
 
 @override_settings(MEDIA_ROOT='/tmp/lp-test-media')
@@ -37,3 +37,57 @@ class MaterialUploadTests(APITestCase):
         self.assertEqual(r.status_code, 400)
         r = self.client.post('/api/courses/materials/', {'language': 'English', 'level': 'B1'}, format='multipart')
         self.assertEqual(r.status_code, 400)
+
+
+class NextLessonTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('learner@example.com', 'pw12345678')
+        p = self.user.profile
+        p.learning_language = 'English'
+        p.language_levels = {'English': 'A1'}
+        p.save()
+        self.lessons = [
+            Material.objects.create(language='English', level='A1', title=f'Lesson {n}', order=n,
+                                    file=SimpleUploadedFile(f'English-A1-Lesson-{n:02d}.pptx', b'x'))
+            for n in (1, 2, 3)
+        ]
+        self.client.force_authenticate(self.user)
+
+    def _next(self):
+        return self.client.get('/api/courses/next/').data
+
+    def _save(self, lesson, status, slide=None):
+        body = {'material_id': lesson.id, 'status': status}
+        if slide is not None:
+            body['last_slide'] = slide
+        return self.client.post('/api/courses/progress/', body, format='json')
+
+    def test_starts_at_first_lesson(self):
+        data = self._next()
+        self.assertEqual(data['material']['id'], self.lessons[0].id)
+        self.assertEqual(data['start_slide'], 1)
+
+    def test_complete_moves_to_next_lesson(self):
+        self._save(self.lessons[0], 'complete')
+        self.assertEqual(self._next()['material']['id'], self.lessons[1].id)
+
+    def test_partial_resumes_same_lesson_at_slide(self):
+        self._save(self.lessons[0], 'partial', 7)
+        data = self._next()
+        self.assertEqual(data['material']['id'], self.lessons[0].id)
+        self.assertEqual(data['start_slide'], 7)
+
+    def test_not_started_repeats_lesson_from_slide_one(self):
+        self._save(self.lessons[0], 'partial', 7)
+        self._save(self.lessons[0], 'not_started')
+        data = self._next()
+        self.assertEqual(data['material']['id'], self.lessons[0].id)
+        self.assertEqual(data['start_slide'], 1)
+        self.assertEqual(MaterialProgress.objects.get(user=self.user, material=self.lessons[0]).status, 'not_started')
+
+    def test_all_done_returns_none_and_bad_input_rejected(self):
+        for lesson in self.lessons:
+            self._save(lesson, 'complete')
+        self.assertIsNone(self._next()['material'])
+        self.assertEqual(self._save(self.lessons[0], 'partial').status_code, 400)
+        self.assertEqual(self._save(self.lessons[0], 'bogus').status_code, 400)

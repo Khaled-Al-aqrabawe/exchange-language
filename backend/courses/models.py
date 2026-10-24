@@ -1,5 +1,6 @@
 import re
 
+from django.conf import settings
 from django.db import models
 
 
@@ -43,3 +44,26 @@ def parse_material_name(filename):
         number, rest = m.group(1), m.group(2).replace('-', ' ').replace('_', ' ').strip()
         return (f'Lesson {number} - {rest}' if rest else f'Lesson {number}'), int(number)
     return stem.replace('-', ' ').replace('_', ' ').strip(), 0
+
+
+class MaterialProgress(models.Model):
+    """How far a user got in one lesson (material) during live sessions."""
+
+    STATUS_CHOICES = [
+        ('complete', 'Complete'),
+        ('partial', 'Partial'),
+        ('not_started', 'Not started'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='material_progress', on_delete=models.CASCADE)
+    material = models.ForeignKey(Material, related_name='progress_entries', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    # Slide the user stopped at (only meaningful for 'partial').
+    last_slide = models.PositiveIntegerField(default=1)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'material')
+
+    def __str__(self):
+        return f'{self.user_id} - {self.material_id} ({self.status})'

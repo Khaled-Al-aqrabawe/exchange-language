@@ -1,8 +1,9 @@
-import { Download, ExternalLink, FileText, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, Download, ExternalLink, FileText, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import { downloadFile } from '../utils/downloadFile'
 
 const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }]
@@ -16,10 +17,18 @@ const statusKeys = {
   left: 'call.partnerLeft',
 }
 
+// A live session is 50 minutes: two turns of 25, the requester goes first.
+const TURN_MS = 25 * 60 * 1000
+
+function formatClock(totalSeconds) {
+  const secs = Math.max(0, totalSeconds)
+  return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`
+}
+
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
 const OFFICE_EXTENSIONS = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx']
 
-function SharedMaterialStage({ material, onClose, t }) {
+function SharedMaterialStage({ material, onClose, onFinish, t }) {
   const name = material.file_name || material.title
   const ext = name.split('.').pop()?.toLowerCase()
   const isImage = IMAGE_EXTENSIONS.includes(ext)
@@ -33,7 +42,7 @@ function SharedMaterialStage({ material, onClose, t }) {
   // for this exact URL from before that header was removed server-side - a
   // fixed query param forces a fresh request instead of reusing that cache entry.
   const embedSrc = isOffice
-    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(material.file)}`
+    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(material.file)}${material.start_slide > 1 ? `&wdStartOn=${material.start_slide}` : ''}`
     : `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
 
   return (
@@ -47,6 +56,18 @@ function SharedMaterialStage({ material, onClose, t }) {
           </span>
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
+          {material.start_slide > 1 && (
+            <span className="text-xs text-amber-300">{t('call.startAtSlide', { n: material.start_slide })}</span>
+          )}
+          {onFinish && (
+            <button
+              type="button"
+              onClick={onFinish}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 h-8 text-xs font-medium text-white hover:bg-white/20 transition-colors"
+            >
+              <Check size={13} /> {t('call.finishLesson')}
+            </button>
+          )}
           <a
             href={material.file}
             target="_blank"
@@ -96,6 +117,8 @@ export default function Call() {
   const { t } = useTranslation()
   const { roomId } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [searchParams] = useSearchParams()
 
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
@@ -118,6 +141,21 @@ export default function Call() {
   const [sharedMaterial, setSharedMaterial] = useState(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
+  // Who asked for this session: from the call link (instant call) or the session's host.
+  const [requester, setRequester] = useState(() => {
+    const id = Number(searchParams.get('from'))
+    return id ? { id, name: searchParams.get('name') || '' } : null
+  })
+  const [liveStart, setLiveStart] = useState(null)
+  const [now, setNow] = useState(() => Date.now())
+  const [liveEnded, setLiveEnded] = useState(false)
+  const [startNote, setStartNote] = useState('')
+  const [finishPrompt, setFinishPrompt] = useState(null)
+  const [stoppedSlide, setStoppedSlide] = useState('')
+  const [promptError, setPromptError] = useState('')
+  const sharedRef = useRef(null)
+  const firedRef = useRef(new Set())
+
   const [sessionEndTime, setSessionEndTime] = useState(null)
   const [sessionId, setSessionId] = useState(null)
   const [reminderBanner, setReminderBanner] = useState('')
@@ -135,6 +173,7 @@ export default function Call() {
         if (!session) return
         const endTime = new Date(session.scheduled_time).getTime() + session.duration_minutes * 60000
         setSessionId(session.id)
+        setRequester((r) => r || { id: session.host.id, name: session.host.full_name })
         setSessionEndTime(endTime)
       })
       .catch(() => {})
@@ -213,6 +252,8 @@ export default function Call() {
           }
         } else if (data.type === 'material-share' && data.material) {
           setSharedMaterial({ ...data.material, from: 'partner' })
+        } else if (data.type === 'live-start') {
+          setLiveStart((v) => v || Date.now())
         } else if (data.type === 'material-share-stop') {
           setSharedMaterial(null)
         } else if (data.event === 'peer-left') {
@@ -388,8 +429,8 @@ export default function Call() {
     }
   }
 
-  const shareMaterial = (m) => {
-    const material = { id: m.id, title: m.title, file: m.file, file_name: m.file_name }
+  const shareMaterial = (m, startSlide = 1) => {
+    const material = { id: m.id, title: m.title, file: m.file, file_name: m.file_name, start_slide: startSlide }
     send({ type: 'material-share', material })
     setSharedMaterial({ ...material, from: 'you' })
     setShowMaterialPicker(false)
@@ -402,6 +443,98 @@ export default function Call() {
     setSharedMaterial(null)
   }
 
+  // Opens the signed-in user's own next lesson (their turn's default file).
+  const shareNextLesson = async () => {
+    try {
+      const { data } = await client.get('/courses/next/')
+      if (data.material) shareMaterial(data.material, data.start_slide)
+    } catch {
+      // no default lesson - the user can still pick a file by hand
+    }
+  }
+
+  const iAmRequester = !!requester && requester.id === user?.id
+  sharedRef.current = sharedMaterial
+
+  // The requester starts the shared 50-minute clock once the call is connected.
+  useEffect(() => {
+    if (status !== 'connected' || !iAmRequester || liveStart) return
+    setLiveStart(Date.now())
+    send({ type: 'live-start' })
+  }, [status, iAmRequester, liveStart])
+
+  useEffect(() => {
+    if (!liveStart) return undefined
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [liveStart])
+
+  const elapsedMs = liveStart ? Math.max(0, now - liveStart) : 0
+  const liveTurn = Math.min(Math.floor(elapsedMs / TURN_MS), 1)
+  const turnRemaining = liveStart ? Math.ceil((TURN_MS - (elapsedMs - liveTurn * TURN_MS)) / 1000) : null
+  const isMyTurn = liveTurn === 0 ? iAmRequester : !iAmRequester
+  const liveActive = !!liveStart && !!requester && !liveEnded
+  const turnCountdown = liveActive && turnRemaining > 0 && turnRemaining <= 60 && countdownValue == null ? turnRemaining : null
+
+  const askFinished = (material, reason) => {
+    setStoppedSlide('')
+    setPromptError('')
+    setFinishPrompt({ material, reason, step: 'ask' })
+  }
+
+  // Note of who sent the request, shown when the session starts.
+  useEffect(() => {
+    if (!liveStart || !requester) return undefined
+    setStartNote(iAmRequester ? t('call.youStartedNote') : t('call.requestedByNote', { name: requester.name || t('call.yourPartner') }))
+    const id = setTimeout(() => setStartNote(''), 10000)
+    return () => clearTimeout(id)
+  }, [liveStart, requester?.id])
+
+  // A turn begins: its owner opens their next lesson; the previous owner is asked how it went.
+  useEffect(() => {
+    if (!liveStart || !requester) return
+    const key = `turn-${liveTurn}`
+    if (firedRef.current.has(key)) return
+    firedRef.current.add(key)
+    const prev = sharedRef.current
+    if (liveTurn === 1 && !isMyTurn && prev?.from === 'you' && prev.id) askFinished(prev, 'turn')
+    if (isMyTurn) shareNextLesson()
+  }, [liveStart, liveTurn, requester?.id])
+
+  // Toasts at 10 and 20 minutes into each turn, and the end of the session.
+  useEffect(() => {
+    if (!liveStart || !requester) return
+    const inTurnMin = (elapsedMs - liveTurn * TURN_MS) / 60000
+    for (const mark of [10, 20]) {
+      const key = `${liveTurn}-${mark}`
+      if (inTurnMin >= mark && inTurnMin < mark + 1 && !firedRef.current.has(key)) {
+        firedRef.current.add(key)
+        setReminderBanner(t(isMyTurn ? 'call.turnElapsedMine' : 'call.turnElapsedPartner', { minutes: mark }))
+        setTimeout(() => setReminderBanner(''), 6000)
+      }
+    }
+    if (elapsedMs >= 2 * TURN_MS && !firedRef.current.has('end')) {
+      firedRef.current.add('end')
+      setLiveEnded(true)
+      const mine = sharedRef.current
+      if (isMyTurn && mine?.from === 'you' && mine.id) askFinished(mine, 'turn')
+    }
+  }, [now])
+
+  const answerFinished = async (statusValue) => {
+    const { material, reason } = finishPrompt
+    const body = { material_id: material.id, status: statusValue }
+    if (statusValue === 'partial') body.last_slide = Number(stoppedSlide)
+    try {
+      await client.post('/courses/progress/', body)
+    } catch {
+      setPromptError(t('call.progressError'))
+      return
+    }
+    setFinishPrompt(null)
+    if (statusValue === 'complete' && reason === 'next') shareNextLesson()
+  }
+
   const isConnected = status === 'connected'
   const statusText = t(statusKeys[status] || statusKeys.connecting)
 
@@ -409,7 +542,17 @@ export default function Call() {
     <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
       <div className="max-w-4xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
+          <div className="flex items-center gap-3 min-w-0">
+            <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
+            {liveActive && (
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums"
+                style={{ background: isMyTurn ? 'var(--accent)' : 'rgb(255 255 255 / 0.1)', color: '#fff' }}
+              >
+                <Clock size={12} /> {isMyTurn ? t('call.yourTurn') : t('call.partnerTurn')} · {formatClock(turnRemaining)}
+              </span>
+            )}
+          </div>
           <span className="inline-flex items-center gap-1.5 text-sm text-slate-300">
             <span className="relative flex h-2 w-2">
               {isConnected && (
@@ -420,6 +563,12 @@ export default function Call() {
             {statusText}
           </span>
         </div>
+
+        {startNote && (
+          <div className="mb-4 rounded-2xl border border-sky-500/30 bg-sky-500/10 px-5 py-3 text-sky-300 text-sm">
+            {startNote}
+          </div>
+        )}
 
         {reminderBanner && (
           <div className="mb-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-3 text-amber-300 text-sm">
@@ -449,7 +598,14 @@ export default function Call() {
                 {statusText}
               </div>
             )}
-            {sharedMaterial && <SharedMaterialStage material={sharedMaterial} onClose={closeSharedMaterial} t={t} />}
+            {sharedMaterial && (
+              <SharedMaterialStage
+                material={sharedMaterial}
+                onClose={closeSharedMaterial}
+                onFinish={sharedMaterial.from === 'you' && sharedMaterial.id ? () => askFinished(sharedMaterial, 'next') : undefined}
+                t={t}
+              />
+            )}
             <video
               ref={localVideoRef}
               autoPlay
@@ -554,6 +710,62 @@ export default function Call() {
           <span className="font-display text-white font-bold tabular-nums" style={{ fontSize: '9rem', lineHeight: 1, textShadow: '0 8px 40px rgb(0 0 0 / 0.6)' }}>
             {countdownValue}
           </span>
+        </div>
+      )}
+
+      {turnCountdown != null && (
+        <div className="fixed inset-x-0 top-24 z-50 flex justify-center pointer-events-none">
+          <span className="font-display text-white font-bold tabular-nums" style={{ fontSize: '5rem', lineHeight: 1, textShadow: '0 6px 30px rgb(0 0 0 / 0.7)' }}>
+            {turnCountdown}
+          </span>
+        </div>
+      )}
+
+      {finishPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6">
+            <p className="text-lg font-semibold text-white mb-1">{t('call.finishedTitle')}</p>
+            <p className="text-sm text-slate-400 mb-5 truncate">{finishPrompt.material.title}</p>
+            {finishPrompt.step === 'ask' ? (
+              <div className="flex flex-col gap-2">
+                <button onClick={() => answerFinished('complete')} className="lp-btn-primary w-full justify-center">
+                  {t('call.finishedYes')}
+                </button>
+                <button
+                  onClick={() => setFinishPrompt({ ...finishPrompt, step: 'slide' })}
+                  className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 transition-colors"
+                >
+                  {t('call.finishedNo')}
+                </button>
+                <button
+                  onClick={() => answerFinished('not_started')}
+                  className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                >
+                  {t('call.finishedNone')}
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <label className="text-sm text-slate-300">{t('call.stoppedAtLabel')}</label>
+                <input
+                  type="number"
+                  min="1"
+                  autoFocus
+                  value={stoppedSlide}
+                  onChange={(e) => setStoppedSlide(e.target.value)}
+                  className="w-full rounded-xl px-3.5 py-2.5 text-sm bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                />
+                <button
+                  onClick={() => answerFinished('partial')}
+                  disabled={!(Number(stoppedSlide) >= 1)}
+                  className="lp-btn-primary w-full justify-center disabled:opacity-50"
+                >
+                  {t('call.stoppedAtSave')}
+                </button>
+              </div>
+            )}
+            {promptError && <p className="text-sm mt-3" style={{ color: '#f87171' }}>{promptError}</p>}
+          </div>
         </div>
       )}
 

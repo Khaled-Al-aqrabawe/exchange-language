@@ -410,7 +410,7 @@ export default function Partners() {
   const handleCall = async (p) => {
     try {
       const { data } = await client.post('/calls/ring/', { partner_id: p.user_id })
-      navigate(`/call/${data.room_id}`)
+      navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
     } catch {
       window.alert(t('call.ringError'))
     }

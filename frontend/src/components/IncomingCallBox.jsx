@@ -66,7 +66,7 @@ export default function IncomingCallBox() {
     clearTimeout(timer.current)
     client.delete('/calls/incoming/').catch(() => {})
     setCall(null)
-    navigate(`/call/${call.room_id}`)
+    navigate(`/call/${call.room_id}?from=${call.caller.id}&name=${encodeURIComponent(call.caller.name)}`)
   }
   const decline = () => {
     clearTimeout(timer.current)
