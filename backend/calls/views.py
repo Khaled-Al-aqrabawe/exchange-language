@@ -4,16 +4,19 @@ import uuid
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.core.cache import cache
+from django.utils import timezone
 from rest_framework import permissions
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.models import User
+from sessions_app.models import ScheduledSession
 
 logger = logging.getLogger(__name__)
 
 RING_SECONDS = 30
+INSTANT_CALL_MINUTES = 50
 
 
 def _cache_key(user_id):
@@ -34,6 +37,11 @@ class RingPartnerView(APIView):
             raise NotFound('Partner not found')
 
         room_id = uuid.uuid4().hex
+        # The call is a real session so it can be completed and rated like a booked one.
+        ScheduledSession.objects.create(
+            host=request.user, partner=partner, scheduled_time=timezone.now(),
+            duration_minutes=INSTANT_CALL_MINUTES, status='confirmed', room_id=room_id, is_instant=True,
+        )
         avatar = getattr(request.user.profile, 'avatar', None)
         payload = {
             'event': 'incoming-call',

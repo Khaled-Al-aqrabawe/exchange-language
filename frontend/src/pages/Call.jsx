@@ -1,4 +1,4 @@
-import { Check, Clock, FileText, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, FileText, Star, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -18,6 +18,45 @@ const statusKeys = {
 
 // A live session is 50 minutes: two turns of 25, the requester goes first.
 const TURN_MS = 25 * 60 * 1000
+
+// Lets a small video box be dragged around inside the call stage (mouse and touch).
+function useDraggable(stageRef) {
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const drag = useRef(null)
+
+  const onPointerDown = (e) => {
+    e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    drag.current = {
+      px: e.clientX,
+      py: e.clientY,
+      ox: offset.x,
+      oy: offset.y,
+      box: e.currentTarget.getBoundingClientRect(),
+      stage: stageRef.current?.getBoundingClientRect(),
+    }
+  }
+
+  const onPointerMove = (e) => {
+    const d = drag.current
+    if (!d) return
+    let dx = e.clientX - d.px
+    let dy = e.clientY - d.py
+    if (d.stage) {
+      // keep the box inside the stage
+      dx = Math.min(Math.max(dx, d.stage.left - d.box.left), d.stage.right - d.box.right)
+      dy = Math.min(Math.max(dy, d.stage.top - d.box.top), d.stage.bottom - d.box.bottom)
+    }
+    setOffset({ x: d.ox + dx, y: d.oy + dy })
+  }
+
+  const onPointerUp = () => { drag.current = null }
+
+  return {
+    style: { transform: `translate(${offset.x}px, ${offset.y}px)`, touchAction: 'none', cursor: 'grab' },
+    handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
+  }
+}
 
 function formatClock(totalSeconds) {
   const secs = Math.max(0, totalSeconds)
@@ -95,6 +134,63 @@ function SharedMaterialStage({ material, onClose, onFinish, t }) {
   )
 }
 
+// Shown when leaving a session (completed or not) so each person can rate the other.
+function CallRatingModal({ partnerName, onSubmit, onSkip, t }) {
+  const [score, setScore] = useState(0)
+  const [hoverScore, setHoverScore] = useState(0)
+  const [comment, setComment] = useState('')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const submit = async () => {
+    if (!score) {
+      setError(t('schedule.ratingRequired'))
+      return
+    }
+    setSubmitting(true)
+    await onSubmit(score, comment.trim())
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4">
+      <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6">
+        <p className="text-lg font-semibold text-white mb-1">{t('schedule.rateModalTitle', { name: partnerName })}</p>
+        <p className="text-sm text-slate-400 mb-4">{t('schedule.rateModalSubtitle')}</p>
+        <div className="flex items-center gap-1 mb-4">
+          {[1, 2, 3, 4, 5].map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => { setScore(value); setError('') }}
+              onMouseEnter={() => setHoverScore(value)}
+              onMouseLeave={() => setHoverScore(0)}
+              aria-label={t('schedule.rateStars', { count: value })}
+            >
+              <Star size={28} fill={value <= (hoverScore || score) ? 'var(--accent)' : 'none'} style={{ color: 'var(--accent)' }} />
+            </button>
+          ))}
+        </div>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={3}
+          placeholder={t('schedule.rateCommentPlaceholder')}
+          className="w-full rounded-xl px-3.5 py-2.5 text-sm bg-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+        />
+        {error && <p className="text-sm mt-2" style={{ color: '#f87171' }}>{error}</p>}
+        <div className="flex justify-end gap-2 mt-5">
+          <button onClick={onSkip} disabled={submitting} className="text-sm px-4 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-colors">
+            {t('call.skipRating')}
+          </button>
+          <button onClick={submit} disabled={submitting} className="lp-btn-primary text-sm px-4 py-2 disabled:opacity-50">
+            {submitting ? t('schedule.submitting') : t('schedule.rateSubmit')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Call() {
   const { t } = useTranslation()
   const { roomId } = useParams()
@@ -105,19 +201,23 @@ export default function Call() {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const stageRef = useRef(null)
+  const localDrag = useDraggable(stageRef)
+  const remoteDrag = useDraggable(stageRef)
   const pcRef = useRef(null)
   const socketRef = useRef(null)
   const pendingCandidatesRef = useRef([])
   const cameraStreamRef = useRef(null)
   const previewStreamRef = useRef(null)
+  const joinedRef = useRef(false)
+  const micOnRef = useRef(false)
+  const camOnRef = useRef(false)
   const lobbyVideoRef = useRef(null)
   const screenStreamRef = useRef(null)
 
   const [joined, setJoined] = useState(false)
-  const [previewReady, setPreviewReady] = useState(false)
   const [status, setStatus] = useState('connecting')
-  const [micOn, setMicOn] = useState(true)
-  const [camOn, setCamOn] = useState(true)
+  const [micOn, setMicOn] = useState(false)
+  const [camOn, setCamOn] = useState(false)
   const [error, setError] = useState('')
   const [screenSharing, setScreenSharing] = useState(false)
   const [screenShareError, setScreenShareError] = useState('')
@@ -147,6 +247,8 @@ export default function Call() {
   const [reminderBanner, setReminderBanner] = useState('')
   const [countdownValue, setCountdownValue] = useState(null)
   const [showCompletedBox, setShowCompletedBox] = useState(false)
+  const [ratingOpen, setRatingOpen] = useState(false)
+  const [otherName, setOtherName] = useState('')
   const [showLeaveChoice, setShowLeaveChoice] = useState(false)
   const reminder5FiredRef = useRef(false)
   const reminder30FiredRef = useRef(false)
@@ -159,31 +261,27 @@ export default function Call() {
         if (!session) return
         const endTime = new Date(session.scheduled_time).getTime() + session.duration_minutes * 60000
         setSessionId(session.id)
+        setOtherName((session.host.id === user?.id ? session.partner : session.host).full_name)
         setRequester((r) => r || { id: session.host.id, name: session.host.full_name })
         setSessionEndTime(endTime)
       })
       .catch(() => {})
   }, [roomId])
 
-  // Lobby: preview the camera so the user can set mic/camera before joining.
-  useEffect(() => {
-    if (joined) return undefined
-    let cancelled = false
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        if (cancelled) {
-          stream.getTracks().forEach((track) => track.stop())
-          return
-        }
-        previewStreamRef.current = stream
-        if (lobbyVideoRef.current) lobbyVideoRef.current.srcObject = stream
-        setPreviewReady(true)
-      })
-      .catch(() => {
-        if (!cancelled) setError(t('call.micError'))
-      })
-    return () => { cancelled = true }
-  }, [joined, t])
+  // Lobby: the camera and microphone stay closed until the user turns one on.
+  const ensurePreview = async () => {
+    if (previewStreamRef.current) return previewStreamRef.current
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    stream.getTracks().forEach((track) => { track.enabled = false })
+    previewStreamRef.current = stream
+    if (lobbyVideoRef.current) lobbyVideoRef.current.srcObject = stream
+    return stream
+  }
+
+  // Leaving the lobby without joining must release a camera that was turned on.
+  useEffect(() => () => {
+    if (!joinedRef.current) previewStreamRef.current?.getTracks().forEach((track) => track.stop())
+  }, [])
 
   useEffect(() => {
     if (!joined) return undefined
@@ -198,6 +296,8 @@ export default function Call() {
           ? preview
           : await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         previewStreamRef.current = null
+        localStream.getAudioTracks().forEach((track) => { track.enabled = micOnRef.current })
+        localStream.getVideoTracks().forEach((track) => { track.enabled = camOnRef.current })
       } catch {
         if (!cancelled) setError(t('call.micError'))
         return
@@ -318,8 +418,8 @@ export default function Call() {
   }
 
   const setSessionStatus = (statusValue) => {
-    if (!sessionId) return
-    client.patch(`/sessions/${sessionId}/status/`, { status: statusValue }).catch(() => {})
+    if (!sessionId) return Promise.resolve()
+    return client.patch(`/sessions/${sessionId}/status/`, { status: statusValue }).catch(() => {})
   }
 
   useEffect(() => {
@@ -360,9 +460,22 @@ export default function Call() {
 
   // Always lands on a real page: navigate(-1) does nothing when the call was opened
   // in a fresh tab (no history to go back to).
+  const exitCall = () => navigate(sessionId ? '/schedule' : '/partners', { replace: true })
+
+  // Leaving always ends with the chance to rate the other person (when there is a session).
   const leaveCall = () => {
     cleanupMedia()
-    navigate(sessionId ? '/schedule' : '/partners', { replace: true })
+    if (sessionId) setRatingOpen(true)
+    else exitCall()
+  }
+
+  const submitRating = async (score, comment) => {
+    try {
+      await client.post(`/sessions/${sessionId}/rate/`, { score, comment })
+    } catch {
+      // rating is optional - never block leaving
+    }
+    exitCall()
   }
 
   const handleLeaveClick = () => {
@@ -373,23 +486,32 @@ export default function Call() {
     leaveCall()
   }
 
-  const chooseLeaveStatus = (statusValue) => {
-    setSessionStatus(statusValue)
+  const chooseLeaveStatus = async (statusValue) => {
     setShowLeaveChoice(false)
+    await setSessionStatus(statusValue)
     leaveCall()
   }
 
-  const toggleMic = () => {
-    const stream = cameraStreamRef.current || previewStreamRef.current
-    stream?.getAudioTracks().forEach((tr) => (tr.enabled = !tr.enabled))
-    setMicOn((v) => !v)
+  // Turns a device on/off. In the lobby the first press asks the browser for the camera.
+  const toggleDevice = async (kind) => {
+    let stream = cameraStreamRef.current || previewStreamRef.current
+    if (!stream) {
+      try {
+        stream = await ensurePreview()
+      } catch {
+        setError(t('call.micError'))
+        return
+      }
+    }
+    const on = kind === 'audio' ? micOn : camOn
+    const tracks = kind === 'audio' ? stream.getAudioTracks() : stream.getVideoTracks()
+    tracks.forEach((track) => { track.enabled = !on })
+    if (kind === 'audio') setMicOn(!on)
+    else setCamOn(!on)
   }
 
-  const toggleCam = () => {
-    const stream = cameraStreamRef.current || previewStreamRef.current
-    stream?.getVideoTracks().forEach((tr) => (tr.enabled = !tr.enabled))
-    setCamOn((v) => !v)
-  }
+  const toggleMic = () => toggleDevice('audio')
+  const toggleCam = () => toggleDevice('video')
 
   const stopScreenShare = async () => {
     const pc = pcRef.current
@@ -474,6 +596,9 @@ export default function Call() {
   }
 
   const iAmRequester = !!requester && requester.id === user?.id
+  micOnRef.current = micOn
+  camOnRef.current = camOn
+  joinedRef.current = joined
   sharedRef.current = sharedMaterial
 
   // The requester starts the shared 50-minute clock once the call is connected.
@@ -575,12 +700,10 @@ export default function Call() {
           ) : (
             <div className="relative bg-slate-900 rounded-2xl overflow-hidden" style={{ aspectRatio: '16 / 9', border: '1px solid rgb(255 255 255 / 0.1)' }}>
               <video ref={lobbyVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-              {!previewReady && (
-                <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">{t('call.connecting')}</div>
-              )}
-              {previewReady && !camOn && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400">
+              {!camOn && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900 text-slate-400 text-sm">
                   <VideoOff size={32} />
+                  {t('call.cameraOff')}
                 </div>
               )}
             </div>
@@ -588,8 +711,7 @@ export default function Call() {
           <div className="flex items-center justify-center gap-3 mt-6">
             <button
               onClick={toggleMic}
-              disabled={!previewReady}
-              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 disabled:opacity-40 ${
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
                 micOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
               }`}
               title={micOn ? t('call.mute') : t('call.unmute')}
@@ -598,8 +720,7 @@ export default function Call() {
             </button>
             <button
               onClick={toggleCam}
-              disabled={!previewReady}
-              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 disabled:opacity-40 ${
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
                 camOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
               }`}
               title={camOn ? t('call.turnOffCamera') : t('call.turnOnCamera')}
@@ -613,8 +734,7 @@ export default function Call() {
             </button>
             <button
               onClick={() => setJoined(true)}
-              disabled={!previewReady}
-              className="lp-btn-primary disabled:opacity-50"
+              className="lp-btn-primary"
             >
               {t('call.joinNow')}
             </button>
@@ -686,7 +806,8 @@ export default function Call() {
               className={sharedMaterial
                 ? 'absolute bottom-[10rem] end-4 w-40 aspect-[4/3] object-cover rounded-xl shadow-lg z-20'
                 : 'w-full h-full object-cover'}
-              style={sharedMaterial ? { border: '2px solid var(--accent)' } : undefined}
+              style={sharedMaterial ? { border: '2px solid var(--accent)', ...remoteDrag.style } : undefined}
+              {...(sharedMaterial ? remoteDrag.handlers : {})}
             />
             {!isConnected && (
               <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">
@@ -706,8 +827,9 @@ export default function Call() {
               autoPlay
               playsInline
               muted
-              className={`absolute bottom-4 end-4 w-40 rounded-xl shadow-lg transition-transform hover:scale-105 z-20 ${screenSharing ? 'hidden' : ''}`}
-              style={{ border: '2px solid var(--accent-2)' }}
+              className={`absolute bottom-4 end-4 w-40 rounded-xl shadow-lg z-20 ${screenSharing ? 'hidden' : ''}`}
+              style={{ border: '2px solid var(--accent-2)', ...localDrag.style }}
+              {...localDrag.handlers}
             />
           </div>
         )}
@@ -864,16 +986,25 @@ export default function Call() {
         </div>
       )}
 
+      {ratingOpen && (
+        <CallRatingModal
+          partnerName={otherName || t('call.yourPartner')}
+          onSubmit={submitRating}
+          onSkip={exitCall}
+          t={t}
+        />
+      )}
+
       {showCompletedBox && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
           <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6 text-center">
             <p className="text-lg font-semibold text-white mb-2">{t('call.sessionCompletedTitle')}</p>
             <p className="text-sm text-slate-400 mb-6">{t('call.sessionCompletedBody')}</p>
             <button
-              onClick={() => navigate('/schedule')}
+              onClick={() => { setShowCompletedBox(false); setRatingOpen(true) }}
               className="lp-btn-primary w-full justify-center"
             >
-              {t('call.backToSchedule')}
+              {t('call.rateAndContinue')}
             </button>
           </div>
         </div>

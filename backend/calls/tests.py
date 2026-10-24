@@ -47,3 +47,22 @@ class IncomingPollingTests(TransactionTestCase):
         self.assertEqual(got['room_id'], room)
         c2.delete('/api/calls/incoming/')
         self.assertIsNone(c2.get('/api/calls/incoming/').data)
+
+
+class InstantCallSessionTests(TransactionTestCase):
+    def test_ring_creates_a_rateable_session(self):
+        caller = User.objects.create_user('e@example.com', 'pw12345678')
+        partner = User.objects.create_user('f@example.com', 'pw12345678')
+        c1, c2 = APIClient(), APIClient()
+        c1.force_authenticate(caller)
+        c2.force_authenticate(partner)
+        room = c1.post('/api/calls/ring/', {'partner_id': partner.id}, format='json').data['room_id']
+
+        session = c2.get('/api/sessions/', {'room_id': room}).data[0]
+        self.assertEqual(session['host']['id'], caller.id)
+
+        # not rateable while the call is still running ...
+        self.assertEqual(c2.post(f"/api/sessions/{session['id']}/rate/", {'score': 5}, format='json').status_code, 400)
+        # ... but rateable once it ended, completed or not
+        c2.patch(f"/api/sessions/{session['id']}/status/", {'status': 'not_completed'}, format='json')
+        self.assertEqual(c2.post(f"/api/sessions/{session['id']}/rate/", {'score': 4, 'comment': 'ok'}, format='json').status_code, 201)

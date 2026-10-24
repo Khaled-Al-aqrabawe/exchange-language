@@ -28,6 +28,8 @@ class ScheduledSession(models.Model):
     cancellation_reason = models.TextField(blank=True)
     room_id = models.CharField(max_length=64, default=uuid.uuid4, editable=False, unique=True)
     reminder_sent_at = models.DateTimeField(null=True, blank=True)
+    # Started with "Call now" instead of being booked: no invitation, reminder or notification.
+    is_instant = models.BooleanField(default=False)
     # Stamped the moment each participant joins the call room, so a completed
     # session can be told apart from one where someone was a no-show.
     host_joined_at = models.DateTimeField(null=True, blank=True)

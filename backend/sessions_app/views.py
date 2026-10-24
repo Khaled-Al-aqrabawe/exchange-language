@@ -162,8 +162,8 @@ class SessionRatingView(APIView):
         except ScheduledSession.DoesNotExist:
             raise PermissionDenied('Not a participant of this session.')
 
-        if session.status != 'completed':
-            raise ValidationError({'detail': 'You can only rate a session after it has completed.'})
+        if session.status not in ('completed', 'not_completed'):
+            raise ValidationError({'detail': 'You can only rate a session after it has ended.'})
 
         ratee = session.partner if request.user.id == session.host_id else session.host
 
@@ -194,12 +194,12 @@ class NotificationsView(APIView):
             .order_by('-created_at')[:per_type_limit]
         )
         confirmed_qs = (
-            ScheduledSession.objects.filter(host=user, status='confirmed')
+            ScheduledSession.objects.filter(host=user, status='confirmed', is_instant=False)
             .select_related('host', 'partner')
             .order_by('-updated_at')[:per_type_limit]
         )
         reminder_qs = (
-            ScheduledSession.objects.filter(Q(host=user) | Q(partner=user), status='confirmed', reminder_sent_at__isnull=False)
+            ScheduledSession.objects.filter(Q(host=user) | Q(partner=user), status='confirmed', is_instant=False, reminder_sent_at__isnull=False)
             .select_related('host', 'partner')
             .order_by('-reminder_sent_at')[:per_type_limit]
         )

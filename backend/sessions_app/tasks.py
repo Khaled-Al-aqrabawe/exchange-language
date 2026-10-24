@@ -15,6 +15,7 @@ def send_session_reminders():
     now = timezone.now()
     candidates = ScheduledSession.objects.filter(
         status='confirmed',
+        is_instant=False,
         reminder_sent_at__isnull=True,
         scheduled_time__gte=now - timedelta(minutes=5),
         scheduled_time__lte=now + timedelta(minutes=15),
