@@ -1,8 +1,9 @@
-import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Phone, Globe2, MapPin, MessageCircle, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Info, Phone, Globe2, MapPin, MessageCircle, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import client from '../api/client'
+import { MATERIAL_LEVELS } from '../constants'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -374,13 +375,14 @@ export default function Partners() {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibility, setVisibility] = useState('now')
-  const [filters, setFilters] = useState({ learning: '', date: '', time: '' })
+  const [filters, setFilters] = useState({ learning: '', level: '', date: '', time: '' })
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
 
   const load = () => {
     setLoading(true)
     const params = {}
     if (filters.learning) params.language = filters.learning
+    if (filters.level) params.level = filters.level
     if (filters.date) params.day = dateToDayOfWeek(filters.date)
     client.get('/matching/partners/', { params })
       .then(({ data }) => setPartners(data))
@@ -489,6 +491,11 @@ export default function Partners() {
               </div>
             </div>
 
+            <p className="flex items-start gap-2 text-xs mb-4 max-w-xl" style={{ color: 'var(--ink-soft)' }}>
+              <Info size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />
+              {t('partners.levelFilterNote')}
+            </p>
+
             <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
               <div className="w-40">
                 <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iAmLearning')}</label>
@@ -501,6 +508,20 @@ export default function Partners() {
                   >
                     <option value="">{t('partners.anyLanguage')}</option>
                     {myLearning.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </IconField>
+              </div>
+              <div className="w-36">
+                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.levelFilter')}</label>
+                <IconField icon={Sparkles}>
+                  <select
+                    value={filters.level}
+                    onChange={(e) => setFilters({ ...filters, level: e.target.value })}
+                    className={ghostFieldClass}
+                    style={ghostFieldStyle}
+                  >
+                    <option value="">{t('partners.anyLevel')}</option>
+                    {MATERIAL_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
                   </select>
                 </IconField>
               </div>

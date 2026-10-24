@@ -17,6 +17,7 @@ import PartnerProfile from './pages/PartnerProfile'
 import Profile from './pages/Profile'
 import Register from './pages/Register'
 import Schedule from './pages/Schedule'
+import SessionSummary from './pages/SessionSummary'
 import Settings from './pages/Settings'
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
           <Route path="/materials" element={<Materials />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/notes" element={<Notes />} />
+          <Route path="/sessions/:sessionId/summary" element={<SessionSummary />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>

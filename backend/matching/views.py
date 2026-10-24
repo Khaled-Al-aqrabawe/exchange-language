@@ -70,8 +70,6 @@ class PartnerListView(generics.ListAPIView):
         my_spoken = {l.lower() for l in [my_profile.native_language, *(my_profile.spoken_languages or [])] if l}
         if my_spoken and not explicit_language:
             qs = qs.annotate(_learning_lower=Lower('learning_language')).filter(_learning_lower__in=my_spoken)
-        if level:
-            qs = qs.filter(proficiency_level=level)
         if timezone:
             qs = qs.filter(timezone__iexact=timezone)
         if my_profile.gender:
@@ -92,6 +90,9 @@ class PartnerListView(generics.ListAPIView):
             )
 
         ordering = [p for p in qs if levels_compatible(my_profile, p)]
+        if level:
+            # optional: only people who are at this level in the language they are learning
+            ordering = [p for p in ordering if learning_levels(p).get((p.learning_language or '').lower()) == level]
         ordering.sort(key=lambda p: 0 if p.id in exchange_ids else 1)
         return ordering
 

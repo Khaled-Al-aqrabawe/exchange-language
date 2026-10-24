@@ -1,10 +1,11 @@
-import { Check, Clock, Download, FileText, Flag, NotebookPen, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, Download, FileText, Flag, MessageCircle, NotebookPen, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { downloadFile, downloadText } from '../utils/downloadFile'
+import { buildSummaryText } from '../utils/sessionSummary'
 
 const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }]
 
@@ -467,12 +468,19 @@ const REPORT_REASONS = [
 ]
 
 // Report a problem with the other person; the admin receives it with the chosen reason.
-function ReportModal({ sessionId, partnerName, onClose, t }) {
+function ReportModal({ sessionId, partnerName, onClose, onSent, t }) {
   const [reason, setReason] = useState('')
   const [details, setDetails] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
+
+  // After a report is sent the user leaves the call straight away.
+  useEffect(() => {
+    if (!sent) return undefined
+    const id = setTimeout(onSent, 1500)
+    return () => clearTimeout(id)
+  }, [sent])
 
   const submit = async () => {
     if (!reason) {
@@ -501,7 +509,7 @@ function ReportModal({ sessionId, partnerName, onClose, t }) {
           <div className="text-center">
             <p className="text-lg font-semibold text-white mb-2">{t('report.sentTitle')}</p>
             <p className="text-sm text-slate-400 mb-5">{t('report.sentBody')}</p>
-            <button onClick={onClose} className="lp-btn-primary w-full justify-center">{t('common.close')}</button>
+            <button onClick={onSent} className="lp-btn-primary w-full justify-center">{t('report.leaveNow')}</button>
           </div>
         ) : (
           <>
@@ -547,8 +555,83 @@ function ReportModal({ sessionId, partnerName, onClose, t }) {
   )
 }
 
+// The conversation with the other person, inside the call sidebar. It is the same chat
+// as on the Messages page, so what is said here is also kept there.
+function CallChat({ partnerId, myId, t }) {
+  const [conversationId, setConversationId] = useState(null)
+  const [messages, setMessages] = useState([])
+  const [text, setText] = useState('')
+  const socketRef = useRef(null)
+  const bottomRef = useRef(null)
+
+  useEffect(() => {
+    if (!partnerId) return
+    client.post('/chat/conversations/start/', { partner_id: partnerId })
+      .then(({ data }) => setConversationId(data.id))
+      .catch(() => {})
+  }, [partnerId])
+
+  useEffect(() => {
+    if (!conversationId) return undefined
+    let cancelled = false
+    client.get(`/chat/conversations/${conversationId}/messages/`).then(({ data }) => {
+      if (!cancelled) setMessages(data)
+    })
+    const socket = new WebSocket(wsUrl(`/ws/chat/${conversationId}/`))
+    socketRef.current = socket
+    socket.onmessage = (event) => setMessages((prev) => [...prev, JSON.parse(event.data)])
+    return () => {
+      cancelled = true
+      socket.close()
+    }
+  }, [conversationId])
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const send = (e) => {
+    e.preventDefault()
+    if (!text.trim() || socketRef.current?.readyState !== WebSocket.OPEN) return
+    socketRef.current.send(JSON.stringify({ text }))
+    setText('')
+  }
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex-1 space-y-2 overflow-y-auto p-4">
+        {messages.map((m) => {
+          const mine = m.sender.id === myId
+          return (
+            <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+              <span
+                className="max-w-[85%] rounded-2xl px-3 py-1.5 text-sm"
+                style={mine ? { background: 'var(--accent)', color: '#fff' } : { background: 'rgb(255 255 255 / 0.1)', color: '#e2e8f0' }}
+              >
+                {m.text}
+              </span>
+            </div>
+          )
+        })}
+        <div ref={bottomRef} />
+      </div>
+      <form onSubmit={send} className="flex gap-2 border-t border-white/10 p-3">
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={t('call.chatPlaceholder')}
+          className="min-w-0 flex-1 rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+        />
+        <button type="submit" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-white" aria-label={t('call.chatSend')}>
+          <Send size={14} />
+        </button>
+      </form>
+    </div>
+  )
+}
+
 // Shown when leaving a session (completed or not) so each person can rate the other.
-function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, onReport, t }) {
+function CallRatingModal({ partnerName, files, notes, onSubmit, onReport, onSummary, t }) {
   const [score, setScore] = useState(0)
   const [hoverScore, setHoverScore] = useState(0)
   const [comment, setComment] = useState('')
@@ -569,10 +652,17 @@ function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, onReport
       <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6">
         <p className="text-lg font-semibold text-white mb-1">{t('schedule.rateModalTitle', { name: partnerName })}</p>
         <p className="text-sm text-slate-400 mb-4">{t('schedule.rateModalSubtitle')}</p>
-        {(files.length > 0 || notes.trim()) && (
+        {(
           <div className="mb-4 rounded-xl bg-white/5 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">{t('call.downloadsTitle')}</p>
             <div className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={onSummary}
+                className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+              >
+                <Download size={14} className="shrink-0 text-slate-300" /> <span className="truncate">{t('call.downloadSummary')}</span>
+              </button>
               {notes.trim() && (
                 <button
                   type="button"
@@ -618,13 +708,10 @@ function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, onReport
         />
         {error && <p className="text-sm mt-2" style={{ color: '#f87171' }}>{error}</p>}
         <div className="flex items-center justify-between gap-2 mt-5">
-          <button type="button" onClick={onReport} className="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80" style={{ color: '#f87171' }}>
+          <button type="button" onClick={onReport} className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm font-medium hover:opacity-80" style={{ color: '#f87171' }}>
             <Flag size={14} /> {t('report.link')}
           </button>
           <div className="flex gap-2">
-          <button onClick={onSkip} disabled={submitting} className="text-sm px-4 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-colors">
-            {t('call.skipRating')}
-          </button>
           <button onClick={submit} disabled={submitting} className="lp-btn-primary text-sm px-4 py-2 disabled:opacity-50">
             {submitting ? t('schedule.submitting') : t('schedule.rateSubmit')}
           </button>
@@ -636,7 +723,7 @@ function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, onReport
 }
 
 export default function Call() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { roomId } = useParams()
   // Restored after a refresh so the user lands back inside the call.
   const [saved] = useState(() => readCallState(roomId))
@@ -696,6 +783,8 @@ export default function Call() {
   const [showCompletedBox, setShowCompletedBox] = useState(false)
   const [ratingOpen, setRatingOpen] = useState(false)
   const [otherName, setOtherName] = useState('')
+  const [otherId, setOtherId] = useState(null)
+  const [sidebarTab, setSidebarTab] = useState('notes')
   const [reportOpen, setReportOpen] = useState(false)
   // Who takes the first turn: the one who completed more lessons when both learn the same language.
   const [turnInfo, setTurnInfo] = useState(null)
@@ -746,7 +835,9 @@ export default function Call() {
         if (!session) return
         const endTime = new Date(session.scheduled_time).getTime() + session.duration_minutes * 60000
         setSessionId(session.id)
-        setOtherName((session.host.id === user?.id ? session.partner : session.host).full_name)
+        const otherPerson = session.host.id === user?.id ? session.partner : session.host
+        setOtherName(otherPerson.full_name)
+        setOtherId(otherPerson.id)
         setRequester((r) => r || { id: session.host.id, name: session.host.full_name })
         setSessionEndTime(endTime)
       })
@@ -874,10 +965,6 @@ export default function Call() {
           rememberFile(data.material)
         } else if (data.type === 'live-start') {
           setLiveStart((v) => v || Date.now())
-        } else if (data.type === 'ask-finished' && data.material) {
-          setStoppedSlide('')
-          setPromptError('')
-          setFinishPrompt({ material: data.material, reason: 'joint', step: 'ask' })
         } else if (data.type === 'screen-state') {
           setRemoteSharing(!!data.on)
           if (!data.on) setStrokes([])
@@ -991,9 +1078,34 @@ export default function Call() {
 
   // Always lands on a real page: navigate(-1) does nothing when the call was opened
   // in a fresh tab (no history to go back to).
+  const openSidebar = (tab) => {
+    if (notesOpen && sidebarTab === tab) setNotesOpen(false)
+    else {
+      setSidebarTab(tab)
+      setNotesOpen(true)
+    }
+  }
+
   const exitCall = () => {
     writeCallState(roomId, null)
-    navigate(sessionId ? '/schedule' : '/partners', { replace: true })
+    navigate(sessionId ? `/sessions/${sessionId}/summary` : '/partners', { replace: true })
+  }
+
+  const leaveAfterReport = () => {
+    setReportOpen(false)
+    setRatingOpen(false)
+    if (noteLoadedRef.current) saveNote(noteTextRef.current)
+    cleanupMedia()
+    exitCall()
+  }
+
+  const downloadSummary = async () => {
+    try {
+      const { data } = await client.get(`/sessions/${sessionId}/summary/`)
+      downloadText(`session-summary-${sessionId}.txt`, buildSummaryText(data, t, i18n.resolvedLanguage))
+    } catch {
+      // the summary page after leaving has the same download
+    }
   }
 
   // Closes the call; the chance to rate the other person (when there is a session) comes next.
@@ -1008,7 +1120,7 @@ export default function Call() {
   // or either one when studying together), so progress is saved even if the session ends early.
   const leaveCall = () => {
     const lesson = sharedRef.current
-    if (lesson?.id && (jointMode || lesson.from === 'you') && !finishPrompt) {
+    if (lesson?.id && lesson.from === 'you' && !finishPrompt) {
       askFinished(lesson, 'leave')
       return
     }
@@ -1120,6 +1232,7 @@ export default function Call() {
   const shareMaterial = (m, startSlide = 1) => {
     const material = { id: m.id, title: m.title, file: m.file, file_name: m.file_name, start_slide: startSlide }
     send({ type: 'material-share', material })
+    if (sessionId && material.id) client.post(`/sessions/${sessionId}/shared/`, { material_id: material.id }).catch(() => {})
     rememberFile(material)
     setStrokes([])
     setSharedMaterial({ ...material, from: 'you' })
@@ -1210,10 +1323,8 @@ export default function Call() {
   }, [liveStart])
 
   const elapsedMs = liveStart ? Math.max(0, now - liveStart) : 0
-  // Learners of the same language study together for the whole 50 minutes: no turns.
-  const jointMode = !!turnInfo?.same_language
-  const liveTurn = jointMode ? 0 : Math.min(Math.floor(elapsedMs / TURN_MS), 1)
-  const turnRemaining = liveStart ? Math.ceil(((jointMode ? 2 * TURN_MS : TURN_MS) - (elapsedMs - liveTurn * TURN_MS)) / 1000) : null
+  const liveTurn = Math.min(Math.floor(elapsedMs / TURN_MS), 1)
+  const turnRemaining = liveStart ? Math.ceil((TURN_MS - (elapsedMs - liveTurn * TURN_MS)) / 1000) : null
   const firstUserId = turnInfo ? turnInfo.first_user_id : (sessionId ? null : requester?.id ?? null)
   const orderReady = firstUserId != null
   const iGoFirst = firstUserId === user?.id
@@ -1225,7 +1336,6 @@ export default function Call() {
     setStoppedSlide('')
     setPromptError('')
     setFinishPrompt({ material, reason, step: 'ask' })
-    if (jointMode && reason === 'next') send({ type: 'ask-finished', material })
   }
 
   useEffect(() => {
@@ -1241,11 +1351,9 @@ export default function Call() {
     const byProgress = turnInfo?.same_language && turnInfo.counts[turnInfo.first_user_id] > Math.min(...Object.values(turnInfo.counts))
     const who = requester.name || t('call.yourPartner')
     setStartNote(
-      turnInfo?.same_language
-        ? t('call.togetherNote')
-        : byProgress
-          ? t(iGoFirst ? 'call.youGoFirstProgress' : 'call.partnerGoesFirstProgress')
-          : iAmRequester ? t('call.youStartedNote') : t('call.requestedByNote', { name: who }),
+      byProgress
+        ? t(iGoFirst ? 'call.youGoFirstProgress' : 'call.partnerGoesFirstProgress')
+        : iAmRequester ? t('call.youStartedNote') : t('call.requestedByNote', { name: who }),
     )
     const id = setTimeout(() => setStartNote(''), 10000)
     return () => clearTimeout(id)
@@ -1266,11 +1374,11 @@ export default function Call() {
   useEffect(() => {
     if (!liveStart || !requester || !orderReady) return
     const inTurnMin = (elapsedMs - liveTurn * TURN_MS) / 60000
-    for (const mark of jointMode ? [10, 20, 30, 40] : [10, 20]) {
+    for (const mark of [10, 20]) {
       const key = `${liveTurn}-${mark}`
       if (inTurnMin >= mark && inTurnMin < mark + 1 && !firedRef.current.has(key)) {
         firedRef.current.add(key)
-        setReminderBanner(jointMode ? t('call.sessionElapsed', { minutes: mark }) : t(isMyTurn ? 'call.turnElapsedMine' : 'call.turnElapsedPartner', { minutes: mark }))
+        setReminderBanner(t(isMyTurn ? 'call.turnElapsedMine' : 'call.turnElapsedPartner', { minutes: mark }))
         setTimeout(() => setReminderBanner(''), 6000)
       }
     }
@@ -1278,7 +1386,7 @@ export default function Call() {
       firedRef.current.add('end')
       setLiveEnded(true)
       const mine = sharedRef.current
-      if (jointMode ? mine?.id : isMyTurn && mine?.from === 'you' && mine.id) askFinished(mine, 'turn')
+      if (isMyTurn && mine?.from === 'you' && mine.id) askFinished(mine, 'turn')
     }
   }, [now])
 
@@ -1450,9 +1558,9 @@ export default function Call() {
             {liveActive && (
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums"
-                style={{ background: jointMode || isMyTurn ? 'var(--accent)' : 'rgb(255 255 255 / 0.1)', color: '#fff' }}
+                style={{ background: isMyTurn ? 'var(--accent)' : 'rgb(255 255 255 / 0.1)', color: '#fff' }}
               >
-                <Clock size={12} /> {jointMode ? t('call.together') : isMyTurn ? t('call.yourTurn') : t('call.partnerTurn')} · {formatClock(turnRemaining)}
+                <Clock size={12} /> {isMyTurn ? t('call.yourTurn') : t('call.partnerTurn')} · {formatClock(turnRemaining)}
               </span>
             )}
           </div>
@@ -1592,9 +1700,18 @@ export default function Call() {
             </button>
           )}
           <button
-            onClick={() => setNotesOpen((v) => !v)}
+            onClick={() => openSidebar('chat')}
             className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-              notesOpen ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
+              notesOpen && sidebarTab === 'chat' ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
+            }`}
+            title={t('call.chat')}
+          >
+            <MessageCircle size={18} />
+          </button>
+          <button
+            onClick={() => openSidebar('notes')}
+            className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
+              notesOpen && sidebarTab === 'notes' ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
             }`}
             title={t('call.notes')}
           >
@@ -1720,54 +1837,73 @@ export default function Call() {
 
       {notesOpen && (
         <aside className="fixed top-16 bottom-0 end-0 z-40 w-80 max-w-full flex flex-col bg-slate-900 border-s border-white/10 lp-animate-in">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
-              <NotebookPen size={15} /> {t('call.notes')}
-            </span>
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10">
+            <div className="flex items-center gap-1">
+              {[['notes', NotebookPen, t('call.notes')], ['chat', MessageCircle, t('call.chat')]].map(([tab, Icon, label]) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setSidebarTab(tab)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${sidebarTab === tab ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <Icon size={13} /> {label}
+                </button>
+              ))}
+            </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">
-                {!sessionId ? t('call.notesNotSaved') : noteState === 'saving' ? t('call.notesSaving') : noteState === 'saved' ? t('call.notesSaved') : noteState === 'error' ? t('call.notesError') : ''}
-              </span>
-              <button
-                type="button"
-                onClick={() => downloadText('session-notes.txt', noteText)}
-                disabled={!noteText.trim()}
-                className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white disabled:opacity-30"
-                title={t('call.downloadNotes')}
-              >
-                <Download size={14} />
-              </button>
+              {sidebarTab === 'notes' && (
+                <>
+                  <span className="text-xs text-slate-400">
+                    {!sessionId ? t('call.notesNotSaved') : noteState === 'saving' ? t('call.notesSaving') : noteState === 'saved' ? t('call.notesSaved') : noteState === 'error' ? t('call.notesError') : ''}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => downloadText('session-notes.txt', noteText)}
+                    disabled={!noteText.trim()}
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white disabled:opacity-30"
+                    title={t('call.downloadNotes')}
+                  >
+                    <Download size={14} />
+                  </button>
+                </>
+              )}
               <button type="button" onClick={() => setNotesOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white">
                 <X size={14} />
               </button>
             </div>
           </div>
-          <textarea
-            value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            placeholder={t('call.notesPlaceholder')}
-            className="flex-1 w-full resize-none bg-transparent p-4 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
-          />
-          {sessionId && (
-            <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-white/10">
-              <span className="text-xs text-slate-400">
-                {adminNoteState === 'sent' ? t('call.sentToAdmin') : adminNoteState === 'error' ? t('call.notesError') : ''}
-              </span>
-              <button
-                type="button"
-                onClick={sendNoteToAdmin}
-                disabled={!noteText.trim() || adminNoteState === 'sending'}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 h-8 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-40 transition-colors"
-              >
-                <Send size={13} /> {t('call.sendToAdmin')}
-              </button>
-            </div>
+          {sidebarTab === 'chat' ? (
+            <CallChat partnerId={otherId} myId={user?.id} t={t} />
+          ) : (
+            <>
+              <textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder={t('call.notesPlaceholder')}
+                className="flex-1 w-full resize-none bg-transparent p-4 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+              />
+              {sessionId && (
+                <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-white/10">
+                  <span className="text-xs text-slate-400">
+                    {adminNoteState === 'sent' ? t('call.sentToAdmin') : adminNoteState === 'error' ? t('call.notesError') : ''}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={sendNoteToAdmin}
+                    disabled={!noteText.trim() || adminNoteState === 'sending'}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 h-8 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-40 transition-colors"
+                  >
+                    <Send size={13} /> {t('call.sendToAdmin')}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </aside>
       )}
 
       {reportOpen && (
-        <ReportModal sessionId={sessionId} partnerName={otherName || t('call.yourPartner')} onClose={() => setReportOpen(false)} t={t} />
+        <ReportModal sessionId={sessionId} partnerName={otherName || t('call.yourPartner')} onClose={() => setReportOpen(false)} onSent={leaveAfterReport} t={t} />
       )}
 
       {ratingOpen && (
@@ -1776,8 +1912,8 @@ export default function Call() {
           files={sharedFiles}
           notes={noteText}
           onSubmit={submitRating}
-          onSkip={exitCall}
           onReport={() => setReportOpen(true)}
+          onSummary={downloadSummary}
           t={t}
         />
       )}

@@ -1,4 +1,4 @@
-import { CalendarClock, CalendarPlus, ChevronRight, Filter, Star, Video, X, XCircle } from 'lucide-react'
+import { CalendarClock, CalendarPlus, ChevronRight, FileText, Filter, Star, Video, X, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -433,7 +433,12 @@ export default function Schedule() {
                         </span>
                       )
                     )}
-                    {s.status === 'completed' && (
+                    {['completed', 'not_completed'].includes(s.status) && (
+                      <Link to={`/sessions/${s.id}/summary`} onClick={(e) => e.stopPropagation()} className="lp-btn-secondary text-sm px-3 py-1.5">
+                        <FileText size={14} /> {t('summary.link')}
+                      </Link>
+                    )}
+                    {['completed', 'not_completed'].includes(s.status) && (
                       s.my_rating ? (
                         <span className="lp-tag inline-flex items-center gap-1">
                           <Star size={12} fill="currentColor" /> {t('schedule.rated', { score: s.my_rating.score })}

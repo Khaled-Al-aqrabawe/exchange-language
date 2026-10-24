@@ -13,7 +13,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .emails import send_session_confirmed_email, send_session_invitation_email
-from .models import ScheduledSession, SessionNote, SessionRating, SessionReport
+from .models import (
+    ScheduledSession,
+    SessionNote,
+    SessionNoteRevision,
+    SessionRating,
+    SessionReport,
+    SessionSharedFile,
+)
 from .serializers import ScheduledSessionSerializer, SessionRatingSerializer
 
 logger = logging.getLogger(__name__)
@@ -266,6 +273,13 @@ class SessionNoteView(APIView):
         if not isinstance(text, str):
             raise ValidationError({'text': 'Notes must be text.'})
         note, _ = SessionNote.objects.update_or_create(session=session, user=request.user, defaults={'text': text})
+        last = note.revisions.last()
+        if last is None or last.text != text:
+            if last and timezone.now() - last.created_at < timedelta(minutes=1):
+                last.text = text
+                last.save(update_fields=['text'])
+            else:
+                SessionNoteRevision.objects.create(note=note, text=text)
         return Response({'text': note.text, 'updated_at': note.updated_at})
 
 
@@ -383,4 +397,94 @@ class SessionFirstTurnView(APIView):
             'requester_id': host.id,
             'same_language': same_language,
             'counts': counts,
+        })
+
+
+def _participant_session(request, pk):
+    try:
+        return ScheduledSession.objects.select_related('host', 'partner').get(
+            Q(host=request.user) | Q(partner=request.user), pk=pk
+        )
+    except ScheduledSession.DoesNotExist:
+        raise PermissionDenied('Not a participant of this session.')
+
+
+class SessionSharedFileView(APIView):
+    """Records that a lesson file was shared in the session (called by the sharer's browser)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        from courses.models import Material
+
+        session = _participant_session(request, pk)
+        try:
+            material = Material.objects.get(id=request.data.get('material_id'))
+        except (Material.DoesNotExist, ValueError, TypeError):
+            raise ValidationError({'material_id': 'Unknown lesson.'})
+        SessionSharedFile.objects.get_or_create(session=session, material=material, defaults={'shared_by': request.user})
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class SessionSummaryView(APIView):
+    """Everything about one session for the signed-in user: notes (and how they changed),
+    the chat, the files shared, and their progress on those lessons."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        from chat.models import Message
+        from courses.models import MaterialProgress
+
+        session = _participant_session(request, pk)
+        other = session.partner if session.host_id == request.user.id else session.host
+
+        note = SessionNote.objects.filter(session=session, user=request.user).first()
+        revisions = [{'text': r.text, 'created_at': r.created_at} for r in note.revisions.all()] if note else []
+
+        start = session.scheduled_time - timedelta(minutes=10)
+        end = session.scheduled_time + timedelta(minutes=session.duration_minutes + 30)
+        messages = (
+            Message.objects.filter(conversation__participants=request.user, created_at__range=(start, end))
+            .filter(conversation__participants=other)
+            .select_related('sender')
+            .order_by('created_at')
+        )
+
+        shared = list(session.shared_files.select_related('material'))
+        progress = {
+            p.material_id: p for p in MaterialProgress.objects.filter(user=request.user, material__in=[f.material for f in shared])
+        }
+        files = []
+        for entry in shared:
+            m = entry.material
+            mine = progress.get(m.id)
+            files.append({
+                'id': m.id,
+                'title': m.title,
+                'language': m.language,
+                'level': m.level,
+                'file': request.build_absolute_uri(m.file.url) if m.file else None,
+                'file_name': m.file.name.rsplit('/', 1)[-1] if m.file else '',
+                'shared_by_me': entry.shared_by_id == request.user.id,
+                'my_status': mine.status if mine else None,
+                'my_slide': mine.last_slide if mine and mine.status == 'partial' else None,
+            })
+
+        rating = SessionRating.objects.filter(session=session, rater=request.user).first()
+        return Response({
+            'session': {
+                'id': session.id,
+                'status': session.status,
+                'scheduled_time': session.scheduled_time,
+                'duration_minutes': session.duration_minutes,
+                'other': {'id': other.id, 'full_name': other.full_name},
+            },
+            'note': {'text': note.text if note else '', 'revisions': revisions},
+            'chat': [
+                {'sender': m.sender.full_name, 'mine': m.sender_id == request.user.id, 'text': m.text, 'created_at': m.created_at}
+                for m in messages
+            ],
+            'files': files,
+            'my_rating': {'score': rating.score, 'comment': rating.comment} if rating else None,
         })

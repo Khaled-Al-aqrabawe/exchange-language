@@ -312,7 +312,9 @@
     "visibilityScheduled": "Scheduled available",
     "emptyNow": "Nobody is online and available right now. Check \"Scheduled available\" for upcoming times.",
     "time": "Time",
-    "callNow": "Call now"
+    "callNow": "Call now",
+    "levelFilter": "Level",
+    "levelFilterNote": "Optional filter: choose a level (A1 to C2) to see only partners who are at that level in the language they are learning. People learning the same language as you are always shown at your own level only."
   },
   "partnerProfile": {
     "loading": "Loading...",
@@ -634,7 +636,11 @@
     "together": "Studying together",
     "togetherNote": "You both learn the same language, so you study together with no turns. The lesson starts from whoever has done more.",
     "sessionElapsed": "{{minutes}} minutes of the session have passed.",
-    "skipAndLeave": "Skip and leave"
+    "skipAndLeave": "Skip and leave",
+    "chat": "Chat",
+    "chatPlaceholder": "Write a message...",
+    "chatSend": "Send",
+    "downloadSummary": "Download session summary"
   },
   "levels": {
     "beginner": "Beginner",
@@ -695,7 +701,7 @@
     "send": "Send report",
     "error": "Could not send the report. Please try again.",
     "sentTitle": "Report sent",
-    "sentBody": "Thank you. The admin has received it and will look into it.",
+    "sentBody": "Thank you. The admin has received it and will look into it. You are leaving the call now.",
     "reasons": {
       "harassment": "Harassment or abuse",
       "inappropriate_content": "Inappropriate content",
@@ -706,6 +712,37 @@
       "fake_profile": "Fake profile",
       "spam": "Spam",
       "other": "Other"
+    },
+    "leaveNow": "Leave now"
+  },
+  "summary": {
+    "title": "Session with {{name}}",
+    "link": "Summary",
+    "back": "Back to my sessions",
+    "download": "Download summary",
+    "notFound": "This session summary is not available.",
+    "files": "Lessons shared",
+    "noFiles": "No lesson files were shared.",
+    "notes": "Your notes",
+    "noNotes": "You did not write any notes.",
+    "history": "How your notes changed",
+    "versionAt": "Version {{n}} - {{time}}",
+    "chat": "Chat during the session",
+    "noChat": "No messages were sent.",
+    "you": "You",
+    "rating": "Your rating",
+    "status": {
+      "completed": "Completed",
+      "not_completed": "Not completed",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "rejected": "Rejected"
+    },
+    "progress": {
+      "complete": "Completed",
+      "partial": "Stopped at slide {{slide}}",
+      "not_started": "Not started"
     }
   }
 }

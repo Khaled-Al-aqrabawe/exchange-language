@@ -38,3 +38,15 @@ class SameLanguageLevelTests(APITestCase):
         self.client.force_authenticate(self.other_level)
         emails = {p['email'] for p in self.client.get('/api/matching/partners/', {'language': 'English'}).data}
         self.assertNotIn('me@example.com', emails)
+
+
+class LevelFilterTests(APITestCase):
+    def test_level_filter_keeps_only_that_level(self):
+        me = make_user('viewer@example.com', 'English', 'Arabic', 'B1')
+        make_user('a1@example.com', 'Arabic', 'English', 'A1')
+        make_user('c1@example.com', 'Arabic', 'English', 'C1')
+        self.client.force_authenticate(me)
+        everyone = {p['email'] for p in self.client.get('/api/matching/partners/').data}
+        self.assertEqual(everyone, {'a1@example.com', 'c1@example.com'})
+        only_a1 = {p['email'] for p in self.client.get('/api/matching/partners/', {'level': 'A1'}).data}
+        self.assertEqual(only_a1, {'a1@example.com'})

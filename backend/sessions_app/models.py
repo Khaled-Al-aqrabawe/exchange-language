@@ -104,3 +104,26 @@ class SessionReport(models.Model):
 
     def __str__(self):
         return f'SessionReport<{self.session_id}: {self.reporter_id} -> {self.reported_user_id} ({self.reason})>'
+
+
+class SessionNoteRevision(models.Model):
+    """A saved version of a note, so the changes made during a session can be looked back on."""
+
+    note = models.ForeignKey(SessionNote, related_name='revisions', on_delete=models.CASCADE)
+    text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+
+class SessionSharedFile(models.Model):
+    """A lesson file shared during a session."""
+
+    session = models.ForeignKey(ScheduledSession, related_name='shared_files', on_delete=models.CASCADE)
+    material = models.ForeignKey('courses.Material', related_name='shared_in_sessions', on_delete=models.CASCADE)
+    shared_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']

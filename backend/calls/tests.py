@@ -175,3 +175,39 @@ class FirstTurnTests(TransactionTestCase):
         data = self._first_turn(caller, callee)
         self.assertFalse(data['same_language'])
         self.assertEqual(data['first_user_id'], caller.id)
+
+
+class SessionSummaryTests(TransactionTestCase):
+    def test_summary_collects_notes_versions_chat_and_files(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from chat.models import Conversation, Message
+        from courses.models import Material
+
+        a = User.objects.create_user('r@example.com', 'pw12345678', first_name='Ann')
+        b = User.objects.create_user('s@example.com', 'pw12345678', first_name='Bob')
+        ca, cb = APIClient(), APIClient()
+        ca.force_authenticate(a)
+        cb.force_authenticate(b)
+        room = ca.post('/api/calls/ring/', {'partner_id': b.id}, format='json').data['room_id']
+        sid = ca.get('/api/sessions/', {'room_id': room}).data[0]['id']
+
+        ca.put(f'/api/sessions/{sid}/note/', {'text': 'first draft'}, format='json')
+        ca.put(f'/api/sessions/{sid}/note/', {'text': 'second draft'}, format='json')  # within a minute: same version
+        conversation = Conversation.objects.create()
+        conversation.participants.add(a, b)
+        Message.objects.create(conversation=conversation, sender=b, text='hello from Bob')
+        material = Material.objects.create(language='English', level='A1', title='Lesson 1', order=1,
+                                           file=SimpleUploadedFile('English-A1-Lesson-01-x.pptx', b'x'))
+        self.assertEqual(ca.post(f'/api/sessions/{sid}/shared/', {'material_id': material.id}, format='json').status_code, 201)
+
+        data = ca.get(f'/api/sessions/{sid}/summary/').data
+        self.assertEqual(data['note']['text'], 'second draft')
+        self.assertEqual(len(data['note']['revisions']), 1)
+        self.assertEqual(data['chat'][0]['text'], 'hello from Bob')
+        self.assertFalse(data['chat'][0]['mine'])
+        self.assertEqual(data['files'][0]['title'], 'Lesson 1')
+        self.assertTrue(data['files'][0]['shared_by_me'])
+        self.assertEqual(data['session']['other']['full_name'], 'Bob')
+
+        # private: Bob sees his own (empty) note, not Ann's
+        self.assertEqual(cb.get(f'/api/sessions/{sid}/summary/').data['note']['text'], '')
