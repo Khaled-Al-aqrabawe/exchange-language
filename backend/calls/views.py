@@ -31,7 +31,7 @@ class RingPartnerView(APIView):
                 'room_id': room_id,
                 'caller': {
                     'id': request.user.id,
-                    'name': request.user.get_full_name() or request.user.email,
+                    'name': request.user.full_name,
                     'avatar': request.build_absolute_uri(avatar.url) if avatar else None,
                 },
             },
