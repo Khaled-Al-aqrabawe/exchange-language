@@ -346,19 +346,25 @@ export default function Call() {
     return () => clearInterval(interval)
   }, [sessionEndTime, sessionId, t])
 
+  // Always lands on a real page: navigate(-1) does nothing when the call was opened
+  // in a fresh tab (no history to go back to).
+  const leaveCall = () => {
+    cleanupMedia()
+    navigate(sessionId ? '/schedule' : '/partners', { replace: true })
+  }
+
   const handleLeaveClick = () => {
     if (sessionEndTime && Date.now() < sessionEndTime && !autoEndedRef.current) {
       setShowLeaveChoice(true)
       return
     }
-    navigate(-1)
+    leaveCall()
   }
 
   const chooseLeaveStatus = (statusValue) => {
     setSessionStatus(statusValue)
     setShowLeaveChoice(false)
-    cleanupMedia()
-    navigate(-1)
+    leaveCall()
   }
 
   const toggleMic = () => {
