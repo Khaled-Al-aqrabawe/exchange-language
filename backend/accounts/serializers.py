@@ -46,11 +46,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             level = levels.get(lang)
             if level not in CEFR_LEVELS:
                 errors['language_levels'] = f'Choose your level in {lang} (or take the exam).'
-            elif CEFR_LEVELS.index(level) < CEFR_LEVELS.index(MIN_SPEAKING_LEVEL):
-                errors['spoken_languages'] = (
-                    f'You need at least {MIN_SPEAKING_LEVEL} in {lang} to list it as a language you speak. '
-                    'Add it to the languages you want to learn instead.'
-                )
         if errors:
             raise serializers.ValidationError(errors)
         return attrs

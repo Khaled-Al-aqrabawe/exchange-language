@@ -2,7 +2,7 @@ import { AlertCircle, GraduationCap } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES } from '../constants'
-import { CEFR_LEVELS, MIN_SPEAKING_LEVEL, hasExam, levelIndex } from '../data/placementExams'
+import { CEFR_LEVELS, hasExam } from '../data/placementExams'
 import LevelExamModal from './LevelExamModal'
 
 function without(obj, key) {
@@ -12,13 +12,11 @@ function without(obj, key) {
 }
 
 // Pick languages and a CEFR level for each one (by choice or via the placement exam).
-// mode="speak" enforces MIN_SPEAKING_LEVEL; mode="learn" accepts any level.
+// Any level can be chosen in both modes.
 export default function LanguageLevelPicker({ mode, selected, levels, onChange }) {
   const { t } = useTranslation()
   const [examFor, setExamFor] = useState(null)
   const [notice, setNotice] = useState('')
-
-  const tooLow = (level) => mode === 'speak' && levelIndex(level) < levelIndex(MIN_SPEAKING_LEVEL)
 
   const toggle = (lang) => {
     setNotice('')
@@ -30,9 +28,6 @@ export default function LanguageLevelPicker({ mode, selected, levels, onChange }
     setNotice('')
     if (!level) {
       onChange(selected, without(levels, lang))
-    } else if (tooLow(level)) {
-      setNotice(t('levelExam.notEnough', { language: lang, level, min: MIN_SPEAKING_LEVEL }))
-      onChange(selected.filter((l) => l !== lang), without(levels, lang))
     } else {
       onChange(selected, { ...levels, [lang]: level })
     }

@@ -192,9 +192,20 @@ export default function Profile() {
   return (
     <div className="min-h-[calc(100vh-4rem)] lp-hero-bg" style={{ background: 'var(--bg)' }}>
       <div className="max-w-2xl mx-auto px-6 py-10">
-        <h1 className="font-display text-2xl font-bold tracking-tight mb-6 lp-animate-in" style={{ color: 'var(--ink)' }}>{t('profile.title')}</h1>
-
         <form onSubmit={handleSubmit}>
+          <div className="sticky top-16 z-20 -mx-6 px-6 py-3 mb-4 flex flex-wrap items-center gap-3 lp-animate-in" style={{ background: 'var(--bg)' }}>
+            <h1 className="font-display text-2xl font-bold tracking-tight me-auto" style={{ color: 'var(--ink)' }}>{t('profile.title')}</h1>
+            {saveError && <p className="text-sm" style={{ color: '#c1443d' }}>{saveError}</p>}
+            {saved && (
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--accent-2)' }}>
+                <CheckCircle2 size={15} /> {t('profile.saved')}
+              </span>
+            )}
+            <button type="submit" disabled={saving} className="lp-btn-primary disabled:opacity-50">
+              {saving ? t('profile.saving') : t('profile.save')}
+            </button>
+          </div>
+
           <section className="lp-card mb-6 lp-animate-in lp-delay-1">
             <div className="flex items-center gap-4">
               <button
@@ -355,17 +366,6 @@ export default function Profile() {
             {videoError && <p className="text-sm mt-2" style={{ color: '#c1443d' }}>{videoError}</p>}
           </section>
 
-          <div className="flex items-center gap-3 mb-6 lp-animate-in lp-delay-5">
-            <button type="submit" disabled={saving} className="lp-btn-primary disabled:opacity-50">
-              {saving ? t('profile.saving') : t('profile.save')}
-            </button>
-            {saveError && <p className="text-sm" style={{ color: '#c1443d' }}>{saveError}</p>}
-            {saved && (
-              <span className="inline-flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--accent-2)' }}>
-                <CheckCircle2 size={15} /> {t('profile.saved')}
-              </span>
-            )}
-          </div>
         </form>
 
         <ChangePasswordCard />
