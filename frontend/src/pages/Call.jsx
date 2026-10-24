@@ -491,6 +491,8 @@ function CallRatingModal({ partnerName, files, notes, onSubmit, onSkip, onReport
 export default function Call() {
   const { t } = useTranslation()
   const { roomId } = useParams()
+  // Restored after a refresh so the user lands back inside the call.
+  const [saved] = useState(() => readCallState(roomId))
   const navigate = useNavigate()
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
@@ -511,7 +513,6 @@ export default function Call() {
   const lobbyVideoRef = useRef(null)
   const screenStreamRef = useRef(null)
 
-  const [saved] = useState(() => readCallState(roomId))
   const [joined, setJoined] = useState(() => !!saved?.joined)
   const [status, setStatus] = useState('connecting')
   const [micOn, setMicOn] = useState(!!saved?.mic)
