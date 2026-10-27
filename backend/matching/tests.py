@@ -40,13 +40,26 @@ class SameLanguageLevelTests(APITestCase):
         self.assertNotIn('me@example.com', emails)
 
 
-class LevelFilterTests(APITestCase):
-    def test_level_filter_keeps_only_that_level(self):
-        me = make_user('viewer@example.com', 'English', 'Arabic', 'B1')
-        make_user('a1@example.com', 'Arabic', 'English', 'A1')
-        make_user('c1@example.com', 'Arabic', 'English', 'C1')
+class LessonFilterTests(APITestCase):
+    def test_lesson_filter_keeps_only_people_on_that_lesson(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from courses.models import Material, MaterialProgress
+
+        lessons = [
+            Material.objects.create(language='English', level='A1', title=f'L{n}', order=n,
+                                    file=SimpleUploadedFile(f'English-A1-Lesson-{n:02d}.pptx', b'x'))
+            for n in (1, 2, 3)
+        ]
+        me = make_user('viewer@example.com', 'English', 'Arabic', 'A1')
+        on_one = make_user('one@example.com', 'Arabic', 'English', 'A1')
+        on_three = make_user('three@example.com', 'Arabic', 'English', 'A1')
+        for done in lessons[:2]:
+            MaterialProgress.objects.create(user=on_three, material=done, status='complete')
         self.client.force_authenticate(me)
+
         everyone = {p['email'] for p in self.client.get('/api/matching/partners/').data}
-        self.assertEqual(everyone, {'a1@example.com', 'c1@example.com'})
-        only_a1 = {p['email'] for p in self.client.get('/api/matching/partners/', {'level': 'A1'}).data}
-        self.assertEqual(only_a1, {'a1@example.com'})
+        self.assertEqual(everyone, {'one@example.com', 'three@example.com'})
+        at_one = {p['email'] for p in self.client.get('/api/matching/partners/', {'lesson': '1'}).data}
+        self.assertEqual(at_one, {'one@example.com'})
+        at_three = {p['email'] for p in self.client.get('/api/matching/partners/', {'lesson': '3'}).data}
+        self.assertEqual(at_three, {'three@example.com'})

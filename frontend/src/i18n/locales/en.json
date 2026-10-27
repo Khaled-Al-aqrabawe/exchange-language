@@ -314,7 +314,11 @@
     "time": "Time",
     "callNow": "Call now",
     "levelFilter": "Level",
-    "levelFilterNote": "Optional filter: choose a level (A1 to C2) to see only partners who are at that level in the language they are learning. People learning the same language as you are always shown at your own level only."
+    "levelFilterNote": "Optional filter: choose a level (A1 to C2) to see only partners who are at that level in the language they are learning. People learning the same language as you are always shown at your own level only.",
+    "lessonFilter": "Lesson",
+    "anyLesson": "Any lesson",
+    "lessonOption": "Lesson {{n}}",
+    "lessonFilterNote": "Optional filter: choose a lesson to see only partners who are on that lesson right now, meaning the next lesson they have not completed in the language they are learning. People learning the same language as you are always shown at your own level only."
   },
   "partnerProfile": {
     "loading": "Loading...",
@@ -436,7 +440,9 @@
     "rateSubmit": "Submit rating",
     "ratingRequired": "Please select a star rating.",
     "outsideAvailability": "This time is outside the partner's available hours. Please pick a time within their availability shown below.",
-    "partnerAvailability": "Available:"
+    "partnerAvailability": "Available:",
+    "lowRatingReason": "Please write why you gave a low rating.",
+    "lowRatingPlaceholder": "Tell us what went wrong (required)..."
   },
   "courses": {
     "title": "Courses",
@@ -603,8 +609,8 @@
     "finishLesson": "Finish lesson",
     "startAtSlide": "Start at slide {{n}}",
     "finishedTitle": "Finished this lesson?",
-    "finishedYes": "Yes, I finished it",
-    "finishedNo": "No, not yet",
+    "finishedYes": "Yes, completed",
+    "finishedNo": "No, not completed",
     "finishedNone": "I did not study it at all",
     "stoppedAtLabel": "Which slide did you stop at?",
     "stoppedAtSave": "Save",
@@ -644,7 +650,10 @@
     "chatAndNotes": "Chat and notes",
     "share": "Share",
     "shareFile": "Share a lesson file",
-    "stopShareFile": "Stop sharing the file"
+    "stopShareFile": "Stop sharing the file",
+    "recordingNotice": "For safety, your browser keeps a low-quality recording of the session. It is deleted when you leave, and only sent to the admin if you or your partner file a report.",
+    "recordingBadge": "Recording",
+    "translate": "Translate"
   },
   "levels": {
     "beginner": "Beginner",
@@ -717,7 +726,8 @@
       "spam": "Spam",
       "other": "Other"
     },
-    "leaveNow": "Leave now"
+    "leaveNow": "Leave now",
+    "uploading": "Sending recording..."
   },
   "summary": {
     "title": "Session with {{name}}",
@@ -748,5 +758,17 @@
       "partial": "Stopped at slide {{slide}}",
       "not_started": "Not started"
     }
+  },
+  "translate": {
+    "hint": "Click a word in the lesson text, or drag over a phrase, to see its translation and hear it.",
+    "slide": "Slide {{n}} of {{total}}",
+    "emptySlide": "No text on this slide.",
+    "noText": "This file has no readable slide text. Type a word below instead.",
+    "shareFirst": "Share a lesson file to see its text here, or type a word below.",
+    "placeholder": "Type a word...",
+    "go": "Translate",
+    "loading": "Translating...",
+    "error": "Translation is not available right now.",
+    "listen": "Listen"
   }
 }

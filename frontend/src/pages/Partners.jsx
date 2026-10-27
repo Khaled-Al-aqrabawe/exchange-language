@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import client from '../api/client'
-import { MATERIAL_LEVELS } from '../constants'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -375,14 +374,22 @@ export default function Partners() {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibility, setVisibility] = useState('now')
-  const [filters, setFilters] = useState({ learning: '', level: '', date: '', time: '' })
+  const [filters, setFilters] = useState({ learning: '', lesson: '', date: '', time: '' })
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
+  const [lessonCount, setLessonCount] = useState(12)
+
+  // The lesson list runs up to the highest lesson number in the course files.
+  useEffect(() => {
+    client.get('/courses/materials/')
+      .then(({ data }) => setLessonCount(Math.max(1, ...data.map((m) => m.order || 0))))
+      .catch(() => {})
+  }, [])
 
   const load = () => {
     setLoading(true)
     const params = {}
     if (filters.learning) params.language = filters.learning
-    if (filters.level) params.level = filters.level
+    if (filters.lesson) params.lesson = filters.lesson
     if (filters.date) params.day = dateToDayOfWeek(filters.date)
     client.get('/matching/partners/', { params })
       .then(({ data }) => setPartners(data))
@@ -493,7 +500,7 @@ export default function Partners() {
 
             <p className="flex items-start gap-2 text-xs mb-4 max-w-xl" style={{ color: 'var(--ink-soft)' }}>
               <Info size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />
-              {t('partners.levelFilterNote')}
+              {t('partners.lessonFilterNote')}
             </p>
 
             <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
@@ -512,16 +519,18 @@ export default function Partners() {
                 </IconField>
               </div>
               <div className="w-36">
-                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.levelFilter')}</label>
+                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.lessonFilter')}</label>
                 <IconField icon={Sparkles}>
                   <select
-                    value={filters.level}
-                    onChange={(e) => setFilters({ ...filters, level: e.target.value })}
+                    value={filters.lesson}
+                    onChange={(e) => setFilters({ ...filters, lesson: e.target.value })}
                     className={ghostFieldClass}
                     style={ghostFieldStyle}
                   >
-                    <option value="">{t('partners.anyLevel')}</option>
-                    {MATERIAL_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                    <option value="">{t('partners.anyLesson')}</option>
+                    {Array.from({ length: lessonCount }, (_, i) => i + 1).map((n) => (
+                      <option key={n} value={n}>{t('partners.lessonOption', { n })}</option>
+                    ))}
                   </select>
                 </IconField>
               </div>

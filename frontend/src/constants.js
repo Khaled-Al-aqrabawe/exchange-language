@@ -46,3 +46,12 @@ export const TIMEZONES = [
   'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Africa/Cairo',
   'Asia/Dubai', 'Asia/Kolkata', 'Asia/Shanghai', 'Asia/Tokyo', 'Australia/Sydney',
 ]
+
+// Ratings up to this many stars must come with a written reason.
+export const LOW_RATING_MAX = 2
+
+// How each language is spoken aloud by the browser (BCP-47 codes).
+export const SPEECH_LANGUAGES = {
+  Arabic: 'ar-SA', English: 'en-US', Spanish: 'es-ES', French: 'fr-FR', German: 'de-DE', 'Mandarin Chinese': 'zh-CN',
+  Japanese: 'ja-JP', Korean: 'ko-KR', Portuguese: 'pt-BR', Italian: 'it-IT', Russian: 'ru-RU', Turkish: 'tr-TR', Hindi: 'hi-IN',
+}

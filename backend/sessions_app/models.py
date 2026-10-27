@@ -1,3 +1,4 @@
+import os
 import uuid
 
 from django.conf import settings
@@ -74,6 +75,12 @@ class SessionNote(models.Model):
         return f'SessionNote<{self.session_id}: {self.user_id}>'
 
 
+def report_recording_path(instance, filename):
+    """Random file names, so a recording cannot be found by guessing a URL."""
+    extension = os.path.splitext(filename)[1].lower() or '.webm'
+    return f'report_recordings/{uuid.uuid4().hex}{extension}'
+
+
 class SessionReport(models.Model):
     """A problem reported about the other person in a session, or a note sent to the admin."""
 
@@ -96,6 +103,8 @@ class SessionReport(models.Model):
     reported_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='session_reports_received', on_delete=models.CASCADE)
     reason = models.CharField(max_length=30, choices=REASON_CHOICES)
     details = models.TextField(blank=True)
+    # The reporter's browser recording of the session, uploaded only when a report is filed.
+    recording = models.FileField(upload_to=report_recording_path, null=True, blank=True)
     resolved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

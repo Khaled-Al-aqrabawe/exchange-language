@@ -211,3 +211,54 @@ class SessionSummaryTests(TransactionTestCase):
 
         # private: Bob sees his own (empty) note, not Ann's
         self.assertEqual(cb.get(f'/api/sessions/{sid}/summary/').data['note']['text'], '')
+
+
+class LowRatingAndRecordingTests(TransactionTestCase):
+    def _session(self):
+        a = User.objects.create_user('t@example.com', 'pw12345678')
+        b = User.objects.create_user('u@example.com', 'pw12345678')
+        client = APIClient()
+        client.force_authenticate(a)
+        room = client.post('/api/calls/ring/', {'partner_id': b.id}, format='json').data['room_id']
+        sid = client.get('/api/sessions/', {'room_id': room}).data[0]['id']
+        client.patch(f'/api/sessions/{sid}/status/', {'status': 'completed'}, format='json')
+        return client, sid, b
+
+    def test_low_rating_needs_a_reason(self):
+        client, sid, _ = self._session()
+        self.assertEqual(client.post(f'/api/sessions/{sid}/rate/', {'score': 2}, format='json').status_code, 400)
+        self.assertEqual(client.post(f'/api/sessions/{sid}/rate/', {'score': 1, 'comment': '  '}, format='json').status_code, 400)
+        self.assertEqual(client.post(f'/api/sessions/{sid}/rate/', {'score': 2, 'comment': 'was rude'}, format='json').status_code, 201)
+
+    def test_good_rating_needs_no_reason(self):
+        client, sid, _ = self._session()
+        self.assertEqual(client.post(f'/api/sessions/{sid}/rate/', {'score': 4}, format='json').status_code, 201)
+
+    def test_recording_attaches_only_to_my_own_report(self):
+        import shutil
+        import tempfile
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import override_settings
+
+        media = tempfile.mkdtemp()
+        try:
+            with override_settings(MEDIA_ROOT=media):
+                client, sid, other = self._session()
+                report = client.post(f'/api/sessions/{sid}/report/', {'reason': 'harassment'}, format='json').data['id']
+                url = f'/api/sessions/{sid}/report/{report}/recording/'
+                clip = SimpleUploadedFile('lesson.webm', b'webm-bytes', content_type='video/webm')
+                self.assertEqual(client.post(url, {'recording': clip}, format='multipart').status_code, 201)
+
+                from sessions_app.models import SessionReport
+                self.assertTrue(SessionReport.objects.get(id=report).recording.name.startswith('report_recordings/'))
+
+                bad = SimpleUploadedFile('x.txt', b'text', content_type='text/plain')
+                self.assertEqual(client.post(url, {'recording': bad}, format='multipart').status_code, 400)
+
+                intruder = APIClient()
+                intruder.force_authenticate(other)
+                again = SimpleUploadedFile('lesson.webm', b'webm-bytes', content_type='video/webm')
+                self.assertEqual(intruder.post(url, {'recording': again}, format='multipart').status_code, 403)
+        finally:
+            shutil.rmtree(media, ignore_errors=True)

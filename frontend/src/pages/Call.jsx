@@ -1,8 +1,9 @@
-import { Check, Clock, Download, FileText, Flag, MessageCircle, MessageSquareText, NotebookPen, Share2, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
+import { Check, Clock, Download, FileText, Flag, Languages, MessageCircle, MessageSquareText, NotebookPen, Share2, MousePointer2, Pen, Send, Star, Trash2, Type, Undo2, Volume2, Maximize, Mic, MicOff, Minimize, MonitorUp, PhoneOff, Video, VideoOff, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
+import { LOW_RATING_MAX, SPEECH_LANGUAGES } from '../constants'
 import { useAuth } from '../context/AuthContext'
 import { downloadFile, downloadText } from '../utils/downloadFile'
 import { buildSummaryText } from '../utils/sessionSummary'
@@ -468,12 +469,13 @@ const REPORT_REASONS = [
 ]
 
 // Report a problem with the other person; the admin receives it with the chosen reason.
-function ReportModal({ sessionId, partnerName, onClose, onSent, t }) {
+function ReportModal({ sessionId, partnerName, getRecording, onClose, onSent, t }) {
   const [reason, setReason] = useState('')
   const [details, setDetails] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   // After a report is sent the user leaves the call straight away.
   useEffect(() => {
@@ -493,7 +495,15 @@ function ReportModal({ sessionId, partnerName, onClose, onSent, t }) {
     }
     setBusy(true)
     try {
-      await client.post(`/sessions/${sessionId}/report/`, { reason, details })
+      const { data } = await client.post(`/sessions/${sessionId}/report/`, { reason, details })
+      // The reporter's recording of the session goes with the report so the admin can watch it.
+      const clip = await getRecording()
+      if (clip && clip.size > 0) {
+        setUploading(true)
+        const body = new FormData()
+        body.append('recording', clip, 'lesson.webm')
+        await client.post(`/sessions/${sessionId}/report/${data.id}/recording/`, body, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 0 }).catch(() => {})
+      }
       setSent(true)
     } catch {
       setError(t('report.error'))
@@ -545,12 +555,138 @@ function ReportModal({ sessionId, partnerName, onClose, onSent, t }) {
                 {t('common.cancel')}
               </button>
               <button onClick={submit} disabled={busy} className="lp-btn-primary text-sm px-4 py-2 disabled:opacity-50">
-                {busy ? t('schedule.submitting') : t('report.send')}
+                {uploading ? t('report.uploading') : busy ? t('schedule.submitting') : t('report.send')}
               </button>
             </div>
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+function speak(text, language) {
+  const lang = SPEECH_LANGUAGES[language]
+  if (!lang || !('speechSynthesis' in window)) return
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.lang = lang
+  utterance.rate = 0.85
+  window.speechSynthesis.cancel()
+  window.speechSynthesis.speak(utterance)
+}
+
+const EDGE_PUNCTUATION = /^[\s.,;:!?()«»"“”'،؛؟\-–—]+|[\s.,;:!?()«»"“”'،؛؟\-–—]+$/g
+
+// Click a word in the lesson's slide text (or select a phrase) to see its translation
+// beside the slide and hear it spoken. The slide itself is drawn by another site's viewer,
+// so its text is read from the file and shown here, where words can be picked.
+function TranslatePanel({ material, source, target, t }) {
+  const [slides, setSlides] = useState([])
+  const [slideIndex, setSlideIndex] = useState(0)
+  const [result, setResult] = useState(null)
+  const [typed, setTyped] = useState('')
+
+  useEffect(() => {
+    if (!material?.id) {
+      setSlides([])
+      return
+    }
+    client.get(`/courses/materials/${material.id}/text/`)
+      .then(({ data }) => {
+        setSlides(data.slides)
+        setSlideIndex(Math.max(0, (material.start_slide || 1) - 1))
+      })
+      .catch(() => setSlides([]))
+  }, [material?.id])
+
+  const lookup = async (raw) => {
+    const word = raw.replace(EDGE_PUNCTUATION, '')
+    if (!word) return
+    speak(word, source)
+    setResult({ word, loading: true })
+    try {
+      const { data } = await client.get('/courses/translate/', { params: { text: word, source, target } })
+      setResult({ word, translation: data.translation })
+    } catch {
+      setResult({ word, error: true })
+    }
+  }
+
+  // dragging over several words translates the whole phrase
+  const onMouseUp = () => {
+    const picked = window.getSelection()?.toString().trim()
+    if (picked && /\s/.test(picked)) lookup(picked)
+  }
+
+  const lines = slides[slideIndex] || []
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="border-b border-white/10 p-4">
+        {result ? (
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-lg font-semibold text-white" dir="auto">{result.word}</p>
+              <button type="button" onClick={() => speak(result.word, source)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" title={t('translate.listen')}>
+                <Volume2 size={15} />
+              </button>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <p className="text-base" style={{ color: result.error ? '#f87171' : 'var(--accent)' }} dir="auto">
+                {result.loading ? t('translate.loading') : result.error ? t('translate.error') : result.translation}
+              </p>
+              {result.translation && (
+                <button type="button" onClick={() => speak(result.translation, target)} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-slate-300 hover:bg-white/20" title={t('translate.listen')}>
+                  <Volume2 size={13} />
+                </button>
+              )}
+            </div>
+            <p className="mt-1 text-[11px] text-slate-500">{source} → {target}</p>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-400">{t('translate.hint')}</p>
+        )}
+      </div>
+
+      {slides.length > 0 ? (
+        <>
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-slate-400">
+            <button type="button" onClick={() => setSlideIndex((i) => Math.max(0, i - 1))} disabled={slideIndex === 0} className="rounded-full px-2 py-1 hover:bg-white/10 disabled:opacity-30">‹</button>
+            <span>{t('translate.slide', { n: slideIndex + 1, total: slides.length })}</span>
+            <button type="button" onClick={() => setSlideIndex((i) => Math.min(slides.length - 1, i + 1))} disabled={slideIndex === slides.length - 1} className="rounded-full px-2 py-1 hover:bg-white/10 disabled:opacity-30">›</button>
+          </div>
+          <div className="flex-1 space-y-2 overflow-y-auto p-4" onMouseUp={onMouseUp}>
+            {lines.length === 0 && <p className="text-sm text-slate-500">{t('translate.emptySlide')}</p>}
+            {lines.map((line) => (
+              <p key={line} dir="auto" className="text-sm leading-relaxed text-slate-200">
+                {line.split(/(\s+)/).map((part, i) => (
+                  /\S/.test(part)
+                    ? <span key={i} onClick={() => lookup(part)} className="cursor-pointer rounded px-0.5 hover:bg-white/15">{part}</span>
+                    : part
+                ))}
+              </p>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="flex-1 p-4 text-sm text-slate-500">{material?.id ? t('translate.noText') : t('translate.shareFirst')}</p>
+      )}
+
+      <form
+        onSubmit={(e) => { e.preventDefault(); lookup(typed); setTyped('') }}
+        className="flex gap-2 border-t border-white/10 p-3"
+      >
+        <input
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          placeholder={t('translate.placeholder')}
+          dir="auto"
+          className="min-w-0 flex-1 rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+        />
+        <button type="submit" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-white" aria-label={t('translate.go')}>
+          <Languages size={14} />
+        </button>
+      </form>
     </div>
   )
 }
@@ -618,6 +754,10 @@ function CallRatingModal({ partnerName, onSubmit, onReport, onSummary, t }) {
       setError(t('schedule.ratingRequired'))
       return
     }
+    if (score <= LOW_RATING_MAX && !comment.trim()) {
+      setError(t('schedule.lowRatingReason'))
+      return
+    }
     setSubmitting(true)
     await onSubmit(score, comment.trim())
   }
@@ -659,7 +799,7 @@ function CallRatingModal({ partnerName, onSubmit, onReport, onSummary, t }) {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
-          placeholder={t('schedule.rateCommentPlaceholder')}
+          placeholder={score && score <= LOW_RATING_MAX ? t('schedule.lowRatingPlaceholder') : t('schedule.rateCommentPlaceholder')}
           className="w-full rounded-xl px-3.5 py-2.5 text-sm bg-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
         {error && <p className="text-sm mt-2" style={{ color: '#f87171' }}>{error}</p>}
@@ -742,6 +882,11 @@ export default function Call() {
   const [otherId, setOtherId] = useState(null)
   const [sidebarTab, setSidebarTab] = useState('notes')
   const [shareMenuOpen, setShareMenuOpen] = useState(false)
+  // The session is recorded in this browser (low quality) and thrown away on leaving,
+  // unless a report is filed, in which case it is uploaded with the report.
+  const recorderRef = useRef(null)
+  const recordingRef = useRef({ done: null })
+  const [recording, setRecording] = useState(false)
   const [chatMessages, setChatMessages] = useState([])
   const [chatUnread, setChatUnread] = useState(0)
   const [chatToast, setChatToast] = useState(null)
@@ -926,6 +1071,16 @@ export default function Call() {
           rememberFile(data.material)
         } else if (data.type === 'live-start') {
           setLiveStart((v) => v || Date.now())
+        } else if (data.type === 'ask-finished' && data.material) {
+          // only asked when this is also my own current lesson
+          client.get('/courses/next/')
+            .then(({ data: mine }) => {
+              if (mine.material?.id === data.material.id) {
+                setPromptError('')
+                setFinishPrompt({ material: data.material, reason: 'joint' })
+              }
+            })
+            .catch(() => {})
         } else if (data.type === 'screen-state') {
           setRemoteSharing(!!data.on)
           if (!data.on) setStrokes([])
@@ -1091,6 +1246,57 @@ export default function Call() {
     return () => clearTimeout(id)
   }, [chatToast])
 
+  const startRecording = () => {
+    if (recorderRef.current || typeof MediaRecorder === 'undefined') return
+    const remote = remoteVideoRef.current?.srcObject
+    const local = cameraStreamRef.current
+    if (!remote || remote.getVideoTracks().length === 0) return
+    try {
+      // one audio track with both voices, plus the picture of the other person (or their screen)
+      const ctx = new AudioContext()
+      const mix = ctx.createMediaStreamDestination()
+      ;[remote, local].forEach((stream) => {
+        if (stream?.getAudioTracks().length) ctx.createMediaStreamSource(stream).connect(mix)
+      })
+      const output = new MediaStream([...remote.getVideoTracks(), ...mix.stream.getAudioTracks()])
+      const mimeType = ['video/webm;codecs=vp8,opus', 'video/webm'].find((m) => MediaRecorder.isTypeSupported(m))
+      const recorder = new MediaRecorder(output, { mimeType, videoBitsPerSecond: 300000, audioBitsPerSecond: 32000 })
+      const chunks = []
+      recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
+      recordingRef.current = {
+        done: new Promise((resolve) => {
+          recorder.onstop = () => {
+            ctx.close().catch(() => {})
+            resolve(new Blob(chunks, { type: 'video/webm' }))
+          }
+        }),
+      }
+      recorder.start(10000)
+      recorderRef.current = recorder
+      setRecording(true)
+    } catch {
+      // recording is best effort and must never break the call
+    }
+  }
+
+  const stopRecording = () => {
+    const recorder = recorderRef.current
+    if (recorder && recorder.state !== 'inactive') recorder.stop()
+    recorderRef.current = null
+    setRecording(false)
+  }
+
+  useEffect(() => {
+    if (joined && status === 'connected') startRecording()
+  }, [joined, status])
+
+  useEffect(() => () => stopRecording(), [])
+
+  // Lesson text is translated from the lesson's language into one the user knows.
+  const translateSource = sharedMaterial?.language || user?.profile?.learning_language || 'English'
+  const translateTarget = [user?.profile?.native_language, ...(user?.profile?.spoken_languages || []), 'English']
+    .find((l) => l && l !== translateSource) || 'English'
+
   const openSidebar = (tab) => {
     if (notesOpen && sidebarTab === tab) setNotesOpen(false)
     else {
@@ -1124,6 +1330,7 @@ export default function Call() {
   // Closes the call; the chance to rate the other person (when there is a session) comes next.
   const finishLeaving = () => {
     if (noteLoadedRef.current) saveNote(noteTextRef.current)
+    stopRecording()
     cleanupMedia()
     if (sessionId) setRatingOpen(true)
     else exitCall()
@@ -1243,7 +1450,7 @@ export default function Call() {
   }
 
   const shareMaterial = (m, startSlide = 1) => {
-    const material = { id: m.id, title: m.title, file: m.file, file_name: m.file_name, start_slide: startSlide }
+    const material = { id: m.id, title: m.title, file: m.file, file_name: m.file_name, start_slide: startSlide, language: m.language }
     send({ type: 'material-share', material })
     if (sessionId && material.id) client.post(`/sessions/${sessionId}/shared/`, { material_id: material.id }).catch(() => {})
     rememberFile(material)
@@ -1336,9 +1543,12 @@ export default function Call() {
   const turnCountdown = liveActive && turnRemaining > 0 && turnRemaining <= 60 && countdownValue == null ? turnRemaining : null
 
   const askFinished = (material, reason) => {
-    setStoppedSlide('')
     setPromptError('')
-    setFinishPrompt({ material, reason, step: 'ask' })
+    setFinishPrompt({ material, reason })
+    // If the other person is on this same lesson too, they must confirm as well.
+    if (reason !== 'leave') {
+      send({ type: 'ask-finished', material: { id: material.id, title: material.title, file: material.file, file_name: material.file_name } })
+    }
   }
 
   useEffect(() => {
@@ -1396,7 +1606,6 @@ export default function Call() {
   const answerFinished = async (statusValue) => {
     const { material, reason } = finishPrompt
     const body = { material_id: material.id, status: statusValue }
-    if (statusValue === 'partial') body.last_slide = Number(stoppedSlide)
     try {
       await client.post('/courses/progress/', body)
     } catch {
@@ -1502,7 +1711,8 @@ export default function Call() {
       <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
         <div className="max-w-xl mx-auto px-6 py-10 text-center">
           <h1 className="text-lg font-semibold text-white mb-1">{t('call.joinTitle')}</h1>
-          <p className="text-sm text-slate-400 mb-6">{t('call.joinHint')}</p>
+          <p className="text-sm text-slate-400 mb-2">{t('call.joinHint')}</p>
+          <p className="text-xs text-slate-500 mb-6 max-w-md mx-auto">{t('call.recordingNotice')}</p>
           {error ? (
             <div className="rounded-2xl border border-red-900/50 bg-red-950/40 px-5 py-4 text-red-300 text-sm">{error}</div>
           ) : (
@@ -1562,6 +1772,11 @@ export default function Call() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
+            {recording && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-slate-400" title={t('call.recordingNotice')}>
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> {t('call.recordingBadge')}
+              </span>
+            )}
             {liveActive && (
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums"
@@ -1807,52 +2022,25 @@ export default function Call() {
           <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6">
             <p className="text-lg font-semibold text-white mb-1">{t('call.finishedTitle')}</p>
             <p className="text-sm text-slate-400 mb-5 truncate">{finishPrompt.material.title}</p>
-            {finishPrompt.step === 'ask' ? (
-              <div className="flex flex-col gap-2">
-                <button onClick={() => answerFinished('complete')} className="lp-btn-primary w-full justify-center">
-                  {t('call.finishedYes')}
-                </button>
+            <div className="flex flex-col gap-2">
+              <button onClick={() => answerFinished('complete')} className="lp-btn-primary w-full justify-center">
+                {t('call.finishedYes')}
+              </button>
+              <button
+                onClick={() => answerFinished('not_started')}
+                className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                {t('call.finishedNo')}
+              </button>
+              {finishPrompt.reason === 'leave' && (
                 <button
-                  onClick={() => setFinishPrompt({ ...finishPrompt, step: 'slide' })}
-                  className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 transition-colors"
+                  onClick={() => { setFinishPrompt(null); finishLeaving() }}
+                  className="w-full rounded-xl px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors"
                 >
-                  {t('call.finishedNo')}
+                  {t('call.skipAndLeave')}
                 </button>
-                <button
-                  onClick={() => answerFinished('not_started')}
-                  className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-white transition-colors"
-                >
-                  {t('call.finishedNone')}
-                </button>
-                {finishPrompt.reason === 'leave' && (
-                  <button
-                    onClick={() => { setFinishPrompt(null); finishLeaving() }}
-                    className="w-full rounded-xl px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors"
-                  >
-                    {t('call.skipAndLeave')}
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                <label className="text-sm text-slate-300">{t('call.stoppedAtLabel')}</label>
-                <input
-                  type="number"
-                  min="1"
-                  autoFocus
-                  value={stoppedSlide}
-                  onChange={(e) => setStoppedSlide(e.target.value)}
-                  className="w-full rounded-xl px-3.5 py-2.5 text-sm bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                />
-                <button
-                  onClick={() => answerFinished('partial')}
-                  disabled={!(Number(stoppedSlide) >= 1)}
-                  className="lp-btn-primary w-full justify-center disabled:opacity-50"
-                >
-                  {t('call.stoppedAtSave')}
-                </button>
-              </div>
-            )}
+              )}
+            </div>
             {promptError && <p className="text-sm mt-3" style={{ color: '#f87171' }}>{promptError}</p>}
           </div>
         </div>
@@ -1873,12 +2061,12 @@ export default function Call() {
         <aside className={`fixed ${isFullscreen ? 'top-0' : 'top-16'} bottom-0 end-0 z-40 w-80 max-w-full ${notesOpen ? 'flex' : 'hidden md:flex'} flex-col bg-slate-900 border-s border-white/10`}>
           <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10">
             <div className="flex items-center gap-1">
-              {[['notes', NotebookPen, t('call.notes')], ['chat', MessageCircle, t('call.chat')]].map(([tab, Icon, label]) => (
+              {[['notes', NotebookPen, t('call.notes')], ['chat', MessageCircle, t('call.chat')], ['translate', Languages, t('call.translate')]].map(([tab, Icon, label]) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setSidebarTab(tab)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${sidebarTab === tab ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white'}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors ${sidebarTab === tab ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white'}`}
                 >
                   <Icon size={13} /> {label}
                   {tab === 'chat' && chatUnread > 0 && (
@@ -1911,7 +2099,9 @@ export default function Call() {
               </button>
             </div>
           </div>
-          {sidebarTab === 'chat' ? (
+          {sidebarTab === 'translate' ? (
+            <TranslatePanel material={sharedMaterial} source={translateSource} target={translateTarget} t={t} />
+          ) : sidebarTab === 'chat' ? (
             <CallChat messages={chatMessages} onSend={sendChat} myId={user?.id} t={t} />
           ) : (
             <>
@@ -1927,7 +2117,7 @@ export default function Call() {
       )}
 
       {reportOpen && (
-        <ReportModal sessionId={sessionId} partnerName={otherName || t('call.yourPartner')} onClose={() => setReportOpen(false)} onSent={leaveAfterReport} t={t} />
+        <ReportModal sessionId={sessionId} partnerName={otherName || t('call.yourPartner')} getRecording={() => recordingRef.current.done || Promise.resolve(null)} onClose={() => setReportOpen(false)} onSent={leaveAfterReport} t={t} />
       )}
 
       {ratingOpen && (

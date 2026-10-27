@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import client from '../api/client'
+import { LOW_RATING_MAX } from '../constants'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import { useAuth } from '../context/AuthContext'
 import { toDatetimeLocalValue } from '../utils/availability'
@@ -90,6 +91,10 @@ function RatingModal({ partnerName, onDismiss, onConfirm }) {
       setError(t('schedule.ratingRequired'))
       return
     }
+    if (score <= LOW_RATING_MAX && !comment.trim()) {
+      setError(t('schedule.lowRatingReason'))
+      return
+    }
     setSubmitting(true)
     try {
       await onConfirm(score, comment.trim())
@@ -125,7 +130,7 @@ function RatingModal({ partnerName, onDismiss, onConfirm }) {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
-          placeholder={t('schedule.rateCommentPlaceholder')}
+          placeholder={score && score <= LOW_RATING_MAX ? t('schedule.lowRatingPlaceholder') : t('schedule.rateCommentPlaceholder')}
           className="w-full rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent"
           style={{ border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }}
         />

@@ -4,6 +4,9 @@ from rest_framework.exceptions import NotFound
 
 from accounts.models import AvailabilitySlot, Profile
 
+from courses.models import Material
+from courses.views import next_lesson_for
+
 from .serializers import PartnerSerializer
 
 
@@ -42,7 +45,7 @@ class PartnerListView(generics.ListAPIView):
         qs = Profile.objects.exclude(user=self.request.user).select_related('user')
 
         explicit_language = self.request.query_params.get('language')
-        level = self.request.query_params.get('level')
+        lesson = self.request.query_params.get('lesson')
         timezone = self.request.query_params.get('timezone')
         day_of_week = self.request.query_params.get('day')
 
@@ -90,9 +93,10 @@ class PartnerListView(generics.ListAPIView):
             )
 
         ordering = [p for p in qs if levels_compatible(my_profile, p)]
-        if level:
-            # optional: only people who are at this level in the language they are learning
-            ordering = [p for p in ordering if learning_levels(p).get((p.learning_language or '').lower()) == level]
+        if lesson and lesson.isdigit():
+            # optional: only people whose current lesson (the next one they have not completed) is this number
+            wanted = int(lesson)
+            ordering = [p for p in ordering if (next_lesson_for(p.user)[0] or Material(order=-1)).order == wanted]
         ordering.sort(key=lambda p: 0 if p.id in exchange_ids else 1)
         return ordering
 

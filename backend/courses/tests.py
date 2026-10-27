@@ -119,3 +119,41 @@ class LevelDownloadAndStatusTests(APITestCase):
         self.assertEqual(len(names), 2)
         self.assertEqual(self.client.get('/api/courses/materials/download/', {'language': 'English', 'level': 'C2'}).status_code, 404)
         self.assertEqual(self.client.get('/api/courses/materials/download/', {'language': 'Klingon', 'level': 'A1'}).status_code, 400)
+
+
+class SlideTextAndTranslateTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('tr@example.com', 'pw12345678')
+        self.client.force_authenticate(self.user)
+
+    def _pptx(self):
+        import io
+        import zipfile
+
+        def slide(*lines):
+            paragraphs = ''.join(f'<a:p><a:r><a:t>{line}</a:t></a:r></a:p>' for line in lines)
+            return f'<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="x"><p:txBody>{paragraphs}</p:txBody></p:sld>'
+
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w') as bundle:
+            bundle.writestr('ppt/slides/slide2.xml', slide('second slide'))
+            bundle.writestr('ppt/slides/slide1.xml', slide('Ahlan wasahlan', 'hello'))
+        return SimpleUploadedFile('Arabic-A1-Lesson-01-x.pptx', buffer.getvalue())
+
+    def test_slide_text_is_extracted_in_slide_order(self):
+        material = Material.objects.create(language='Arabic', level='A1', title='L1', order=1, file=self._pptx())
+        slides = self.client.get(f'/api/courses/materials/{material.id}/text/').data['slides']
+        self.assertEqual(slides, [['Ahlan wasahlan', 'hello'], ['second slide']])
+
+    def test_translate_uses_the_service_and_validates(self):
+        import io
+        import json
+        from unittest import mock
+
+        reply = io.BytesIO(json.dumps({'responseData': {'translatedText': 'hello'}}).encode())
+        with mock.patch('courses.views.urlopen', return_value=mock.MagicMock(__enter__=lambda s: reply, __exit__=lambda *a: False)):
+            r = self.client.get('/api/courses/translate/', {'text': 'marhaba', 'source': 'Arabic', 'target': 'English'})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.data['translation'], 'hello')
+        self.assertEqual(self.client.get('/api/courses/translate/', {'text': 'x', 'source': 'Klingon', 'target': 'English'}).status_code, 400)
+        self.assertEqual(self.client.get('/api/courses/translate/', {'text': '', 'source': 'Arabic', 'target': 'English'}).status_code, 400)

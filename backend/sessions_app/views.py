@@ -488,3 +488,28 @@ class SessionSummaryView(APIView):
             'files': files,
             'my_rating': {'score': rating.score, 'comment': rating.comment} if rating else None,
         })
+
+
+MAX_RECORDING_BYTES = 500 * 1024 * 1024
+
+
+class SessionReportRecordingView(APIView):
+    """Attaches the reporter's recording of the session to the report they just filed."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk, report_id):
+        try:
+            report = SessionReport.objects.get(id=report_id, session_id=pk, reporter=request.user)
+        except SessionReport.DoesNotExist:
+            raise PermissionDenied('This is not your report.')
+        upload = request.FILES.get('recording')
+        if not upload:
+            raise ValidationError({'recording': 'No file was sent.'})
+        if upload.size > MAX_RECORDING_BYTES:
+            raise ValidationError({'recording': 'The recording is too large.'})
+        if not (upload.content_type or '').startswith(('video/', 'audio/')):
+            raise ValidationError({'recording': 'Send a video or audio recording.'})
+        report.recording = upload
+        report.save(update_fields=['recording'])
+        return Response({'id': report.id}, status=status.HTTP_201_CREATED)

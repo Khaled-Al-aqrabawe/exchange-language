@@ -97,6 +97,10 @@ class ScheduledSessionSerializer(serializers.ModelSerializer):
         )
 
 
+# Ratings up to this many stars must come with a written reason.
+LOW_RATING_MAX = 2
+
+
 class SessionRatingSerializer(serializers.ModelSerializer):
     rater = SessionParticipantSerializer(read_only=True)
     ratee = SessionParticipantSerializer(read_only=True)
@@ -105,6 +109,11 @@ class SessionRatingSerializer(serializers.ModelSerializer):
         model = SessionRating
         fields = ['id', 'session', 'rater', 'ratee', 'score', 'comment', 'created_at']
         read_only_fields = ['id', 'session', 'rater', 'ratee', 'created_at']
+
+    def validate(self, attrs):
+        if attrs.get('score', 5) <= LOW_RATING_MAX and not (attrs.get('comment') or '').strip():
+            raise serializers.ValidationError({'comment': 'Please write why you gave a low rating.'})
+        return attrs
 
     def validate_score(self, value):
         if not 1 <= value <= 5:

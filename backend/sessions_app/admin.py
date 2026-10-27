@@ -12,10 +12,15 @@ class ScheduledSessionAdmin(admin.ModelAdmin):
 
 @admin.register(SessionReport)
 class SessionReportAdmin(admin.ModelAdmin):
-    list_display = ['id', 'reason', 'reporter', 'reported_user', 'session', 'resolved', 'created_at']
+    list_display = ['id', 'reason', 'reporter', 'reported_user', 'session', 'has_recording', 'resolved', 'created_at']
     list_filter = ['reason', 'resolved']
     search_fields = ['reporter__email', 'reported_user__email', 'details']
     list_editable = ['resolved']
+    readonly_fields = ['recording']
+
+    @admin.display(boolean=True, description='Recording')
+    def has_recording(self, obj):
+        return bool(obj.recording)
 
 
 @admin.register(SessionNote)

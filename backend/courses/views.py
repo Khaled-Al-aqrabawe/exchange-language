@@ -1,7 +1,15 @@
+import hashlib
+import json
 import os
+import re
 import tempfile
 import zipfile
+from urllib.error import URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+from xml.etree import ElementTree
 
+from django.core.cache import cache
 from django.http import FileResponse
 from rest_framework import permissions, status
 from rest_framework.exceptions import NotFound, ValidationError
@@ -155,3 +163,85 @@ class MaterialLevelDownloadView(APIView):
                     continue
         archive.seek(0)
         return FileResponse(archive, as_attachment=True, filename=f'{language}-{level}.zip', content_type='application/zip')
+
+
+def pptx_slide_texts(path):
+    """The text of every slide of a .pptx file, one list of lines per slide.
+
+    A .pptx is a zip of XML files, so no extra library is needed: each slide keeps its
+    text in <a:t> elements, one <a:p> element per line."""
+    ns = {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'}
+    slides = []
+    with zipfile.ZipFile(path) as bundle:
+        names = sorted(
+            (n for n in bundle.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml', n)),
+            key=lambda n: int(re.search(r'(\d+)\.xml$', n).group(1)),
+        )
+        for name in names:
+            root = ElementTree.fromstring(bundle.read(name))
+            lines = []
+            for paragraph in root.iter('{%s}p' % ns['a']):
+                text = ''.join(t.text or '' for t in paragraph.iter('{%s}t' % ns['a'])).strip()
+                if text:
+                    lines.append(text)
+            slides.append(lines)
+    return slides
+
+
+class MaterialTextView(APIView):
+    """The text of each slide of a lesson file, so words can be picked out and translated."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            material = Material.objects.get(pk=pk)
+        except Material.DoesNotExist:
+            raise NotFound('Unknown lesson.')
+        key = f'material-text-{material.id}-{material.file.name}'
+        slides = cache.get(key)
+        if slides is None:
+            slides = []
+            if material.file and material.file.name.lower().endswith('.pptx'):
+                try:
+                    slides = pptx_slide_texts(material.file.path)
+                except (OSError, zipfile.BadZipFile, ElementTree.ParseError):
+                    slides = []
+            cache.set(key, slides, 60 * 60)
+        return Response({'slides': slides})
+
+
+# language name -> code used by the translation service
+TRANSLATE_CODES = {
+    'Arabic': 'ar', 'English': 'en', 'Spanish': 'es', 'French': 'fr', 'German': 'de', 'Mandarin Chinese': 'zh-CN',
+    'Japanese': 'ja', 'Korean': 'ko', 'Portuguese': 'pt', 'Italian': 'it', 'Russian': 'ru', 'Turkish': 'tr', 'Hindi': 'hi',
+}
+
+
+class TranslateView(APIView):
+    """Translates a word or short phrase between two of the site's languages."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        text = (request.query_params.get('text') or '').strip()
+        source = request.query_params.get('source', '')
+        target = request.query_params.get('target', '')
+        if not text or len(text) > 200:
+            raise ValidationError({'text': 'Send a word or short phrase (up to 200 characters).'})
+        if source not in TRANSLATE_CODES or target not in TRANSLATE_CODES:
+            raise ValidationError({'detail': 'Unknown language.'})
+        if source == target:
+            return Response({'translation': text})
+
+        key = 'translate-' + hashlib.sha1(f'{source}|{target}|{text}'.encode()).hexdigest()
+        translation = cache.get(key)
+        if translation is None:
+            query = urlencode({'q': text, 'langpair': f'{TRANSLATE_CODES[source]}|{TRANSLATE_CODES[target]}'})
+            try:
+                with urlopen(Request(f'https://api.mymemory.translated.net/get?{query}', headers={'User-Agent': 'LanguagePartner'}), timeout=6) as response:
+                    translation = json.load(response)['responseData']['translatedText']
+            except (URLError, OSError, ValueError, KeyError):
+                return Response({'detail': 'Translation is not available right now.'}, status=status.HTTP_502_BAD_GATEWAY)
+            cache.set(key, translation, 60 * 60 * 24)
+        return Response({'translation': translation})
