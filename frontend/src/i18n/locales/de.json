@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Language Partner",
+    "appName": "Lingua Hub",
     "loading": "Wird geladen...",
     "loadingDashboard": "Deine Startseite wird geladen...",
     "seeAll": "Alle anzeigen",
@@ -25,8 +25,8 @@
     "logOut": "Abmelden"
   },
   "footer": {
-    "tagline": "Language Partner",
-    "copyright": "© {{year}} Language Partner. All rights reserved.",
+    "tagline": "Lingua Hub",
+    "copyright": "© {{year}} Lingua Hub. All rights reserved.",
     "explore": "Entdecken",
     "account": "Konto",
     "getStarted": "Loslegen"
@@ -44,7 +44,7 @@
     "badge": "Kostenlos während des Early Access",
     "heroTitleLine1": "Lerne eine Sprache, indem du",
     "heroTitleLine2": "sie wirklich sprichst",
-    "heroSubtitle": "Language Partner verbindet dich mit Muttersprachlern und anderen Lernenden für echtes Gesprächstraining, plus strukturierte Videokurse für deine Grundlagen.",
+    "heroSubtitle": "Lingua Hub verbindet dich mit Muttersprachlern und anderen Lernenden für echtes Gesprächstraining, plus strukturierte Videokurse für deine Grundlagen.",
     "findAPartner": "Partner finden",
     "getStartedFree": "Kostenlos starten",
     "learnMore": "Mehr erfahren",
@@ -60,7 +60,7 @@
     },
     "realConversations": "Echte Gespräche",
     "practiceHeadline": "Übe mit echten Menschen, nicht mit Karteikarten",
-    "practiceBody": "Apps, die nur Vokabeln abfragen, bringen dich nur bis zu einem gewissen Punkt. Language Partner lässt dich schon in deiner ersten Sitzung mit einer echten Person sprechen — Nachrichten zum Planen, Video zum Üben und Kurse, um Lücken zu schließen.",
+    "practiceBody": "Apps, die nur Vokabeln abfragen, bringen dich nur bis zu einem gewissen Punkt. Lingua Hub lässt dich schon in deiner ersten Sitzung mit einer echten Person sprechen — Nachrichten zum Planen, Video zum Üben und Kurse, um Lücken zu schließen.",
     "practiceList": {
       "matched": "Gematcht nach Sprachkombination, Niveau und Zeitzone",
       "builtin": "Integrierter Chat und Video — nichts zu installieren",
@@ -83,14 +83,14 @@
       "freeBody": "Alle Funktionen sind während des Early Access freigeschaltet — keine Kreditkarte, keine Bezahlschranken."
     },
     "ctaTitle": "Kostenlos nutzbar, ohne Haken",
-    "ctaBody": "Language Partner ist während unserer Early-Access-Phase kostenlos — alle Funktionen sind von Anfang an freigeschaltet.",
+    "ctaBody": "Lingua Hub ist während unserer Early-Access-Phase kostenlos — alle Funktionen sind von Anfang an freigeschaltet.",
     "ctaButton": "Kostenloses Konto erstellen"
   },
   "about": {
     "eyebrow": "Über uns",
     "titlePrefix": "Sprachgefühl entsteht durch",
     "titleHighlight": "Konversation",
-    "intro": "Language Partner gibt es, weil der schnellste Weg, eine Sprache zu lernen, darin besteht, sie tatsächlich mit einer anderen Person zu sprechen. Wir verbinden Lernende für Muttersprachler-Austausch, Übung mit Gleichgesinnten und strukturierte Kurse im eigenen Tempo — alles an einem Ort.",
+    "intro": "Lingua Hub gibt es, weil der schnellste Weg, eine Sprache zu lernen, darin besteht, sie tatsächlich mit einer anderen Person zu sprechen. Wir verbinden Lernende für Muttersprachler-Austausch, Übung mit Gleichgesinnten und strukturierte Kurse im eigenen Tempo — alles an einem Ort.",
     "missionEyebrow": "Unsere Mission",
     "missionHeadline": "Authentische Übung für alle zugänglich machen, überall",
     "missionBody": "Wir matchen Lernende nach Sprachkombination, Niveau und Zeitzone und halten uns dann zurück — integriertes Video und Chat, sodass nichts extra installiert werden muss, und Kurse für mehr Struktur zwischen den Sitzungen.",
@@ -110,7 +110,7 @@
     "title": "Häufig gestellte Fragen",
     "items": {
       "free": {
-        "q": "Ist Language Partner kostenlos?",
+        "q": "Ist Lingua Hub kostenlos?",
         "a": "Ja. Während unserer Early-Access-Phase ist jede Funktion — Austausch-Matching, Übung mit Gleichgesinnten, Videoanrufe und Kurse — komplett kostenlos."
       },
       "matching": {
@@ -239,7 +239,7 @@
       "Setze dir ein winziges, konkretes Wochenziel wie 'Kaffee bestellen' oder 'eine 2-Minuten-Geschichte erzählen' — vage Ziele lassen sich leicht aufschieben."
     ],
     "howItWorksTitle": "So funktioniert's",
-    "whyTitle": "Warum Lernende sich für Language Partner entscheiden",
+    "whyTitle": "Warum Lernende sich für Lingua Hub entscheiden",
     "stats": {
       "completed": "Abgeschlossene Sitzungen",
       "upcoming": "Bevorstehende Sitzungen",
@@ -526,7 +526,7 @@
     "appearance": "Erscheinungsbild",
     "appearanceBody": "Zwischen hellem und dunklem Modus wechseln.",
     "language": "Sprache",
-    "languageBody": "Wähle die Sprache, die in Language Partner verwendet wird.",
+    "languageBody": "Wähle die Sprache, die in Lingua Hub verwendet wird.",
     "logOut": "Abmelden"
   },
   "call": {

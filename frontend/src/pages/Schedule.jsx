@@ -1,4 +1,4 @@
-import { CalendarClock, CalendarPlus, ChevronRight, FileText, Filter, Star, Video, X, XCircle } from 'lucide-react'
+import { CalendarClock, CalendarPlus, ChevronRight, Clock, FileText, Star, Video, X, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -18,7 +18,23 @@ const statusTint = {
   cancelled: 'lp-tag lp-tag--accent',
 }
 
-const STATUS_FILTERS = ['pending', 'confirmed', 'rejected', 'completed', 'not_completed', 'cancelled']
+// The tabs group the statuses the way people think about their sessions
+const TABS = [
+  ['all', null],
+  ['upcoming', ['pending', 'confirmed']],
+  ['past', ['completed', 'not_completed']],
+  ['closed', ['cancelled', 'rejected']],
+]
+
+// Colour of the date tile on each card
+const TILE_TINT = {
+  pending: '#fbbf24',
+  confirmed: 'var(--accent)',
+  completed: '#34d399',
+  not_completed: '#fb923c',
+  cancelled: '#f87171',
+  rejected: '#f87171',
+}
 
 const JOIN_WINDOW_MS = 5 * 60 * 1000
 
@@ -120,8 +136,8 @@ function RatingModal({ partnerName, onDismiss, onConfirm }) {
             >
               <Star
                 size={26}
-                fill={value <= (hoverScore || score) ? 'var(--gold)' : 'none'}
-                style={{ color: 'var(--gold)' }}
+                fill={value <= (hoverScore || score) ? '#f5b301' : 'none'}
+                style={{ color: '#f5b301' }}
               />
             </button>
           ))}
@@ -219,7 +235,7 @@ function SessionDetailsModal({ session, other, onClose }) {
 }
 
 export default function Schedule() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const [now, setNow] = useState(() => Date.now())
   const [sessions, setSessions] = useState([])
@@ -231,7 +247,7 @@ export default function Schedule() {
   const [confirmTime, setConfirmTime] = useState('')
   const [confirmError, setConfirmError] = useState('')
   const [showRequestModal, setShowRequestModal] = useState(false)
-  const [statusFilter, setStatusFilter] = useState('')
+  const [tab, setTab] = useState('all')
   const [dateFilter, setDateFilter] = useState('')
 
   const inputClass = 'w-full rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent'
@@ -279,76 +295,117 @@ export default function Schedule() {
     await loadSessions()
   }
 
-  const filteredSessions = sessions.filter((s) => {
-    if (statusFilter && s.status !== statusFilter) return false
-    if (dateFilter) {
-      const sessionDate = new Date(s.scheduled_time)
-      const [y, m, d] = dateFilter.split('-').map(Number)
-      if (sessionDate.getFullYear() !== y || sessionDate.getMonth() + 1 !== m || sessionDate.getDate() !== d) return false
-    }
-    return true
-  })
+  const inTab = (session, key) => {
+    const statuses = TABS.find(([name]) => name === key)[1]
+    return !statuses || statuses.includes(session.status)
+  }
+  const matchesDate = (session) => {
+    if (!dateFilter) return true
+    const sessionDate = new Date(session.scheduled_time)
+    const [y, m, d] = dateFilter.split('-').map(Number)
+    return sessionDate.getFullYear() === y && sessionDate.getMonth() + 1 === m && sessionDate.getDate() === d
+  }
+  const isOpen = (session) => ['pending', 'confirmed'].includes(session.status)
+
+  // open sessions first (soonest at the top), then the rest with the newest at the top
+  const filteredSessions = sessions
+    .filter((s) => inTab(s, tab) && matchesDate(s))
+    .sort((a, b) => {
+      if (isOpen(a) !== isOpen(b)) return isOpen(a) ? -1 : 1
+      const diff = new Date(a.scheduled_time) - new Date(b.scheduled_time)
+      return isOpen(a) ? diff : -diff
+    })
+
+  const locale = i18n.resolvedLanguage
 
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
-      <div className="max-w-4xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-6 lp-animate-in">
-          <h1 className="font-display text-2xl font-bold tracking-tight" style={{ color: 'var(--ink)' }}>{t('schedule.title')}</h1>
-          <button type="button" onClick={() => setShowRequestModal(true)} className="lp-btn-primary shrink-0">
-            <CalendarPlus size={16} /> {t('schedule.sendRequestTitle')}
-          </button>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 mb-6 lp-animate-in">
-          <Filter size={15} style={{ color: 'var(--ink-soft)' }} />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-            style={inputStyle}
-          >
-            <option value="">{t('schedule.anyStatus')}</option>
-            {STATUS_FILTERS.map((value) => (
-              <option key={value} value={value}>{t(`schedule.status.${value}`)}</option>
-            ))}
-          </select>
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-            style={inputStyle}
-          />
-          {(statusFilter || dateFilter) && (
-            <button
-              type="button"
-              onClick={() => { setStatusFilter(''); setDateFilter('') }}
-              className="inline-flex items-center gap-1 text-sm font-medium hover:opacity-80"
-              style={{ color: 'var(--ink-soft)' }}
-            >
-              <XCircle size={14} /> {t('schedule.clearFilters')}
+      <div className="lp-hero-bg">
+        <div className="mx-auto max-w-4xl px-6 pb-8 pt-10">
+          <div className="lp-animate-in flex flex-wrap items-end justify-between gap-5">
+            <div>
+              <p className="lp-eyebrow mb-3">{t('schedule.eyebrow')}</p>
+              <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl" style={{ color: 'var(--ink)' }}>{t('schedule.title')}</h1>
+              <p className="mt-2 max-w-md text-sm sm:text-base" style={{ color: 'var(--ink-soft)' }}>{t('schedule.subtitle')}</p>
+            </div>
+            <button type="button" onClick={() => setShowRequestModal(true)} className="lp-btn-primary shrink-0">
+              <CalendarPlus size={16} /> {t('schedule.sendRequestTitle')}
             </button>
-          )}
-        </div>
+          </div>
 
+          <div className="lp-animate-in lp-delay-1 mt-7 flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex flex-wrap rounded-full p-1" style={{ background: 'var(--surface-2)' }}>
+              {TABS.map(([key]) => {
+                const count = sessions.filter((s) => inTab(s, key)).length
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setTab(key)}
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
+                    style={tab === key
+                      ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(124 92 255 / 0.9)' }
+                      : { color: 'var(--ink-soft)' }}
+                  >
+                    {t(`schedule.tab.${key}`)}
+                    <span className="rounded-full px-1.5 text-[11px] font-extrabold" style={tab === key ? { background: 'rgb(255 255 255 / 0.25)' } : { background: 'var(--line)' }}>
+                      {count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="h-10 rounded-full px-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                style={inputStyle}
+                aria-label={t('schedule.date')}
+              />
+              {dateFilter && (
+                <button type="button" onClick={() => setDateFilter('')} className="inline-flex items-center gap-1 text-sm font-semibold hover:opacity-80" style={{ color: 'var(--accent)' }}>
+                  <XCircle size={14} /> {t('schedule.clearFilters')}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-4xl px-6 pb-16 pt-4">
         {loading ? (
-          <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>{t('schedule.loading')}</p>
+          <div className="space-y-3">
+            {[0, 1, 2].map((n) => (
+              <div key={n} className="lp-card flex animate-pulse items-center gap-4" style={{ padding: '1.1rem 1.25rem' }}>
+                <div className="h-16 w-16 rounded-2xl" style={{ background: 'var(--surface-2)' }} />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-1/3 rounded" style={{ background: 'var(--surface-2)' }} />
+                  <div className="h-3 w-1/2 rounded" style={{ background: 'var(--surface-2)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : filteredSessions.length === 0 ? (
-          <div className="flex flex-col items-center text-center py-16 rounded-2xl lp-animate-in" style={{ border: '1px dashed var(--line)' }}>
-            <span className="lp-icon-badge h-10 w-10 mb-3">
-              <CalendarClock size={18} />
-            </span>
-            <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>
+          <div className="lp-card lp-animate-in mx-auto flex max-w-xl flex-col items-center py-14 text-center">
+            <span className="lp-icon-badge mb-4 h-14 w-14"><CalendarClock size={22} /></span>
+            <p className="max-w-sm text-sm" style={{ color: 'var(--ink-soft)' }}>
               {sessions.length === 0 ? t('schedule.empty') : t('schedule.noMatchingSessions')}
             </p>
+            {sessions.length === 0 && (
+              <Link to="/partners" className="lp-btn-primary mt-6 text-sm">{t('schedule.findPartners')}</Link>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
             {filteredSessions.map((s, i) => {
               const isHost = s.host.id === user.id
               const other = isHost ? s.partner : s.host
+              const start = new Date(s.scheduled_time)
+              const tint = TILE_TINT[s.status] || 'var(--accent)'
               return (
-                <div
+                <article
                   key={s.id}
                   role="button"
                   tabIndex={0}
@@ -357,117 +414,122 @@ export default function Schedule() {
                     if (e.key === 'Enter' || e.key === ' ') setDetailsTarget({ session: s, other })
                   }}
                   className={`lp-card lp-card--hover lp-animate-in lp-delay-${Math.min(i + 1, 6)} cursor-pointer`}
+                  style={{ padding: '1.1rem 1.25rem' }}
                 >
-                  <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex items-center gap-3">
-                    <img src={avatarUrl(other.id, 70)} alt="" className="lp-avatar lp-gradient-ring h-11 w-11 object-cover" />
-                    <div>
-                      <p className="font-medium" style={{ color: 'var(--ink)' }}>
+                  <div className="flex flex-wrap items-center gap-4">
+                    {/* Date tile */}
+                    <div
+                      className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl"
+                      style={{ background: `color-mix(in srgb, ${tint} 16%, transparent)`, color: tint }}
+                    >
+                      <span className="text-[11px] font-bold uppercase tracking-wider">{start.toLocaleDateString(locale, { month: 'short' })}</span>
+                      <span className="font-display text-2xl font-extrabold leading-none">{start.getDate()}</span>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <img src={avatarUrl(other.id, 60)} alt="" className="lp-avatar h-7 w-7 shrink-0 object-cover" />
+                        <p className="truncate text-base font-bold" style={{ color: 'var(--ink)' }}>{other.full_name}</p>
+                        <span className={statusTint[s.status]}>{t(`schedule.status.${s.status}`)}</span>
+                      </div>
+                      <p className="mt-1 inline-flex items-center gap-1.5 text-sm" style={{ color: 'var(--ink-soft)' }}>
+                        <Clock size={13} />
                         {s.window_end_time ? (
                           <>
-                            {new Date(s.scheduled_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                            {', '}
-                            {new Date(s.scheduled_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                            {start.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
                             {'–'}
-                            {new Date(s.window_end_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                            {new Date(s.window_end_time).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
                             {' · '}{t('schedule.chooseATime')}
                           </>
                         ) : (
                           <>
-                            {new Date(s.scheduled_time).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                            {start.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
                             {' · '}{t('schedule.minutesShort', { count: s.duration_minutes })}
                           </>
                         )}
                       </p>
-                      <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>
-                        {t('schedule.withPartner', { name: other.full_name })}{' '}
-                        <span className={`ms-1 ${statusTint[s.status]}`}>{t(`schedule.status.${s.status}`)}</span>
-                      </p>
-                      {s.notes && <p className="text-sm mt-1" style={{ color: 'var(--ink-soft)' }}>{s.notes}</p>}
+                      {s.notes && <p className="mt-1 line-clamp-1 text-sm" style={{ color: 'var(--ink-soft)' }}>{s.notes}</p>}
                       {s.status === 'cancelled' && s.cancellation_reason && (
-                        <p className="text-sm mt-1" style={{ color: 'var(--ink-soft)' }}>
+                        <p className="mt-1 text-sm" style={{ color: 'var(--ink-soft)' }}>
                           {t('schedule.cancelledReason', { reason: s.cancellation_reason })}
                         </p>
                       )}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                    {!isHost && s.status === 'pending' && confirmingId !== s.id && (
-                      <>
+
+                    <div className="flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      {!isHost && s.status === 'pending' && confirmingId !== s.id && (
+                        <>
+                          <button
+                            onClick={() => (s.window_end_time ? openConfirm(s) : updateStatus(s.id, 'confirmed'))}
+                            className="rounded-full px-4 py-2 text-sm font-bold hover:opacity-80"
+                            style={{ background: 'color-mix(in srgb, #34d399 18%, transparent)', color: '#34d399' }}
+                          >
+                            {t('schedule.approve')}
+                          </button>
+                          <button
+                            onClick={() => updateStatus(s.id, 'rejected')}
+                            className="rounded-full px-4 py-2 text-sm font-bold hover:opacity-80"
+                            style={{ background: 'color-mix(in srgb, #f87171 16%, transparent)', color: '#f87171' }}
+                          >
+                            {t('schedule.reject')}
+                          </button>
+                        </>
+                      )}
+                      {((isHost && s.status === 'pending') || s.status === 'confirmed') && (
                         <button
-                          onClick={() => (s.window_end_time ? openConfirm(s) : updateStatus(s.id, 'confirmed'))}
-                          className="text-sm px-3 py-1.5 rounded-lg font-medium hover:opacity-80"
-                          style={{ background: 'var(--surface-2)', color: 'var(--accent-2)' }}
+                          onClick={() => setCancelTargetId(s.id)}
+                          className="rounded-full px-4 py-2 text-sm font-bold hover:opacity-80"
+                          style={{ background: 'color-mix(in srgb, #f87171 16%, transparent)', color: '#f87171' }}
                         >
-                          {t('schedule.approve')}
+                          {t('schedule.cancelSession')}
                         </button>
-                        <button
-                          onClick={() => updateStatus(s.id, 'rejected')}
-                          className="text-sm px-3 py-1.5 rounded-lg font-medium hover:opacity-80"
-                          style={{ background: 'var(--surface-2)', color: '#c1443d' }}
-                        >
-                          {t('schedule.reject')}
-                        </button>
-                      </>
-                    )}
-                    {((isHost && s.status === 'pending') || s.status === 'confirmed') && (
-                      <button
-                        onClick={() => setCancelTargetId(s.id)}
-                        className="text-sm px-3 py-1.5 rounded-lg font-medium hover:opacity-80"
-                        style={{ background: 'var(--surface-2)', color: '#c1443d' }}
-                      >
-                        {t('schedule.cancelSession')}
-                      </button>
-                    )}
-                    {s.status === 'confirmed' && (
-                      new Date(s.scheduled_time).getTime() - JOIN_WINDOW_MS <= now ? (
-                        <Link
-                          to={`/call/${s.room_id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="lp-btn-primary text-sm px-3 py-1.5"
-                        >
-                          <Video size={14} /> {t('schedule.joinCall')}
+                      )}
+                      {s.status === 'confirmed' && (
+                        start.getTime() - JOIN_WINDOW_MS <= now ? (
+                          <Link to={`/call/${s.room_id}`} target="_blank" rel="noopener noreferrer" className="lp-btn-primary text-sm" style={{ padding: '0.55rem 1.1rem' }}>
+                            <Video size={14} /> {t('schedule.joinCall')}
+                          </Link>
+                        ) : (
+                          <span
+                            className="lp-btn-primary cursor-not-allowed select-none text-sm opacity-40"
+                            style={{ padding: '0.55rem 1.1rem' }}
+                            title={t('schedule.joinCallLocked')}
+                          >
+                            <Video size={14} /> {t('schedule.joinCall')}
+                          </span>
+                        )
+                      )}
+                      {['completed', 'not_completed'].includes(s.status) && (
+                        <Link to={`/sessions/${s.id}/summary`} onClick={(e) => e.stopPropagation()} className="lp-btn-secondary text-sm" style={{ padding: '0.5rem 1rem' }}>
+                          <FileText size={14} /> {t('summary.link')}
                         </Link>
-                      ) : (
-                        <span
-                          className="lp-btn-primary text-sm px-3 py-1.5 opacity-40 cursor-not-allowed select-none"
-                          title={t('schedule.joinCallLocked')}
-                        >
-                          <Video size={14} /> {t('schedule.joinCall')}
-                        </span>
-                      )
-                    )}
-                    {['completed', 'not_completed'].includes(s.status) && (
-                      <Link to={`/sessions/${s.id}/summary`} onClick={(e) => e.stopPropagation()} className="lp-btn-secondary text-sm px-3 py-1.5">
-                        <FileText size={14} /> {t('summary.link')}
-                      </Link>
-                    )}
-                    {['completed', 'not_completed'].includes(s.status) && (
-                      s.my_rating ? (
-                        <span className="lp-tag inline-flex items-center gap-1">
-                          <Star size={12} fill="currentColor" /> {t('schedule.rated', { score: s.my_rating.score })}
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => setRateTarget({ id: s.id, name: other.full_name })}
-                          className="lp-btn-primary text-sm px-3 py-1.5"
-                        >
-                          <Star size={14} /> {t('schedule.rateSession')}
-                        </button>
-                      )
-                    )}
-                  </div>
+                      )}
+                      {['completed', 'not_completed'].includes(s.status) && (
+                        s.my_rating ? (
+                          <span className="lp-tag inline-flex items-center gap-1" style={{ color: '#f5b301' }}>
+                            <Star size={12} fill="currentColor" /> {t('schedule.rated', { score: s.my_rating.score })}
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => setRateTarget({ id: s.id, name: other.full_name })}
+                            className="lp-btn-primary text-sm"
+                            style={{ padding: '0.55rem 1.1rem' }}
+                          >
+                            <Star size={14} /> {t('schedule.rateSession')}
+                          </button>
+                        )
+                      )}
+                    </div>
                   </div>
 
                   {confirmingId === s.id && (
                     <div
-                      className="mt-3 pt-3 flex flex-wrap items-end gap-3 lp-animate-in-fade"
+                      className="lp-animate-in-fade mt-4 flex flex-wrap items-end gap-3 pt-4"
                       style={{ borderTop: '1px solid var(--line)' }}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--ink-soft)' }}>
+                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--ink-soft)' }}>
                           {t('schedule.chooseATime')}
                         </label>
                         <input
@@ -480,23 +542,16 @@ export default function Schedule() {
                           style={inputStyle}
                         />
                       </div>
-                      <button
-                        onClick={() => confirmWithChosenTime(s)}
-                        className="lp-btn-primary text-sm px-3.5 py-2"
-                      >
+                      <button onClick={() => confirmWithChosenTime(s)} className="lp-btn-primary text-sm" style={{ padding: '0.6rem 1.2rem' }}>
                         {t('schedule.approve')}
                       </button>
-                      <button
-                        onClick={() => setConfirmingId(null)}
-                        className="text-sm px-3 py-2 rounded-lg font-medium hover:opacity-80"
-                        style={{ color: 'var(--ink-soft)' }}
-                      >
+                      <button onClick={() => setConfirmingId(null)} className="rounded-full px-3 py-2 text-sm font-medium hover:opacity-80" style={{ color: 'var(--ink-soft)' }}>
                         {t('schedule.cancelDismiss')}
                       </button>
-                      {confirmError && <p className="text-sm w-full" style={{ color: '#c1443d' }}>{confirmError}</p>}
+                      {confirmError && <p className="w-full text-sm" style={{ color: '#f87171' }}>{confirmError}</p>}
                     </div>
                   )}
-                </div>
+                </article>
               )
             })}
           </div>

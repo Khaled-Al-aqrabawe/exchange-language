@@ -800,6 +800,103 @@ function CallChat({ messages, onSend, myId, t }) {
   )
 }
 
+// "Share a lesson": lessons grouped by language and level, with the user's progress and
+// their next lesson marked, so it is clear which course each file belongs to.
+function MaterialPicker({ materials, loading, defaultLanguage, onPick, onClose, t }) {
+  const languages = [...new Set(materials.map((m) => m.language))]
+  const [language, setLanguage] = useState(null)
+  const active = language || (languages.includes(defaultLanguage) ? defaultLanguage : languages[0])
+  const inLanguage = materials.filter((m) => m.language === active)
+  const levels = [...new Set(inLanguage.map((m) => m.level))]
+  // the lesson to do next: the first one in this language that is not completed yet
+  const nextId = inLanguage.find((m) => m.my_status !== 'complete')?.id
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-4" onClick={onClose}>
+      <div
+        className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 pt-5">
+          <div>
+            <p className="text-lg font-bold text-white">{t('materials.pickMaterial')}</p>
+            <p className="text-xs text-slate-400">{t('materials.pickHint')}</p>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-white/10 hover:text-white">
+            <X size={16} />
+          </button>
+        </div>
+
+        {loading ? (
+          <p className="px-6 py-8 text-sm text-slate-400">{t('materials.loading')}</p>
+        ) : materials.length === 0 ? (
+          <p className="px-6 py-8 text-sm text-slate-400">{t('materials.empty')}</p>
+        ) : (
+          <>
+            {languages.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto px-6 pt-4">
+                {languages.map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => setLanguage(l)}
+                    className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${l === active ? 'bg-[var(--accent)] text-[var(--accent-ink)]' : 'bg-white/10 text-slate-300 hover:bg-white/15'}`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex-1 space-y-5 overflow-y-auto px-6 pb-6 pt-4">
+              {levels.map((level) => {
+                const lessons = inLanguage.filter((m) => m.level === level)
+                const done = lessons.filter((m) => m.my_status === 'complete').length
+                return (
+                  <section key={level}>
+                    <div className="mb-2 flex items-center justify-between">
+                      <h3 className="flex items-center gap-2 text-sm font-bold text-white">
+                        <span className="rounded-full bg-[var(--gold)] px-2.5 py-0.5 text-xs font-extrabold text-white">{level}</span>
+                        {active}
+                      </h3>
+                      <span className="text-xs text-slate-400">{t('materials.progressCount', { done, total: lessons.length })}</span>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      {lessons.map((m) => {
+                        const isNext = m.id === nextId
+                        return (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => onPick(m)}
+                            className={`flex items-center gap-3 rounded-2xl px-3.5 py-3 text-start transition-colors ${isNext ? 'bg-[color-mix(in_srgb,var(--accent)_22%,transparent)] ring-1 ring-[var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_30%,transparent)]' : 'bg-white/5 hover:bg-white/10'}`}
+                          >
+                            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${m.my_status === 'complete' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-200'}`}>
+                              {m.my_status === 'complete' ? <Check size={16} /> : m.order || '•'}
+                            </span>
+                            <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-100">{m.title}</span>
+                            {isNext ? (
+                              <span className="shrink-0 rounded-full bg-[var(--accent)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--accent-ink)]">{t('call.nextLesson')}</span>
+                            ) : m.my_status === 'complete' ? (
+                              <span className="shrink-0 text-[11px] font-semibold text-emerald-300">{t('materials.completed')}</span>
+                            ) : m.my_status === 'partial' ? (
+                              <span className="shrink-0 text-[11px] font-semibold text-amber-300">{t('materials.inProgress', { slide: m.my_slide })}</span>
+                            ) : null}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </section>
+                )
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Shown when leaving a session (completed or not) so each person can rate the other.
 function CallRatingModal({ partnerName, onSubmit, onReport, onSummary, t }) {
   const [score, setScore] = useState(0)
@@ -2031,40 +2128,14 @@ export default function Call() {
       </div>
 
       {showMaterialPicker && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-          onClick={() => setShowMaterialPicker(false)}
-        >
-          <div
-            className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold text-white">{t('materials.pickMaterial')}</p>
-              <button onClick={() => setShowMaterialPicker(false)} className="text-slate-400 hover:text-white">
-                <X size={16} />
-              </button>
-            </div>
-            {materialsLoading ? (
-              <p className="text-sm text-slate-400">{t('materials.loading')}</p>
-            ) : materials.length === 0 ? (
-              <p className="text-sm text-slate-400">{t('materials.empty')}</p>
-            ) : (
-              <div className="max-h-72 overflow-y-auto flex flex-col gap-1.5">
-                {materials.map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => shareMaterial(m)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-slate-200 hover:bg-white/10 transition-colors"
-                  >
-                    <FileText size={15} className="shrink-0 text-slate-400" />
-                    <span className="truncate">{m.title}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <MaterialPicker
+          materials={materials}
+          loading={materialsLoading}
+          defaultLanguage={user?.profile?.learning_language}
+          onPick={shareMaterial}
+          onClose={() => setShowMaterialPicker(false)}
+          t={t}
+        />
       )}
 
       {countdownValue != null && (

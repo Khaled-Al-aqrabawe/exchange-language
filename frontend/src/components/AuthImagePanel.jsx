@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import logoIcon from '../assets/logo-icon.png'
+import { BrandMark } from './BrandLogo'
 import { avatarUrl } from '../utils/images'
 
 const chipSeeds = ['auth-1', 'auth-2', 'auth-3']
@@ -61,9 +61,9 @@ export default function AuthImagePanel({ quote }) {
 
       <div className="relative flex items-center gap-2 text-white">
         <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-          <img src={logoIcon} alt="" className="h-6 w-6 object-contain" />
+          <BrandMark className="h-7 w-7" />
         </span>
-        <span className="font-bold tracking-tight">Language Partner</span>
+        <span className="font-extrabold tracking-tight">Lingua Hub</span>
       </div>
 
       <div className="relative">

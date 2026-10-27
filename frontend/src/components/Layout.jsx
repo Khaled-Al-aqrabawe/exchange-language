@@ -13,7 +13,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import logoIcon from '../assets/logo-icon.png'
+import { BrandMark, BrandWordmark } from './BrandLogo'
 import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
 import LanguageSwitcher from './LanguageSwitcher'
@@ -92,10 +92,8 @@ function SocialIcon({ name, href, label }) {
 function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-      <img src={logoIcon} alt="" className="lp-logo h-9 w-9 object-contain" />
-      <span className="font-display text-[19px] font-semibold tracking-tight" style={{ color: 'var(--ink)' }}>
-        Language Partner
-      </span>
+      <BrandMark className="h-10 w-10 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105" />
+      <BrandWordmark className="text-[21px]" />
     </Link>
   )
 }
@@ -192,8 +190,8 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
       <nav
-        className="sticky top-0 z-50"
-        style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)', boxShadow: '0 1px 0 color-mix(in srgb, var(--gold) 22%, transparent)' }}
+        className="sticky top-0 z-50 backdrop-blur-md"
+        style={{ background: 'color-mix(in srgb, var(--surface) 88%, transparent)', borderBottom: '1px solid var(--line)', boxShadow: '0 8px 24px -20px rgb(20 20 60 / 0.35)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Logo />
@@ -205,10 +203,10 @@ export default function Layout() {
                     <NavLink
                       key={to}
                       to={to}
-                      className="relative flex items-center gap-1.5 px-3 h-16 text-[13.5px] font-medium transition-colors shrink-0"
+                      className="relative flex items-center gap-1.5 px-3.5 h-10 rounded-full text-[13.5px] font-semibold transition-colors shrink-0 hover:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]"
                       style={({ isActive }) => ({
-                        color: isActive ? 'var(--ink)' : 'var(--ink-soft)',
-                        boxShadow: isActive ? 'inset 0 -2px 0 var(--gold)' : 'none',
+                        color: isActive ? 'var(--accent)' : 'var(--ink-soft)',
+                        background: isActive ? 'color-mix(in srgb, var(--accent) 13%, transparent)' : undefined,
                       })}
                     >
                       <Icon size={15} strokeWidth={1.9} />
@@ -268,14 +266,12 @@ export default function Layout() {
       </main>
 
       {!hideFooter && (
-        <footer className="lp-footer relative" style={{ borderTop: '3px solid var(--gold)' }}>
+        <footer className="lp-footer relative" style={{ borderTop: '4px solid var(--gold)' }}>
           <div className="max-w-6xl mx-auto px-6 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2.5 mb-3">
-                <img src={logoIcon} alt="" className="h-8 w-8 object-contain" style={{ filter: "brightness(0) invert(1)" }} />
-                <span className="font-display text-lg font-semibold tracking-tight" style={{ color: 'var(--ink)' }}>
-                  {t('footer.tagline')}
-                </span>
+                <BrandMark className="h-9 w-9" />
+                <BrandWordmark className="text-xl" />
               </div>
               <p className="text-sm max-w-xs leading-relaxed mb-5" style={{ color: 'var(--ink-soft)' }}>
                 {t('landing.heroSubtitle')}

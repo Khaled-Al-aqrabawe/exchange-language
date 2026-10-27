@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Language Partner",
+    "appName": "Lingua Hub",
     "loading": "Yükleniyor...",
     "loadingDashboard": "Ana sayfan yükleniyor...",
     "seeAll": "Tümünü gör",
@@ -25,8 +25,8 @@
     "logOut": "Çıkış yap"
   },
   "footer": {
-    "tagline": "Language Partner",
-    "copyright": "© {{year}} Language Partner. All rights reserved.",
+    "tagline": "Lingua Hub",
+    "copyright": "© {{year}} Lingua Hub. All rights reserved.",
     "explore": "Keşfet",
     "account": "Hesap",
     "getStarted": "Başla"
@@ -44,7 +44,7 @@
     "badge": "Erken erişimde ücretsiz",
     "heroTitleLine1": "Bir dili gerçekten",
     "heroTitleLine2": "konuşarak öğren",
-    "heroSubtitle": "Language Partner, gerçek konuşma pratiği için seni ana dili konuşanlarla ve diğer öğrencilerle buluşturur; temellerini oluşturman için yapılandırılmış video kurslar da sunar.",
+    "heroSubtitle": "Lingua Hub, gerçek konuşma pratiği için seni ana dili konuşanlarla ve diğer öğrencilerle buluşturur; temellerini oluşturman için yapılandırılmış video kurslar da sunar.",
     "findAPartner": "Partner bul",
     "getStartedFree": "Ücretsiz başla",
     "learnMore": "Daha fazla bilgi",
@@ -60,7 +60,7 @@
     },
     "realConversations": "Gerçek sohbetler",
     "practiceHeadline": "Kartlarla değil, insanlarla pratik yap",
-    "practiceBody": "Sadece kelime çalıştıran uygulamalar seni ancak belirli bir noktaya kadar götürür. Language Partner, daha ilk seansından itibaren seni gerçek biriyle konuşturur — planlamak için mesajlaşma, pratik için video ve boşlukları doldurmak için kurslar.",
+    "practiceBody": "Sadece kelime çalıştıran uygulamalar seni ancak belirli bir noktaya kadar götürür. Lingua Hub, daha ilk seansından itibaren seni gerçek biriyle konuşturur — planlamak için mesajlaşma, pratik için video ve boşlukları doldurmak için kurslar.",
     "practiceList": {
       "matched": "Dil çifti, seviye ve saat dilimine göre eşleştirme",
       "builtin": "Yerleşik sohbet ve video — kurulacak hiçbir şey yok",
@@ -83,14 +83,14 @@
       "freeBody": "Erken erişim süresince tüm özellikler açık — kredi kartı yok, ücretli duvar yok."
     },
     "ctaTitle": "Ücretsiz kullanım, gizli koşul yok",
-    "ctaBody": "Language Partner, erken erişim aşamamız boyunca ücretsizdir — tüm özellikler ilk günden itibaren açıktır.",
+    "ctaBody": "Lingua Hub, erken erişim aşamamız boyunca ücretsizdir — tüm özellikler ilk günden itibaren açıktır.",
     "ctaButton": "Ücretsiz hesabını oluştur"
   },
   "about": {
     "eyebrow": "Hakkımızda",
     "titlePrefix": "Akıcılık",
     "titleHighlight": "sohbetten doğar",
-    "intro": "Language Partner var, çünkü bir dili öğrenmenin en hızlı yolu onu başka biriyle gerçekten konuşmaktır. Öğrencileri ana dili konuşanlarla değişim, akranlarla pratik ve kendi hızında yapılandırılmış kurslar için tek bir yerde bir araya getiriyoruz.",
+    "intro": "Lingua Hub var, çünkü bir dili öğrenmenin en hızlı yolu onu başka biriyle gerçekten konuşmaktır. Öğrencileri ana dili konuşanlarla değişim, akranlarla pratik ve kendi hızında yapılandırılmış kurslar için tek bir yerde bir araya getiriyoruz.",
     "missionEyebrow": "Misyonumuz",
     "missionHeadline": "Gerçek pratiği herkes için, her yerde erişilebilir kılmak",
     "missionBody": "Öğrencileri dil çifti, seviye ve saat dilimine göre eşleştirir, sonra araya girmeyiz — yerleşik video ve sohbet sayesinde kurulacak ekstra bir şey olmaz, seanslar arasında biraz daha yapı istediğinde kurslar devreye girer.",
@@ -110,7 +110,7 @@
     "title": "Sık Sorulan Sorular",
     "items": {
       "free": {
-        "q": "Language Partner ücretsiz mi?",
+        "q": "Lingua Hub ücretsiz mi?",
         "a": "Evet. Erken erişim aşamamız boyunca değişim eşleştirmesi, akran pratiği, video görüşmeleri ve kurslar dahil tüm özellikler tamamen ücretsizdir."
       },
       "matching": {
@@ -239,7 +239,7 @@
       "'Kahve sipariş etmek' ya da '2 dakikalık bir hikaye anlatmak' gibi küçük, somut bir haftalık hedef koy — belirsiz hedefler kolayca ertelenir."
     ],
     "howItWorksTitle": "Nasıl çalışır",
-    "whyTitle": "Öğrenciler neden Language Partner'ı seçiyor",
+    "whyTitle": "Öğrenciler neden Lingua Hub'ı seçiyor",
     "stats": {
       "completed": "Tamamlanan oturumlar",
       "upcoming": "Yaklaşan oturumlar",
@@ -526,7 +526,7 @@
     "appearance": "Görünüm",
     "appearanceBody": "Açık ve koyu mod arasında geçiş yap.",
     "language": "Dil",
-    "languageBody": "Language Partner genelinde kullanılan dili seç.",
+    "languageBody": "Lingua Hub genelinde kullanılan dili seç.",
     "logOut": "Çıkış yap"
   },
   "call": {

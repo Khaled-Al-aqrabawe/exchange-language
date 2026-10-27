@@ -2,10 +2,6 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 
 const ThemeContext = createContext(null)
 
-function systemPrefersDark() {
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches
-}
-
 function getStoredTheme() {
   const stored = localStorage.getItem('lp_theme')
   return stored === 'light' || stored === 'dark' ? stored : null
@@ -20,7 +16,7 @@ function applyTheme(theme) {
 }
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState(() => getStoredTheme() || (systemPrefersDark() ? 'dark' : 'light'))
+  const [theme, setThemeState] = useState(() => getStoredTheme() || 'light')
 
   useEffect(() => {
     applyTheme(theme)

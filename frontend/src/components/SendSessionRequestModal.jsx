@@ -1,18 +1,19 @@
-import { CalendarPlus, CheckCircle2, X } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Globe2, Info, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
 import { LANGUAGES } from '../constants'
-import { DAYS, isSlotExpiredToday, isWithinAvailability } from '../utils/availability'
+import { DAYS, isSlotExpiredToday, isWithinAvailability, timeStrPlusMinutes } from '../utils/availability'
+import ModalShell, { Chip, ModalField, localDateString, modalInputClass, modalInputStyle } from './ModalShell'
 
-const todayStr = () => new Date().toISOString().slice(0, 10)
 const nowTimeStr = () => new Date().toTimeString().slice(0, 5)
+const DURATIONS = [30, 40, 60]
 
 export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSent }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [partners, setPartners] = useState([])
   const [partnersLoading, setPartnersLoading] = useState(true)
-  const [partnerFilters, setPartnerFilters] = useState({ language: '', level: '' })
+  const [partnerFilters, setPartnerFilters] = useState({ language: '' })
   const [lockedPartnerDetail, setLockedPartnerDetail] = useState(null)
   const [form, setForm] = useState({
     partner_id: lockedPartnerId || '',
@@ -27,12 +28,13 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
   const [sent, setSent] = useState(false)
 
   const lockedFromPartner = Boolean(lockedPartnerId)
+  const today = localDateString(0)
 
   useEffect(() => {
     if (!lockedPartnerId) return
     client.get(`/matching/partners/${lockedPartnerId}/`)
       .then(({ data }) => {
-        setPartnerFilters({ language: data.learning_language, level: data.proficiency_level })
+        setPartnerFilters({ language: data.learning_language })
         setLockedPartnerDetail(data)
       })
       .catch(() => {})
@@ -42,7 +44,6 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
     setPartnersLoading(true)
     const params = {}
     if (partnerFilters.language) params.language = partnerFilters.language
-    if (partnerFilters.level) params.level = partnerFilters.level
     client.get('/matching/partners/', { params })
       .then(({ data }) => {
         setPartners(data)
@@ -53,9 +54,13 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
       .finally(() => setPartnersLoading(false))
   }, [partnerFilters])
 
-  const inputClass = 'w-full rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent'
-  const inputStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
-  const labelClass = 'block text-sm font-medium mb-1.5'
+  // Picking a start time or a length fills in the end time, which can still be changed by hand.
+  const setStart = (start_time) => setForm((f) => ({ ...f, start_time, end_time: start_time ? timeStrPlusMinutes(start_time, f.duration_minutes) : '' }))
+  const setDuration = (minutes) => setForm((f) => ({
+    ...f,
+    duration_minutes: minutes,
+    end_time: f.start_time ? timeStrPlusMinutes(f.start_time, minutes) : f.end_time,
+  }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -83,14 +88,13 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
     }
     setSubmitting(true)
     try {
-      const payload = {
+      await client.post('/sessions/', {
         partner_id: form.partner_id,
         duration_minutes: form.duration_minutes,
         notes: form.notes,
         scheduled_time: startDateTime.toISOString(),
-      }
-      payload.window_end_time = endDateTime.toISOString()
-      await client.post('/sessions/', payload)
+        window_end_time: endDateTime.toISOString(),
+      })
       setSent(true)
       onSent?.()
     } catch (err) {
@@ -101,137 +105,154 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
     }
   }
 
+  const partnerSlots = (lockedPartnerDetail?.availability || []).filter((slot) => !isSlotExpiredToday(slot))
+  const dayChips = [0, 1, 2].map((offset) => {
+    const value = localDateString(offset)
+    const label = offset === 0 ? t('modal.today') : offset === 1 ? t('modal.tomorrow')
+      : new Date(`${value}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })
+    return { value, label }
+  })
+
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-8 overflow-y-auto" style={{ background: 'color-mix(in srgb, black 45%, transparent)' }}>
-      <div className="lp-surface w-full max-w-md p-6 lp-animate-in-scale my-auto" style={{ boxShadow: 'var(--shadow-card-hover)' }}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <span className="lp-icon-badge h-9 w-9">
-              <CalendarPlus size={16} />
-            </span>
-            <h2 className="font-display text-lg font-bold tracking-tight" style={{ color: 'var(--ink)' }}>{t('schedule.sendRequestTitle')}</h2>
-          </div>
-          <button type="button" onClick={onClose} className="hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }} aria-label={t('common.close')}>
-            <X size={18} />
+    <ModalShell
+      icon={CalendarPlus}
+      title={t('schedule.sendRequestTitle')}
+      subtitle={sent ? undefined : t('schedule.requestSubtitle')}
+      onClose={onClose}
+      footer={sent ? null : (
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={onClose} className="lp-btn-secondary shrink-0">{t('common.cancel')}</button>
+          <button type="submit" form="session-request-form" disabled={submitting} className="lp-btn-primary flex-1 disabled:opacity-50">
+            {submitting ? t('schedule.submitting') : t('schedule.submit')}
           </button>
         </div>
-
-        {sent ? (
-          <div className="py-4 text-center lp-animate-in">
-            <CheckCircle2 size={28} className="mx-auto mb-2" style={{ color: 'var(--accent-2)' }} />
-            <p className="text-sm font-medium mb-4" style={{ color: 'var(--ink)' }}>{t('schedule.requestSent')}</p>
-            <button type="button" onClick={onClose} className="lp-btn-primary">{t('common.done')}</button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('schedule.language')} *</label>
-                <select
-                  required
-                  disabled={lockedFromPartner}
-                  value={partnerFilters.language}
-                  onChange={(e) => setPartnerFilters({ ...partnerFilters, language: e.target.value })}
-                  className={`${inputClass} ${lockedFromPartner ? 'cursor-not-allowed opacity-60' : ''}`}
-                  style={inputStyle}
-                >
-                  <option value="" disabled>{t('schedule.selectLanguage')}</option>
-                  {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('schedule.partner')} *</label>
+      )}
+    >
+      {sent ? (
+        <div className="lp-animate-in py-8 text-center">
+          <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ background: 'color-mix(in srgb, #34d399 18%, transparent)', color: '#34d399' }}>
+            <CheckCircle2 size={34} />
+          </span>
+          <p className="mb-6 font-display text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('schedule.requestSent')}</p>
+          <button type="button" onClick={onClose} className="lp-btn-primary">{t('common.done')}</button>
+        </div>
+      ) : (
+        <form id="session-request-form" onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ModalField label={`${t('schedule.language')} *`} icon={Globe2}>
+              <select
+                required
+                disabled={lockedFromPartner}
+                value={partnerFilters.language}
+                onChange={(e) => setPartnerFilters({ ...partnerFilters, language: e.target.value })}
+                className={`${modalInputClass} ps-11 ${lockedFromPartner ? 'cursor-not-allowed opacity-60' : ''}`}
+                style={modalInputStyle}
+              >
+                <option value="" disabled>{t('schedule.selectLanguage')}</option>
+                {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </ModalField>
+            <ModalField
+              label={`${t('schedule.partner')} *`}
+              icon={User}
+              hint={!partnersLoading && partners.length === 0 ? t('schedule.noPartnersForFilters') : undefined}
+            >
               <select
                 required
                 value={form.partner_id}
                 onChange={(e) => setForm({ ...form, partner_id: e.target.value })}
-                className={`${inputClass} ${(lockedFromPartner || partnersLoading) ? 'cursor-not-allowed opacity-60' : ''}`}
-                style={inputStyle}
+                className={`${modalInputClass} ps-11 ${(lockedFromPartner || partnersLoading) ? 'cursor-not-allowed opacity-60' : ''}`}
+                style={modalInputStyle}
                 disabled={partnersLoading || lockedFromPartner}
               >
                 <option value="" disabled>{partnersLoading ? t('partners.loading') : t('schedule.selectAPartner')}</option>
-                {partners.map((p) => (
-                  <option key={p.user_id} value={p.user_id}>{p.full_name}</option>
-                ))}
+                {partners.map((p) => <option key={p.user_id} value={p.user_id}>{p.full_name}</option>)}
               </select>
-              {!partnersLoading && partners.length === 0 && (
-                <p className="text-xs mt-1.5" style={{ color: 'var(--ink-soft)' }}>{t('schedule.noPartnersForFilters')}</p>
-              )}
-            </div>
+            </ModalField>
+          </div>
 
-            <div>
-              <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('schedule.date')} *</label>
+          <div>
+            <ModalField label={`${t('schedule.date')} *`} icon={CalendarCheck}>
               <input
                 required
                 type="date"
-                min={todayStr()}
+                min={today}
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className={inputClass}
-                style={inputStyle}
+                className={`${modalInputClass} ps-11`}
+                style={modalInputStyle}
               />
+            </ModalField>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {dayChips.map((c) => (
+                <Chip key={c.value} active={form.date === c.value} onClick={() => setForm({ ...form, date: c.value })}>{c.label}</Chip>
+              ))}
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('schedule.fromTime')} *</label>
+          <div>
+            <div className="grid grid-cols-2 gap-4">
+              <ModalField label={`${t('schedule.fromTime')} *`} icon={Clock}>
                 <input
                   required
                   type="time"
-                  min={form.date === todayStr() ? nowTimeStr() : undefined}
+                  min={form.date === today ? nowTimeStr() : undefined}
                   value={form.start_time}
-                  onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-                  className={inputClass}
-                  style={inputStyle}
+                  onChange={(e) => setStart(e.target.value)}
+                  className={`${modalInputClass} ps-11`}
+                  style={modalInputStyle}
                 />
-              </div>
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('schedule.toTime')} *</label>
+              </ModalField>
+              <ModalField label={`${t('schedule.toTime')} *`} icon={Clock}>
                 <input
                   required
                   type="time"
-                  min={form.date === todayStr() ? form.start_time || nowTimeStr() : undefined}
+                  min={form.date === today ? form.start_time || nowTimeStr() : undefined}
                   value={form.end_time}
                   onChange={(e) => setForm({ ...form, end_time: e.target.value })}
-                  className={inputClass}
-                  style={inputStyle}
+                  className={`${modalInputClass} ps-11`}
+                  style={modalInputStyle}
                 />
-              </div>
+              </ModalField>
             </div>
-            {lockedPartnerDetail?.availability?.filter((slot) => !isSlotExpiredToday(slot)).length > 0 && (
-              <p className="text-xs -mt-2" style={{ color: 'var(--ink-soft)' }}>
-                {t('schedule.partnerAvailability')}{' '}
-                {lockedPartnerDetail.availability.filter((slot) => !isSlotExpiredToday(slot)).map((slot, i) => (
-                  <span key={slot.id}>
-                    {i > 0 && ', '}
-                    {t(`profile.days.${DAYS.find((d) => d.value === slot.day_of_week)?.key}`)}
-                    {' '}{slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>{t('modal.length')}</span>
+              {DURATIONS.map((m) => (
+                <Chip key={m} active={form.duration_minutes === m} onClick={() => setDuration(m)}>{t('schedule.minutesShort', { count: m })}</Chip>
+              ))}
+            </div>
+          </div>
+
+          {partnerSlots.length > 0 && (
+            <div className="rounded-2xl p-4" style={{ background: 'color-mix(in srgb, var(--accent) 10%, var(--surface))', border: '1px solid color-mix(in srgb, var(--accent) 25%, var(--line))' }}>
+              <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
+                <Info size={14} /> {t('schedule.partnerAvailability')} · {lockedPartnerDetail.timezone}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {partnerSlots.map((slot) => (
+                  <span key={slot.id} className="lp-tag lp-tag--accent">
+                    {t(`profile.days.${DAYS.find((d) => d.value === slot.day_of_week)?.key}`)} {slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
                   </span>
                 ))}
-                {' '}({lockedPartnerDetail.timezone})
-              </p>
-            )}
-
-            <div>
-              <label className={labelClass} style={{ color: 'var(--ink)' }}>{t('schedule.notes')}</label>
-              <textarea
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                rows={2}
-                className={inputClass}
-                style={inputStyle}
-              />
+              </div>
             </div>
+          )}
 
-            {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
-            <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50">
-              {submitting ? t('schedule.submitting') : t('schedule.submit')}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
+          <ModalField label={t('schedule.notes')}>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              rows={2}
+              className="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              style={modalInputStyle}
+            />
+          </ModalField>
+
+          {error && (
+            <p className="rounded-2xl px-4 py-3 text-sm font-medium" style={{ background: 'color-mix(in srgb, #f87171 14%, transparent)', color: '#f87171' }}>{error}</p>
+          )}
+        </form>
+      )}
+    </ModalShell>
   )
 }

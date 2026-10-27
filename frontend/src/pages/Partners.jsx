@@ -1,8 +1,9 @@
-import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Info, Phone, Globe2, MapPin, MessageCircle, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
+import { ArrowRight, CalendarCheck, CalendarPlus, CheckCircle2, Clock, GraduationCap, Globe2, Info, MapPin, MessageCircle, Phone, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import client from '../api/client'
+import ModalShell, { Chip, ModalField, Switch, localDateString, modalInputClass, modalInputStyle } from '../components/ModalShell'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -40,10 +41,6 @@ function AddAvailabilityModal({ onClose, onSaved }) {
   const [mySlots, setMySlots] = useState([])
   const [slotsLoading, setSlotsLoading] = useState(true)
 
-  const fieldClass = 'w-full rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent'
-  const fieldStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
-  const labelClass = 'block text-xs font-semibold uppercase tracking-wide mb-1.5'
-
   const loadSlots = () => client.get('/auth/me/availability/').then(({ data }) => setMySlots(data))
 
   useEffect(() => {
@@ -56,6 +53,15 @@ function AddAvailabilityModal({ onClose, onSaved }) {
       : new Date(`${s.specific_date}T00:00:00`)
     return date.toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric' })
   }
+
+  // The length chips set the end time from the start time
+  const lengthOf = () => {
+    const [sh, sm] = slot.start_time.split(':').map(Number)
+    const [eh, em] = slot.end_time.split(':').map(Number)
+    return (eh * 60 + em) - (sh * 60 + sm)
+  }
+  const setLength = (minutes) => setSlot((s) => ({ ...s, end_time: timeStrPlusMinutes(s.start_time, minutes) }))
+  const setStart = (start_time) => setSlot((s) => ({ ...s, start_time, end_time: timeStrPlusMinutes(start_time, Math.max(lengthOf(), 30) || 40) }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -99,267 +105,287 @@ function AddAvailabilityModal({ onClose, onSaved }) {
     onSaved?.()
   }
 
+  const dayChips = [0, 1, 2].map((offset) => {
+    const value = localDateString(offset)
+    const label = offset === 0 ? t('modal.today') : offset === 1 ? t('modal.tomorrow')
+      : new Date(`${value}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })
+    return { value, label }
+  })
+
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-8 overflow-y-auto" style={{ background: 'color-mix(in srgb, black 45%, transparent)' }}>
-      <div className="lp-surface w-full max-w-sm p-6 lp-animate-in-scale my-auto" style={{ boxShadow: 'var(--shadow-card-hover)' }}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <span className="lp-icon-badge h-9 w-9">
-              <CalendarPlus size={16} />
-            </span>
-            <h2 className="font-display text-lg font-bold tracking-tight" style={{ color: 'var(--ink)' }}>{t('partners.addAvailableTime')}</h2>
-          </div>
-          <button type="button" onClick={onClose} className="hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }} aria-label={t('common.close')}>
-            <X size={18} />
-          </button>
-        </div>
-
-        {!slotsLoading && mySlots.length > 0 && (
-          <div className="mb-5">
-            <p className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.myAvailableTimes')}</p>
-            <ul className="space-y-1.5">
-              {mySlots.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex items-center justify-between px-3 py-2 rounded-xl text-sm"
-                  style={{ background: 'var(--surface-2)', color: 'var(--ink)' }}
+    <ModalShell
+      icon={CalendarPlus}
+      title={t('partners.addAvailableTime')}
+      subtitle={saved ? undefined : t('partners.addAvailableTimeSubtitle')}
+      onClose={onClose}
+      footer={saved ? null : (
+        <button type="submit" form="availability-form" disabled={saving} className="lp-btn-primary w-full disabled:opacity-50">
+          {saving ? t('profile.saving') : t('partners.addAvailableTime')}
+        </button>
+      )}
+    >
+      {!slotsLoading && mySlots.length > 0 && (
+        <div className="mb-5">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.myAvailableTimes')}</p>
+          <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto">
+            {mySlots.map((s) => (
+              <span
+                key={s.id}
+                className="inline-flex items-center gap-2 rounded-full py-1.5 ps-3.5 pe-1.5 text-xs font-semibold"
+                style={{ background: 'color-mix(in srgb, var(--accent) 14%, var(--surface))', color: 'var(--ink)' }}
+              >
+                <span style={{ color: 'var(--accent)' }}>{formatSlotDate(s)}</span>
+                {s.start_time.slice(0, 5)}–{s.end_time.slice(0, 5)}
+                {!s.is_recurring && <span style={{ color: 'var(--ink-soft)' }}>· {t('partners.oneTime')}</span>}
+                <button
+                  type="button"
+                  onClick={() => handleDelete(s.id)}
+                  className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-[color-mix(in_srgb,#f87171_22%,transparent)]"
+                  style={{ color: '#f87171' }}
+                  aria-label={t('profile.removeSlot')}
                 >
-                  <span className="flex items-center gap-2">
-                    <span className="lp-tag lp-tag--accent2">{formatSlotDate(s)}</span>
-                    {s.start_time.slice(0, 5)}–{s.end_time.slice(0, 5)}
-                    {!s.is_recurring && (
-                      <span className="text-xs" style={{ color: 'var(--ink-soft)' }}>{t('partners.oneTime')}</span>
-                    )}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(s.id)}
-                    className="hover:opacity-70 transition-opacity"
-                    style={{ color: '#c1443d' }}
-                    aria-label={t('profile.removeSlot')}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </li>
-              ))}
-            </ul>
+                  <Trash2 size={13} />
+                </button>
+              </span>
+            ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {saved ? (
-          <div className="py-4 text-center lp-animate-in">
-            <CheckCircle2 size={28} className="mx-auto mb-2" style={{ color: 'var(--accent-2)' }} />
-            <p className="text-sm font-medium mb-4" style={{ color: 'var(--ink)' }}>{t('partners.availabilityAdded')}</p>
-            <div className="flex items-center justify-center gap-2">
-              <button type="button" onClick={() => setSaved(false)} className="lp-btn-secondary">
-                <Plus size={15} /> {t('partners.addAnother')}
-              </button>
-              <button type="button" onClick={onClose} className="lp-btn-primary">{t('common.done')}</button>
-            </div>
+      {saved ? (
+        <div className="lp-animate-in py-6 text-center">
+          <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ background: 'color-mix(in srgb, #34d399 18%, transparent)', color: '#34d399' }}>
+            <CheckCircle2 size={34} />
+          </span>
+          <p className="mb-6 font-display text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('partners.availabilityAdded')}</p>
+          <div className="flex items-center justify-center gap-3">
+            <button type="button" onClick={() => setSaved(false)} className="lp-btn-secondary"><Plus size={15} /> {t('partners.addAnother')}</button>
+            <button type="button" onClick={onClose} className="lp-btn-primary">{t('common.done')}</button>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partners.addAvailableTimeSubtitle')}</p>
-            {(speakOptions.length > 1 || learnOptions.length > 1) && (
-              <div className="grid grid-cols-2 gap-3">
-                {speakOptions.length > 1 && (
-                  <div>
-                    <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iSpeak')}</label>
-                    <select
-                      value={slot.native_language}
-                      onChange={(e) => setSlot({ ...slot, native_language: e.target.value })}
-                      className={fieldClass}
-                      style={fieldStyle}
-                    >
-                      {speakOptions.map((l) => <option key={l} value={l}>{l}</option>)}
-                    </select>
-                  </div>
-                )}
-                {learnOptions.length > 1 && (
-                  <div>
-                    <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iAmLearning')}</label>
-                    <select
-                      value={slot.learning_language}
-                      onChange={(e) => setSlot({ ...slot, learning_language: e.target.value })}
-                      className={fieldClass}
-                      style={fieldStyle}
-                    >
-                      {learnOptions.map((l) => <option key={l} value={l}>{l}</option>)}
-                    </select>
-                  </div>
-                )}
-              </div>
-            )}
-            <div>
-              <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.date')}</label>
+        </div>
+      ) : (
+        <form id="availability-form" onSubmit={handleSubmit} className="space-y-5">
+          {(speakOptions.length > 1 || learnOptions.length > 1) && (
+            <div className="grid grid-cols-2 gap-4">
+              {speakOptions.length > 1 && (
+                <ModalField label={t('auth.register.iSpeak')} icon={Globe2}>
+                  <select value={slot.native_language} onChange={(e) => setSlot({ ...slot, native_language: e.target.value })} className={`${modalInputClass} ps-11`} style={modalInputStyle}>
+                    {speakOptions.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </ModalField>
+              )}
+              {learnOptions.length > 1 && (
+                <ModalField label={t('auth.register.iAmLearning')} icon={GraduationCap}>
+                  <select value={slot.learning_language} onChange={(e) => setSlot({ ...slot, learning_language: e.target.value })} className={`${modalInputClass} ps-11`} style={modalInputStyle}>
+                    {learnOptions.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </ModalField>
+              )}
+            </div>
+          )}
+
+          <div>
+            <ModalField label={t('partners.date')} icon={CalendarCheck}>
               <input
                 type="date"
                 required
                 min={todayStr()}
                 value={slot.date}
                 onChange={(e) => setSlot({ ...slot, date: e.target.value })}
-                className={fieldClass}
-                style={fieldStyle}
+                className={`${modalInputClass} ps-11`}
+                style={modalInputStyle}
               />
+            </ModalField>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {dayChips.map((c) => (
+                <Chip key={c.value} active={slot.date === c.value} onClick={() => setSlot({ ...slot, date: c.value })}>{c.label}</Chip>
+              ))}
             </div>
-            <label className="flex items-center gap-2.5 text-sm font-medium cursor-pointer" style={{ color: 'var(--ink)' }}>
-              <input
-                type="checkbox"
-                checked={slot.weekly}
-                onChange={(e) => setSlot({ ...slot, weekly: e.target.checked })}
-                className="h-4 w-4 rounded"
-                style={{ accentColor: 'var(--accent)' }}
-              />
-              {t('partners.repeatWeekly')}
-            </label>
-            <p className="text-xs -mt-2.5" style={{ color: 'var(--ink-soft)' }}>
-              {slot.weekly ? t('partners.repeatWeeklyHintOn') : t('partners.repeatWeeklyHintOff')}
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('profile.startTime')}</label>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 rounded-2xl p-4" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+            <div className="min-w-0">
+              <p className="text-sm font-bold" style={{ color: 'var(--ink)' }}>{t('partners.repeatWeekly')}</p>
+              <p className="mt-0.5 text-xs" style={{ color: 'var(--ink-soft)' }}>
+                {slot.weekly ? t('partners.repeatWeeklyHintOn') : t('partners.repeatWeeklyHintOff')}
+              </p>
+            </div>
+            <Switch checked={slot.weekly} onChange={(weekly) => setSlot({ ...slot, weekly })} label={t('partners.repeatWeekly')} />
+          </div>
+
+          <div>
+            <div className="grid grid-cols-2 gap-4">
+              <ModalField label={t('profile.startTime')} icon={Clock}>
                 <input
                   type="time"
                   min={slot.date === todayStr() ? nowTimeStr() : undefined}
                   value={slot.start_time}
-                  onChange={(e) => setSlot({ ...slot, start_time: e.target.value })}
-                  className={fieldClass}
-                  style={fieldStyle}
+                  onChange={(e) => setStart(e.target.value)}
+                  className={`${modalInputClass} ps-11`}
+                  style={modalInputStyle}
                 />
-              </div>
-              <div>
-                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('profile.endTime')}</label>
+              </ModalField>
+              <ModalField label={t('profile.endTime')} icon={Clock}>
                 <input
                   type="time"
                   value={slot.end_time}
                   onChange={(e) => setSlot({ ...slot, end_time: e.target.value })}
-                  className={fieldClass}
-                  style={fieldStyle}
+                  className={`${modalInputClass} ps-11`}
+                  style={modalInputStyle}
                 />
-              </div>
+              </ModalField>
             </div>
-            {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
-            <button type="submit" disabled={saving} className="lp-btn-primary w-full disabled:opacity-50">
-              {saving ? t('profile.saving') : t('partners.addAvailableTime')}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>{t('modal.length')}</span>
+              {[30, 40, 60, 90].map((m) => (
+                <Chip key={m} active={lengthOf() === m} onClick={() => setLength(m)}>{t('schedule.minutesShort', { count: m })}</Chip>
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <p className="rounded-2xl px-4 py-3 text-sm font-medium" style={{ background: 'color-mix(in srgb, #f87171 14%, transparent)', color: '#f87171' }}>{error}</p>
+          )}
+        </form>
+      )}
+    </ModalShell>
   )
 }
 
-function IconField({ icon: Icon, children }) {
+// A labelled field on the filter bar
+function FilterField({ label, icon: Icon, children, className = '' }) {
   return (
-    <div className="relative">
-      <Icon size={15} className="absolute top-1/2 -translate-y-1/2 start-3.5 pointer-events-none z-10" style={{ color: 'var(--accent)' }} />
-      {children}
-    </div>
+    <label className={`block ${className}`}>
+      <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{label}</span>
+      <span className="relative block">
+        <Icon size={15} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--accent)' }} />
+        {children}
+      </span>
+    </label>
   )
 }
+
+const fieldClass = 'h-11 w-full rounded-xl ps-10 pe-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
+const fieldStyle = { background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--ink)' }
 
 function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, onSchedule, onCall }) {
-  const accent = p.match_type === 'exchange' ? 'var(--accent)' : 'var(--accent-2)'
+  const exchange = p.match_type === 'exchange'
   const visibleAvailability = (p.availability || [])
     .filter((slot) => !isSlotExpiredToday(slot))
     .filter((slot) => filterDayOfWeek == null || slot.day_of_week === filterDayOfWeek)
     .filter((slot) => !filterTime || (slot.start_time.slice(0, 5) <= filterTime && filterTime <= slot.end_time.slice(0, 5)))
+
+  const cover = exchange
+    ? 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 20%, var(--surface)), color-mix(in srgb, var(--gold) 12%, var(--surface)))'
+    : 'linear-gradient(135deg, color-mix(in srgb, var(--accent-2) 16%, var(--surface)), color-mix(in srgb, var(--accent) 12%, var(--surface)))'
+
   return (
-    <div
-      className={`group relative flex flex-col p-5 -m-5 rounded-[28px] transition-all duration-300 hover:-translate-y-1 lp-animate-in lp-delay-${(i % 6) + 1}`}
+    <article
+      className={`lp-card lp-card--hover flex flex-col overflow-hidden lp-animate-in lp-delay-${(i % 6) + 1}`}
+      style={{ padding: 0 }}
     >
-      <span
-        className="absolute inset-0 rounded-[28px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 -z-10"
-        style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-card)' }}
-      />
-      <Link to={`/partners/${p.user_id}`} className="flex flex-col flex-1">
-      <div className="relative mb-3">
-        <span
-          className="absolute -top-4 -start-4 h-24 w-24 rounded-full pointer-events-none transition-opacity duration-300 opacity-70 group-hover:opacity-100"
-          style={{ background: accent, filter: 'blur(28px)', opacity: 0.28 }}
-        />
-        <div className="relative flex items-center gap-3">
+      <div className="relative h-20 shrink-0" style={{ background: cover }}>
+        {p.is_available_now && (
+          <span className="absolute start-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style={{ background: 'rgb(0 0 0 / 0.35)' }}>
+            <span className="h-2 w-2 rounded-full" style={{ background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+            {t('partners.visibilityNow')}
+          </span>
+        )}
+        <span className="absolute end-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style={{ background: 'rgb(0 0 0 / 0.35)' }}>
+          {exchange ? t('partners.exchangeMatch') : t('partners.peerPractice')}
+        </span>
+      </div>
+
+      <div className="-mt-9 flex flex-1 flex-col px-5 pb-5">
+        <Link to={`/partners/${p.user_id}`} className="relative w-fit">
           <img
-            src={resolveAvatarUrl(p.avatar, p.user_id, 96)}
+            src={resolveAvatarUrl(p.avatar, p.user_id, 144)}
             alt=""
-            className="lp-avatar lp-gradient-ring h-16 w-16 shrink-0 transition-transform duration-300 group-hover:scale-105"
-            style={{ border: '3px solid var(--surface)' }}
+            className="lp-avatar h-[72px] w-[72px] object-cover"
+            style={{ border: '4px solid var(--surface)' }}
           />
           {p.intro_video && (
             <span
-              className="absolute -bottom-1 -end-1 flex h-6 w-6 items-center justify-center rounded-full"
+              className="absolute -bottom-0.5 -end-0.5 flex h-6 w-6 items-center justify-center rounded-full"
               style={{ background: 'var(--gradient-brand)', color: 'var(--accent-ink)', border: '2px solid var(--surface)' }}
               title={t('partners.hasVideo')}
             >
               <Video size={11} />
             </span>
           )}
-        </div>
-      </div>
-
-      <h3 className="font-display font-bold truncate" style={{ color: 'var(--ink)' }}>{p.full_name}</h3>
-      <span className="text-xs font-semibold mt-0.5" style={{ color: accent }}>
-        {p.match_type === 'exchange' ? t('partners.exchangeMatch') : t('partners.peerPractice')}
-      </span>
-
-      <p className="text-sm mt-2.5" style={{ color: 'var(--ink-soft)' }}>
-        {t('partners.speaksLearning', { native: p.native_language, learning: p.learning_language })}
-      </p>
-      <p className="text-xs capitalize" style={{ color: 'var(--ink-soft)', opacity: 0.75 }}>
-        {t(`levels.${p.proficiency_level}`, p.proficiency_level)} · {p.timezone}
-      </p>
-
-      <p className="text-sm mt-3 line-clamp-2 flex-1" style={{ color: 'var(--ink-soft)' }}>
-        {p.bio || t('partnerProfile.noBio')}
-      </p>
-
-      {visibleAvailability.length > 0 && (
-        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 text-xs font-medium" style={{ color: 'var(--accent-2)' }}>
-          {visibleAvailability.slice(0, 2).map((slot) => (
-            <span key={slot.id} className="inline-flex items-center gap-1">
-              <Clock size={11} />
-              {nextDateForDayOfWeek(slot.day_of_week, slot.start_time).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })}
-              {' '}{slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-xs" style={{ color: 'var(--ink-soft)' }}>
-        {p.country && (
-          <span className="inline-flex items-center gap-1">
-            <MapPin size={12} /> {p.country}
-          </span>
-        )}
-        <span className="inline-flex items-center gap-1">
-          <CalendarCheck size={12} /> {t('partners.sessionsCount', { count: p.sessions_completed })}
-        </span>
-        {p.ratings_count > 0 && (
-          <span className="inline-flex items-center gap-1" style={{ color: '#c98a1c' }}>
-            <Star size={12} fill="currentColor" /> {p.average_rating}
-          </span>
-        )}
-      </div>
-
-      </Link>
-
-      <div className="flex gap-2 mt-3 opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 focus-within:opacity-100 focus-within:translate-y-0 [@media(hover:none)]:opacity-100 [@media(hover:none)]:translate-y-0">
-        <Link to={`/partners/${p.user_id}`} className="lp-btn-secondary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
-          <User size={12} /> {t('partners.viewProfile')}
         </Link>
-        <button type="button" onClick={() => onMessage(p)} className="lp-btn-primary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
-          <MessageCircle size={12} /> {t('partnerProfile.message')}
-        </button>
-        {p.is_available_now && (
-          <button type="button" onClick={() => onCall(p)} className="lp-btn-primary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
-            <Phone size={12} /> {t('partners.callNow')}
-          </button>
+
+        <Link to={`/partners/${p.user_id}`} className="mt-3 block hover:opacity-80">
+          <h3 className="truncate font-display text-lg font-bold" style={{ color: 'var(--ink)' }}>{p.full_name}</h3>
+        </Link>
+        {p.country && (
+          <p className="mt-0.5 inline-flex items-center gap-1 text-xs" style={{ color: 'var(--ink-soft)' }}>
+            <MapPin size={12} /> {p.country}
+          </p>
         )}
-        <button type="button" onClick={() => onSchedule(p)} className="lp-btn-secondary flex-1 justify-center text-xs whitespace-nowrap" style={{ padding: '0.4rem 0.5rem', gap: '0.3rem' }}>
-          <CalendarPlus size={12} /> {t('partnerProfile.scheduleSession')}
-        </button>
+
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className="lp-tag">{p.native_language}</span>
+          <ArrowRight size={13} className="rtl:rotate-180" style={{ color: 'var(--ink-soft)' }} />
+          <span className="lp-tag lp-tag--accent">
+            {p.learning_language} · {t(`levels.${p.proficiency_level}`, p.proficiency_level)}
+          </span>
+        </div>
+
+        <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
+          {p.bio || t('partnerProfile.noBio')}
+        </p>
+
+        {visibleAvailability.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {visibleAvailability.slice(0, 2).map((slot) => (
+              <span key={slot.id} className="lp-tag lp-tag--accent2">
+                <Clock size={11} />
+                {nextDateForDayOfWeek(slot.day_of_week, slot.start_time).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })}
+                {' '}{slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-3 flex items-center gap-4 text-xs" style={{ color: 'var(--ink-soft)' }}>
+          <span className="inline-flex items-center gap-1">
+            <CalendarCheck size={13} /> {t('partners.sessionsCount', { count: p.sessions_completed })}
+          </span>
+          {p.ratings_count > 0 && (
+            <span className="inline-flex items-center gap-1 font-semibold" style={{ color: '#f5b301' }}>
+              <Star size={13} fill="currentColor" /> {p.average_rating}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-4 grid gap-2">
+          {p.is_available_now ? (
+            <button type="button" onClick={() => onCall(p)} className="lp-btn-primary w-full">
+              <Phone size={15} /> {t('partners.callNow')}
+            </button>
+          ) : (
+            <button type="button" onClick={() => onSchedule(p)} className="lp-btn-primary w-full">
+              <CalendarPlus size={15} /> {t('partnerProfile.scheduleSession')}
+            </button>
+          )}
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => onMessage(p)} className="lp-btn-secondary" style={{ padding: '0.55rem 0.5rem' }}>
+              <MessageCircle size={14} /> {t('partnerProfile.message')}
+            </button>
+            {p.is_available_now ? (
+              <button type="button" onClick={() => onSchedule(p)} className="lp-btn-secondary" style={{ padding: '0.55rem 0.5rem' }}>
+                <CalendarPlus size={14} /> {t('partners.scheduleShort')}
+              </button>
+            ) : (
+              <Link to={`/partners/${p.user_id}`} className="lp-btn-secondary" style={{ padding: '0.55rem 0.5rem' }}>
+                <User size={14} /> {t('partners.viewProfile')}
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -406,14 +432,12 @@ export default function Partners() {
   const slotMatchesTime = (slot) =>
     !filters.time || (slot.start_time.slice(0, 5) <= filters.time && filters.time <= slot.end_time.slice(0, 5))
   const withAvailability = partners.filter((p) => p.availability?.some(slotMatchesTime))
-  const availableNow = (p) => p.is_available_now
+  const availableNow = partners.filter((p) => p.is_available_now)
   // Highest-rated first; unrated partners last. Array#sort is stable, so ties keep the
   // server order (exchange matches first).
   const byRating = (list) => [...list].sort((x, y) => (y.average_rating || 0) - (x.average_rating || 0))
   const visiblePartners = byRating(
-    visibility === 'now'
-      ? partners.filter(availableNow)
-      : visibility === 'scheduled' ? withAvailability : partners,
+    visibility === 'now' ? availableNow : visibility === 'scheduled' ? withAvailability : partners,
   )
 
   const handleCall = async (p) => {
@@ -430,49 +454,35 @@ export default function Partners() {
     navigate(`/messages/${data.id}`)
   }
 
-  const ghostFieldClass = 'w-full bg-transparent ps-6 pe-2 py-2 text-sm font-medium transition-colors focus:outline-none'
-  const ghostFieldStyle = { borderBottom: '2px solid var(--line)', color: 'var(--ink)' }
-  const labelClass = 'block text-[11px] font-semibold uppercase tracking-wide mb-1'
+  const tabs = [
+    ['now', t('partners.visibilityNow'), availableNow.length],
+    ['scheduled', t('partners.visibilityScheduled'), withAvailability.length],
+    ['all', t('partners.visibilityAll'), partners.length],
+  ]
+  const hasFilters = !!(filters.learning || filters.lesson || filters.date || filters.time)
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] relative overflow-hidden" style={{ background: 'var(--bg)' }}>
-      <div
-        className="absolute -top-24 -end-24 h-72 w-72 rounded-full pointer-events-none lp-blob-drift"
-        style={{ background: 'var(--accent)', opacity: 0.16, filter: 'blur(70px)' }}
-      />
-      <div
-        className="absolute top-[420px] -start-16 h-72 w-72 rounded-full pointer-events-none lp-blob-drift"
-        style={{ background: 'var(--accent-2)', opacity: 0.16, filter: 'blur(70px)', animationDelay: '3s' }}
-      />
-
-      <div className="max-w-5xl mx-auto px-6 pt-12 pb-10 relative">
-          <div className="lp-animate-in text-center sm:text-start">
-            <p className="lp-eyebrow mb-1.5">{t('partners.eyebrow')}</p>
-            <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight mb-2 lp-gradient-text">{t('partners.title')}</h1>
-            <p className="text-sm sm:text-base mb-6 max-w-lg mx-auto sm:mx-0" style={{ color: 'var(--ink-soft)' }}>{t('partners.subtitle')}</p>
-
-            {!loading && (
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-6 gap-y-1 mb-9 text-sm lp-animate-in-fade">
-                <span style={{ color: 'var(--ink)' }}>
-                  <strong className="font-display text-lg" style={{ color: 'var(--accent)' }}>{partners.length}</strong>{' '}
-                  <span style={{ color: 'var(--ink-soft)' }}>{t('partners.statFound')}</span>
-                </span>
-                <span style={{ color: 'var(--ink)' }}>
-                  <strong className="font-display text-lg" style={{ color: 'var(--accent-2)' }}>{withAvailability.length}</strong>{' '}
-                  <span style={{ color: 'var(--ink-soft)' }}>{t('partners.statWithTime')}</span>
-                </span>
-              </div>
-            )}
+    <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
+      <div className="lp-hero-bg">
+        <div className="mx-auto max-w-6xl px-6 pb-8 pt-10">
+          <div className="lp-animate-in flex flex-wrap items-end justify-between gap-5">
+            <div>
+              <p className="lp-eyebrow mb-3">{t('partners.eyebrow')}</p>
+              <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>
+                {t('partners.title')}
+              </h1>
+              <p className="mt-2 max-w-xl text-sm sm:text-base" style={{ color: 'var(--ink-soft)' }}>{t('partners.subtitle')}</p>
+            </div>
+            <button type="button" onClick={() => setShowAvailabilityModal(true)} className="lp-btn-primary shrink-0">
+              <CalendarPlus size={16} /> {t('partners.addAvailableTime')}
+            </button>
           </div>
 
-          <div className="lp-animate-in lp-delay-1">
-            <div className="flex items-center justify-center sm:justify-between gap-4 mb-6 flex-wrap">
-              <div className="flex items-center gap-1">
-                {[
-                  ['now', t('partners.visibilityNow')],
-                  ['scheduled', t('partners.visibilityScheduled')],
-                  ['all', t('partners.visibilityAll')],
-                ].map(([key, label]) => (
+          {/* Filter bar */}
+          <div className="lp-card lp-animate-in lp-delay-1 mt-8" style={{ padding: '1.1rem 1.25rem' }}>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="inline-flex rounded-full p-1" style={{ background: 'var(--surface-2)' }}>
+                {tabs.map(([key, label, count]) => (
                   <button
                     key={key}
                     type="button"
@@ -480,112 +490,108 @@ export default function Partners() {
                       setVisibility(key)
                       if (key !== 'scheduled') setFilters((f) => ({ ...f, date: '', time: '' }))
                     }}
-                    className="relative px-1 py-1.5 text-sm font-semibold transition-colors me-5 last:me-0"
-                    style={{ color: visibility === key ? 'var(--ink)' : 'var(--ink-soft)' }}
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
+                    style={visibility === key
+                      ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(124 92 255 / 0.9)' }
+                      : { color: 'var(--ink-soft)' }}
                   >
                     {label}
-                    {visibility === key && (
-                      <span className="absolute left-0 right-0 -bottom-0.5 h-[2.5px] rounded-full" style={{ background: 'var(--gradient-brand)' }} />
+                    {!loading && (
+                      <span
+                        className="rounded-full px-1.5 text-[11px] font-extrabold"
+                        style={visibility === key ? { background: 'rgb(255 255 255 / 0.25)' } : { background: 'var(--line)' }}
+                      >
+                        {count}
+                      </span>
                     )}
                   </button>
                 ))}
               </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                <button type="button" onClick={() => setShowAvailabilityModal(true)} className="lp-btn-primary shrink-0">
-                  <CalendarPlus size={15} /> {t('partners.addAvailableTime')}
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={() => setFilters({ learning: '', lesson: '', date: '', time: '' })}
+                  className="text-sm font-semibold hover:opacity-70"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  {t('partners.clearFilters')}
                 </button>
-              </div>
+              )}
             </div>
 
-            <p className="flex items-start gap-2 text-xs mb-4 max-w-xl" style={{ color: 'var(--ink-soft)' }}>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <FilterField label={t('auth.register.iAmLearning')} icon={Globe2}>
+                <select value={filters.learning} onChange={(e) => setFilters({ ...filters, learning: e.target.value })} className={fieldClass} style={fieldStyle}>
+                  <option value="">{t('partners.anyLanguage')}</option>
+                  {myLearning.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </FilterField>
+              <FilterField label={t('partners.lessonFilter')} icon={GraduationCap}>
+                <select value={filters.lesson} onChange={(e) => setFilters({ ...filters, lesson: e.target.value })} className={fieldClass} style={fieldStyle}>
+                  <option value="">{t('partners.anyLesson')}</option>
+                  {Array.from({ length: lessonCount }, (_, n) => n + 1).map((n) => (
+                    <option key={n} value={n}>{t('partners.lessonOption', { n })}</option>
+                  ))}
+                </select>
+              </FilterField>
+              {visibility === 'scheduled' && (
+                <>
+                  <FilterField label={t('partners.date')} icon={CalendarCheck}>
+                    <input type="date" min={todayStr()} value={filters.date} onChange={(e) => setFilters({ ...filters, date: e.target.value })} className={fieldClass} style={fieldStyle} />
+                  </FilterField>
+                  <FilterField label={t('partners.time')} icon={Clock}>
+                    <input type="time" value={filters.time} onChange={(e) => setFilters({ ...filters, time: e.target.value })} className={fieldClass} style={fieldStyle} />
+                  </FilterField>
+                </>
+              )}
+            </div>
+
+            <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
               <Info size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />
               {t('partners.lessonFilterNote')}
             </p>
-
-            <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
-              <div className="w-40">
-                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iAmLearning')}</label>
-                <IconField icon={Globe2}>
-                  <select
-                    value={filters.learning}
-                    onChange={(e) => setFilters({ ...filters, learning: e.target.value })}
-                    className={ghostFieldClass}
-                    style={ghostFieldStyle}
-                  >
-                    <option value="">{t('partners.anyLanguage')}</option>
-                    {myLearning.map((l) => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                </IconField>
-              </div>
-              <div className="w-36">
-                <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.lessonFilter')}</label>
-                <IconField icon={Sparkles}>
-                  <select
-                    value={filters.lesson}
-                    onChange={(e) => setFilters({ ...filters, lesson: e.target.value })}
-                    className={ghostFieldClass}
-                    style={ghostFieldStyle}
-                  >
-                    <option value="">{t('partners.anyLesson')}</option>
-                    {Array.from({ length: lessonCount }, (_, i) => i + 1).map((n) => (
-                      <option key={n} value={n}>{t('partners.lessonOption', { n })}</option>
-                    ))}
-                  </select>
-                </IconField>
-              </div>
-              {visibility === 'scheduled' && (
-                <div className="w-44">
-                  <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.date')}</label>
-                  <input
-                    type="date"
-                    min={todayStr()}
-                    value={filters.date}
-                    onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                    className="w-full bg-transparent pe-2 py-2 text-sm font-medium transition-colors focus:outline-none"
-                    style={ghostFieldStyle}
-                  />
-                </div>
-              )}
-              {visibility === 'scheduled' && (
-                <div className="w-36">
-                  <label className={labelClass} style={{ color: 'var(--ink-soft)' }}>{t('partners.time')}</label>
-                  <input
-                    type="time"
-                    value={filters.time}
-                    onChange={(e) => setFilters({ ...filters, time: e.target.value })}
-                    className="w-full bg-transparent pe-2 py-2 text-sm font-medium transition-colors focus:outline-none"
-                    style={ghostFieldStyle}
-                  />
-                </div>
-              )}
-            </div>
           </div>
         </div>
+      </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="mx-auto max-w-6xl px-6 pb-16 pt-6">
         {loading ? (
-          <div className="grid sm:grid-cols-2 gap-8">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-16 w-16 rounded-full mb-3" style={{ background: 'var(--surface-2)' }} />
-                <div className="h-3.5 w-2/3 rounded mb-2" style={{ background: 'var(--surface-2)' }} />
-                <div className="h-3 w-1/3 rounded mb-4" style={{ background: 'var(--surface-2)' }} />
-                <div className="h-3 rounded w-4/5" style={{ background: 'var(--surface-2)' }} />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[0, 1, 2, 3, 4, 5].map((n) => (
+              <div key={n} className="lp-card animate-pulse" style={{ padding: 0, overflow: 'hidden' }}>
+                <div className="h-20" style={{ background: 'var(--surface-2)' }} />
+                <div className="space-y-3 p-5">
+                  <div className="-mt-12 h-[72px] w-[72px] rounded-full" style={{ background: 'var(--line)', border: '4px solid var(--surface)' }} />
+                  <div className="h-4 w-2/3 rounded" style={{ background: 'var(--surface-2)' }} />
+                  <div className="h-3 w-1/2 rounded" style={{ background: 'var(--surface-2)' }} />
+                  <div className="h-10 rounded-full" style={{ background: 'var(--surface-2)' }} />
+                </div>
               </div>
             ))}
           </div>
         ) : visiblePartners.length === 0 ? (
-          <div className="flex flex-col items-center text-center py-20 lp-animate-in">
-            <span className="lp-icon-badge h-12 w-12 mb-4">
-              <Search size={20} />
+          <div className="lp-card lp-animate-in mx-auto max-w-xl py-14 text-center">
+            <span className="lp-icon-badge mx-auto mb-4 h-14 w-14">
+              <Search size={22} />
             </span>
-            <p className="text-sm max-w-sm" style={{ color: 'var(--ink-soft)' }}>
+            <p className="mx-auto max-w-sm text-sm" style={{ color: 'var(--ink-soft)' }}>
               {visibility === 'now' ? t('partners.emptyNow') : visibility === 'scheduled' ? t('partners.emptyAvailable') : t('partners.empty')}
             </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              {visibility !== 'all' && (
+                <button type="button" onClick={() => setVisibility('all')} className="lp-btn-primary">
+                  {t('partners.showAll')}
+                </button>
+              )}
+              {hasFilters && (
+                <button type="button" onClick={() => setFilters({ learning: '', lesson: '', date: '', time: '' })} className="lp-btn-secondary">
+                  {t('partners.clearFilters')}
+                </button>
+              )}
+            </div>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-x-14 gap-y-12">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {visiblePartners.map((p, i) => (
               <PartnerCard
                 key={p.user_id}
@@ -604,7 +610,7 @@ export default function Partners() {
         )}
 
         {!loading && visiblePartners.length > 0 && visibility === 'scheduled' && withAvailability.length < partners.length && (
-          <p className="flex items-center justify-center gap-1.5 text-xs mt-8 lp-animate-in" style={{ color: 'var(--ink-soft)' }}>
+          <p className="mt-8 flex items-center justify-center gap-1.5 text-xs" style={{ color: 'var(--ink-soft)' }}>
             <Sparkles size={13} style={{ color: 'var(--accent)' }} />
             {t('partners.moreWithAllHint', { count: partners.length - withAvailability.length })}
           </p>
@@ -622,7 +628,6 @@ export default function Partners() {
       {showAvailabilityModal && (
         <AddAvailabilityModal onClose={() => setShowAvailabilityModal(false)} onSaved={load} />
       )}
-
     </div>
   )
 }

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Language Partner",
+    "appName": "Lingua Hub",
     "loading": "Loading...",
     "loadingDashboard": "Loading your home...",
     "seeAll": "See all",
@@ -26,8 +26,8 @@
     "notes": "My notes"
   },
   "footer": {
-    "tagline": "Language Partner",
-    "copyright": "© {{year}} Language Partner. All rights reserved.",
+    "tagline": "Lingua Hub",
+    "copyright": "© {{year}} Lingua Hub. All rights reserved.",
     "explore": "Explore",
     "account": "Account",
     "getStarted": "Get started"
@@ -45,7 +45,7 @@
     "badge": "Free during early access",
     "heroTitleLine1": "Learn a language by",
     "heroTitleLine2": "actually speaking it",
-    "heroSubtitle": "Language Partner connects you with native speakers and fellow learners for real conversation practice, plus structured video courses to build your foundation.",
+    "heroSubtitle": "Lingua Hub connects you with native speakers and fellow learners for real conversation practice, plus structured video courses to build your foundation.",
     "findAPartner": "Find a partner",
     "getStartedFree": "Get started free",
     "learnMore": "Learn more",
@@ -61,7 +61,7 @@
     },
     "realConversations": "Real conversations",
     "practiceHeadline": "Practice with people, not flashcards",
-    "practiceBody": "Apps that only drill vocabulary can only take you so far. Language Partner gets you talking with a real person from your very first session — messaging to plan, video to practice, and courses to fill in the gaps.",
+    "practiceBody": "Apps that only drill vocabulary can only take you so far. Lingua Hub gets you talking with a real person from your very first session — messaging to plan, video to practice, and courses to fill in the gaps.",
     "practiceList": {
       "matched": "Matched by language pair, level, and timezone",
       "builtin": "Built-in chat and video — nothing to install",
@@ -84,14 +84,14 @@
       "freeBody": "Every feature is unlocked during early access — no credit card, no paywalls."
     },
     "ctaTitle": "Free to use, no catch",
-    "ctaBody": "Language Partner is free during our early access phase — every feature is unlocked from day one.",
+    "ctaBody": "Lingua Hub is free during our early access phase — every feature is unlocked from day one.",
     "ctaButton": "Create your free account"
   },
   "about": {
     "eyebrow": "About us",
     "titlePrefix": "Fluency comes from",
     "titleHighlight": "conversation",
-    "intro": "Language Partner exists because the fastest way to learn a language is to actually speak it with another person. We connect learners for native-speaker exchange, peer practice, and structured self-paced courses — all in one place.",
+    "intro": "Lingua Hub exists because the fastest way to learn a language is to actually speak it with another person. We connect learners for native-speaker exchange, peer practice, and structured self-paced courses — all in one place.",
     "missionEyebrow": "Our mission",
     "missionHeadline": "Make authentic practice accessible to anyone, anywhere",
     "missionBody": "We match learners by language pair, level, and timezone, then get out of the way — built-in video and chat so there's nothing extra to install, and courses for whenever you want a bit more structure between sessions.",
@@ -111,7 +111,7 @@
     "title": "Frequently Asked Questions",
     "items": {
       "free": {
-        "q": "Is Language Partner free?",
+        "q": "Is Lingua Hub free?",
         "a": "Yes. During our early access phase, every feature — exchange matching, peer practice, video calls, and courses — is completely free."
       },
       "matching": {
@@ -241,11 +241,12 @@
       "Set a tiny, specific weekly goal, like 'order coffee' or 'tell a 2-minute story' — vague goals are easy to postpone."
     ],
     "howItWorksTitle": "How it works",
-    "whyTitle": "Why learners choose Language Partner",
+    "whyTitle": "Why learners choose Lingua Hub",
     "stats": {
       "completed": "Sessions completed",
       "upcoming": "Upcoming sessions",
-      "partners": "Partners connected"
+      "partners": "Partners connected",
+      "lessons": "Lessons completed"
     },
     "quickActions": {
       "findPartner": "Find a partner",
@@ -263,7 +264,16 @@
     "keepLearningEmpty": "No courses yet.",
     "exchange": "Exchange",
     "peer": "Peer",
-    "emptyStateBody": "This page will fill up as you connect with partners and courses are added — head to <link>Find a partner</link> to get started."
+    "emptyStateBody": "This page will fill up as you connect with partners and courses are added — head to <link>Find a partner</link> to get started.",
+    "continueTitle": "Continue your next lesson",
+    "viewLessons": "All lessons",
+    "practiceLesson": "Find a partner for this lesson",
+    "levelProgress": "{{done}} of {{total}} lessons completed in this level",
+    "allDone": "You completed every lesson. Amazing work!",
+    "noLesson": "Pick a language you are learning in your profile to see your next lesson here.",
+    "availableNow": "Available now",
+    "availableNowEmpty": "Nobody is online right now. Schedule a session or check back soon.",
+    "noLessonsYet": "There are no {{language}} lessons yet. Check back soon!"
   },
   "partners": {
     "eyebrow": "Partners",
@@ -318,7 +328,10 @@
     "lessonFilter": "Lesson",
     "anyLesson": "Any lesson",
     "lessonOption": "Lesson {{n}}",
-    "lessonFilterNote": "Optional filter: choose a lesson to see only partners who are on that lesson right now, meaning the next lesson they have not completed in the language they are learning. People learning the same language as you are always shown at your own level only."
+    "lessonFilterNote": "Optional filter: choose a lesson to see only partners who are on that lesson right now, meaning the next lesson they have not completed in the language they are learning. People learning the same language as you are always shown at your own level only.",
+    "showAll": "Show all partners",
+    "clearFilters": "Clear filters",
+    "scheduleShort": "Schedule"
   },
   "partnerProfile": {
     "loading": "Loading...",
@@ -360,7 +373,14 @@
     "loading": "Loading...",
     "empty": "No conversations yet. Message a partner from their profile to get started.",
     "noMessagesYet": "No messages yet",
-    "selectConversation": "Select a conversation"
+    "selectConversation": "Select a conversation",
+    "eyebrow": "Chat",
+    "search": "Search conversations",
+    "noResults": "No conversation matches your search.",
+    "you": "You",
+    "back": "Back",
+    "findPartners": "Find partners",
+    "selectHint": "Pick a conversation on the left, or message a partner from their profile."
   },
   "conversationThread": {
     "connected": "Connected",
@@ -368,7 +388,10 @@
     "videoCall": "Video call",
     "typeAMessage": "Type a message...",
     "send": "Send",
-    "conversation": "Conversation"
+    "conversation": "Conversation",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "sayHello": "Say hello and start practicing!"
   },
   "schedule": {
     "title": "Session history",
@@ -442,7 +465,17 @@
     "outsideAvailability": "This time is outside the partner's available hours. Please pick a time within their availability shown below.",
     "partnerAvailability": "Available:",
     "lowRatingReason": "Please write why you gave a low rating.",
-    "lowRatingPlaceholder": "Tell us what went wrong (required)..."
+    "lowRatingPlaceholder": "Tell us what went wrong (required)...",
+    "eyebrow": "Sessions",
+    "subtitle": "Your booked sessions, requests and past practice in one place.",
+    "findPartners": "Find a partner",
+    "tab": {
+      "all": "All",
+      "upcoming": "Upcoming",
+      "past": "Completed",
+      "closed": "Cancelled"
+    },
+    "requestSubtitle": "Pick a partner and a time that works for both of you."
   },
   "courses": {
     "title": "Courses",
@@ -462,7 +495,7 @@
     "sharedByYou": "You shared",
     "sharedByPartner": "shared",
     "openFile": "Open file",
-    "pickMaterial": "Choose a material to share",
+    "pickMaterial": "Choose a lesson to share",
     "stopSharing": "Stop sharing",
     "filesCount": "{{count}} lessons",
     "allLevels": "All levels",
@@ -480,7 +513,8 @@
     "levelDone": "Course completed",
     "progressCount": "{{done}} of {{total}} done",
     "downloadLevel": "Download full level",
-    "preparing": "Preparing..."
+    "preparing": "Preparing...",
+    "pickHint": "Your next lesson is highlighted."
   },
   "coursePlayer": {
     "loading": "Loading...",
@@ -552,7 +586,16 @@
       "friday": "Friday",
       "saturday": "Saturday",
       "sunday": "Sunday"
-    }
+    },
+    "tabs": {
+      "basics": "Basics",
+      "languages": "Languages",
+      "video": "Intro video",
+      "security": "Security"
+    },
+    "completion": "Profile completeness",
+    "completionHint": "Complete profiles get more partner requests.",
+    "introVideoHint": "A short video helps partners get to know you before the first session."
   },
   "settings": {
     "title": "Settings",
@@ -563,7 +606,7 @@
     "appearance": "Appearance",
     "appearanceBody": "Switch between light and dark mode.",
     "language": "Language",
-    "languageBody": "Choose the language used across Language Partner.",
+    "languageBody": "Choose the language used across Lingua Hub.",
     "logOut": "Log out"
   },
   "call": {
@@ -653,7 +696,8 @@
     "stopShareFile": "Stop sharing the file",
     "recordingNotice": "For safety, your browser keeps a low-quality recording of the session. It is deleted when you leave, and only sent to the admin if you or your partner file a report.",
     "recordingBadge": "Recording",
-    "translate": "Translate"
+    "translate": "Translate",
+    "nextLesson": "Next lesson"
   },
   "levels": {
     "beginner": "Beginner",
@@ -702,7 +746,11 @@
     "download": "Download",
     "saving": "Saving...",
     "saved": "Saved",
-    "error": "Could not save"
+    "error": "Could not save",
+    "eyebrow": "Notebook",
+    "search": "Search your notes",
+    "openSession": "Open session",
+    "noResults": "No notes match your search."
   },
   "report": {
     "link": "Report a problem",
@@ -772,5 +820,10 @@
     "listen": "Listen",
     "addToNotes": "Add to notes",
     "addedToNotes": "Added to notes"
+  },
+  "modal": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "length": "Length"
   }
 }

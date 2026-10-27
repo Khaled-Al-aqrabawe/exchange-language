@@ -1,88 +1,89 @@
 @import "tailwindcss";
 
-/* ---- Design tokens: formal, premium — ivory, deep navy, antique gold ---- */
+/* ---- Lingua Hub design tokens: midnight with a violet glow (dark by default, light on request) ---- */
 
 @theme {
-  /* Squarer, more formal corners across every Tailwind `rounded-*` utility */
-  --radius-md: 0.3125rem;
-  --radius-lg: 0.375rem;
-  --radius-xl: 0.5rem;
-  --radius-2xl: 0.625rem;
-  --radius-3xl: 0.75rem;
+  /* Soft, generous corners across every Tailwind `rounded-*` utility */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
 }
 
 :root {
   color-scheme: light;
 
-  --font-display: 'Playfair Display', 'Amiri', Georgia, 'Times New Roman', serif;
-  --font-body: 'Inter', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Inter', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sora', 'Cairo', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
 
-  --bg: #f7f6f2;
+  /* white, with one violet accent used sparingly */
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f1efe8;
-  --ink: #0c1a30;
-  --ink-soft: #596478;
-  --line: #e2ded3;
-  --accent: #15294b;
+  --surface-2: #f5f6fa;
+  --ink: #0f1222;
+  --ink-soft: #666d86;
+  --line: #e6e8f0;
+  --accent: #5b43e8;
   --accent-ink: #ffffff;
-  --accent-2: #8c6b20;
+  --accent-2: #0b86c4;
   --accent-2-ink: #ffffff;
-  --gold: #b8923c;
-  --navy-deep: #0a1426;
-  --on-navy: #f3efe6;
-  --on-navy-soft: #a9b3c6;
-  --gradient-brand: linear-gradient(180deg, #1b3258, #112245);
-  --gradient-hero: linear-gradient(160deg, #11213f 0%, #0a1426 70%);
-  --shadow-card: 0 1px 2px rgb(12 26 48 / 0.04), 0 2px 10px -4px rgb(12 26 48 / 0.06);
-  --shadow-card-hover: 0 2px 4px rgb(12 26 48 / 0.05), 0 12px 28px -14px rgb(12 26 48 / 0.2);
-  --radius-card: 10px;
+  --gold: #e11d74;              /* small pink highlight (old token name, so every page picks it up) */
+  --navy-deep: #f5f6fa;
+  --on-navy: #0f1222;
+  --on-navy-soft: #666d86;
+  --gradient-brand: linear-gradient(135deg, #6a52f0 0%, #5b43e8 100%);
+  --gradient-hero: linear-gradient(135deg, #f6f4ff 0%, #ffffff 100%);
+  --panel-border: #e6e8f0;
+  --panel-glow: rgb(91 67 232 / 0.07);
+  --glow-a: 6%;
+  --glow-b: 4%;
+  --glow-c: 3%;
+  --badge-glow: none;
+  --btn-shadow: 0 8px 18px -10px rgb(91 67 232 / 0.55);
+  --btn-shadow-hover: 0 12px 24px -10px rgb(91 67 232 / 0.6);
+  --gold-btn-bg: var(--accent);
+  --gold-btn-ink: #ffffff;
+  --shadow-card: 0 1px 2px rgb(20 20 60 / 0.04), 0 6px 18px -12px rgb(20 20 60 / 0.12);
+  --shadow-card-hover: 0 2px 6px rgb(20 20 60 / 0.06), 0 18px 34px -18px rgb(91 67 232 / 0.3);
+  --radius-card: 20px;
   --radius-pill: 999px;
-  --radius-tag: 6px;
+  --radius-tag: 999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    color-scheme: dark;
-    --bg: #080f1e;
-    --surface: #0e182b;
-    --surface-2: #132038;
-    --ink: #eef0f4;
-    --ink-soft: #97a3b8;
-    --line: #1f2d46;
-    --accent: #d2b06b;
-    --accent-ink: #0a1426;
-    --accent-2: #8fa9d8;
-    --accent-2-ink: #0a1426;
-    --gold: #d2b06b;
-    --gradient-brand: linear-gradient(180deg, #dcbc79, #c19c52);
-    --gradient-hero: linear-gradient(160deg, #10203d 0%, #0a1426 70%);
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 14px -8px rgb(0 0 0 / 0.5);
-    --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.35), 0 18px 36px -16px rgb(0 0 0 / 0.65);
-  }
-}
-
+/* midnight, for people who pick the dark theme */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #080f1e;
-  --surface: #0e182b;
-  --surface-2: #132038;
-  --ink: #eef0f4;
-  --ink-soft: #97a3b8;
-  --line: #1f2d46;
-  --accent: #d2b06b;
-  --accent-ink: #0a1426;
-  --accent-2: #8fa9d8;
-  --accent-2-ink: #0a1426;
-  --gold: #d2b06b;
-  --gradient-brand: linear-gradient(180deg, #dcbc79, #c19c52);
-  --gradient-hero: linear-gradient(160deg, #10203d 0%, #0a1426 70%);
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 14px -8px rgb(0 0 0 / 0.5);
-  --shadow-card-hover: 0 4px 10px rgb(0 0 0 / 0.35), 0 18px 36px -16px rgb(0 0 0 / 0.65);
-}
 
-:root[data-theme='light'] {
-  color-scheme: light;
+  --bg: #070816;
+  --surface: #0f1229;
+  --surface-2: #171b3a;
+  --ink: #eef0ff;
+  --ink-soft: #9aa3c7;
+  --line: #242a55;
+  --accent: #8b7cff;
+  --accent-ink: #ffffff;
+  --accent-2: #38bdf8;
+  --accent-2-ink: #04202e;
+  --gold: #f472b6;
+  --navy-deep: #050613;
+  --on-navy: #f2f1ff;
+  --on-navy-soft: #b4b3e6;
+  --gradient-brand: linear-gradient(135deg, #8b6cff 0%, #5b6bff 100%);
+  --gradient-hero: linear-gradient(135deg, #3b2bd0 0%, #6a46ff 52%, #b04bf0 100%);
+  --panel-border: transparent;
+  --panel-glow: rgb(255 255 255 / 0.28);
+  --glow-a: 34%;
+  --glow-b: 22%;
+  --glow-c: 20%;
+  --badge-glow: 0 0 22px -6px color-mix(in srgb, var(--accent) 70%, transparent);
+  --btn-shadow: 0 10px 26px -10px rgb(124 92 255 / 0.85), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  --btn-shadow-hover: 0 16px 32px -10px rgb(124 92 255 / 0.95), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  --gold-btn-bg: #ffffff;
+  --gold-btn-ink: #3b2bd0;
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 10px 30px -14px rgb(0 0 0 / 0.7);
+  --shadow-card-hover: 0 0 0 1px rgb(139 124 255 / 0.4), 0 24px 50px -20px rgb(110 86 255 / 0.55);
 }
 
 * {
@@ -95,12 +96,12 @@ body {
   background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: 'cv11', 'ss01';
 }
 
 h1, h2, .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
+  font-weight: 700;
 }
 
 .font-mono {
@@ -114,18 +115,18 @@ h1, h2, .font-display {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--gold) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
 /* ---- Motion ---- */
 
 @keyframes lp-fade-up {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -135,7 +136,7 @@ h1, h2, .font-display {
 }
 
 @keyframes lp-scale-in {
-  from { opacity: 0; transform: scale(0.985); }
+  from { opacity: 0; transform: scale(0.97); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -145,7 +146,7 @@ h1, h2, .font-display {
 }
 
 .lp-animate-in {
-  animation: lp-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: lp-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .lp-animate-in-fade {
@@ -153,7 +154,7 @@ h1, h2, .font-display {
 }
 
 .lp-animate-in-scale {
-  animation: lp-scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: lp-scale-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .lp-delay-1 { animation-delay: 60ms; }
@@ -177,56 +178,60 @@ h1, h2, .font-display {
   border-radius: var(--radius-card);
 }
 
+/* Glass-like card with a faint top sheen */
 .lp-card {
-  background: var(--surface);
+  background: linear-gradient(180deg, color-mix(in srgb, #fff 4%, var(--surface)), var(--surface));
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   padding: 1.5rem;
   box-shadow: var(--shadow-card);
-  transition: box-shadow 220ms ease, transform 220ms ease, border-color 220ms ease;
+  transition: box-shadow 240ms ease, transform 240ms ease, border-color 240ms ease;
 }
 
 .lp-card--hover:hover,
 a.lp-card:hover,
 button.lp-card:hover {
   box-shadow: var(--shadow-card-hover);
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
 }
 
-/* Small caps label with a gold rule — the signature of every section */
+/* Small violet chip above a section title */
 .lp-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold) !important;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .lp-eyebrow::before {
   content: '';
-  width: 28px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.8;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
 }
 
 .lp-eyebrow--center::after {
-  content: '';
-  width: 28px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.8;
+  display: none;
 }
 
+/* Short two-colour bar under a headline */
 .lp-rule {
-  width: 48px;
-  height: 2px;
-  background: var(--gold);
+  width: 64px;
+  height: 5px;
   border: 0;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--accent), var(--gold));
 }
 
 .lp-tag {
@@ -235,7 +240,7 @@ button.lp-card:hover {
   gap: 0.3em;
   font-size: 12px;
   font-weight: 600;
-  padding: 0.2rem 0.6rem;
+  padding: 0.25rem 0.7rem;
   border-radius: var(--radius-tag);
   border: 1px solid var(--line);
   color: var(--ink-soft);
@@ -244,15 +249,15 @@ button.lp-card:hover {
 }
 
 .lp-tag--accent {
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
   color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
 }
 
 .lp-tag--accent2 {
-  border-color: color-mix(in srgb, var(--accent-2) 35%, var(--line));
   color: var(--accent-2);
-  background: color-mix(in srgb, var(--accent-2) 9%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent-2) 35%, var(--line));
+  background: color-mix(in srgb, var(--accent-2) 12%, var(--surface));
 }
 
 .lp-btn-primary {
@@ -261,24 +266,25 @@ button.lp-card:hover {
   justify-content: center;
   gap: 0.5rem;
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
-  letter-spacing: 0.01em;
-  padding: 0.7rem 1.4rem;
-  border-radius: var(--radius-tag);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
   background: var(--gradient-brand);
   color: var(--accent-ink);
-  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
-  transition: filter 180ms ease, box-shadow 180ms ease;
-  box-shadow: 0 1px 2px rgb(12 26 48 / 0.18), 0 8px 18px -10px rgb(12 26 48 / 0.5);
+  border: 0;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  box-shadow: var(--btn-shadow);
 }
 
 .lp-btn-primary:hover {
-  filter: brightness(1.12);
-  box-shadow: 0 1px 2px rgb(12 26 48 / 0.18), 0 12px 22px -10px rgb(12 26 48 / 0.55);
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: var(--btn-shadow-hover);
 }
 
 .lp-btn-primary:active {
+  transform: translateY(0);
   filter: brightness(0.96);
 }
 
@@ -288,40 +294,41 @@ button.lp-card:hover {
   justify-content: center;
   gap: 0.5rem;
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
-  letter-spacing: 0.01em;
-  padding: 0.7rem 1.4rem;
-  border-radius: var(--radius-tag);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in srgb, var(--ink) 22%, var(--line));
   color: var(--ink);
-  background: transparent;
-  transition: border-color 180ms ease, background 180ms ease;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
 }
 
 .lp-btn-secondary:hover {
-  border-color: var(--gold);
-  background: color-mix(in srgb, var(--gold) 8%, var(--surface));
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  transform: translateY(-1px);
 }
 
-/* Gold button for use on navy surfaces */
+/* White button, used on the violet gradient panels */
 .lp-btn-gold {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  letter-spacing: 0.01em;
-  padding: 0.8rem 1.8rem;
-  border-radius: var(--radius-tag);
-  background: linear-gradient(180deg, #dcbc79, #bf9a50);
-  color: #0a1426;
-  transition: filter 180ms ease;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 0.85rem 1.9rem;
+  border-radius: var(--radius-pill);
+  background: var(--gold-btn-bg);
+  color: var(--gold-btn-ink);
+  box-shadow: var(--btn-shadow);
+  transition: transform 180ms ease, filter 180ms ease;
 }
 
 .lp-btn-gold:hover {
-  filter: brightness(1.07);
+  transform: translateY(-2px);
+  filter: brightness(0.96);
 }
 
 .lp-social-icon {
@@ -329,8 +336,8 @@ button.lp-card:hover {
 }
 
 .lp-social-icon:hover {
-  color: var(--gold) !important;
-  border-color: var(--gold) !important;
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
 }
 
 .lp-avatar {
@@ -338,11 +345,12 @@ button.lp-card:hover {
   object-fit: cover;
 }
 
+/* Headline words in the accent colour */
 .lp-gradient-text {
-  color: var(--gold);
-  font-style: italic;
+  color: var(--accent);
 }
 
+/* Avatar ring in both brand colours */
 .lp-gradient-ring {
   position: relative;
 }
@@ -350,25 +358,25 @@ button.lp-card:hover {
 .lp-gradient-ring::before {
   content: '';
   position: absolute;
-  inset: -2px;
+  inset: -3px;
   border-radius: inherit;
-  padding: 1.5px;
-  background: linear-gradient(135deg, var(--gold), transparent 70%);
+  padding: 2.5px;
+  background: linear-gradient(135deg, var(--accent), var(--gold));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
 }
 
-/* Navy tile with a gold glyph */
+/* Glowing tile that holds an icon */
 .lp-icon-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-tag);
-  background: var(--navy-deep);
-  color: #d9b974;
-  border: 1px solid color-mix(in srgb, #d9b974 30%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--accent);
+  box-shadow: var(--badge-glow);
 }
 
 .lp-hero-bg {
@@ -383,36 +391,83 @@ button.lp-card:hover {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(60% 55% at 0% 0%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 65%),
-    radial-gradient(50% 45% at 100% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 65%);
+    radial-gradient(45% 60% at 8% 0%, color-mix(in srgb, var(--accent) var(--glow-a), transparent), transparent 70%),
+    radial-gradient(40% 55% at 95% 8%, color-mix(in srgb, var(--accent-2) var(--glow-b), transparent), transparent 70%),
+    radial-gradient(40% 45% at 60% 105%, color-mix(in srgb, var(--gold) var(--glow-c), transparent), transparent 70%);
+}
+
+/* Faint grid that fades out toward the bottom of a hero */
+.lp-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px);
+  background-size: 52px 52px;
+  opacity: 0.7;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 80%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 80%);
+  pointer-events: none;
 }
 
 /* Auth / form card */
 .lp-auth-card {
-  background: var(--surface);
+  background: linear-gradient(180deg, color-mix(in srgb, #fff 5%, var(--surface)), var(--surface));
   border: 1px solid var(--line);
-  border-top: 3px solid var(--gold);
-  border-radius: var(--radius-card);
+  border-radius: 28px;
   padding: 2.5rem 2.25rem;
   box-shadow: var(--shadow-card-hover);
+  position: relative;
 }
 
-/* Navy panel (hero banners, CTAs) */
+.lp-auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  right: 2rem;
+  height: 4px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+
+/* Violet gradient panel (hero banners, CTAs) */
 .lp-navy-panel {
   position: relative;
   background: var(--gradient-hero);
   color: var(--on-navy);
-  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
-  border-radius: var(--radius-card);
+  border: 1px solid var(--panel-border);
+  border-radius: 32px;
   overflow: hidden;
 }
 
-/* Re-skin everything inside the footer without touching each element */
+.lp-navy-panel::after {
+  content: '';
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  right: -100px;
+  top: -140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--panel-glow), transparent 70%);
+  pointer-events: none;
+}
+
+/* Footer: a soft grey band on the white theme, a deep panel on the dark one */
 .lp-footer {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+:root[data-theme='dark'] .lp-footer {
   --ink: var(--on-navy);
   --ink-soft: var(--on-navy-soft);
-  --line: rgb(255 255 255 / 0.12);
-  --accent: var(--gold);
+  --line: rgb(255 255 255 / 0.1);
+  --accent: #a89cff;
+  --gold: #f472b6;
+  --surface: #14173a;
   background: var(--navy-deep);
   color: var(--on-navy);
 }
@@ -420,17 +475,20 @@ button.lp-card:hover {
 /* ---- Legacy utilities kept for backward compatibility ---- */
 
 .text-gradient {
-  color: var(--gold);
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .bg-grid {
   background-image:
-    linear-gradient(to right, rgb(226 222 211 / 0.6) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(226 222 211 / 0.6) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px);
   background-size: 44px 44px;
 }
 
-/* Subtle texture; invisible on light surfaces, a fine grain on navy ones */
+/* Subtle dot texture on gradient panels */
 .bg-dots {
   position: relative;
 }
@@ -440,8 +498,8 @@ button.lp-card:hover {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px);
-  background-size: 18px 18px;
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 8%, transparent) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
 }
 
 /* Decorative motion (floating words, drifting blobs) is intentionally off */
@@ -450,10 +508,4 @@ button.lp-card:hover {
 .lp-float-2,
 .lp-float-3 {
   display: none !important;
-}
-
-/* The mark is dark line-art: flip it to white on dark surfaces */
-:root[data-theme='dark'] .lp-logo { filter: brightness(0) invert(1); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .lp-logo { filter: brightness(0) invert(1); }
 }

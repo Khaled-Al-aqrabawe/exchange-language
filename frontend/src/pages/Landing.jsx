@@ -51,7 +51,7 @@ export default function Landing() {
           <div className="lp-animate-in">
             <p className="lp-eyebrow mb-7">{t('landing.badge')}</p>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-semibold leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.1rem] font-extrabold leading-[1.1]">
               {t('landing.heroTitleLine1')}
               <br />
               <span className="lp-gradient-text">{t('landing.heroTitleLine2')}</span>
@@ -91,19 +91,24 @@ export default function Landing() {
       </section>
 
       {/* How it works */}
-      <section style={{ borderTop: '1px solid var(--line)', background: 'var(--surface)' }}>
+      <section style={{ background: 'color-mix(in srgb, var(--accent) 5%, var(--bg))' }}>
         <div className="max-w-6xl mx-auto px-6 py-24">
-          <div className="text-center mb-16 lp-animate-in">
+          <div className="text-center mb-14 lp-animate-in">
             <p className="lp-eyebrow lp-eyebrow--center">{t('landing.howItWorks')}</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-x-12 gap-y-12">
+          <div className="grid md:grid-cols-3 gap-6">
             {steps.map((step, i) => (
-              <div key={step.n} className={`lp-animate-in lp-delay-${i + 1}`} style={{ borderTop: '1px solid var(--line)', paddingTop: '1.75rem' }}>
-                <div className="flex items-baseline justify-between mb-5">
-                  <span className="font-display text-5xl font-semibold leading-none" style={{ color: 'var(--gold)' }}>{step.n}</span>
-                  <step.icon size={22} strokeWidth={1.5} style={{ color: 'var(--ink-soft)' }} />
+              <div key={step.n} className={`lp-card lp-card--hover lp-animate-in lp-delay-${i + 1}`} style={{ padding: '2rem' }}>
+                <div className="flex items-center justify-between mb-6">
+                  <span
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl font-display text-lg font-extrabold"
+                    style={{ background: i === 1 ? 'color-mix(in srgb, var(--gold) 16%, var(--surface))' : 'color-mix(in srgb, var(--accent) 14%, var(--surface))', color: i === 1 ? 'var(--accent-2)' : 'var(--accent)' }}
+                  >
+                    {step.n}
+                  </span>
+                  <step.icon size={24} strokeWidth={1.75} style={{ color: 'var(--ink-soft)' }} />
                 </div>
-                <h3 className="font-display text-xl font-semibold mb-2.5">{step.title}</h3>
+                <h3 className="font-display text-xl font-bold mb-2.5">{step.title}</h3>
                 <p className="leading-relaxed text-[15px]" style={{ color: 'var(--ink-soft)' }}>{step.body}</p>
               </div>
             ))}
@@ -112,7 +117,7 @@ export default function Landing() {
       </section>
 
       {/* Product showcase */}
-      <section style={{ borderTop: '1px solid var(--line)' }}>
+      <section>
         <div className="max-w-6xl mx-auto px-6 py-24 grid lg:grid-cols-2 gap-20 items-center">
           <div className="flex justify-center order-2 lg:order-1 lp-animate-in-scale">
             <MessageMockup />
@@ -123,8 +128,10 @@ export default function Landing() {
             <p className="leading-[1.75] mb-8" style={{ color: 'var(--ink-soft)' }}>{t('landing.practiceBody')}</p>
             <ul className="space-y-4">
               {practiceList.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-[15px]" style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--line)' }}>
-                  <ShieldCheck size={18} strokeWidth={1.75} className="mt-0.5 shrink-0" style={{ color: 'var(--gold)' }} />
+                <li key={item} className="flex items-start gap-3 text-[15px] font-medium">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: 'color-mix(in srgb, var(--accent) 15%, var(--surface))', color: 'var(--accent)' }}>
+                    <ShieldCheck size={14} strokeWidth={2.25} />
+                  </span>
                   {item}
                 </li>
               ))}
@@ -134,22 +141,22 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section style={{ borderTop: '1px solid var(--line)', background: 'var(--surface)' }}>
+      <section style={{ background: 'var(--surface)' }}>
         <div className="max-w-6xl mx-auto px-6 py-24">
           <div className="max-w-2xl mb-14 lp-animate-in">
             <p className="lp-eyebrow mb-5">{t('landing.everythingIncluded')}</p>
             <h2 className="text-4xl font-semibold leading-tight">{t('landing.featuresHeadline')}</h2>
           </div>
-          <div
-            className="grid sm:grid-cols-2 lg:grid-cols-3"
-            style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-card)', overflow: 'hidden', gap: '1px', background: 'var(--line)' }}
-          >
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
-              <div key={f.title} className={`p-8 lp-animate-in lp-delay-${(i % 6) + 1}`} style={{ background: 'var(--surface)' }}>
-                <span className="flex h-11 w-11 items-center justify-center mb-6" style={{ border: '1px solid color-mix(in srgb, var(--gold) 55%, var(--line))', borderRadius: 'var(--radius-tag)', color: 'var(--gold)' }}>
-                  <f.icon size={20} strokeWidth={1.6} />
+              <div key={f.title} className={`lp-card lp-card--hover lp-animate-in lp-delay-${(i % 6) + 1}`} style={{ padding: '2rem' }}>
+                <span
+                  className="flex h-12 w-12 items-center justify-center mb-5 rounded-2xl"
+                  style={{ background: i % 2 ? 'color-mix(in srgb, var(--gold) 16%, var(--surface))' : 'color-mix(in srgb, var(--accent) 14%, var(--surface))', color: i % 2 ? 'var(--accent-2)' : 'var(--accent)' }}
+                >
+                  <f.icon size={22} strokeWidth={1.9} />
                 </span>
-                <h3 className="font-display text-lg font-semibold mb-2">{f.title}</h3>
+                <h3 className="font-display text-lg font-bold mb-2">{f.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{f.body}</p>
               </div>
             ))}
@@ -158,7 +165,7 @@ export default function Landing() {
       </section>
 
       {/* Final CTA */}
-      <section style={{ borderTop: '1px solid var(--line)' }}>
+      <section>
         <div className="max-w-5xl mx-auto px-6 py-24">
           <div className="lp-navy-panel bg-dots px-8 py-20 text-center lp-animate-in-scale">
             <div className="relative">
