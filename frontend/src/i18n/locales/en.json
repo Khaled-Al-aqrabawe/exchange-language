@@ -769,6 +769,8 @@
     "go": "Translate",
     "loading": "Translating...",
     "error": "Translation is not available right now.",
-    "listen": "Listen"
+    "listen": "Listen",
+    "addToNotes": "Add to notes",
+    "addedToNotes": "Added to notes"
   }
 }

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from .models import ScheduledSession, SessionNote, SessionReport
 
@@ -18,9 +19,11 @@ class SessionReportAdmin(admin.ModelAdmin):
     list_editable = ['resolved']
     readonly_fields = ['recording']
 
-    @admin.display(boolean=True, description='Recording')
+    @admin.display(description='Recording')
     def has_recording(self, obj):
-        return bool(obj.recording)
+        if not obj.recording:
+            return '-'
+        return format_html('<a href="{}" target="_blank">Watch</a>', obj.recording.url)
 
 
 @admin.register(SessionNote)
