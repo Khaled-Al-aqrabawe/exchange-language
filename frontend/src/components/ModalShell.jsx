@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 // Shared look for the app's pop-up forms: a glass card with a gradient top edge, a header,
 // a scrolling body and a footer that stays in view.
-export default function ModalShell({ icon: Icon, title, subtitle, onClose, children, footer }) {
+export default function ModalShell({ icon: Icon, title, subtitle, onClose, children, footer, wide = false }) {
   const { t } = useTranslation()
   return (
     <div
@@ -12,7 +12,7 @@ export default function ModalShell({ icon: Icon, title, subtitle, onClose, child
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="lp-animate-in-scale relative my-auto flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-[28px]"
+        className={`lp-animate-in-scale relative my-auto flex max-h-[92vh] w-full ${wide ? 'max-w-3xl' : 'max-w-lg'} flex-col overflow-hidden rounded-[28px]`}
         style={{
           background: 'linear-gradient(180deg, color-mix(in srgb, #fff 5%, var(--surface)), var(--surface))',
           border: '1px solid var(--line)',

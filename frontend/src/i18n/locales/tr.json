@@ -357,6 +357,8 @@
     "conversation": "Konuşma"
   },
   "schedule": {
+    "dateFrom": "Başlangıç",
+    "dateTo": "Bitiş",
     "title": "Seans geçmişi",
     "sendRequestTitle": "Seans talebi gönder",
     "requestSent": "Seans talebin gönderildi!",
@@ -437,6 +439,11 @@
     "lessonsCount": "{{count}} ders"
   },
   "materials": {
+    "eyebrow": "Kurslar",
+    "start": "Başla",
+    "continue": "Devam et",
+    "nextUp": "Sıradaki",
+    "anyLevel": "Herhangi bir seviye",
     "title": "Kurslar",
     "subtitle": "Seanslarında kullanabileceğin indirilebilir dosyalar.",
     "loading": "Materyaller yükleniyor...",
@@ -518,6 +525,7 @@
     }
   },
   "settings": {
+    "eyebrow": "Ayarlar",
     "title": "Ayarlar",
     "editProfile": "Profili düzenle",
     "notifications": "Bildirimler",
@@ -573,6 +581,7 @@
     "other": "Diğer"
   },
   "notifications": {
+    "eyebrow": "Bildirimler",
     "title": "Bildirimler",
     "empty": "Henüz bildirim yok.",
     "request": "{{name}} sana bir seans isteği gönderdi",

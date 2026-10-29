@@ -1,4 +1,6 @@
 import { ArrowLeft, CheckCircle2, Download, ExternalLink, FileText, FolderOpen, SlidersHorizontal, Trash2, Upload, X } from 'lucide-react'
+import JSZip from 'jszip'
+import { init as initPptxPreview } from 'pptx-preview'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
@@ -8,6 +10,160 @@ import { downloadBlob, downloadFile } from '../utils/downloadFile'
 
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
 const OFFICE_EXTENSIONS = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx']
+
+// Picture backgrounds, in slide order, as data URLs (null where a slide has none). The preview
+// library doesn't draw these itself, which leaves light slide text on a white page.
+async function readSlideBackgrounds(buffer) {
+  const zip = await JSZip.loadAsync(buffer)
+  const text = (path) => zip.file(path)?.async('string')
+  const parse = (xml) => new DOMParser().parseFromString(xml, 'application/xml')
+  const pres = parse(await text('ppt/presentation.xml'))
+  const presRels = parse(await text('ppt/_rels/presentation.xml.rels'))
+  const target = (doc, id) => [...doc.getElementsByTagName('Relationship')].find((r) => r.getAttribute('Id') === id)?.getAttribute('Target')
+  const mime = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml' }
+  const result = []
+  for (const sld of [...pres.getElementsByTagName('p:sldId')]) {
+    let dataUrl = null
+    try {
+      const slidePath = `ppt/${target(presRels, sld.getAttribute('r:id'))}`.replace('ppt/ppt/', 'ppt/')
+      const slide = parse(await text(slidePath))
+      const bg = slide.getElementsByTagName('p:bg')[0]
+      const blip = bg?.getElementsByTagName('a:blip')[0]
+      if (blip) {
+        const slideRels = parse(await text(slidePath.replace('slides/', 'slides/_rels/') + '.rels'))
+        const mediaPath = `ppt/${target(slideRels, blip.getAttribute('r:embed')).replace('../', '')}`
+        const ext = mediaPath.split('.').pop().toLowerCase()
+        dataUrl = `data:${mime[ext] || 'image/png'};base64,${await zip.file(mediaPath).async('base64')}`
+      }
+    } catch { /* leave this slide's background as the library drew it */ }
+    result.push(dataUrl)
+  }
+  return result
+}
+
+// Office Online can't reach localhost, so .pptx files are drawn in the browser as real slides.
+function PptxSlides({ material, name, t, fallback }) {
+  const boxRef = useRef(null)
+  const stageRef = useRef(null)
+  const previewerRef = useRef(null)
+  const fixRef = useRef(null)
+  const [status, setStatus] = useState('loading')
+  const [position, setPosition] = useState({ index: 0, total: 0 })
+
+  useEffect(() => {
+    let cancelled = false
+    const box = boxRef.current
+    const stage = stageRef.current
+    setStatus('loading')
+    let backgrounds = []
+    const fixBackgrounds = () => {
+      const url = backgrounds[previewerRef.current?.currentIndex ?? 0]
+      if (!url) return
+      stage.querySelectorAll('.slide-background').forEach((el) => {
+        el.style.backgroundImage = `url(${url})`
+        el.style.backgroundSize = '100% 100%'
+        el.style.backgroundPosition = '0 0'
+        el.style.backgroundRepeat = 'no-repeat'
+        el.style.opacity = '1'
+      })
+    }
+    fixRef.current = fixBackgrounds
+    const observer = new MutationObserver(fixBackgrounds)
+    observer.observe(stage, { childList: true, subtree: true })
+    // 16:9 slide that fits the free space, leaving room for the page controls
+    const width = Math.max(320, Math.min(box.clientWidth - 48, (box.clientHeight - 96) * (16 / 9)))
+    fetch(material.file)
+      .then((r) => { if (!r.ok) throw new Error('fetch'); return r.arrayBuffer() })
+      .then(async (buffer) => {
+        if (cancelled) return
+        backgrounds = await readSlideBackgrounds(buffer).catch(() => [])
+        if (cancelled) return
+        stage.innerHTML = ''
+        const previewer = initPptxPreview(stage, { width, height: Math.round(width * 9 / 16), mode: 'slide' })
+        previewerRef.current = previewer
+        await previewer.preview(buffer)
+        if (cancelled) return
+        fixBackgrounds()
+        setPosition({ index: previewer.currentIndex, total: previewer.slideCount })
+        setStatus('ready')
+      })
+      .catch(() => { if (!cancelled) setStatus('error') })
+    return () => {
+      cancelled = true
+      observer.disconnect()
+      try { previewerRef.current?.destroy() } catch { /* already gone */ }
+      previewerRef.current = null
+    }
+  }, [material.file])
+
+  const go = (step) => {
+    const previewer = previewerRef.current
+    if (!previewer) return
+    if (step > 0) previewer.renderNextSlide()
+    else previewer.renderPreSlide()
+    fixRef.current?.()
+    setPosition({ index: previewer.currentIndex, total: previewer.slideCount })
+  }
+
+  if (status === 'error') return fallback
+  return (
+    <div ref={boxRef} className="flex h-full flex-col items-center justify-center gap-4 px-6">
+      {status === 'loading' && <p className="text-sm text-slate-500">{t('materials.loading')}</p>}
+      <div ref={stageRef} className="overflow-hidden rounded-lg bg-white shadow-lg [&_.pptx-preview-wrapper-next]:hidden [&_.pptx-preview-wrapper-pagination]:hidden" style={{ border: '1px solid var(--line)', display: status === 'ready' ? 'block' : 'none' }} />
+      {status === 'ready' && (
+        <div className="flex items-center gap-4 text-sm text-slate-600">
+          <button type="button" onClick={() => go(-1)} disabled={position.index === 0} className="rounded-full px-3 py-1 hover:bg-slate-200 disabled:opacity-30" aria-label="Previous slide">‹</button>
+          <span>{position.index + 1} / {position.total}</span>
+          <button type="button" onClick={() => go(1)} disabled={position.index >= position.total - 1} className="rounded-full px-3 py-1 hover:bg-slate-200 disabled:opacity-30" aria-label="Next slide">›</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SlideTextPreview({ material, name, t }) {
+  const [slides, setSlides] = useState(null)
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    setSlides(null)
+    setIndex(0)
+    if (!material.id) { setSlides([]); return }
+    client.get(`/courses/materials/${material.id}/text/`)
+      .then(({ data }) => setSlides(data.slides || []))
+      .catch(() => setSlides([]))
+  }, [material.id])
+
+  if (slides === null) return <p className="flex h-full items-center justify-center text-sm text-slate-500">{t('materials.loading')}</p>
+  if (slides.length === 0) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 text-slate-500">
+        <FileText size={32} />
+        <p className="text-sm">{name}</p>
+        <button type="button" onClick={() => downloadFile(material.file, material.file_name)} className="lp-btn-secondary text-sm">
+          <Download size={15} /> {t('materials.download')}
+        </button>
+      </div>
+    )
+  }
+  const lines = slides[index] || []
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex shrink-0 items-center justify-center gap-4 border-b border-slate-200 px-4 py-2 text-sm text-slate-600">
+        <button type="button" onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0} className="rounded-full px-3 py-1 hover:bg-slate-200 disabled:opacity-30">‹</button>
+        <span>{index + 1} / {slides.length}</span>
+        <button type="button" onClick={() => setIndex((i) => Math.min(slides.length - 1, i + 1))} disabled={index === slides.length - 1} className="rounded-full px-3 py-1 hover:bg-slate-200 disabled:opacity-30">›</button>
+      </div>
+      <div className="flex-1 overflow-y-auto px-6 py-8">
+        <div className="mx-auto max-w-3xl space-y-3 rounded-2xl bg-white shadow p-8">
+          {lines.map((line, i) => (
+            <p key={i} dir="auto" className={`leading-relaxed text-slate-900 ${i === 0 ? 'text-2xl font-bold' : 'text-base'}`}>{line}</p>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function MaterialViewer({ material, onClose, t }) {
   const name = material.file_name || material.title
@@ -22,9 +178,9 @@ function MaterialViewer({ material, onClose, t }) {
   const canView = isImage || !isOffice || !isLocal
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-slate-900 lp-animate-in-scale">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
-        <span className="inline-flex items-center gap-2 min-w-0 text-sm text-white">
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-100 lp-animate-in-scale">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid var(--line)', background: '#fff' }}>
+        <span className="inline-flex items-center gap-2 min-w-0 text-sm font-semibold text-slate-800">
           <FileText size={15} className="shrink-0 text-slate-400" />
           <span className="truncate">{material.title}</span>
         </span>
@@ -32,7 +188,7 @@ function MaterialViewer({ material, onClose, t }) {
           <button
             type="button"
             onClick={() => downloadFile(material.file, material.file_name)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
             title={t('materials.download')}
           >
             <Download size={15} />
@@ -40,7 +196,7 @@ function MaterialViewer({ material, onClose, t }) {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
           >
             <X size={15} />
           </button>
@@ -48,15 +204,11 @@ function MaterialViewer({ material, onClose, t }) {
       </div>
       <div className="relative flex-1 min-h-0">
         {!canView ? (
-          <div className="flex flex-col items-center justify-center gap-3 h-full text-slate-400">
-            <FileText size={32} />
-            <p className="text-sm">{name}</p>
-            <button type="button" onClick={() => downloadFile(material.file, material.file_name)} className="lp-btn-secondary text-sm">
-              <Download size={15} /> {t('materials.download')}
-            </button>
-          </div>
+          ext === 'pptx'
+            ? <PptxSlides material={material} name={name} t={t} fallback={<SlideTextPreview material={material} name={name} t={t} />} />
+            : <SlideTextPreview material={material} name={name} t={t} />
         ) : isImage ? (
-          <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-black" />
+          <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-slate-100" />
         ) : (
           <iframe src={src} title={material.title} className="w-full h-full bg-white border-0" />
         )}
@@ -117,8 +269,8 @@ function UploadPanel({ t, onUploaded }) {
           type="file"
           multiple
           onChange={(e) => setFiles([...e.target.files])}
-          className="text-sm max-w-64"
-          style={{ color: 'var(--ink-soft)' }}
+          className="block w-64 max-w-full cursor-pointer rounded-xl px-2 py-1.5 text-sm file:mr-3 file:cursor-pointer file:rounded-full file:border-0 file:px-4 file:py-1.5 file:text-sm file:font-semibold file:text-[var(--accent)] file:bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] hover:file:bg-[color-mix(in_srgb,var(--accent)_22%,transparent)]"
+          style={{ ...fieldStyle, color: 'var(--ink-soft)' }}
         />
       </div>
       <button type="submit" disabled={busy || files.length === 0} className="lp-btn-primary disabled:opacity-50">
@@ -136,7 +288,7 @@ export default function Materials() {
   const { user } = useAuth()
   const [materials, setMaterials] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState({ language: '' })
+  const [filters, setFilters] = useState({ language: '', level: '' })
   const [openLevel, setOpenLevel] = useState(null)
   const [openLang, setOpenLang] = useState(null)
   const [viewing, setViewing] = useState(null)
@@ -161,18 +313,18 @@ export default function Materials() {
 
   const language = filters.language || openLang
   const scoped = materials.filter((m) => !language || m.language === language)
-  const languagesPresent = LANGUAGES.filter((l) => materials.some((m) => m.language === l))
+  const languagesPresent = LANGUAGES.filter((l) => materials.some((m) => m.language === l && (!filters.level || m.level === filters.level)))
+  const levelsPresent = MATERIAL_LEVELS.filter((lvl) => materials.some((m) => m.level === lvl && (!filters.language || m.language === filters.language)))
 
   const load = () => {
     setLoading(true)
-    const params = {}
-    if (filters.language) params.language = filters.language
-    client.get('/courses/materials/', { params })
+    // Always load everything: the filters narrow it down here and list only what exists.
+    client.get('/courses/materials/')
       .then(({ data }) => setMaterials(data))
       .finally(() => setLoading(false))
   }
 
-  useEffect(load, [filters])
+  useEffect(load, [])
 
   const handleDelete = async (m) => {
     if (!window.confirm(t('materials.confirmDelete', { title: m.title }))) return
@@ -185,27 +337,40 @@ export default function Materials() {
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       <div className="lp-hero-bg">
-        <div className="max-w-5xl mx-auto px-6 pt-10 pb-6 lp-animate-in">
-          <h1 className="font-display text-3xl font-bold tracking-tight mb-1" style={{ color: 'var(--ink)' }}>{t('materials.title')}</h1>
+        <div className="max-w-6xl mx-auto px-6 pt-10 pb-6 lp-animate-in">
+          <p className="lp-eyebrow mb-3">{t('materials.eyebrow')}</p>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl mb-1" style={{ color: 'var(--ink)' }}>{t('materials.title')}</h1>
           <p className="text-sm mb-6" style={{ color: 'var(--ink-soft)' }}>{t('materials.subtitle')}</p>
 
           <div className="flex flex-wrap items-center gap-3">
             <SlidersHorizontal size={15} style={{ color: 'var(--ink-soft)' }} />
             <select
               value={filters.language}
-              onChange={(e) => { setFilters({ ...filters, language: e.target.value }); setOpenLevel(null); setOpenLang(null) }}
+              onChange={(e) => {
+                const lang = e.target.value
+                const stillThere = !filters.level || materials.some((m) => m.level === filters.level && (!lang || m.language === lang))
+                setFilters({ language: lang, level: stillThere ? filters.level : '' }); setOpenLevel(null); setOpenLang(null) }}
               className="rounded-xl px-3.5 py-2.5 text-sm"
               style={selectStyle}
             >
               <option value="">{t('courses.anyLanguage')}</option>
-              {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+              {languagesPresent.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+            <select
+              value={filters.level}
+              onChange={(e) => { setFilters({ ...filters, level: e.target.value }); setOpenLevel(null); setOpenLang(null) }}
+              className="rounded-xl px-3.5 py-2.5 text-sm"
+              style={selectStyle}
+            >
+              <option value="">{t('materials.anyLevel')}</option>
+              {levelsPresent.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
           {user?.is_superuser && <UploadPanel t={t} onUploaded={load} />}
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 pb-10">
+      <div className="max-w-6xl mx-auto px-6 pb-10">
         {loading ? (
           <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>{t('materials.loading')}</p>
         ) : materials.length === 0 ? (
@@ -224,7 +389,7 @@ export default function Materials() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {MATERIAL_LEVELS.map((lvl) => {
+                  {MATERIAL_LEVELS.filter((lvl) => !filters.level || lvl === filters.level).map((lvl) => {
                     const count = materials.filter((m) => m.language === lang && m.level === lvl).length
                     const progress = levelProgress(lang, lvl)
                     return (
@@ -287,58 +452,79 @@ export default function Materials() {
               <Download size={15} /> {zipBusy ? t('materials.preparing') : t('materials.downloadLevel')}
             </button>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {scoped.filter((m) => m.level === openLevel).map((m, i) => (
-              <div
-                key={m.id}
-                className={`lp-surface lp-card--hover p-5 flex flex-col lp-animate-in lp-delay-${(i % 6) + 1}`}
-              >
-                <span className="lp-icon-badge h-10 w-10 mb-3">
-                  <FileText size={17} />
-                </span>
-                <h3 className="font-semibold mb-1" style={{ color: 'var(--ink)' }}>{m.title}</h3>
-                <p className="text-sm mb-2 font-medium lp-gradient-text w-fit">{m.language} · {m.level}</p>
-                {m.my_status === 'complete' && (
-                  <span className="lp-tag lp-tag--accent2 mb-2 inline-flex w-fit items-center gap-1">
-                    <CheckCircle2 size={12} /> {t('materials.completed')}
-                  </span>
-                )}
-                {m.my_status === 'partial' && (
-                  <span className="lp-tag mb-2 inline-flex w-fit items-center gap-1">
-                    {t('materials.inProgress', { slide: m.my_slide })}
-                  </span>
-                )}
-                <p className="text-sm line-clamp-2 flex-1" style={{ color: 'var(--ink-soft)' }}>{m.description}</p>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => setViewing(m)}
-                    className="lp-btn-secondary flex-1 justify-center text-sm whitespace-nowrap"
-                  >
-                    <ExternalLink size={15} /> {t('materials.openFile')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => downloadFile(m.file, m.file_name)}
-                    className="lp-btn-secondary flex-1 justify-center text-sm whitespace-nowrap"
-                  >
-                    <Download size={15} /> {t('materials.download')}
-                  </button>
-                  {user?.is_superuser && (
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(m)}
-                      className="lp-btn-secondary justify-center"
-                      style={{ color: '#c1443d' }}
-                      aria-label={t('materials.delete')}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  )}
+          {(() => {
+            const lessons = scoped.filter((x) => x.level === openLevel)
+            const nextId = lessons.find((x) => x.my_status !== 'complete')?.id
+            const progress = levelProgress(language, openLevel)
+            return (
+              <>
+                <div className="lp-surface mb-6 flex flex-wrap items-center gap-4 p-5 lp-animate-in">
+                  <div className="min-w-0 flex-1 basis-56">
+                    <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{language} · {openLevel}</p>
+                    <div className="mt-2 h-2 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%`, background: '#22c55e' }} />
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>{progress.done} / {progress.total}</span>
                 </div>
-              </div>
-            ))}
-          </div>
+                <ol className="relative">
+                  {lessons.map((m, i) => {
+                    const done = m.my_status === 'complete'
+                    const partial = m.my_status === 'partial'
+                    const isNext = m.id === nextId
+                    const color = done ? '#22c55e' : partial ? '#f59e0b' : 'var(--accent)'
+                    return (
+                      <li key={m.id} className={`relative flex gap-4 pb-5 lp-animate-in lp-delay-${(i % 6) + 1}`}>
+                        {i < lessons.length - 1 && (
+                          <span className="absolute start-[19px] top-10 bottom-0 w-0.5" style={{ background: done ? '#22c55e' : 'var(--line)' }} />
+                        )}
+                        <span
+                          className="relative z-[1] flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-extrabold"
+                          style={done
+                            ? { background: '#22c55e', color: '#fff' }
+                            : { background: 'var(--surface)', color, border: `2px solid ${isNext || partial ? color : 'var(--line)'}` }}
+                        >
+                          {done ? <CheckCircle2 size={20} /> : i + 1}
+                        </span>
+                        <div
+                          className="flex min-w-0 flex-1 flex-wrap items-center gap-3 rounded-2xl px-4 py-3 transition-colors"
+                          style={isNext
+                            ? { background: 'color-mix(in srgb, var(--accent) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)' }
+                            : undefined}
+                        >
+                          <div className="min-w-0 flex-1 basis-52">
+                            {isNext && <p className="lp-eyebrow mb-1">{t('materials.nextUp')}</p>}
+                            <h3 className="truncate font-semibold" style={{ color: 'var(--ink)' }}>{m.title}</h3>
+                            <p className="truncate text-sm" style={{ color: done ? '#16a34a' : partial ? '#d97706' : 'var(--ink-soft)' }}>
+                              {done ? t('materials.completed') : partial ? t('materials.inProgress', { slide: m.my_slide }) : (m.description || `${m.language} · ${m.level}`)}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setViewing(m)}
+                              className={`${isNext ? 'lp-btn-primary' : 'lp-btn-secondary'} whitespace-nowrap text-sm`}
+                              style={{ padding: '0.5rem 1rem' }}
+                            >
+                              <ExternalLink size={15} /> {t('materials.openFile')}
+                            </button>
+                            <button type="button" onClick={() => downloadFile(m.file, m.file_name)} className="lp-btn-secondary justify-center" style={{ padding: '0.5rem 0.7rem' }} title={t('materials.download')} aria-label={t('materials.download')}>
+                              <Download size={15} />
+                            </button>
+                            {user?.is_superuser && (
+                              <button type="button" onClick={() => handleDelete(m)} className="lp-btn-secondary justify-center" style={{ color: '#c1443d', padding: '0.5rem 0.7rem' }} title={t('materials.delete')} aria-label={t('materials.delete')}>
+                                <Trash2 size={15} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ol>
+              </>
+            )
+          })()}
           </>
         )}
       </div>

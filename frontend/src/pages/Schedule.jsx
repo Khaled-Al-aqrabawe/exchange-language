@@ -22,7 +22,8 @@ const statusTint = {
 const TABS = [
   ['all', null],
   ['upcoming', ['pending', 'confirmed']],
-  ['past', ['completed', 'not_completed']],
+  ['past', ['completed']],
+  ['uncompleted', ['not_completed']],
   ['closed', ['cancelled', 'rejected']],
 ]
 
@@ -248,7 +249,8 @@ export default function Schedule() {
   const [confirmError, setConfirmError] = useState('')
   const [showRequestModal, setShowRequestModal] = useState(false)
   const [tab, setTab] = useState('all')
-  const [dateFilter, setDateFilter] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   const inputClass = 'w-full rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent'
   const inputStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
@@ -299,11 +301,12 @@ export default function Schedule() {
     const statuses = TABS.find(([name]) => name === key)[1]
     return !statuses || statuses.includes(session.status)
   }
+  // Compares local calendar days, so a session late in the evening still counts for its own day.
   const matchesDate = (session) => {
-    if (!dateFilter) return true
-    const sessionDate = new Date(session.scheduled_time)
-    const [y, m, d] = dateFilter.split('-').map(Number)
-    return sessionDate.getFullYear() === y && sessionDate.getMonth() + 1 === m && sessionDate.getDate() === d
+    if (!dateFrom && !dateTo) return true
+    const d = new Date(session.scheduled_time)
+    const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    return (!dateFrom || day >= dateFrom) && (!dateTo || day <= dateTo)
   }
   const isOpen = (session) => ['pending', 'confirmed'].includes(session.status)
 
@@ -321,11 +324,11 @@ export default function Schedule() {
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       <div className="lp-hero-bg">
-        <div className="mx-auto max-w-4xl px-6 pb-8 pt-10">
+        <div className="mx-auto max-w-6xl px-6 pb-8 pt-10">
           <div className="lp-animate-in flex flex-wrap items-end justify-between gap-5">
             <div>
               <p className="lp-eyebrow mb-3">{t('schedule.eyebrow')}</p>
-              <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl" style={{ color: 'var(--ink)' }}>{t('schedule.title')}</h1>
+              <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>{t('schedule.title')}</h1>
               <p className="mt-2 max-w-md text-sm sm:text-base" style={{ color: 'var(--ink-soft)' }}>{t('schedule.subtitle')}</p>
             </div>
             <button type="button" onClick={() => setShowRequestModal(true)} className="lp-btn-primary shrink-0">
@@ -356,16 +359,22 @@ export default function Schedule() {
               })}
             </div>
             <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="h-10 rounded-full px-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                style={inputStyle}
-                aria-label={t('schedule.date')}
-              />
-              {dateFilter && (
-                <button type="button" onClick={() => setDateFilter('')} className="inline-flex items-center gap-1 text-sm font-semibold hover:opacity-80" style={{ color: 'var(--accent)' }}>
+              {[['dateFrom', dateFrom, setDateFrom, undefined, dateTo || undefined], ['dateTo', dateTo, setDateTo, dateFrom || undefined, undefined]].map(([key, value, setValue, min, max]) => (
+                <label key={key} className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                  {t(`schedule.${key}`)}
+                  <input
+                    type="date"
+                    value={value}
+                    min={min}
+                    max={max}
+                    onChange={(e) => setValue(e.target.value)}
+                    className="h-10 rounded-full px-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    style={inputStyle}
+                  />
+                </label>
+              ))}
+              {(dateFrom || dateTo) && (
+                <button type="button" onClick={() => { setDateFrom(''); setDateTo('') }} className="inline-flex items-center gap-1 text-sm font-semibold hover:opacity-80" style={{ color: 'var(--accent)' }}>
                   <XCircle size={14} /> {t('schedule.clearFilters')}
                 </button>
               )}
@@ -374,7 +383,7 @@ export default function Schedule() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-6 pb-16 pt-4">
+      <div className="mx-auto max-w-6xl px-6 pb-16 pt-4">
         {loading ? (
           <div className="space-y-3">
             {[0, 1, 2].map((n) => (

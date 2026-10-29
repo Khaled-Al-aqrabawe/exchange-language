@@ -394,6 +394,8 @@
     "sayHello": "Say hello and start practicing!"
   },
   "schedule": {
+    "dateFrom": "From",
+    "dateTo": "To",
     "title": "Session history",
     "sendRequestTitle": "Send session request",
     "requestSent": "Your session request was sent!",
@@ -473,6 +475,7 @@
       "all": "All",
       "upcoming": "Upcoming",
       "past": "Completed",
+      "uncompleted": "Not completed",
       "closed": "Cancelled"
     },
     "requestSubtitle": "Pick a partner and a time that works for both of you."
@@ -486,6 +489,11 @@
     "lessonsCount": "{{count}} lessons"
   },
   "materials": {
+    "eyebrow": "Courses",
+    "start": "Start",
+    "continue": "Continue",
+    "nextUp": "Up next",
+    "anyLevel": "Any level",
     "title": "Courses",
     "subtitle": "Downloadable files to use in your sessions.",
     "loading": "Loading materials...",
@@ -598,6 +606,7 @@
     "introVideoHint": "A short video helps partners get to know you before the first session."
   },
   "settings": {
+    "eyebrow": "Settings",
     "title": "Settings",
     "editProfile": "Edit profile",
     "notifications": "Notifications",
@@ -713,6 +722,7 @@
     "other": "Other"
   },
   "notifications": {
+    "eyebrow": "Notifications",
     "title": "Notifications",
     "empty": "No notifications yet.",
     "request": "{{name}} sent you a session request",

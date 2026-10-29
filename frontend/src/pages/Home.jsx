@@ -3,12 +3,13 @@ import {
   BookOpenCheck,
   CalendarClock,
   Lightbulb,
+  Phone,
   Sparkles,
   Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { resolveAvatarUrl } from '../utils/images'
@@ -50,6 +51,7 @@ function SectionHeader({ title, to }) {
 export default function Home() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const profile = user?.profile
 
   const [sessions, setSessions] = useState([])
@@ -75,13 +77,22 @@ export default function Home() {
     .filter((s) => s.status === 'confirmed' && new Date(s.scheduled_time) > new Date())
     .sort((a, b) => new Date(a.scheduled_time) - new Date(b.scheduled_time))
 
+  const handleCall = async (p) => {
+    try {
+      const { data } = await client.post('/calls/ring/', { partner_id: p.user_id })
+      navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
+    } catch {
+      window.alert(t('call.ringError'))
+    }
+  }
+
   const availableNow = partners.filter((p) => p.is_available_now).slice(0, 4)
   const upcomingSessions = upcoming.slice(0, 3)
 
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       <div className="lp-hero-bg">
-        <div className="mx-auto max-w-5xl px-6 pb-14 pt-8">
+        <div className="mx-auto max-w-6xl px-6 pb-14 pt-8">
           {/* Greeting */}
           <div className="lp-animate-in flex items-center gap-4">
             <img
@@ -89,28 +100,33 @@ export default function Home() {
               alt=""
               className="lp-avatar lp-gradient-ring h-16 w-16 shrink-0 object-cover"
             />
-            <h1 className="font-display text-3xl font-extrabold leading-tight sm:text-4xl" style={{ color: 'var(--ink)' }}>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>
               {user?.first_name ? t('dashboard.welcomeWithName', { name: user.first_name }) : t('dashboard.welcome')}
             </h1>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-6 pb-16">
+      <div className="mx-auto max-w-6xl px-6 pb-16">
         {/* Available now */}
         <div className="lp-animate-in lp-delay-3">
           <SectionHeader title={t('dashboard.availableNow')} to="/partners" />
           {availableNow.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {availableNow.map((p) => (
-                <Link key={p.user_id} to={`/partners/${p.user_id}`} className="lp-card lp-card--hover flex flex-col items-center text-center" style={{ padding: '1.25rem 1rem' }}>
-                  <div className="relative">
-                    <img src={resolveAvatarUrl(p.avatar, p.user_id, 128)} alt="" className="lp-avatar lp-gradient-ring h-16 w-16 object-cover" />
-                    <span className="absolute bottom-0 end-0 h-4 w-4 rounded-full border-2" style={{ background: '#34d399', borderColor: 'var(--surface)' }} />
-                  </div>
-                  <p className="mt-3 w-full truncate text-sm font-bold" style={{ color: 'var(--ink)' }}>{p.full_name}</p>
-                  <p className="mt-0.5 w-full truncate text-xs" style={{ color: 'var(--ink-soft)' }}>{p.native_language} → {p.learning_language}</p>
-                </Link>
+                <div key={p.user_id} className="lp-card lp-card--hover flex flex-col items-center text-center" style={{ padding: '1.25rem 1rem' }}>
+                  <Link to={`/partners/${p.user_id}`} className="flex w-full flex-col items-center">
+                    <div className="relative">
+                      <img src={resolveAvatarUrl(p.avatar, p.user_id, 128)} alt="" className="lp-avatar lp-gradient-ring h-16 w-16 object-cover" />
+                      <span className="absolute bottom-0 end-0 h-4 w-4 rounded-full border-2" style={{ background: '#34d399', borderColor: 'var(--surface)' }} />
+                    </div>
+                    <p className="mt-3 w-full truncate text-sm font-bold" style={{ color: 'var(--ink)' }}>{p.full_name}</p>
+                    <p className="mt-0.5 w-full truncate text-xs" style={{ color: 'var(--ink-soft)' }}>{p.native_language} → {p.learning_language}</p>
+                  </Link>
+                  <button type="button" onClick={() => handleCall(p)} className="lp-btn-primary mt-3 w-full">
+                    <Phone size={15} /> {t('partners.callNow')}
+                  </button>
+                </div>
               ))}
             </div>
           ) : (

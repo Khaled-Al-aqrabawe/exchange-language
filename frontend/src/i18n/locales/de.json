@@ -357,6 +357,8 @@
     "conversation": "Unterhaltung"
   },
   "schedule": {
+    "dateFrom": "Von",
+    "dateTo": "Bis",
     "title": "Sitzungsverlauf",
     "sendRequestTitle": "Sitzungsanfrage senden",
     "requestSent": "Deine Sitzungsanfrage wurde gesendet!",
@@ -437,6 +439,11 @@
     "lessonsCount": "{{count}} Lektionen"
   },
   "materials": {
+    "eyebrow": "Kurse",
+    "start": "Starten",
+    "continue": "Fortsetzen",
+    "nextUp": "Als Nächstes",
+    "anyLevel": "Jedes Niveau",
     "title": "Kurse",
     "subtitle": "Herunterladbare Dateien für deine Sitzungen.",
     "loading": "Materialien werden geladen...",
@@ -518,6 +525,7 @@
     }
   },
   "settings": {
+    "eyebrow": "Einstellungen",
     "title": "Einstellungen",
     "editProfile": "Profil bearbeiten",
     "notifications": "Benachrichtigungen",
@@ -573,6 +581,7 @@
     "other": "Divers"
   },
   "notifications": {
+    "eyebrow": "Benachrichtigungen",
     "title": "Benachrichtigungen",
     "empty": "Noch keine Benachrichtigungen.",
     "request": "{{name}} hat dir eine Sitzungsanfrage gesendet",

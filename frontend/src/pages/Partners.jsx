@@ -114,6 +114,7 @@ function AddAvailabilityModal({ onClose, onSaved }) {
 
   return (
     <ModalShell
+      wide
       icon={CalendarPlus}
       title={t('partners.addAvailableTime')}
       subtitle={saved ? undefined : t('partners.addAvailableTimeSubtitle')}
@@ -184,6 +185,7 @@ function AddAvailabilityModal({ onClose, onSaved }) {
             </div>
           )}
 
+          <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <ModalField label={t('partners.date')} icon={CalendarCheck}>
               <input
@@ -201,16 +203,6 @@ function AddAvailabilityModal({ onClose, onSaved }) {
                 <Chip key={c.value} active={slot.date === c.value} onClick={() => setSlot({ ...slot, date: c.value })}>{c.label}</Chip>
               ))}
             </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-4 rounded-2xl p-4" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
-            <div className="min-w-0">
-              <p className="text-sm font-bold" style={{ color: 'var(--ink)' }}>{t('partners.repeatWeekly')}</p>
-              <p className="mt-0.5 text-xs" style={{ color: 'var(--ink-soft)' }}>
-                {slot.weekly ? t('partners.repeatWeeklyHintOn') : t('partners.repeatWeeklyHintOff')}
-              </p>
-            </div>
-            <Switch checked={slot.weekly} onChange={(weekly) => setSlot({ ...slot, weekly })} label={t('partners.repeatWeekly')} />
           </div>
 
           <div>
@@ -241,6 +233,18 @@ function AddAvailabilityModal({ onClose, onSaved }) {
                 <Chip key={m} active={lengthOf() === m} onClick={() => setLength(m)}>{t('schedule.minutesShort', { count: m })}</Chip>
               ))}
             </div>
+          </div>
+
+          </div>
+
+          <div className="flex items-center justify-between gap-4 rounded-2xl p-4" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+            <div className="min-w-0">
+              <p className="text-sm font-bold" style={{ color: 'var(--ink)' }}>{t('partners.repeatWeekly')}</p>
+              <p className="mt-0.5 text-xs" style={{ color: 'var(--ink-soft)' }}>
+                {slot.weekly ? t('partners.repeatWeeklyHintOn') : t('partners.repeatWeeklyHintOff')}
+              </p>
+            </div>
+            <Switch checked={slot.weekly} onChange={(weekly) => setSlot({ ...slot, weekly })} label={t('partners.repeatWeekly')} />
           </div>
 
           {error && (

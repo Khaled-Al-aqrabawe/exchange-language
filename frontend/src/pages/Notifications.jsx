@@ -28,16 +28,14 @@ export default function Notifications() {
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       <div className="lp-hero-bg">
-        <div className="max-w-3xl mx-auto px-6 pt-10 pb-6 lp-animate-in">
-          <div className="lp-icon-badge mb-3">
-            <Bell size={18} />
-          </div>
-          <h1 className="font-display text-3xl font-bold tracking-tight mb-1" style={{ color: 'var(--ink)' }}>{t('notifications.pageTitle')}</h1>
+        <div className="max-w-6xl mx-auto px-6 pt-10 pb-6 lp-animate-in">
+          <p className="lp-eyebrow mb-3">{t('notifications.eyebrow')}</p>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl mb-1" style={{ color: 'var(--ink)' }}>{t('notifications.pageTitle')}</h1>
           <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>{t('notifications.pageSubtitle')}</p>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 pb-14">
+      <div className="max-w-6xl mx-auto px-6 pb-14">
         {loading ? (
           <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>{t('common.loading')}</p>
         ) : items.length === 0 ? (

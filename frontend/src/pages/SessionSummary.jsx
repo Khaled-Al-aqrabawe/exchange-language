@@ -42,7 +42,7 @@ export default function SessionSummary() {
           <Link to="/schedule" className="inline-flex items-center gap-1.5 text-sm mb-3 hover:opacity-70" style={{ color: 'var(--ink-soft)' }}>
             <ArrowLeft size={14} /> {t('summary.back')}
           </Link>
-          <h1 className="font-display text-3xl font-bold tracking-tight mb-1" style={{ color: 'var(--ink)' }}>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl mb-1" style={{ color: 'var(--ink)' }}>
             {t('summary.title', { name: session.other.full_name })}
           </h1>
           <p className="text-sm mb-4" style={{ color: 'var(--ink-soft)' }}>

@@ -67,7 +67,8 @@ export default function Settings() {
   return (
     <div className="min-h-[calc(100vh-4rem)] lp-hero-bg" style={{ background: 'var(--bg)' }}>
       <div className="max-w-2xl mx-auto px-6 py-10">
-        <h1 className="font-display text-2xl font-bold tracking-tight mb-6 lp-animate-in" style={{ color: 'var(--ink)' }}>{t('settings.title')}</h1>
+        <p className="lp-eyebrow mb-3 lp-animate-in">{t('settings.eyebrow')}</p>
+        <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl mb-6 lp-animate-in" style={{ color: 'var(--ink)' }}>{t('settings.title')}</h1>
 
         <section className="lp-card mb-6 lp-animate-in lp-delay-1">
           <div className="flex items-center gap-4">

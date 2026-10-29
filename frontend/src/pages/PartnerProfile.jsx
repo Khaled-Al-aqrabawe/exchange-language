@@ -1,9 +1,10 @@
-import { CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, Phone, Play, Sparkles, Star, Target, Video, X } from 'lucide-react'
+import { CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, Phone, Play, Sparkles, Star, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import ConversationThread from './ConversationThread'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import { bookableStartTimes, DAYS, isSlotExpiredToday, slotOccurrenceUtcInstant } from '../utils/availability'
 import { resolveAvatarUrl } from '../utils/images'
@@ -137,12 +138,14 @@ export default function PartnerProfile() {
   const [bookingSlot, setBookingSlot] = useState(null)
   const [showRequestModal, setShowRequestModal] = useState(false)
   const [videoPlaying, setVideoPlaying] = useState(false)
+  const [chatId, setChatId] = useState(null)
 
   const loadPartner = () => client.get(`/matching/partners/${userId}/`).then(({ data }) => setPartner(data))
 
   useEffect(() => {
     setLoading(true)
     setVideoPlaying(false)
+    setChatId(null)
     loadPartner().finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
@@ -156,7 +159,7 @@ export default function PartnerProfile() {
 
   const handleMessage = async () => {
     const { data } = await client.post('/chat/conversations/start/', { partner_id: userId })
-    navigate(`/messages/${data.id}`)
+    setChatId(data.id)
   }
 
   const handleCall = async () => {
@@ -316,9 +319,6 @@ export default function PartnerProfile() {
             </div>
 
             <div className="mb-8 flex items-start gap-3">
-              <span className="lp-icon-badge h-9 w-9 shrink-0">
-                <Target size={16} />
-              </span>
               <div>
                 <p className="lp-eyebrow mb-1">{t('partnerProfile.learningGoals')}</p>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
@@ -393,6 +393,22 @@ export default function PartnerProfile() {
           onClose={() => setShowRequestModal(false)}
           onSent={loadPartner}
         />
+      )}
+      {chatId && (
+        <div className="fixed bottom-4 end-4 z-40 h-[32rem] max-h-[calc(100vh-6rem)] w-[22rem] max-w-[calc(100vw-2rem)]">
+          <button
+            type="button"
+            onClick={() => setChatId(null)}
+            className="lp-surface absolute -top-3 -end-3 z-10 flex h-8 w-8 items-center justify-center rounded-full hover:opacity-80"
+            style={{ color: 'var(--ink)', boxShadow: 'var(--shadow-card-hover)' }}
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+          <div className="lp-surface lp-animate-in-scale h-full overflow-hidden" style={{ boxShadow: 'var(--shadow-card-hover)' }}>
+            <ConversationThread conversationId={chatId} partner={{ id: partner.user_id, full_name: partner.full_name }} />
+          </div>
+        </div>
       )}
     </div>
   )

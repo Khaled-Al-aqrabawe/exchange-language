@@ -115,6 +115,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
 
   return (
     <ModalShell
+      wide
       icon={CalendarPlus}
       title={t('schedule.sendRequestTitle')}
       subtitle={sent ? undefined : t('schedule.requestSubtitle')}
@@ -171,6 +172,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
             </ModalField>
           </div>
 
+          <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <ModalField label={`${t('schedule.date')} *`} icon={CalendarCheck}>
               <input
@@ -221,6 +223,8 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
                 <Chip key={m} active={form.duration_minutes === m} onClick={() => setDuration(m)}>{t('schedule.minutesShort', { count: m })}</Chip>
               ))}
             </div>
+          </div>
+
           </div>
 
           {partnerSlots.length > 0 && (

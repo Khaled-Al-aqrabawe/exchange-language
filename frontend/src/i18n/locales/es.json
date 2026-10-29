@@ -357,6 +357,8 @@
     "conversation": "Conversación"
   },
   "schedule": {
+    "dateFrom": "Desde",
+    "dateTo": "Hasta",
     "title": "Historial de sesiones",
     "sendRequestTitle": "Enviar solicitud de sesión",
     "requestSent": "¡Tu solicitud de sesión fue enviada!",
@@ -437,6 +439,11 @@
     "lessonsCount": "{{count}} lecciones"
   },
   "materials": {
+    "eyebrow": "Cursos",
+    "start": "Empezar",
+    "continue": "Continuar",
+    "nextUp": "Siguiente",
+    "anyLevel": "Cualquier nivel",
     "title": "Cursos",
     "subtitle": "Archivos descargables para usar en tus sesiones.",
     "loading": "Cargando materiales...",
@@ -518,6 +525,7 @@
     }
   },
   "settings": {
+    "eyebrow": "Ajustes",
     "title": "Ajustes",
     "editProfile": "Editar perfil",
     "notifications": "Notificaciones",
@@ -573,6 +581,7 @@
     "other": "Otro"
   },
   "notifications": {
+    "eyebrow": "Notificaciones",
     "title": "Notificaciones",
     "empty": "Todavía no hay notificaciones.",
     "request": "{{name}} te envió una solicitud de sesión",

@@ -47,10 +47,10 @@ export default function Messages() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] lp-hero-bg" style={{ background: 'var(--bg)' }}>
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-8 sm:px-6">
+      <div className="mx-auto max-w-6xl px-6 pb-10 pt-10">
         <div className="lp-animate-in mb-6">
           <p className="lp-eyebrow mb-3">{t('messages.eyebrow')}</p>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl" style={{ color: 'var(--ink)' }}>{t('messages.title')}</h1>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>{t('messages.title')}</h1>
         </div>
 
         <div className="lp-card lp-animate-in lp-delay-1 flex overflow-hidden" style={{ padding: 0, height: 'calc(100vh - 17rem)', minHeight: '28rem' }}>

@@ -390,6 +390,8 @@
     "sayHello": "قل مرحباً وابدأ التدرّب!"
   },
   "schedule": {
+    "dateFrom": "من",
+    "dateTo": "إلى",
     "title": "سجل الجلسات",
     "sendRequestTitle": "إرسال طلب جلسة",
     "requestSent": "تم إرسال طلب الجلسة!",
@@ -469,6 +471,7 @@
       "all": "الكل",
       "upcoming": "القادمة",
       "past": "المكتملة",
+      "uncompleted": "غير مكتملة",
       "closed": "الملغاة"
     },
     "requestSubtitle": "اختر شريكاً ووقتاً يناسبكما."
@@ -482,6 +485,11 @@
     "lessonsCount": "{{count}} درسًا"
   },
   "materials": {
+    "eyebrow": "الدورات",
+    "start": "ابدأ",
+    "continue": "تابع",
+    "nextUp": "التالي",
+    "anyLevel": "أي مستوى",
     "title": "الدورات",
     "subtitle": "ملفات قابلة للتنزيل لاستخدامها في جلساتك.",
     "loading": "جارٍ تحميل المواد...",
@@ -588,6 +596,7 @@
     "introVideoHint": "فيديو قصير يساعد الشركاء على التعرف عليك قبل أول جلسة."
   },
   "settings": {
+    "eyebrow": "الإعدادات",
     "title": "الإعدادات",
     "editProfile": "تعديل الملف الشخصي",
     "notifications": "الإشعارات",
@@ -703,6 +712,7 @@
     "other": "آخر"
   },
   "notifications": {
+    "eyebrow": "الإشعارات",
     "title": "الإشعارات",
     "empty": "لا توجد إشعارات بعد.",
     "request": "أرسل لك {{name}} طلب جلسة",
