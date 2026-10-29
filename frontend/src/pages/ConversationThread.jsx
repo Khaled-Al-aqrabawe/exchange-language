@@ -30,7 +30,7 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
   // Same as "Call now": rings the partner and opens a real session (notes, rating, timer).
   const startCall = async () => {
     try {
-      const { data } = await client.post('/calls/ring/', { partner_id: partner.id })
+      const { data } = await client.post('/calls/ring/', { partner_id: partner.id, notify: false })
       navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
     } catch {
       window.alert(t('call.ringError'))

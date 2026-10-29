@@ -788,6 +788,9 @@
     "uploading": "Sending recording..."
   },
   "summary": {
+    "readyTitle": "Session finished",
+    "readyBody": "Your session summary is ready. Download it to keep your notes, chat and shared lessons.",
+    "close": "Close",
     "title": "Session with {{name}}",
     "link": "Summary",
     "back": "Back to my sessions",

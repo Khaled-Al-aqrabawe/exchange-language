@@ -2,6 +2,8 @@ import {
   ArrowRight,
   BookOpenCheck,
   CalendarClock,
+  Download,
+  FileText,
   Lightbulb,
   Phone,
   Sparkles,
@@ -9,9 +11,12 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import client from '../api/client'
+import ModalShell from '../components/ModalShell'
 import { useAuth } from '../context/AuthContext'
+import { downloadText } from '../utils/downloadFile'
+import { buildSummaryText } from '../utils/sessionSummary'
 import { resolveAvatarUrl } from '../utils/images'
 
 const dayOfYear = () => {
@@ -52,6 +57,27 @@ export default function Home() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  // Arriving from a finished call: offer the session summary in a box over the home page.
+  const [summaryId, setSummaryId] = useState(location.state?.summarySessionId || null)
+  const [summaryBusy, setSummaryBusy] = useState(false)
+
+  const closeSummary = () => {
+    setSummaryId(null)
+    navigate('/home', { replace: true, state: null })
+  }
+
+  const downloadSummary = async () => {
+    setSummaryBusy(true)
+    try {
+      const { data } = await client.get(`/sessions/${summaryId}/summary/`)
+      downloadText(`session-summary-${summaryId}.txt`, buildSummaryText(data, t, i18n.resolvedLanguage))
+    } finally {
+      setSummaryBusy(false)
+      closeSummary()
+    }
+  }
+
   const profile = user?.profile
 
   const [sessions, setSessions] = useState([])
@@ -79,7 +105,7 @@ export default function Home() {
 
   const handleCall = async (p) => {
     try {
-      const { data } = await client.post('/calls/ring/', { partner_id: p.user_id })
+      const { data } = await client.post('/calls/ring/', { partner_id: p.user_id, notify: false })
       navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
     } catch {
       window.alert(t('call.ringError'))
@@ -91,6 +117,26 @@ export default function Home() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
+      {summaryId && (
+        <ModalShell
+          icon={FileText}
+          title={t('summary.readyTitle')}
+          subtitle={t('summary.readyBody')}
+          onClose={closeSummary}
+          footer={(
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={closeSummary} className="lp-btn-secondary shrink-0">{t('summary.close')}</button>
+              <button type="button" onClick={downloadSummary} disabled={summaryBusy} className="lp-btn-primary flex-1 disabled:opacity-50">
+                <Download size={16} /> {t('summary.download')}
+              </button>
+            </div>
+          )}
+        >
+          <Link to={`/sessions/${summaryId}/summary`} onClick={() => setSummaryId(null)} className="text-sm font-semibold hover:opacity-80" style={{ color: 'var(--accent)' }}>
+            {t('summary.link')} →
+          </Link>
+        </ModalShell>
+      )}
       <div className="lp-hero-bg">
         <div className="mx-auto max-w-6xl px-6 pb-14 pt-8">
           {/* Greeting */}

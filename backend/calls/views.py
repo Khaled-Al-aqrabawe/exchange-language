@@ -23,10 +23,33 @@ def _cache_key(user_id):
     return f'incoming_call_{user_id}'
 
 
+def _notify_partner(request, partner, room_id):
+    avatar = getattr(request.user.profile, 'avatar', None)
+    payload = {
+        'event': 'incoming-call',
+        'room_id': room_id,
+        'caller': {
+            'id': request.user.id,
+            'name': request.user.full_name,
+            'avatar': request.build_absolute_uri(avatar.url) if avatar else None,
+        },
+    }
+    cache.set(_cache_key(partner.id), payload, RING_SECONDS)
+    try:
+        async_to_sync(get_channel_layer().group_send)(
+            f'user_{partner.id}', {'type': 'notify.event', 'payload': payload},
+        )
+    except Exception:
+        logger.exception('Could not push incoming-call over the channel layer')
+
+
 class RingPartnerView(APIView):
     """Starts an instant call: creates a room and tells the partner. The event is
     pushed over their notify socket and also stored briefly so their browser can
-    pick it up by polling if the socket is down."""
+    pick it up by polling if the socket is down.
+
+    With `notify: false` only the room is created; the caller rings later via
+    `call-notify`, when they press "Join now" in the lobby."""
 
     permission_classes = [permissions.IsAuthenticated]
 
@@ -42,24 +65,36 @@ class RingPartnerView(APIView):
             host=request.user, partner=partner, scheduled_time=timezone.now(),
             duration_minutes=INSTANT_CALL_MINUTES, status='confirmed', room_id=room_id, is_instant=True,
         )
-        avatar = getattr(request.user.profile, 'avatar', None)
-        payload = {
-            'event': 'incoming-call',
-            'room_id': room_id,
-            'caller': {
-                'id': request.user.id,
-                'name': request.user.full_name,
-                'avatar': request.build_absolute_uri(avatar.url) if avatar else None,
-            },
-        }
-        cache.set(_cache_key(partner.id), payload, RING_SECONDS)
-        try:
-            async_to_sync(get_channel_layer().group_send)(
-                f'user_{partner.id}', {'type': 'notify.event', 'payload': payload},
-            )
-        except Exception:
-            logger.exception('Could not push incoming-call over the channel layer')
+        if request.data.get('notify', True) is not False:
+            _notify_partner(request, partner, room_id)
         return Response({'room_id': room_id})
+
+
+class NotifyCallView(APIView):
+    """Rings the partner of a call the caller created without notifying."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        session = ScheduledSession.objects.filter(
+            room_id=request.data.get('room_id'), host=request.user, is_instant=True,
+        ).first()
+        if not session:
+            raise NotFound('Call not found')
+        _notify_partner(request, session.partner, session.room_id)
+        return Response(status=204)
+
+
+class CancelCallView(APIView):
+    """The caller backed out of the lobby before joining: drop the unused instant session."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        ScheduledSession.objects.filter(
+            room_id=request.data.get('room_id'), host=request.user, is_instant=True, host_joined_at__isnull=True,
+        ).delete()
+        return Response(status=204)
 
 
 class IncomingCallView(APIView):

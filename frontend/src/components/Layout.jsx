@@ -185,7 +185,7 @@ export default function Layout() {
   const location = useLocation()
   const { t } = useTranslation()
   const authedLinks = useAuthedLinks()
-  const hideFooter = NO_FOOTER_PATHS.includes(location.pathname)
+  const hideFooter = NO_FOOTER_PATHS.includes(location.pathname) || location.pathname.startsWith('/call/')
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
