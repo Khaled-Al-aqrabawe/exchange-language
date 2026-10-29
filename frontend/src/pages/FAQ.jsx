@@ -15,7 +15,6 @@ export default function FAQ() {
 
       <div className="lp-hero-bg">
         <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-10 text-center lp-animate-in" style={{ color: 'var(--ink)' }}>
-          <p className="lp-eyebrow mb-4" style={{ color: 'var(--accent)' }}>{t('faq.eyebrow')}</p>
           <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight">
             <span className="lp-gradient-text">{t('faq.title')}</span>
           </h1>

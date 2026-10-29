@@ -328,7 +328,7 @@ function AnnotationLayer({ active, tool, color, strokes, onDraw, onUpdate, onDel
       )}
       {active && tool === 'select' && selected && selBox && !textAt && (
         <div
-          className="absolute z-[7] flex items-center gap-1 rounded-full bg-white/90 px-1.5 py-1"
+          className="absolute z-[7] flex items-center gap-1 rounded-full bg-slate-900/90 px-1.5 py-1"
           style={{ left: selBox.x, top: Math.max(selBox.y - 36, 2) }}
         >
           {selected.type === 'text' && (
@@ -340,7 +340,7 @@ function AnnotationLayer({ active, tool, color, strokes, onDraw, onUpdate, onDel
           <button
             type="button"
             onClick={() => { onDelete(selectedId); setSelectedId(null) }}
-            className="flex h-6 w-6 items-center justify-center rounded-full text-red-400 hover:bg-slate-200"
+            className="flex h-6 w-6 items-center justify-center rounded-full text-red-400 hover:bg-white/15"
           >
             <Trash2 size={13} />
           </button>
@@ -356,7 +356,7 @@ function AnnotationToolbar({ pen, t }) {
     <button
       type="button"
       onClick={() => pen.onTool(name)}
-      className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${pen.on && pen.tool === name ? 'bg-[var(--accent)] text-white' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'}`}
+      className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${pen.on && pen.tool === name ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
       title={title}
     >
       <Icon size={14} />
@@ -370,7 +370,7 @@ function AnnotationToolbar({ pen, t }) {
           type="button"
           onClick={() => pen.onColor(c)}
           className="h-5 w-5 rounded-full transition-transform hover:scale-110"
-          style={{ background: c, outline: pen.color === c ? '2px solid #0f172a' : 'none', outlineOffset: '1px' }}
+          style={{ background: c, outline: pen.color === c ? '2px solid #fff' : 'none', outlineOffset: '1px' }}
           aria-label={c}
         />
       ))}
@@ -381,7 +381,7 @@ function AnnotationToolbar({ pen, t }) {
         type="button"
         onClick={pen.onUndo}
         disabled={!pen.canUndo}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-800 hover:bg-slate-200 disabled:opacity-30 transition-colors"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-30 transition-colors"
         title={t('call.undo')}
       >
         <Undo2 size={14} />
@@ -408,12 +408,12 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
     : `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
 
   return (
-    <div className={`absolute inset-y-0 start-0 ${fullWidth ? 'end-0' : 'end-[9.75rem]'} z-10 flex flex-col bg-white lp-animate-in-scale`}>
-      <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid rgb(15 23 42 / 0.1)' }}>
-        <span className="inline-flex items-center gap-2 min-w-0 text-sm text-slate-900">
-          <FileText size={15} className="shrink-0 text-slate-500" />
+    <div className={`absolute inset-y-0 start-0 ${fullWidth ? 'end-0' : 'end-[9.75rem]'} z-10 flex flex-col bg-slate-900 lp-animate-in-scale`}>
+      <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
+        <span className="inline-flex items-center gap-2 min-w-0 text-sm text-white">
+          <FileText size={15} className="shrink-0 text-slate-400" />
           <span className="truncate">
-            <span className="text-slate-500">{t(material.from === 'you' ? 'materials.sharedByYou' : 'materials.sharedByPartner')}: </span>
+            <span className="text-slate-400">{t(material.from === 'you' ? 'materials.sharedByYou' : 'materials.sharedByPartner')}: </span>
             {material.title}
           </span>
         </span>
@@ -426,14 +426,14 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
             <button
               type="button"
               onClick={onFinish}
-              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 h-8 text-xs font-medium text-slate-900 hover:bg-slate-200 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 h-8 text-xs font-medium text-white hover:bg-white/20 transition-colors"
             >
               <Check size={13} /> {t('call.finishLesson')}
             </button>
           )}
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
             title={t('materials.stopSharing')}
           >
             <X size={15} />
@@ -444,13 +444,13 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
       <div className="relative flex-1 min-h-0">
         {canEmbed ? (
           isImage ? (
-            <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-slate-100" />
+            <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-black" />
           ) : (
             // The viewer shows a 16:9 slide plus its own 31px control bar, so the frame is that tall:
             // otherwise it adds black bars beside the slide and the bar no longer fits the frame.
-            <div className="flex h-full w-full items-center justify-center bg-slate-100 p-3" style={{ containerType: 'size' }}>
+            <div className="flex h-full w-full items-center justify-center bg-black p-3" style={{ containerType: 'size' }}>
               <div
-                className="relative overflow-hidden rounded-xl bg-white shadow-md"
+                className="relative overflow-hidden rounded-xl bg-white"
                 style={{ '--w': 'min(100cqw - 24px, (100cqh - 24px - 31px) * 16 / 9)', width: 'calc(var(--w))', height: 'calc(var(--w) * 9 / 16 + 31px)' }}
               >
                 {/* a little larger than the frame so the viewer's own 1px outline is clipped away */}
@@ -461,7 +461,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
             </div>
           )
         ) : (
-          <div className="flex flex-col items-center justify-center gap-3 h-full text-slate-500">
+          <div className="flex flex-col items-center justify-center gap-3 h-full text-slate-400">
             <FileText size={32} />
             <p className="text-sm">{name}</p>
           </div>
@@ -521,19 +521,19 @@ function ReportModal({ sessionId, partnerName, getRecording, onClose, onSent, t 
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4 py-6">
-      <div className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl" style={{ border: '1px solid var(--line)' }}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 py-6">
+      <div className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-slate-900 shadow-2xl border border-white/10">
         {sent ? (
           <div className="p-8 text-center">
-            <p className="mb-2 text-lg font-semibold text-slate-900">{t('report.sentTitle')}</p>
-            <p className="mb-5 text-sm text-slate-500">{t('report.sentBody')}</p>
+            <p className="mb-2 text-lg font-semibold text-white">{t('report.sentTitle')}</p>
+            <p className="mb-5 text-sm text-slate-400">{t('report.sentBody')}</p>
             <button onClick={onSent} className="lp-btn-primary w-full justify-center">{t('report.leaveNow')}</button>
           </div>
         ) : (
           <>
             <div className="px-6 pb-3 pt-6">
-              <p className="mb-1 text-xl font-bold text-slate-900">{t('report.title', { name: partnerName })}</p>
-              <p className="text-sm text-slate-500">{t('report.subtitle')}</p>
+              <p className="mb-1 text-xl font-bold text-white">{t('report.title', { name: partnerName })}</p>
+              <p className="text-sm text-slate-400">{t('report.subtitle')}</p>
             </div>
             <div className="flex-1 overflow-y-auto px-6 pb-4">
               <div className="grid gap-2.5 sm:grid-cols-2">
@@ -544,8 +544,8 @@ function ReportModal({ sessionId, partnerName, getRecording, onClose, onSent, t 
                       key={r}
                       className="flex cursor-pointer items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold transition-all"
                       style={active
-                        ? { background: 'color-mix(in srgb, var(--accent) 10%, white)', border: '2px solid var(--accent)', color: 'var(--accent)' }
-                        : { background: '#fff', border: '2px solid #e2e8f0', color: '#334155' }}
+                        ? { background: 'color-mix(in srgb, var(--accent) 18%, transparent)', border: '2px solid var(--accent)', color: 'var(--accent)' }
+                        : { background: 'rgb(255 255 255 / 0.04)', border: '2px solid rgb(255 255 255 / 0.12)', color: '#e2e8f0' }}
                     >
                       <input
                         type="radio"
@@ -556,7 +556,7 @@ function ReportModal({ sessionId, partnerName, getRecording, onClose, onSent, t 
                       />
                       <span
                         className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                        style={active ? { background: 'var(--accent)', color: '#fff' } : { border: '2px solid #cbd5e1' }}
+                        style={active ? { background: 'var(--accent)', color: '#fff' } : { border: '2px solid rgb(255 255 255 / 0.3)' }}
                       >
                         {active && <CheckCircle2 size={14} />}
                       </span>
@@ -570,12 +570,12 @@ function ReportModal({ sessionId, partnerName, getRecording, onClose, onSent, t 
                 onChange={(e) => setDetails(e.target.value)}
                 rows={3}
                 placeholder={t('report.detailsPlaceholder')}
-                className="mt-4 w-full rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                className="mt-4 w-full rounded-2xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
               />
               {error && <p className="mt-2 text-sm" style={{ color: '#ef4444' }}>{error}</p>}
             </div>
-            <div className="flex justify-end gap-2 border-t border-slate-200 px-6 py-4">
-              <button onClick={onClose} className="rounded-full px-5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
+            <div className="flex justify-end gap-2 border-t border-white/10 px-6 py-4">
+              <button onClick={onClose} className="rounded-full px-5 py-2 text-sm font-semibold text-slate-300 hover:bg-white/10 transition-colors">
                 {t('common.cancel')}
               </button>
               <button onClick={submit} disabled={busy} className="lp-btn-primary px-5 py-2 text-sm disabled:opacity-50">
@@ -670,24 +670,24 @@ function TranslatePanel({ material, source, target, onAddNote, t }) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="border-b border-slate-200 p-4">
+      <div className="border-b border-white/10 p-4">
         {result ? (
           <div>
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-xl font-semibold leading-snug text-slate-900" dir="auto">{result.word}</p>
-                {result.shown && <p className="text-xs italic text-slate-500">{result.shown}</p>}
+                <p className="text-xl font-semibold leading-snug text-white" dir="auto">{result.word}</p>
+                {result.shown && <p className="text-xs italic text-slate-400">{result.shown}</p>}
               </div>
-              <button type="button" onClick={() => speak(result.word, source)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-800 hover:bg-slate-200" title={t('translate.listen')}>
+              <button type="button" onClick={() => speak(result.word, source)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" title={t('translate.listen')}>
                 <Volume2 size={15} />
               </button>
             </div>
-            <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2">
+            <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-white/5 px-3 py-2">
               <p className="text-base font-medium" style={{ color: result.error ? '#f87171' : '#7dd3fc' }} dir="auto">
                 {result.loading ? t('translate.loading') : result.error ? t('translate.error') : result.translation}
               </p>
               {result.translation && (
-                <button type="button" onClick={() => speak(result.translation, target)} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200" title={t('translate.listen')}>
+                <button type="button" onClick={() => speak(result.translation, target)} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-slate-300 hover:bg-white/20" title={t('translate.listen')}>
                   <Volume2 size={13} />
                 </button>
               )}
@@ -699,7 +699,7 @@ function TranslatePanel({ material, source, target, onAddNote, t }) {
                   type="button"
                   disabled={added}
                   onClick={() => { onAddNote(`${result.word} = ${result.translation}`); setAdded(true) }}
-                  className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-200 disabled:opacity-60"
+                  className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-slate-200 hover:bg-white/20 disabled:opacity-60"
                 >
                   {added ? t('translate.addedToNotes') : t('translate.addToNotes')}
                 </button>
@@ -707,18 +707,18 @@ function TranslatePanel({ material, source, target, onAddNote, t }) {
             </div>
           </div>
         ) : (
-          <p className="text-sm text-slate-500">{t('translate.hint')}</p>
+          <p className="text-sm text-slate-400">{t('translate.hint')}</p>
         )}
       </div>
 
       {recent.length > 1 && (
-        <div className="flex gap-1.5 overflow-x-auto border-b border-slate-200 px-4 py-2">
+        <div className="flex gap-1.5 overflow-x-auto border-b border-white/10 px-4 py-2">
           {recent.map((r) => (
             <button
               key={r.word}
               type="button"
               onClick={() => { speak(r.word, source); setAdded(false); setResult(r) }}
-              className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-200"
+              className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-xs text-slate-200 hover:bg-white/20"
               dir="auto"
             >
               {r.word}
@@ -729,22 +729,22 @@ function TranslatePanel({ material, source, target, onAddNote, t }) {
 
       {slides.length > 0 ? (
         <>
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2 text-xs text-slate-500">
-            <button type="button" onClick={() => setSlideIndex((i) => Math.max(0, i - 1))} disabled={slideIndex === 0} className="rounded-full px-2 py-1 hover:bg-slate-100 disabled:opacity-30">‹</button>
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-slate-400">
+            <button type="button" onClick={() => setSlideIndex((i) => Math.max(0, i - 1))} disabled={slideIndex === 0} className="rounded-full px-2 py-1 hover:bg-white/10 disabled:opacity-30">‹</button>
             <span>{t('translate.slide', { n: slideIndex + 1, total: slides.length })}</span>
-            <button type="button" onClick={() => setSlideIndex((i) => Math.min(slides.length - 1, i + 1))} disabled={slideIndex === slides.length - 1} className="rounded-full px-2 py-1 hover:bg-slate-100 disabled:opacity-30">›</button>
+            <button type="button" onClick={() => setSlideIndex((i) => Math.min(slides.length - 1, i + 1))} disabled={slideIndex === slides.length - 1} className="rounded-full px-2 py-1 hover:bg-white/10 disabled:opacity-30">›</button>
           </div>
           <div className="flex-1 space-y-2 overflow-y-auto p-4" onMouseUp={onMouseUp}>
             {lines.length === 0 && <p className="text-sm text-slate-500">{t('translate.emptySlide')}</p>}
             {lines.map((line, lineIndex) => {
               let wordIndex = -1
               return (
-                <p key={`${lineIndex}-${line}`} dir="auto" className="text-sm leading-relaxed text-slate-700">
+                <p key={`${lineIndex}-${line}`} dir="auto" className="text-sm leading-relaxed text-slate-200">
                   {line.split(/(\s+)/).map((part, i) => {
                     if (!/\S/.test(part)) return part
                     wordIndex += 1
                     const index = wordIndex
-                    return <span key={i} onClick={() => pick(lineIndex, index, part)} className="cursor-pointer rounded px-0.5 hover:bg-slate-200">{part}</span>
+                    return <span key={i} onClick={() => pick(lineIndex, index, part)} className="cursor-pointer rounded px-0.5 hover:bg-white/15">{part}</span>
                   })}
                 </p>
               )
@@ -757,14 +757,14 @@ function TranslatePanel({ material, source, target, onAddNote, t }) {
 
       <form
         onSubmit={(e) => { e.preventDefault(); lookup(typed); setTyped('') }}
-        className="flex gap-2 border-t border-slate-200 p-3"
+        className="flex gap-2 border-t border-white/10 p-3"
       >
         <input
           value={typed}
           onChange={(e) => setTyped(e.target.value)}
           placeholder={t('translate.placeholder')}
           dir="auto"
-          className="min-w-0 flex-1 rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          className="min-w-0 flex-1 rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
         <button type="submit" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-white" aria-label={t('translate.go')}>
           <Languages size={14} />
@@ -800,7 +800,7 @@ function CallChat({ messages, onSend, myId, t }) {
             <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
               <span
                 className="max-w-[85%] rounded-2xl px-3 py-1.5 text-sm"
-                style={mine ? { background: 'var(--accent)', color: '#fff' } : { background: 'rgb(15 23 42 / 0.1)', color: '#1e293b' }}
+                style={mine ? { background: 'var(--accent)', color: '#fff' } : { background: 'rgb(255 255 255 / 0.1)', color: '#e2e8f0' }}
               >
                 {m.text}
               </span>
@@ -809,12 +809,12 @@ function CallChat({ messages, onSend, myId, t }) {
         })}
         <div ref={bottomRef} />
       </div>
-      <form onSubmit={submit} className="flex gap-2 border-t border-slate-200 p-3">
+      <form onSubmit={submit} className="flex gap-2 border-t border-white/10 p-3">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t('call.chatPlaceholder')}
-          className="min-w-0 flex-1 rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          className="min-w-0 flex-1 rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
         <button type="submit" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-white" aria-label={t('call.chatSend')}>
           <Send size={14} />
@@ -838,23 +838,23 @@ function MaterialPicker({ materials, loading, defaultLanguage, onPick, onClose, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-4" onClick={onClose}>
       <div
-        className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
+        className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 pt-5">
           <div>
-            <p className="text-lg font-bold text-slate-900">{t('materials.pickMaterial')}</p>
-            <p className="text-xs text-slate-500">{t('materials.pickHint')}</p>
+            <p className="text-lg font-bold text-white">{t('materials.pickMaterial')}</p>
+            <p className="text-xs text-slate-400">{t('materials.pickHint')}</p>
           </div>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-white/10 hover:text-white">
             <X size={16} />
           </button>
         </div>
 
         {loading ? (
-          <p className="px-6 py-8 text-sm text-slate-500">{t('materials.loading')}</p>
+          <p className="px-6 py-8 text-sm text-slate-400">{t('materials.loading')}</p>
         ) : materials.length === 0 ? (
-          <p className="px-6 py-8 text-sm text-slate-500">{t('materials.empty')}</p>
+          <p className="px-6 py-8 text-sm text-slate-400">{t('materials.empty')}</p>
         ) : (
           <>
             {languages.length > 1 && (
@@ -864,7 +864,7 @@ function MaterialPicker({ materials, loading, defaultLanguage, onPick, onClose, 
                     key={l}
                     type="button"
                     onClick={() => setLanguage(l)}
-                    className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${l === active ? 'bg-[var(--accent)] text-[var(--accent-ink)]' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                    className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${l === active ? 'bg-[var(--accent)] text-[var(--accent-ink)]' : 'bg-white/10 text-slate-300 hover:bg-white/15'}`}
                   >
                     {l}
                   </button>
@@ -879,11 +879,11 @@ function MaterialPicker({ materials, loading, defaultLanguage, onPick, onClose, 
                 return (
                   <section key={level}>
                     <div className="mb-2 flex items-center justify-between">
-                      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                      <h3 className="flex items-center gap-2 text-sm font-bold text-white">
                         <span className="rounded-full bg-[var(--gold)] px-2.5 py-0.5 text-xs font-extrabold text-white">{level}</span>
                         {active}
                       </h3>
-                      <span className="text-xs text-slate-500">{t('materials.progressCount', { done, total: lessons.length })}</span>
+                      <span className="text-xs text-slate-400">{t('materials.progressCount', { done, total: lessons.length })}</span>
                     </div>
                     <div className="flex flex-col gap-1.5">
                       {lessons.map((m) => {
@@ -893,12 +893,12 @@ function MaterialPicker({ materials, loading, defaultLanguage, onPick, onClose, 
                             key={m.id}
                             type="button"
                             onClick={() => onPick(m)}
-                            className={`flex items-center gap-3 rounded-2xl px-3.5 py-3 text-start transition-colors ${isNext ? 'bg-[color-mix(in_srgb,var(--accent)_22%,transparent)] ring-1 ring-[var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_30%,transparent)]' : 'bg-slate-50 hover:bg-slate-100'}`}
+                            className={`flex items-center gap-3 rounded-2xl px-3.5 py-3 text-start transition-colors ${isNext ? 'bg-[color-mix(in_srgb,var(--accent)_22%,transparent)] ring-1 ring-[var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_30%,transparent)]' : 'bg-white/5 hover:bg-white/10'}`}
                           >
-                            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${m.my_status === 'complete' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-100 text-slate-700'}`}>
+                            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${m.my_status === 'complete' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-200'}`}>
                               {m.my_status === 'complete' ? <Check size={16} /> : m.order || '•'}
                             </span>
-                            <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{m.title}</span>
+                            <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-100">{m.title}</span>
                             {isNext ? (
                               <span className="shrink-0 rounded-full bg-[var(--accent)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--accent-ink)]">{t('call.nextLesson')}</span>
                             ) : m.my_status === 'complete' ? (
@@ -944,19 +944,19 @@ function CallRatingModal({ partnerName, onSubmit, onReport, onSummary, t }) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white border border-slate-200 p-6">
-        <p className="text-lg font-semibold text-slate-900 mb-1">{t('schedule.rateModalTitle', { name: partnerName })}</p>
-        <p className="text-sm text-slate-500 mb-4">{t('schedule.rateModalSubtitle')}</p>
+      <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6">
+        <p className="text-lg font-semibold text-white mb-1">{t('schedule.rateModalTitle', { name: partnerName })}</p>
+        <p className="text-sm text-slate-400 mb-4">{t('schedule.rateModalSubtitle')}</p>
         {(
-          <div className="mb-4 rounded-xl bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">{t('call.downloadsTitle')}</p>
+          <div className="mb-4 rounded-xl bg-white/5 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">{t('call.downloadsTitle')}</p>
             <div className="flex flex-col gap-1.5">
               <button
                 type="button"
                 onClick={onSummary}
-                className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm font-semibold text-slate-900 hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm font-semibold text-white hover:bg-white/10 transition-colors"
               >
-                <Download size={14} className="shrink-0 text-slate-600" /> <span className="truncate">{t('call.downloadSummary')}</span>
+                <Download size={14} className="shrink-0 text-slate-300" /> <span className="truncate">{t('call.downloadSummary')}</span>
               </button>
             </div>
           </div>
@@ -980,7 +980,7 @@ function CallRatingModal({ partnerName, onSubmit, onReport, onSummary, t }) {
           onChange={(e) => setComment(e.target.value)}
           rows={3}
           placeholder={score && score <= LOW_RATING_MAX ? t('schedule.lowRatingPlaceholder') : t('schedule.rateCommentPlaceholder')}
-          className="w-full rounded-xl px-3.5 py-2.5 text-sm bg-slate-100 text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          className="w-full rounded-xl px-3.5 py-2.5 text-sm bg-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
         {error && <p className="text-sm mt-2" style={{ color: '#f87171' }}>{error}</p>}
         <div className="flex items-center justify-between gap-2 mt-5">
@@ -1917,18 +1917,18 @@ export default function Call() {
 
   if (!joined) {
     return (
-      <div className="bg-slate-100 min-h-[calc(100vh-4rem)]">
+      <div className="bg-slate-950 min-h-[calc(100vh-4rem)]">
         <div className="max-w-xl mx-auto px-6 py-10 text-center">
-          <h1 className="text-lg font-semibold text-slate-900 mb-1">{t('call.joinTitle')}</h1>
-          <p className="text-sm text-slate-500 mb-2">{t('call.joinHint')}</p>
+          <h1 className="text-lg font-semibold text-white mb-1">{t('call.joinTitle')}</h1>
+          <p className="text-sm text-slate-400 mb-2">{t('call.joinHint')}</p>
           <p className="text-xs text-slate-500 mb-6 max-w-md mx-auto">{t('call.recordingNotice')}</p>
           {error ? (
             <div className="rounded-2xl border border-red-900/50 bg-red-950/40 px-5 py-4 text-red-300 text-sm">{error}</div>
           ) : (
-            <div className="relative bg-slate-200 rounded-2xl overflow-hidden" style={{ aspectRatio: '16 / 9', border: '1px solid rgb(15 23 42 / 0.1)' }}>
+            <div className="relative bg-slate-900 rounded-2xl overflow-hidden" style={{ aspectRatio: '16 / 9', border: '1px solid rgb(255 255 255 / 0.1)' }}>
               <video ref={lobbyVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
               {!camOn && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white text-slate-500 text-sm">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900 text-slate-400 text-sm">
                   <VideoOff size={32} />
                   {t('call.cameraOff')}
                 </div>
@@ -1939,7 +1939,7 @@ export default function Call() {
             <button
               onClick={toggleMic}
               className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-                micOn ? 'bg-slate-100 text-slate-800 hover:bg-slate-200' : 'bg-red-500 text-white hover:bg-red-600'
+                micOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
               }`}
               title={micOn ? t('call.mute') : t('call.unmute')}
             >
@@ -1948,7 +1948,7 @@ export default function Call() {
             <button
               onClick={toggleCam}
               className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-                camOn ? 'bg-slate-100 text-slate-800 hover:bg-slate-200' : 'bg-red-500 text-white hover:bg-red-600'
+                camOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
               }`}
               title={camOn ? t('call.turnOffCamera') : t('call.turnOnCamera')}
             >
@@ -1956,7 +1956,7 @@ export default function Call() {
             </button>
           </div>
           <div className="flex items-center justify-center gap-3 mt-6">
-            <button onClick={leaveLobby} className="rounded-full px-6 h-11 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+            <button onClick={leaveLobby} className="rounded-full px-6 h-11 text-sm font-medium text-slate-300 bg-white/10 hover:bg-white/20 transition-colors">
               {t('call.back')}
             </button>
             <button
@@ -1975,27 +1975,27 @@ export default function Call() {
     <div
       ref={rootRef}
       // the sidebar is always shown beside the call and takes its width, so the picture never sits under it
-      className={`bg-slate-100 md:pe-80 ${isFullscreen ? 'h-screen overflow-y-auto' : 'min-h-[calc(100vh-4rem)]'}`}
+      className={`flex flex-col overflow-hidden bg-slate-950 md:pe-80 ${isFullscreen ? 'h-screen' : 'h-[calc(100vh-4rem)]'}`}
     >
-      <div className={`${isFullscreen ? 'max-w-none px-4 py-4' : 'max-w-5xl px-6 py-10'} mx-auto`}>
-        <div className="flex items-center justify-between mb-4">
+      <div className={`${isFullscreen ? 'max-w-none px-4' : 'max-w-6xl px-6'} mx-auto flex min-h-0 w-full flex-1 flex-col py-3`}>
+        <div className="mb-2 flex shrink-0 items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <h1 className="text-lg font-semibold text-slate-900">{t('call.title')}</h1>
+            <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
             {recording && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-slate-500" title={t('call.recordingNotice')}>
+              <span className="inline-flex items-center gap-1 text-[11px] text-slate-400" title={t('call.recordingNotice')}>
                 <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> {t('call.recordingBadge')}
               </span>
             )}
             {liveActive && (
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums"
-                style={{ background: isMyTurn ? 'var(--accent)' : 'rgb(15 23 42 / 0.1)', color: '#fff' }}
+                style={{ background: isMyTurn ? 'var(--accent)' : 'rgb(255 255 255 / 0.1)', color: '#fff' }}
               >
                 <Clock size={12} /> {isMyTurn ? t('call.yourTurn') : t('call.partnerTurn')} · {formatClock(turnRemaining)}
               </span>
             )}
           </div>
-          <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+          <span className="inline-flex items-center gap-1.5 text-sm text-slate-300">
             <span className="relative flex h-2 w-2">
               {isConnected && (
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -2029,14 +2029,16 @@ export default function Call() {
             {error}
           </div>
         ) : (
+          <div className="flex min-h-0 flex-1 items-center justify-center" style={{ containerType: 'size' }}>
           <div
             ref={stageRef}
-            className="relative bg-slate-200 rounded-2xl overflow-hidden lp-animate-in-scale"
+            className="relative bg-slate-900 rounded-2xl overflow-hidden lp-animate-in-scale"
             style={{
               aspectRatio: '16 / 9',
               boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)',
-              border: '1px solid rgb(15 23 42 / 0.1)',
-              ...(isFullscreen ? { width: 'min(100%, calc((100vh - 9rem) * 16 / 9))', margin: '0 auto' } : {}),
+              border: '1px solid rgb(255 255 255 / 0.1)',
+              // as large as fits the screen, so the buttons below never need a scroll
+              width: 'min(100cqw, calc(100cqh * 16 / 9))',
             }}
           >
             {/* While a file is shared it covers the stage, so the other user shrinks into a box above yours. */}
@@ -2045,14 +2047,14 @@ export default function Call() {
               autoPlay
               playsInline
               className={sharedMaterial
-                ? `absolute top-2 end-2 w-[8.5rem] aspect-[4/3] object-cover rounded-xl z-20 ${remoteCamOn ? '' : 'hidden'}`
+                ? `absolute bottom-12 end-3 w-28 aspect-[4/3] object-cover rounded-xl shadow-lg z-20 ${remoteCamOn ? '' : 'hidden'}`
                 : screenSharing
                   ? `absolute bottom-4 end-4 w-40 aspect-[4/3] object-cover rounded-xl shadow-lg z-20 ${remoteCamOn ? '' : 'hidden'}`
                   : 'w-full h-full object-cover'}
               style={sharedMaterial || screenSharing ? { border: '2px solid var(--accent)' } : undefined}
             />
             {!isConnected && (
-              <div className="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">
+              <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">
                 {statusText}
               </div>
             )}
@@ -2062,14 +2064,14 @@ export default function Call() {
                 onClose={closeSharedMaterial}
                 onFinish={sharedMaterial.from === 'you' && sharedMaterial.id ? () => askFinished(sharedMaterial, 'next') : undefined}
                 pen={penApi}
-                fullWidth={!(remoteCamOn || (camOn && !screenSharing))}
+                fullWidth
                 t={t}
               />
             )}
             {screenAnnotating && (
               <>
                 <AnnotationLayer active={penOn} tool={penTool} color={penColor} strokes={strokes} onDraw={drawLocal} onUpdate={penApi.onUpdate} onDelete={penApi.onDelete} />
-                <div className="absolute top-3 start-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5">
+                <div className="absolute top-3 start-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-slate-900/80 px-3 py-1.5">
                   <AnnotationToolbar pen={penApi} t={t} />
                 </div>
               </>
@@ -2083,19 +2085,20 @@ export default function Call() {
                 screenSharing && !sharedMaterial
                   // while sharing, this element shows the shared screen itself, filling the box like the other person sees it
                   ? 'absolute inset-0 z-[1] h-full w-full bg-black object-cover'
-                  : `absolute ${sharedMaterial ? 'top-[7.5rem] end-2 w-[8.5rem] aspect-[4/3] object-cover' : 'bottom-4 end-4 w-40'} rounded-xl shadow-lg z-20 ${screenSharing || !camOn ? 'hidden' : ''}`
+                  : `absolute ${sharedMaterial ? 'bottom-12 end-[8.25rem] w-28 aspect-[4/3] object-cover' : 'bottom-4 end-4 w-40'} rounded-xl shadow-lg z-20 ${screenSharing || !camOn ? 'hidden' : ''}`
               }
               style={screenSharing && !sharedMaterial ? undefined : sharedMaterial ? { border: '2px solid var(--accent-2)' } : { border: '2px solid var(--accent-2)', ...localDrag.style }}
               {...(sharedMaterial || screenSharing ? {} : localDrag.handlers)}
             />
           </div>
+          </div>
         )}
 
-        <div className="flex items-center justify-center gap-3 mt-8">
+        <div className="mt-3 flex shrink-0 items-center justify-center gap-3">
           <button
             onClick={toggleMic}
             className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-              micOn ? 'bg-slate-100 text-slate-800 hover:bg-slate-200' : 'bg-red-500 text-white hover:bg-red-600'
+              micOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
             }`}
             title={micOn ? t('call.mute') : t('call.unmute')}
           >
@@ -2104,7 +2107,7 @@ export default function Call() {
           <button
             onClick={toggleCam}
             className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-              camOn ? 'bg-slate-100 text-slate-800 hover:bg-slate-200' : 'bg-red-500 text-white hover:bg-red-600'
+              camOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500 text-white hover:bg-red-600'
             }`}
             title={camOn ? t('call.turnOffCamera') : t('call.turnOnCamera')}
           >
@@ -2112,7 +2115,7 @@ export default function Call() {
           </button>
           <button
             onClick={toggleFullscreen}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-800 hover:bg-slate-200 transition-all hover:scale-105"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all hover:scale-105"
             title={isFullscreen ? t('call.exitFullscreen') : t('call.fullscreen')}
           >
             {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
@@ -2120,26 +2123,26 @@ export default function Call() {
           <div className="relative">
             {shareMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setShareMenuOpen(false)} />}
             {shareMenuOpen && (
-              <div className="absolute bottom-full start-1/2 z-50 mb-3 w-60 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl">
+              <div className="absolute bottom-full start-1/2 z-50 mb-3 w-60 -translate-x-1/2 rounded-2xl border border-white/10 bg-slate-900 p-1.5 shadow-xl">
                 <button
                   type="button"
                   onClick={() => { setShareMenuOpen(false); openMaterialPicker() }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-slate-800 hover:bg-slate-100"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-slate-100 hover:bg-white/10"
                 >
-                  <FileText size={16} className="shrink-0 text-slate-500" /> {t('call.shareFile')}
+                  <FileText size={16} className="shrink-0 text-slate-400" /> {t('call.shareFile')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setShareMenuOpen(false); toggleScreenShare() }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-slate-800 hover:bg-slate-100"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-slate-100 hover:bg-white/10"
                 >
-                  <MonitorUp size={16} className="shrink-0 text-slate-500" /> {screenSharing ? t('call.stopSharingScreen') : t('call.shareScreen')}
+                  <MonitorUp size={16} className="shrink-0 text-slate-400" /> {screenSharing ? t('call.stopSharingScreen') : t('call.shareScreen')}
                 </button>
                 {sharedMaterial?.from === 'you' && (
                   <button
                     type="button"
                     onClick={() => { setShareMenuOpen(false); closeSharedMaterial() }}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-red-300 hover:bg-slate-100"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-sm text-red-300 hover:bg-white/10"
                   >
                     <X size={16} className="shrink-0" /> {t('call.stopShareFile')}
                   </button>
@@ -2149,7 +2152,7 @@ export default function Call() {
             <button
               onClick={() => setShareMenuOpen((v) => !v)}
               className={`relative z-50 flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${
-                screenSharing || sharedMaterial?.from === 'you' ? 'bg-[var(--accent)] text-white' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+                screenSharing || sharedMaterial?.from === 'you' ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
               }`}
               title={t('call.share')}
             >
@@ -2160,7 +2163,7 @@ export default function Call() {
           <button
             onClick={() => (notesOpen ? setNotesOpen(false) : openSidebar(chatUnread > 0 ? 'chat' : sidebarTab))}
             className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 md:hidden ${
-              notesOpen ? 'bg-[var(--accent)] text-white' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+              notesOpen ? 'bg-[var(--accent)] text-white' : 'bg-white/10 text-white hover:bg-white/20'
             }`}
             title={t('call.chatAndNotes')}
           >
@@ -2209,23 +2212,23 @@ export default function Call() {
 
       {finishPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white border border-slate-200 p-6">
-            <p className="text-lg font-semibold text-slate-900 mb-1">{t('call.finishedTitle')}</p>
-            <p className="text-sm text-slate-500 mb-5 truncate">{finishPrompt.material.title}</p>
+          <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6">
+            <p className="text-lg font-semibold text-white mb-1">{t('call.finishedTitle')}</p>
+            <p className="text-sm text-slate-400 mb-5 truncate">{finishPrompt.material.title}</p>
             <div className="flex flex-col gap-2">
               <button onClick={() => answerFinished('complete')} className="lp-btn-primary w-full justify-center">
                 {t('call.finishedYes')}
               </button>
               <button
                 onClick={() => answerFinished('not_started')}
-                className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors"
+                className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 transition-colors"
               >
                 {t('call.finishedNo')}
               </button>
               {finishPrompt.reason === 'leave' && (
                 <button
                   onClick={() => { setFinishPrompt(null); finishLeaving() }}
-                  className="w-full rounded-xl px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-600 transition-colors"
+                  className="w-full rounded-xl px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors"
                 >
                   {t('call.skipAndLeave')}
                 </button>
@@ -2240,7 +2243,7 @@ export default function Call() {
         <button
           type="button"
           onClick={() => { setChatToast(null); openSidebar('chat') }}
-          className="fixed top-20 start-1/2 z-[55] flex -translate-x-1/2 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-lg lp-animate-in"
+          className="fixed top-20 start-1/2 z-[55] flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-slate-900 px-4 py-2 text-sm text-white shadow-lg lp-animate-in"
         >
           <MessageCircle size={15} style={{ color: 'var(--accent)' }} />
           <span className="max-w-[16rem] truncate"><strong>{chatToast.sender.full_name}:</strong> {chatToast.text}</span>
@@ -2248,15 +2251,15 @@ export default function Call() {
       )}
 
       {(
-        <aside className={`fixed ${isFullscreen ? 'top-0' : 'top-16'} bottom-0 end-0 z-40 w-80 max-w-full ${notesOpen ? 'flex' : 'hidden md:flex'} flex-col bg-white border-s border-slate-200`}>
-          <div className="flex items-center justify-between px-3 py-2.5 border-b border-slate-200">
+        <aside className={`fixed ${isFullscreen ? 'top-0' : 'top-16'} bottom-0 end-0 z-40 w-80 max-w-full ${notesOpen ? 'flex' : 'hidden md:flex'} flex-col bg-slate-900 border-s border-white/10`}>
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10">
             <div className="flex items-center gap-1">
               {[['notes', NotebookPen, t('call.notes')], ['chat', MessageCircle, t('call.chat')], ['translate', Languages, t('call.translate')]].map(([tab, Icon, label]) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setSidebarTab(tab)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors ${sidebarTab === tab ? 'bg-slate-200 text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors ${sidebarTab === tab ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white'}`}
                 >
                   <Icon size={13} /> {label}
                   {tab === 'chat' && chatUnread > 0 && (
@@ -2270,21 +2273,21 @@ export default function Call() {
             <div className="flex items-center gap-2">
               {sidebarTab === 'notes' && (
                 <>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-400">
                     {!sessionId ? t('call.notesNotSaved') : noteState === 'saving' ? t('call.notesSaving') : noteState === 'saved' ? t('call.notesSaved') : noteState === 'error' ? t('call.notesError') : ''}
                   </span>
                   <button
                     type="button"
                     onClick={() => downloadText('session-notes.txt', noteText)}
                     disabled={!noteText.trim()}
-                    className="flex h-7 w-7 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30"
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white disabled:opacity-30"
                     title={t('call.downloadNotes')}
                   >
                     <Download size={14} />
                   </button>
                 </>
               )}
-              <button type="button" onClick={() => setNotesOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 md:hidden">
+              <button type="button" onClick={() => setNotesOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white md:hidden">
                 <X size={14} />
               </button>
             </div>
@@ -2299,7 +2302,7 @@ export default function Call() {
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder={t('call.notesPlaceholder')}
-                className="flex-1 w-full resize-none bg-transparent p-4 text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none"
+                className="flex-1 w-full resize-none bg-transparent p-4 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
               />
             </>
           )}
@@ -2322,9 +2325,9 @@ export default function Call() {
 
       {showCompletedBox && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white border border-slate-200 p-6 text-center">
-            <p className="text-lg font-semibold text-slate-900 mb-2">{t('call.sessionCompletedTitle')}</p>
-            <p className="text-sm text-slate-500 mb-6">{t('call.sessionCompletedBody')}</p>
+          <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6 text-center">
+            <p className="text-lg font-semibold text-white mb-2">{t('call.sessionCompletedTitle')}</p>
+            <p className="text-sm text-slate-400 mb-6">{t('call.sessionCompletedBody')}</p>
             <button
               onClick={() => { setShowCompletedBox(false); setRatingOpen(true) }}
               className="lp-btn-primary w-full justify-center"
@@ -2337,22 +2340,22 @@ export default function Call() {
 
       {showLeaveChoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white border border-slate-200 p-6">
-            <p className="text-lg font-semibold text-slate-900 mb-2">{t('call.leaveChoiceTitle')}</p>
-            <p className="text-sm text-slate-500 mb-6">{t('call.leaveChoiceBody')}</p>
+          <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 p-6">
+            <p className="text-lg font-semibold text-white mb-2">{t('call.leaveChoiceTitle')}</p>
+            <p className="text-sm text-slate-400 mb-6">{t('call.leaveChoiceBody')}</p>
             <div className="flex flex-col gap-2">
               <button onClick={() => chooseLeaveStatus('completed')} className="lp-btn-primary w-full justify-center">
                 {t('call.markComplete')}
               </button>
               <button
                 onClick={() => chooseLeaveStatus('not_completed')}
-                className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors"
+                className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 transition-colors"
               >
                 {t('call.markIncomplete')}
               </button>
               <button
                 onClick={() => setShowLeaveChoice(false)}
-                className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+                className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-white transition-colors"
               >
                 {t('call.cancelLeave')}
               </button>

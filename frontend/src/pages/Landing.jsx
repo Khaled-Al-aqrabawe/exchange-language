@@ -49,7 +49,6 @@ export default function Landing() {
       <section className="relative overflow-hidden lp-hero-bg">
         <div className="relative max-w-6xl mx-auto px-6 pt-20 sm:pt-24 pb-24 grid lg:grid-cols-[1.05fr_1fr] gap-16 items-center">
           <div className="lp-animate-in">
-            <p className="lp-eyebrow mb-7">{t('landing.badge')}</p>
 
             <h1 className="text-4xl sm:text-5xl lg:text-[3.1rem] font-extrabold leading-[1.1]">
               {t('landing.heroTitleLine1')}

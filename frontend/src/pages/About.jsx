@@ -18,7 +18,6 @@ export default function About() {
 
       <section className="lp-hero-bg">
         <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-20 text-center lp-animate-in">
-          <p className="lp-eyebrow mb-4" style={{ color: 'var(--accent)' }}>{t('about.eyebrow')}</p>
           <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight">
             {t('about.titlePrefix')} <span className="lp-gradient-text">{t('about.titleHighlight')}</span>
           </h1>

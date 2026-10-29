@@ -471,7 +471,6 @@ export default function Partners() {
         <div className="mx-auto max-w-6xl px-6 pb-8 pt-10">
           <div className="lp-animate-in flex flex-wrap items-end justify-between gap-5">
             <div>
-              <p className="lp-eyebrow mb-3">{t('partners.eyebrow')}</p>
               <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>
                 {t('partners.title')}
               </h1>

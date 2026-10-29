@@ -47,8 +47,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
             },
         })
 
+        # Tell the other people in the conversation right away, wherever they are in the app.
+        for other_id in await self.other_participant_ids(user):
+            await self.channel_layer.group_send(f'user_{other_id}', {
+                'type': 'notify.event',
+                'payload': {
+                    'event': 'new-message',
+                    'conversation': message.conversation_id,
+                    'sender': {'id': user.id, 'name': user.full_name},
+                    'text': message.text[:140],
+                },
+            })
+
     async def chat_message(self, event):
         await self.send(text_data=json.dumps(event['message']))
+
+    @database_sync_to_async
+    def other_participant_ids(self, user):
+        conversation = Conversation.objects.get(id=self.conversation_id)
+        return list(conversation.participants.exclude(id=user.id).values_list('id', flat=True))
 
     @database_sync_to_async
     def is_participant(self, user):

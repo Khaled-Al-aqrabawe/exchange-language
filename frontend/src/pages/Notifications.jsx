@@ -29,7 +29,6 @@ export default function Notifications() {
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       <div className="lp-hero-bg">
         <div className="max-w-6xl mx-auto px-6 pt-10 pb-6 lp-animate-in">
-          <p className="lp-eyebrow mb-3">{t('notifications.eyebrow')}</p>
           <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl mb-1" style={{ color: 'var(--ink)' }}>{t('notifications.pageTitle')}</h1>
           <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>{t('notifications.pageSubtitle')}</p>
         </div>

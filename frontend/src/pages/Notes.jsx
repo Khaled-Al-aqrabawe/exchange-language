@@ -81,7 +81,6 @@ export default function Notes() {
         <div className="mx-auto max-w-6xl px-6 pb-6 pt-10">
           <div className="lp-animate-in flex flex-wrap items-end justify-between gap-5">
             <div>
-              <p className="lp-eyebrow mb-3">{t('notes.eyebrow')}</p>
               <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>{t('notes.title')}</h1>
               <p className="mt-2 max-w-md text-sm sm:text-base" style={{ color: 'var(--ink-soft)' }}>{t('notes.subtitle')}</p>
             </div>

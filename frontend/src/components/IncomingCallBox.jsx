@@ -1,7 +1,7 @@
-import { Phone, PhoneOff } from 'lucide-react'
+import { MessageCircle, Phone, PhoneOff } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { resolveAvatarUrl } from '../utils/images'
@@ -14,7 +14,12 @@ export default function IncomingCallBox() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const pathRef = useRef(location.pathname)
+  pathRef.current = location.pathname
   const [call, setCall] = useState(null)
+  const [message, setMessage] = useState(null)
+  const messageTimer = useRef(null)
   const timer = useRef(null)
   const handled = useRef(new Set())
 
@@ -47,6 +52,14 @@ export default function IncomingCallBox() {
         try {
           const data = JSON.parse(e.data)
           if (data.event === 'incoming-call') show(data)
+          if (data.event === 'new-message') {
+            // The call page announces its own chat, and an open thread already shows the message.
+            const path = pathRef.current
+            if (path.startsWith('/call/') || path === `/messages/${data.conversation}`) return
+            setMessage(data)
+            clearTimeout(messageTimer.current)
+            messageTimer.current = setTimeout(() => setMessage(null), 6000)
+          }
         } catch { /* ignore malformed messages */ }
       }
       socket.onclose = () => { if (!closed) retry = setTimeout(connect, 3000) }
@@ -56,11 +69,27 @@ export default function IncomingCallBox() {
       closed = true
       clearTimeout(retry)
       clearTimeout(timer.current)
+      clearTimeout(messageTimer.current)
       socket?.close()
     }
   }, [user?.id])
 
-  if (!call) return null
+  const messageToast = message && (
+    <button
+      type="button"
+      onClick={() => { setMessage(null); navigate(`/messages/${message.conversation}`) }}
+      className="fixed bottom-4 end-4 z-[70] flex w-80 max-w-[calc(100vw-2rem)] items-center gap-3 p-4 text-start lp-surface lp-animate-in-scale"
+      style={{ boxShadow: 'var(--shadow-card-hover)' }}
+    >
+      <span className="lp-icon-badge h-10 w-10 shrink-0"><MessageCircle size={18} /></span>
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-bold" style={{ color: 'var(--ink)' }}>{message.sender.name}</span>
+        <span className="block truncate text-sm" style={{ color: 'var(--ink-soft)' }}>{message.text}</span>
+      </span>
+    </button>
+  )
+
+  if (!call) return messageToast || null
 
   const answer = () => {
     clearTimeout(timer.current)
@@ -75,6 +104,8 @@ export default function IncomingCallBox() {
   }
 
   return (
+    <>
+    {messageToast}
     <div
       className="fixed top-20 end-4 z-[70] w-80 p-4 lp-surface lp-animate-in-scale"
       style={{ boxShadow: 'var(--shadow-card-hover)' }}
@@ -95,5 +126,6 @@ export default function IncomingCallBox() {
         </button>
       </div>
     </div>
+    </>
   )
 }
