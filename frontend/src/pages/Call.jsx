@@ -409,7 +409,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
 
   return (
     <div className={`absolute inset-y-0 start-0 ${fullWidth ? 'end-0' : 'end-[9.75rem]'} z-10 flex flex-col bg-slate-900 lp-animate-in-scale`}>
-      <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
+      <div className="flex items-center justify-between gap-3 px-4 py-2 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
         <span className="inline-flex items-center gap-2 min-w-0 text-sm text-white">
           <FileText size={15} className="shrink-0 text-slate-400" />
           <span className="truncate">
@@ -448,10 +448,10 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
           ) : (
             // The viewer shows a 16:9 slide plus its own 31px control bar, so the frame is that tall:
             // otherwise it adds black bars beside the slide and the bar no longer fits the frame.
-            <div className="flex h-full w-full items-center justify-center bg-black p-3" style={{ containerType: 'size' }}>
+            <div className="flex h-full w-full items-center justify-center bg-black p-1" style={{ containerType: 'size' }}>
               <div
                 className="relative overflow-hidden rounded-xl bg-white"
-                style={{ '--w': 'min(100cqw - 24px, (100cqh - 24px - 31px) * 16 / 9)', width: 'calc(var(--w))', height: 'calc(var(--w) * 9 / 16 + 31px)' }}
+                style={{ '--w': 'min(100cqw - 8px, (100cqh - 8px - 31px) * 16 / 9)', width: 'calc(var(--w))', height: 'calc(var(--w) * 9 / 16 + 31px)' }}
               >
                 {/* a little larger than the frame so the viewer's own 1px outline is clipped away */}
                 <iframe src={embedSrc} title={material.title} className="absolute border-0 bg-white" style={{ inset: '-2px', width: 'calc(100% + 4px)', height: 'calc(100% + 4px)' }} />
@@ -2034,11 +2034,12 @@ export default function Call() {
             ref={stageRef}
             className="relative bg-slate-900 rounded-2xl overflow-hidden lp-animate-in-scale"
             style={{
-              aspectRatio: '16 / 9',
+              // a shared file gets all the free space (the slide inside keeps its own 16:9 shape)
+              ...(sharedMaterial ? { height: '100%' } : { aspectRatio: '16 / 9' }),
               boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)',
               border: '1px solid rgb(255 255 255 / 0.1)',
               // as large as fits the screen, so the buttons below never need a scroll
-              width: 'min(100cqw, calc(100cqh * 16 / 9))',
+              width: sharedMaterial ? '100%' : 'min(100cqw, calc(100cqh * 16 / 9))',
             }}
           >
             {/* While a file is shared it covers the stage, so the other user shrinks into a box above yours. */}
