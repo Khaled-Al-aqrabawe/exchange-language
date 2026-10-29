@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import client, { wsUrl } from '../api/client'
+import PptxSlideViewer from '../components/PptxSlideViewer'
 import { LOW_RATING_MAX, SPEECH_LANGUAGES } from '../constants'
 import { useAuth } from '../context/AuthContext'
 import { downloadFile, downloadText } from '../utils/downloadFile'
@@ -89,7 +90,7 @@ function formatClock(totalSeconds) {
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
 const OFFICE_EXTENSIONS = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx']
 
-const PEN_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#facc15']
+const PEN_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#facc15', '#000000', '#ffffff']
 
 // A transparent canvas over the shared file. Points are stored as fractions of the
 // canvas size, so a drawing lines up on screens of different sizes.
@@ -370,7 +371,7 @@ function AnnotationToolbar({ pen, t }) {
           type="button"
           onClick={() => pen.onColor(c)}
           className="h-5 w-5 rounded-full transition-transform hover:scale-110"
-          style={{ background: c, outline: pen.color === c ? '2px solid #fff' : 'none', outlineOffset: '1px' }}
+          style={{ background: c, border: '1px solid rgb(148 163 184 / 0.6)', outline: pen.color === c ? '2px solid var(--accent)' : 'none', outlineOffset: '2px' }}
           aria-label={c}
         />
       ))}
@@ -390,7 +391,9 @@ function AnnotationToolbar({ pen, t }) {
   )
 }
 
-function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t }) {
+function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slide, onSlide, t }) {
+  const [slideCount, setSlideCount] = useState(0)
+  const [pptxFailed, setPptxFailed] = useState(false)
   const name = material.file_name || material.title
   const ext = name.split('.').pop()?.toLowerCase()
   const isImage = IMAGE_EXTENSIONS.includes(ext)
@@ -399,7 +402,9 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
   const isOffice = OFFICE_EXTENSIONS.includes(ext)
   // Office Online can only fetch publicly reachable URLs, so it won't work on localhost
   const isLocal = ['localhost', '127.0.0.1'].includes(new URL(material.file, window.location.href).hostname)
-  const canEmbed = isImage || isPdf || isTextLike || (isOffice && !isLocal)
+  // .pptx files are drawn here so both people stay on the same slide; other Office files need Office Online
+  const isPptx = ext === 'pptx' && !pptxFailed
+  const canEmbed = isImage || isPdf || isTextLike || isPptx || (isOffice && !isLocal)
   // Browsers may have cached an old blocked (X-Frame-Options: DENY) response
   // for this exact URL from before that header was removed server-side - a
   // fixed query param forces a fresh request instead of reusing that cache entry.
@@ -409,7 +414,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
 
   return (
     <div className={`absolute inset-y-0 start-0 ${fullWidth ? 'end-0' : 'end-[9.75rem]'} z-10 flex flex-col bg-slate-900 lp-animate-in-scale`}>
-      <div className="flex items-center justify-between gap-3 px-4 py-2 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
+      <div className="flex items-center justify-between gap-3 px-4 py-1 shrink-0" style={{ borderBottom: '1px solid rgb(255 255 255 / 0.1)' }}>
         <span className="inline-flex items-center gap-2 min-w-0 text-sm text-white">
           <FileText size={15} className="shrink-0 text-slate-400" />
           <span className="truncate">
@@ -431,13 +436,16 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
               <Check size={13} /> {t('call.finishLesson')}
             </button>
           )}
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-            title={t('materials.stopSharing')}
-          >
-            <X size={15} />
-          </button>
+          {/* Only the person who shared the file can close it for both of you. */}
+          {material.from === 'you' && (
+            <button
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+              title={t('materials.stopSharing')}
+            >
+              <X size={15} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -445,6 +453,17 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
         {canEmbed ? (
           isImage ? (
             <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-black" />
+          ) : isPptx ? (
+            <div className="relative h-full w-full">
+              <PptxSlideViewer url={material.file} index={slide} onReady={setSlideCount} onError={() => setPptxFailed(true)} />
+              {slideCount > 0 && (
+                <div className="absolute bottom-3 start-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-full bg-slate-900/80 px-3 py-1 text-sm text-white backdrop-blur">
+                  <button type="button" onClick={() => onSlide(Math.max(0, slide - 1))} disabled={slide <= 0} className="rounded-full px-2 hover:bg-white/15 disabled:opacity-30" aria-label="Previous slide">‹</button>
+                  <span className="tabular-nums">{slide + 1} / {slideCount}</span>
+                  <button type="button" onClick={() => onSlide(Math.min(slideCount - 1, slide + 1))} disabled={slide >= slideCount - 1} className="rounded-full px-2 hover:bg-white/15 disabled:opacity-30" aria-label="Next slide">›</button>
+                </div>
+              )}
+            </div>
           ) : (
             // The viewer shows a 16:9 slide plus its own 31px control bar, so the frame is that tall:
             // otherwise it adds black bars beside the slide and the bar no longer fits the frame.
@@ -1021,6 +1040,7 @@ export default function Call() {
   const micOnRef = useRef(!!saved?.mic)
   const camOnRef = useRef(!!saved?.cam)
   const screenSharingRef = useRef(false)
+  const stopShareRef = useRef(null)
   const lobbyVideoRef = useRef(null)
   const screenStreamRef = useRef(null)
 
@@ -1035,6 +1055,7 @@ export default function Call() {
   const [materials, setMaterials] = useState([])
   const [materialsLoading, setMaterialsLoading] = useState(false)
   const [sharedMaterial, setSharedMaterial] = useState(null)
+  const [sharedSlide, setSharedSlide] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Who asked for this session: from the call link (instant call) or the session's host.
@@ -1247,6 +1268,7 @@ export default function Call() {
           }
         } else if (data.type === 'material-share' && data.material) {
           setSharedMaterial({ ...data.material, from: 'partner' })
+          setSharedSlide(Math.max(0, (data.material.start_slide || 1) - 1))
           setStrokes([])
           rememberFile(data.material)
         } else if (data.type === 'live-start') {
@@ -1261,6 +1283,9 @@ export default function Call() {
               }
             })
             .catch(() => {})
+        } else if (data.type === 'screen-stop-request') {
+          // the other person asked me to stop sharing my screen
+          if (screenSharingRef.current) stopShareRef.current?.()
         } else if (data.type === 'screen-state') {
           setRemoteSharing(!!data.on)
           if (!data.on) setStrokes([])
@@ -1274,6 +1299,8 @@ export default function Call() {
           setStrokes((list) => list.filter((st) => st.id !== data.id))
         } else if (data.type === 'draw-clear') {
           setStrokes([])
+        } else if (data.type === 'material-slide' && Number.isInteger(data.index)) {
+          setSharedSlide(data.index)
         } else if (data.type === 'material-share-stop') {
           setSharedMaterial(null)
           setStrokes([])
@@ -1626,6 +1653,8 @@ export default function Call() {
     setScreenSharing(false)
   }
 
+  stopShareRef.current = stopScreenShare
+
   const toggleScreenShare = async () => {
     if (screenSharing) {
       await stopScreenShare()
@@ -1672,8 +1701,15 @@ export default function Call() {
     }
   }
 
+  // Both people can turn the page; the other one follows right away.
+  const changeSlide = (index) => {
+    setSharedSlide(index)
+    send({ type: 'material-slide', index })
+  }
+
   const shareMaterial = (m, startSlide = 1) => {
     const material = { id: m.id, title: m.title, file: m.file, file_name: m.file_name, start_slide: startSlide, language: m.language }
+    setSharedSlide(Math.max(0, startSlide - 1))
     send({ type: 'material-share', material })
     if (sessionId && material.id) client.post(`/sessions/${sessionId}/shared/`, { material_id: material.id }).catch(() => {})
     rememberFile(material)
@@ -1683,9 +1719,8 @@ export default function Call() {
   }
 
   const closeSharedMaterial = () => {
-    if (sharedMaterial?.from === 'you') {
-      send({ type: 'material-share-stop' })
-    }
+    if (sharedMaterial?.from !== 'you') return
+    send({ type: 'material-share-stop' })
     setSharedMaterial(null)
     setStrokes([])
     setPenOn(false)
@@ -2000,7 +2035,7 @@ export default function Call() {
       // the sidebar is always shown beside the call and takes its width, so the picture never sits under it
       className={`flex flex-col overflow-hidden bg-slate-950 md:pe-80 ${isFullscreen ? 'h-screen' : 'h-[calc(100vh-4rem)]'}`}
     >
-      <div className={`${isFullscreen ? 'max-w-none px-4' : 'max-w-6xl px-6'} mx-auto flex min-h-0 w-full flex-1 flex-col py-3`}>
+      <div className={`${isFullscreen ? 'max-w-none px-4' : 'max-w-6xl px-6'} mx-auto flex min-h-0 w-full flex-1 flex-col py-2`}>
         <div className="mb-2 flex shrink-0 items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
@@ -2025,19 +2060,19 @@ export default function Call() {
         </div>
 
         {startNote && (
-          <div className="mb-4 rounded-2xl border border-sky-500/30 bg-sky-500/10 px-5 py-3 text-sky-300 text-sm">
+          <div className="mb-2 shrink-0 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-1.5 text-sky-300 text-xs">
             {startNote}
           </div>
         )}
 
         {reminderBanner && (
-          <div className="mb-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-3 text-amber-300 text-sm">
+          <div className="mb-2 shrink-0 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-amber-300 text-xs">
             {reminderBanner}
           </div>
         )}
 
         {screenShareError && (
-          <div className="mb-4 rounded-2xl border border-red-900/50 bg-red-950/40 px-5 py-3 text-red-300 text-sm">
+          <div className="mb-2 shrink-0 rounded-xl border border-red-900/50 bg-red-950/40 px-4 py-1.5 text-red-300 text-xs">
             {screenShareError}
           </div>
         )}
@@ -2057,7 +2092,7 @@ export default function Call() {
               boxShadow: '0 24px 64px -20px rgb(0 0 0 / 0.6)',
               border: '1px solid rgb(255 255 255 / 0.1)',
               // as large as fits the screen, so the buttons below never need a scroll
-              width: sharedMaterial ? '100%' : 'min(100cqw, calc(100cqh * 16 / 9))',
+              width: sharedMaterial ? 'min(100cqw, calc((100cqh - 41px) * 16 / 9))' : 'min(100cqw, calc(100cqh * 16 / 9))',
             }}
           >
             {/* While a file is shared it covers the stage, so the other user shrinks into a box above yours. */}
@@ -2084,8 +2119,19 @@ export default function Call() {
                 onFinish={sharedMaterial.from === 'you' && sharedMaterial.id ? () => askFinished(sharedMaterial, 'next') : undefined}
                 pen={penApi}
                 fullWidth
+                slide={sharedSlide}
+                onSlide={changeSlide}
                 t={t}
               />
+            )}
+            {remoteSharing && !sharedMaterial && (
+              <button
+                type="button"
+                onClick={() => send({ type: 'screen-stop-request' })}
+                className="absolute top-3 start-3 z-30 inline-flex items-center gap-1.5 rounded-full bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800"
+              >
+                <X size={13} /> {t('call.stopTheirShare')}
+              </button>
             )}
             {screenAnnotating && (
               <>
@@ -2113,7 +2159,7 @@ export default function Call() {
           </div>
         )}
 
-        <div className="mt-3 flex shrink-0 items-center justify-center gap-3">
+        <div className="mt-2 flex shrink-0 items-center justify-center gap-3">
           <button
             onClick={toggleMic}
             className={`flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-105 ${

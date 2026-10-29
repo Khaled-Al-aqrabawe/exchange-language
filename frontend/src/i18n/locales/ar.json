@@ -610,6 +610,7 @@
     "logOut": "تسجيل الخروج"
   },
   "call": {
+    "stopTheirShare": "إيقاف مشاركة الشاشة",
     "title": "مكالمة فيديو",
     "connecting": "جارٍ الاتصال...",
     "connected": "متصل",

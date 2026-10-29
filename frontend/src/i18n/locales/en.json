@@ -620,6 +620,7 @@
     "logOut": "Log out"
   },
   "call": {
+    "stopTheirShare": "Stop their screen share",
     "title": "Video call",
     "connecting": "Connecting...",
     "connected": "Connected",

@@ -1,9 +1,8 @@
 import { ArrowLeft, CheckCircle2, Download, ExternalLink, FileText, FolderOpen, SlidersHorizontal, Trash2, Upload, X } from 'lucide-react'
-import JSZip from 'jszip'
-import { init as initPptxPreview } from 'pptx-preview'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
+import PptxSlideViewer from '../components/PptxSlideViewer'
 import { useAuth } from '../context/AuthContext'
 import { LANGUAGES, MATERIAL_LEVELS } from '../constants'
 import { downloadBlob, downloadFile } from '../utils/downloadFile'
@@ -11,110 +10,27 @@ import { downloadBlob, downloadFile } from '../utils/downloadFile'
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
 const OFFICE_EXTENSIONS = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx']
 
-// Picture backgrounds, in slide order, as data URLs (null where a slide has none). The preview
-// library doesn't draw these itself, which leaves light slide text on a white page.
-async function readSlideBackgrounds(buffer) {
-  const zip = await JSZip.loadAsync(buffer)
-  const text = (path) => zip.file(path)?.async('string')
-  const parse = (xml) => new DOMParser().parseFromString(xml, 'application/xml')
-  const pres = parse(await text('ppt/presentation.xml'))
-  const presRels = parse(await text('ppt/_rels/presentation.xml.rels'))
-  const target = (doc, id) => [...doc.getElementsByTagName('Relationship')].find((r) => r.getAttribute('Id') === id)?.getAttribute('Target')
-  const mime = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml' }
-  const result = []
-  for (const sld of [...pres.getElementsByTagName('p:sldId')]) {
-    let dataUrl = null
-    try {
-      const slidePath = `ppt/${target(presRels, sld.getAttribute('r:id'))}`.replace('ppt/ppt/', 'ppt/')
-      const slide = parse(await text(slidePath))
-      const bg = slide.getElementsByTagName('p:bg')[0]
-      const blip = bg?.getElementsByTagName('a:blip')[0]
-      if (blip) {
-        const slideRels = parse(await text(slidePath.replace('slides/', 'slides/_rels/') + '.rels'))
-        const mediaPath = `ppt/${target(slideRels, blip.getAttribute('r:embed')).replace('../', '')}`
-        const ext = mediaPath.split('.').pop().toLowerCase()
-        dataUrl = `data:${mime[ext] || 'image/png'};base64,${await zip.file(mediaPath).async('base64')}`
-      }
-    } catch { /* leave this slide's background as the library drew it */ }
-    result.push(dataUrl)
-  }
-  return result
-}
-
 // Office Online can't reach localhost, so .pptx files are drawn in the browser as real slides.
-function PptxSlides({ material, name, t, fallback }) {
-  const boxRef = useRef(null)
-  const stageRef = useRef(null)
-  const previewerRef = useRef(null)
-  const fixRef = useRef(null)
+function PptxSlides({ material, t, fallback }) {
   const [status, setStatus] = useState('loading')
-  const [position, setPosition] = useState({ index: 0, total: 0 })
-
-  useEffect(() => {
-    let cancelled = false
-    const box = boxRef.current
-    const stage = stageRef.current
-    setStatus('loading')
-    let backgrounds = []
-    const fixBackgrounds = () => {
-      const url = backgrounds[previewerRef.current?.currentIndex ?? 0]
-      if (!url) return
-      stage.querySelectorAll('.slide-background').forEach((el) => {
-        el.style.backgroundImage = `url(${url})`
-        el.style.backgroundSize = '100% 100%'
-        el.style.backgroundPosition = '0 0'
-        el.style.backgroundRepeat = 'no-repeat'
-        el.style.opacity = '1'
-      })
-    }
-    fixRef.current = fixBackgrounds
-    const observer = new MutationObserver(fixBackgrounds)
-    observer.observe(stage, { childList: true, subtree: true })
-    // 16:9 slide that fits the free space, leaving room for the page controls
-    const width = Math.max(320, Math.min(box.clientWidth - 48, (box.clientHeight - 96) * (16 / 9)))
-    fetch(material.file)
-      .then((r) => { if (!r.ok) throw new Error('fetch'); return r.arrayBuffer() })
-      .then(async (buffer) => {
-        if (cancelled) return
-        backgrounds = await readSlideBackgrounds(buffer).catch(() => [])
-        if (cancelled) return
-        stage.innerHTML = ''
-        const previewer = initPptxPreview(stage, { width, height: Math.round(width * 9 / 16), mode: 'slide' })
-        previewerRef.current = previewer
-        await previewer.preview(buffer)
-        if (cancelled) return
-        fixBackgrounds()
-        setPosition({ index: previewer.currentIndex, total: previewer.slideCount })
-        setStatus('ready')
-      })
-      .catch(() => { if (!cancelled) setStatus('error') })
-    return () => {
-      cancelled = true
-      observer.disconnect()
-      try { previewerRef.current?.destroy() } catch { /* already gone */ }
-      previewerRef.current = null
-    }
-  }, [material.file])
-
-  const go = (step) => {
-    const previewer = previewerRef.current
-    if (!previewer) return
-    if (step > 0) previewer.renderNextSlide()
-    else previewer.renderPreSlide()
-    fixRef.current?.()
-    setPosition({ index: previewer.currentIndex, total: previewer.slideCount })
-  }
+  const [index, setIndex] = useState(0)
+  const [total, setTotal] = useState(0)
 
   if (status === 'error') return fallback
   return (
-    <div ref={boxRef} className="flex h-full flex-col items-center justify-center gap-4 px-6">
+    <div className="flex h-full flex-col items-center justify-center gap-4 px-6">
       {status === 'loading' && <p className="text-sm text-slate-500">{t('materials.loading')}</p>}
-      <div ref={stageRef} className="overflow-hidden rounded-lg bg-white shadow-lg [&_.pptx-preview-wrapper-next]:hidden [&_.pptx-preview-wrapper-pagination]:hidden" style={{ border: '1px solid var(--line)', display: status === 'ready' ? 'block' : 'none' }} />
+      <div
+        className="w-full overflow-hidden rounded-lg shadow-lg"
+        style={{ maxWidth: 'min(100%, calc((100vh - 15rem) * 16 / 9))', aspectRatio: '16 / 9', border: '1px solid var(--line)', display: status === 'ready' ? 'block' : 'none' }}
+      >
+        <PptxSlideViewer url={material.file} index={index} onReady={(count) => { setTotal(count); setStatus('ready') }} onError={() => setStatus('error')} />
+      </div>
       {status === 'ready' && (
         <div className="flex items-center gap-4 text-sm text-slate-600">
-          <button type="button" onClick={() => go(-1)} disabled={position.index === 0} className="rounded-full px-3 py-1 hover:bg-slate-200 disabled:opacity-30" aria-label="Previous slide">‹</button>
-          <span>{position.index + 1} / {position.total}</span>
-          <button type="button" onClick={() => go(1)} disabled={position.index >= position.total - 1} className="rounded-full px-3 py-1 hover:bg-slate-200 disabled:opacity-30" aria-label="Next slide">›</button>
+          <button type="button" onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0} className="rounded-full px-3 py-1 hover:bg-slate-200 disabled:opacity-30" aria-label="Previous slide">‹</button>
+          <span>{index + 1} / {total}</span>
+          <button type="button" onClick={() => setIndex((i) => Math.min(total - 1, i + 1))} disabled={index >= total - 1} className="rounded-full px-3 py-1 hover:bg-slate-200 disabled:opacity-30" aria-label="Next slide">›</button>
         </div>
       )}
     </div>
