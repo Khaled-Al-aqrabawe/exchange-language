@@ -1426,19 +1426,41 @@ export default function Call() {
     return () => clearTimeout(id)
   }, [chatToast])
 
+  // Records the whole call: both voices, and the picture of whatever is being shown. A canvas is
+  // used so the picture can switch between the two people's cameras and a shared screen.
+
   const startRecording = () => {
     if (recorderRef.current || typeof MediaRecorder === 'undefined') return
     const remote = remoteVideoRef.current?.srcObject
     const local = cameraStreamRef.current
-    if (!remote || remote.getVideoTracks().length === 0) return
+    if (!remote) return
     try {
-      // one audio track with both voices, plus the picture of the other person (or their screen)
       const ctx = new AudioContext()
       const mix = ctx.createMediaStreamDestination()
       ;[remote, local].forEach((stream) => {
         if (stream?.getAudioTracks().length) ctx.createMediaStreamSource(stream).connect(mix)
       })
-      const output = new MediaStream([...remote.getVideoTracks(), ...mix.stream.getAudioTracks()])
+
+      const canvas = document.createElement('canvas')
+      canvas.width = 960
+      canvas.height = 540
+      const g = canvas.getContext('2d')
+      const paint = () => {
+        // my own shared screen is shown in the local video element; otherwise the other person's picture
+        const mine = screenSharingRef.current ? localVideoRef.current : null
+        const remoteEl = remoteVideoRef.current
+        const el = mine && mine.videoWidth ? mine : remoteEl
+        g.fillStyle = '#000'
+        g.fillRect(0, 0, canvas.width, canvas.height)
+        if (el && el.videoWidth) {
+          const scale = Math.min(canvas.width / el.videoWidth, canvas.height / el.videoHeight)
+          const w = el.videoWidth * scale
+          const h = el.videoHeight * scale
+          g.drawImage(el, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
+        }
+      }
+      const timer = setInterval(paint, 200)
+      const output = new MediaStream([...canvas.captureStream(5).getVideoTracks(), ...mix.stream.getAudioTracks()])
       const mimeType = ['video/webm;codecs=vp8,opus', 'video/webm'].find((m) => MediaRecorder.isTypeSupported(m))
       const recorder = new MediaRecorder(output, { mimeType, videoBitsPerSecond: 300000, audioBitsPerSecond: 32000 })
       const chunks = []
@@ -1446,6 +1468,7 @@ export default function Call() {
       recordingRef.current = {
         done: new Promise((resolve) => {
           recorder.onstop = () => {
+            clearInterval(timer)
             ctx.close().catch(() => {})
             resolve(new Blob(chunks, { type: 'video/webm' }))
           }
@@ -1981,11 +2004,6 @@ export default function Call() {
         <div className="mb-2 flex shrink-0 items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <h1 className="text-lg font-semibold text-white">{t('call.title')}</h1>
-            {recording && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-slate-400" title={t('call.recordingNotice')}>
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> {t('call.recordingBadge')}
-              </span>
-            )}
             {liveActive && (
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums"
