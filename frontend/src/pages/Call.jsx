@@ -446,12 +446,17 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, t })
           isImage ? (
             <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-slate-100" />
           ) : (
-            // The viewer draws its bar only as wide as the 16:9 slide, so the frame is 16:9 too and the cover below lines up with the bar's corner.
-            <div className="flex h-full w-full items-center justify-center bg-slate-100" style={{ containerType: 'size' }}>
-              <div className="relative overflow-hidden" style={{ width: 'min(100cqw, calc(100cqh * 16 / 9))', aspectRatio: '16 / 9' }}>
-                <iframe src={embedSrc} title={material.title} className="w-full h-full bg-white border-0" />
+            // The viewer shows a 16:9 slide plus its own 31px control bar, so the frame is that tall:
+            // otherwise it adds black bars beside the slide and the bar no longer fits the frame.
+            <div className="flex h-full w-full items-center justify-center bg-slate-100 p-3" style={{ containerType: 'size' }}>
+              <div
+                className="relative overflow-hidden rounded-xl bg-white shadow-md"
+                style={{ '--w': 'min(100cqw - 24px, (100cqh - 24px - 31px) * 16 / 9)', width: 'calc(var(--w))', height: 'calc(var(--w) * 9 / 16 + 31px)' }}
+              >
+                {/* a little larger than the frame so the viewer's own 1px outline is clipped away */}
+                <iframe src={embedSrc} title={material.title} className="absolute border-0 bg-white" style={{ inset: '-2px', width: 'calc(100% + 4px)', height: 'calc(100% + 4px)' }} />
                 {/* Hides the viewer's own menu (download / print) and full-screen icons; same colour as its bar so it blends in. */}
-                {isOffice && <div className="absolute bottom-0 end-0 z-[5] h-[30px] w-28" style={{ background: 'rgb(68 68 68)' }} />}
+                {isOffice && <div className="absolute bottom-0 end-0 z-[5] h-[31px] w-28" style={{ background: 'rgb(68 68 68)' }} />}
               </div>
             </div>
           )

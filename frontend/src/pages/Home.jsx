@@ -132,9 +132,6 @@ export default function Home() {
             </div>
           )}
         >
-          <Link to={`/sessions/${summaryId}/summary`} onClick={() => setSummaryId(null)} className="text-sm font-semibold hover:opacity-80" style={{ color: 'var(--accent)' }}>
-            {t('summary.link')} →
-          </Link>
         </ModalShell>
       )}
       <div className="lp-hero-bg">

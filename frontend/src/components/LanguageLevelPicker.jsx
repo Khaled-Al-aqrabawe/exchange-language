@@ -5,6 +5,9 @@ import { LANGUAGES } from '../constants'
 import { CEFR_LEVELS, hasExam } from '../data/placementExams'
 import LevelExamModal from './LevelExamModal'
 
+// Languages you speak (and can help others with) need at least this level.
+const MIN_SPEAK_INDEX = CEFR_LEVELS.indexOf('B1')
+
 function without(obj, key) {
   const copy = { ...obj }
   delete copy[key]
@@ -24,8 +27,16 @@ export default function LanguageLevelPicker({ mode, selected, levels, onChange }
     else onChange([...selected, lang], levels)
   }
 
+  const speaking = mode === 'speak'
+  const allowed = speaking ? CEFR_LEVELS.slice(MIN_SPEAK_INDEX) : CEFR_LEVELS
+
   const setLevel = (lang, level) => {
     setNotice('')
+    if (speaking && level && !allowed.includes(level)) {
+      setNotice(t('levelExam.speakMin'))
+      onChange(selected, without(levels, lang))
+      return
+    }
     if (!level) {
       onChange(selected, without(levels, lang))
     } else {
@@ -79,20 +90,20 @@ export default function LanguageLevelPicker({ mode, selected, levels, onChange }
             >
               <span className="font-medium text-sm min-w-24" style={{ color: 'var(--ink)' }}>{lang}</span>
               <select
-                value={levels[lang] || ''}
+                value={allowed.includes(levels[lang]) ? levels[lang] : ''}
                 onChange={(e) => setLevel(lang, e.target.value)}
                 className="rounded-lg px-3 py-1.5 text-sm"
                 style={{ border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }}
               >
                 <option value="">{t('levelExam.chooseLevel')}</option>
-                {CEFR_LEVELS.map((lv) => <option key={lv} value={lv}>{lv}</option>)}
+                {allowed.map((lv) => <option key={lv} value={lv}>{lv}</option>)}
               </select>
               {hasExam(lang) && (
                 <button type="button" onClick={() => setExamFor(lang)} className="lp-btn-secondary text-xs" style={{ padding: '0.4rem 0.8rem' }}>
                   <GraduationCap size={14} /> {t('levelExam.takeExam')}
                 </button>
               )}
-              {!levels[lang] && <span className="text-xs" style={{ color: '#c1443d' }}>{t('levelExam.required')}</span>}
+              {!allowed.includes(levels[lang]) && <span className="text-xs" style={{ color: '#c1443d' }}>{t('levelExam.required')}</span>}
             </div>
           ))}
         </div>

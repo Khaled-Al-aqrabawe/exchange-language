@@ -174,7 +174,8 @@
       "confirmPassword": "Confirm new password",
       "resetSubmit": "Reset password",
       "resetting": "Resetting...",
-      "passwordMismatch": "Passwords don't match.",
+      "passwordIncomplete": "Enter your current and new password.",
+    "passwordMismatch": "Passwords don't match.",
       "invalidCode": "Incorrect or expired code.",
       "successTitle": "Password reset",
       "successBody": "Your password has been changed. You can now log in.",
@@ -740,6 +741,7 @@
     "yourLevel": "Your {{language}} level is",
     "continue": "Use this level",
     "takeExam": "Take level exam",
+    "speakMin": "Languages you speak need at least level B1.",
     "chooseLevel": "Choose level",
     "required": "Choose a level or take the exam",
     "notEnough": "Your {{language}} level ({{level}}) isn't enough to be listed as a language you speak - you need at least {{min}}. You can add it to the languages you want to learn instead."

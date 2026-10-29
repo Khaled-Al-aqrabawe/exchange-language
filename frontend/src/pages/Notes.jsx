@@ -1,4 +1,4 @@
-import { Download, ExternalLink, NotebookPen, Search } from 'lucide-react'
+import { Download, NotebookPen, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -32,14 +32,6 @@ function NoteCard({ note, index, i18n, t }) {
           <h2 className="truncate text-sm font-bold" style={{ color: 'var(--ink)' }}>{note.other.full_name}</h2>
           <p className="text-xs" style={{ color: 'var(--ink-soft)' }}>{date}</p>
         </div>
-        <Link
-          to={`/sessions/${note.session_id}/summary`}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]"
-          style={{ color: 'var(--accent)' }}
-          title={t('notes.openSession')}
-        >
-          <ExternalLink size={16} />
-        </Link>
       </div>
 
       <textarea

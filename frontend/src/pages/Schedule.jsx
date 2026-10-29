@@ -7,7 +7,9 @@ import { LOW_RATING_MAX } from '../constants'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import { useAuth } from '../context/AuthContext'
 import { toDatetimeLocalValue } from '../utils/availability'
+import { downloadText } from '../utils/downloadFile'
 import { avatarUrl } from '../utils/images'
+import { buildSummaryText } from '../utils/sessionSummary'
 
 const statusTint = {
   pending: 'lp-tag',
@@ -237,6 +239,16 @@ function SessionDetailsModal({ session, other, onClose }) {
 
 export default function Schedule() {
   const { t, i18n } = useTranslation()
+
+  // The summary (notes, chat, shared lessons) is a text file; there is no page for it.
+  const downloadSummary = async (sessionId) => {
+    try {
+      const { data } = await client.get(`/sessions/${sessionId}/summary/`)
+      downloadText(`session-summary-${sessionId}.txt`, buildSummaryText(data, t, i18n.resolvedLanguage))
+    } catch {
+      window.alert(t('summary.notFound'))
+    }
+  }
   const { user } = useAuth()
   const [now, setNow] = useState(() => Date.now())
   const [sessions, setSessions] = useState([])
@@ -509,9 +521,9 @@ export default function Schedule() {
                         )
                       )}
                       {['completed', 'not_completed'].includes(s.status) && (
-                        <Link to={`/sessions/${s.id}/summary`} onClick={(e) => e.stopPropagation()} className="lp-btn-secondary text-sm" style={{ padding: '0.5rem 1rem' }}>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); downloadSummary(s.id) }} className="lp-btn-secondary text-sm" style={{ padding: '0.5rem 1rem' }}>
                           <FileText size={14} /> {t('summary.link')}
-                        </Link>
+                        </button>
                       )}
                       {['completed', 'not_completed'].includes(s.status) && (
                         s.my_rating ? (

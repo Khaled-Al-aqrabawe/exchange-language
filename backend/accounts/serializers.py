@@ -4,6 +4,8 @@ from .models import AvailabilitySlot, Profile, User
 
 
 CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+# Languages a person says they speak (other than their native one) must be at least B1.
+SPOKEN_MIN_LEVELS = CEFR_LEVELS[CEFR_LEVELS.index('B1'):]
 MIN_SPEAKING_LEVEL = 'B1'
 
 
@@ -46,6 +48,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             level = levels.get(lang)
             if level not in CEFR_LEVELS:
                 errors['language_levels'] = f'Choose your level in {lang} (or take the exam).'
+            elif level not in SPOKEN_MIN_LEVELS:
+                errors['language_levels'] = f'Languages you speak need at least level B1 ({lang}).'
         if errors:
             raise serializers.ValidationError(errors)
         return attrs

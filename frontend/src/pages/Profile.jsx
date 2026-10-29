@@ -16,53 +16,26 @@ function maxDateOfBirth() {
   return d.toISOString().slice(0, 10)
 }
 
-function ChangePasswordCard() {
+// Password fields live in the profile form, so the one "Save changes" button saves
+// everything; leaving them empty just keeps the current password.
+function ChangePasswordCard({ values, onChange, error, done }) {
   const { t } = useTranslation()
-  const [oldPassword, setOldPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [done, setDone] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setDone(false)
-    if (newPassword !== confirmPassword) {
-      setError(t('profile.passwordMismatch'))
-      return
-    }
-    setSubmitting(true)
-    try {
-      await client.post('/auth/me/change-password/', { old_password: oldPassword, new_password: newPassword })
-      setOldPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-      setDone(true)
-    } catch (err) {
-      const data = err.response?.data
-      setError(data ? Object.values(data).flat().join(' ') : t('profile.changePasswordError'))
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
+  const set = (key) => (e) => onChange({ ...values, [key]: e.target.value })
   return (
-    <section className="lp-card lp-animate-in">
+    <section className="lp-animate-in">
       <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-bold" style={{ color: 'var(--ink)' }}>
         <KeyRound size={18} style={{ color: 'var(--accent)' }} /> {t('profile.changePassword')}
       </h2>
       <p className="mb-5 text-sm" style={{ color: 'var(--ink-soft)' }}>{t('profile.changePasswordSubtitle')}</p>
-      <form onSubmit={handleSubmit} className="max-w-sm space-y-4">
+      <div className="max-w-sm space-y-4">
         <Field label={t('profile.currentPassword')}>
-          <input type="password" required value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} className={fieldClass} style={fieldStyle} />
+          <input type="password" autoComplete="current-password" value={values.old} onChange={set('old')} className={fieldClass} style={fieldStyle} />
         </Field>
         <Field label={t('profile.newPassword')}>
-          <input type="password" required minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={fieldClass} style={fieldStyle} />
+          <input type="password" autoComplete="new-password" minLength={8} value={values.next} onChange={set('next')} className={fieldClass} style={fieldStyle} />
         </Field>
         <Field label={t('profile.confirmNewPassword')}>
-          <input type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={fieldClass} style={fieldStyle} />
+          <input type="password" autoComplete="new-password" minLength={8} value={values.confirm} onChange={set('confirm')} className={fieldClass} style={fieldStyle} />
         </Field>
         {error && <p className="text-sm" style={{ color: '#f87171' }}>{error}</p>}
         {done && (
@@ -70,10 +43,7 @@ function ChangePasswordCard() {
             <CheckCircle2 size={15} /> {t('profile.changePasswordSuccess')}
           </p>
         )}
-        <button type="submit" disabled={submitting} className="lp-btn-primary disabled:opacity-50">
-          {submitting ? t('profile.changingPassword') : t('profile.changePassword')}
-        </button>
-      </form>
+      </div>
     </section>
   )
 }
@@ -85,6 +55,9 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [passwords, setPasswords] = useState({ old: '', next: '', confirm: '' })
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordDone, setPasswordDone] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const fileInputRef = useRef(null)
@@ -121,7 +94,29 @@ export default function Profile() {
     setSaving(true)
     setSaved(false)
     setSaveError('')
+    setPasswordError('')
+    setPasswordDone(false)
     try {
+      // On the Security tab, any filled password field means the password is being changed too.
+      if (passwords.old || passwords.next || passwords.confirm) {
+        if (!passwords.old || !passwords.next) {
+          setPasswordError(t('profile.passwordIncomplete'))
+          return
+        }
+        if (passwords.next !== passwords.confirm) {
+          setPasswordError(t('profile.passwordMismatch'))
+          return
+        }
+        try {
+          await client.post('/auth/me/change-password/', { old_password: passwords.old, new_password: passwords.next })
+        } catch (err) {
+          const data = err.response?.data
+          setPasswordError(data ? Object.values(data).flat().join(' ') : t('profile.changePasswordError'))
+          return
+        }
+        setPasswords({ old: '', next: '', confirm: '' })
+        setPasswordDone(true)
+      }
       await client.patch('/auth/me/', form)
       await refreshUser()
       setSaved(true)
@@ -246,7 +241,7 @@ export default function Profile() {
               {completion < 100 && <p className="mt-2 text-xs" style={{ color: 'var(--ink-soft)' }}>{t('profile.completionHint')}</p>}
             </div>
 
-            {tab !== 'security' && (
+            {(
               <div className="mt-5">
                 <button type="submit" form="profile-form" disabled={saving} className="lp-btn-primary w-full disabled:opacity-50">
                   {saving ? t('profile.saving') : t('profile.save')}
@@ -279,10 +274,9 @@ export default function Profile() {
               ))}
             </div>
 
-            {tab === 'security' ? (
-              <ChangePasswordCard />
-            ) : (
+            {(
               <form id="profile-form" onSubmit={handleSubmit} className="lp-card lp-animate-in">
+                {tab === 'security' && <ChangePasswordCard values={passwords} onChange={setPasswords} error={passwordError} done={passwordDone} />}
                 {tab === 'basics' && (
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label={t('profile.firstName')}>
