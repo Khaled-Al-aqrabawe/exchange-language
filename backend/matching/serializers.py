@@ -39,6 +39,7 @@ class PartnerSerializer(serializers.ModelSerializer):
     is_available_now = serializers.SerializerMethodField()
     age = serializers.ReadOnlyField()
     learning_level = serializers.SerializerMethodField()
+    next_session_in_minutes = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -46,7 +47,19 @@ class PartnerSerializer(serializers.ModelSerializer):
             'user_id', 'email', 'full_name', 'bio', 'gender', 'country', 'age', 'native_language',
             'learning_language', 'learning_level', 'proficiency_level', 'timezone', 'learning_goals', 'avatar', 'intro_video',
             'match_type', 'is_available_now', 'sessions_completed', 'average_rating', 'ratings_count', 'availability',
+            'next_session_in_minutes',
         ]
+
+    def get_next_session_in_minutes(self, obj):
+        """Minutes until a confirmed session of theirs starts, when that is within the next 30 minutes."""
+        now = dj_timezone.now()
+        soon = ScheduledSession.objects.filter(
+            Q(host=obj.user) | Q(partner=obj.user), status='confirmed',
+            scheduled_time__gt=now, scheduled_time__lte=now + timedelta(minutes=30),
+        ).order_by('scheduled_time').first()
+        if not soon:
+            return None
+        return max(1, round((soon.scheduled_time - now).total_seconds() / 60))
 
     def get_learning_level(self, obj):
         """CEFR level in the language they are learning (older profiles only have a broad level)."""

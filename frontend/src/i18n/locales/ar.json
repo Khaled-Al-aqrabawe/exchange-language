@@ -344,6 +344,7 @@
     "noAvailableTimes": "لم تضف أي أوقات متاحة بعد.",
     "repeatsWeekly": "يتكرر أسبوعياً",
     "endAdjusted": "تم تعديل وقت النهاية ليكون الوقت 40 دقيقة على الأقل.",
+    "sessionSoon": "لديه جلسة بعد {{count}} دقيقة",
     "minDurationError": "يجب ألا يقل الوقت المتاح عن 40 دقيقة.",
     "callNowSubtitle": "ماذا تريد أن تفعل مع {{name}}؟",
     "lessonFilter": "الدرس",

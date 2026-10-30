@@ -377,6 +377,12 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, on
           {p.bio || t('partnerProfile.noBio')}
         </p>
 
+        {p.next_session_in_minutes != null && (
+          <p className="mt-3 inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'color-mix(in srgb, #f59e0b 16%, transparent)', color: '#b45309' }}>
+            <Clock size={12} /> {t('partners.sessionSoon', { count: p.next_session_in_minutes, defaultValue: 'Has a session in {{count}} min' })}
+          </p>
+        )}
+
         {visibleAvailability.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {visibleAvailability.slice(0, 2).map((slot) => (

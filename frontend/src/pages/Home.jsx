@@ -204,6 +204,11 @@ export default function Home() {
                     </div>
                     <p className="mt-3 w-full truncate text-sm font-bold" style={{ color: 'var(--ink)' }}>{p.full_name}</p>
                     <p className="mt-0.5 w-full truncate text-xs" style={{ color: 'var(--ink-soft)' }}>{p.native_language} → {p.learning_language}</p>
+                    {p.next_session_in_minutes != null && (
+                      <p className="mt-1.5 text-[11px] font-bold" style={{ color: '#b45309' }}>
+                        {t('partners.sessionSoon', { count: p.next_session_in_minutes, defaultValue: 'Has a session in {{count}} min' })}
+                      </p>
+                    )}
                   </Link>
                   <button type="button" onClick={() => handleCall(p)} className="lp-btn-primary mt-3 w-full">
                     <Phone size={15} /> {t('partners.callNow')}
