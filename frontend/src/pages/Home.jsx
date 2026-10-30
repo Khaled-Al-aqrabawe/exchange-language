@@ -66,7 +66,7 @@ function CourseProgress({ lessons, language, level }) {
 
   return (
     <Link
-      to="/materials"
+      to={`/materials?language=${encodeURIComponent(language || '')}&level=${encodeURIComponent(level || '')}`}
       className="lp-card lp-card--hover lp-animate-in lp-delay-2 mb-6 flex items-center gap-3.5"
       style={{ padding: '0.7rem 1rem' }}
     >

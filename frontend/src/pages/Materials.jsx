@@ -1,6 +1,7 @@
 import { ArrowLeft, CheckCircle2, Download, ExternalLink, FileText, FolderOpen, SlidersHorizontal, Trash2, Upload, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import client from '../api/client'
 import PptxSlideViewer from '../components/PptxSlideViewer'
 import { useAuth } from '../context/AuthContext'
@@ -209,6 +210,19 @@ export default function Materials() {
   const [openLang, setOpenLang] = useState(null)
   const [viewing, setViewing] = useState(null)
   const [zipBusy, setZipBusy] = useState(false)
+  const [searchParams] = useSearchParams()
+
+  // Arriving with ?language=&level= (the home page progress row) opens that level's lesson list directly.
+  useEffect(() => {
+    const wantLang = (searchParams.get('language') || '').toLowerCase()
+    const wantLevel = searchParams.get('level')
+    if (!wantLang || !wantLevel || materials.length === 0) return
+    const match = materials.find((m) => m.language.toLowerCase() === wantLang && m.level === wantLevel)
+    if (match) {
+      setOpenLang(match.language)
+      setOpenLevel(match.level)
+    }
+  }, [materials, searchParams])
 
   // How many lessons of a language/level the user has completed.
   const levelProgress = (lang, lvl) => {
