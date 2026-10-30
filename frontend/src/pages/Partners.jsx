@@ -307,6 +307,21 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, filterType, o
     .filter((slot) => !filterType || (slot.session_type || 'lesson') === filterType)
     .filter((slot) => !filterTime || (slot.start_time.slice(0, 5) <= filterTime && filterTime <= slot.end_time.slice(0, 5)))
 
+  // The card shows the nearest day of each kind (a free conversation day and a lesson day),
+  // with every time that falls on that day.
+  const slotDate = (slot) => (!slot.is_recurring && slot.specific_date
+    ? new Date(`${slot.specific_date}T${slot.start_time}`)
+    : nextDateForDayOfWeek(slot.day_of_week, slot.start_time))
+  const dayKey = (slot) => slotDate(slot).toDateString()
+  const nearestPerType = ['lesson', 'conversation']
+    .flatMap((kind) => {
+      const ofKind = visibleAvailability
+        .filter((slot) => (slot.session_type || 'lesson') === kind)
+        .sort((x, y) => slotDate(x) - slotDate(y))
+      return ofKind.filter((slot) => ofKind[0] && dayKey(slot) === dayKey(ofKind[0]))
+    })
+    .sort((x, y) => slotDate(x) - slotDate(y))
+
   const cover = exchange
     ? 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 20%, var(--surface)), color-mix(in srgb, var(--gold) 12%, var(--surface)))'
     : 'linear-gradient(135deg, color-mix(in srgb, var(--accent-2) 16%, var(--surface)), color-mix(in srgb, var(--accent) 12%, var(--surface)))'
@@ -384,9 +399,9 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, filterType, o
           </p>
         )}
 
-        {visibleAvailability.length > 0 && (
+        {nearestPerType.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {visibleAvailability.slice(0, 2).map((slot) => (
+            {nearestPerType.map((slot) => (
               <button
                 key={slot.id}
                 type="button"
@@ -395,7 +410,7 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, filterType, o
                 title={t('partners.scheduleThisTime', 'Schedule a session at this time')}
               >
                 <Clock size={11} />
-                {nextDateForDayOfWeek(slot.day_of_week, slot.start_time).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })}
+                {slotDate(slot).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })}
                 {' '}{formatTime12(slot.start_time)}–{formatTime12(slot.end_time)}
                 <span className="opacity-60">·</span>
                 {slot.session_type === 'conversation' ? <MessagesSquare size={11} /> : <BookOpen size={11} />}

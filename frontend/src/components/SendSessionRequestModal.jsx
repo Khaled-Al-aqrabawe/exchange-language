@@ -55,12 +55,16 @@ export default function SendSessionRequestModal({ lockedPartnerId, initialSlotId
 
   const options = useMemo(() => {
     if (!partnerDetail) return []
-    return (partnerDetail.availability || [])
+    const all = (partnerDetail.availability || [])
       .filter((slot) => !isSlotExpiredToday(slot))
       .map((slot) => describeSlot(slot, partnerDetail.timezone))
       .filter((o) => o.end > new Date())
-      // coming from one time tag: only that time; otherwise only the kind of session being looked for
-      .filter((o) => (initialSlotId ? o.slot.id === initialSlotId : !sessionType || (o.slot.session_type || 'lesson') === sessionType))
+    // Coming from a time tag: that day's times of the same kind (a day can hold several);
+    // otherwise only the kind of session being looked for.
+    const clicked = initialSlotId ? all.find((o) => o.slot.id === initialSlotId) : null
+    const kind = (o) => o.slot.session_type || 'lesson'
+    return all
+      .filter((o) => (clicked ? dayString(o.start) === dayString(clicked.start) && kind(o) === kind(clicked) : !sessionType || kind(o) === sessionType))
       .sort((a, b) => a.start - b.start)
   }, [partnerDetail, initialSlotId, sessionType])
 
