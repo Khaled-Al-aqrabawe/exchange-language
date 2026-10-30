@@ -397,9 +397,28 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slid
   const bodyRef = useRef(null)
 
   // Selecting text on the slide itself shows its translation in a bubble right beside the selection.
-  const onSelect = async () => {
-    if (!translate) return
+  const onSelect = async (event) => {
+    if (!translate || pen.on) return
     const selection = window.getSelection()
+    // A plain click (nothing dragged over) translates the word under the pointer.
+    if (selection?.isCollapsed && selection.rangeCount) {
+      const caret = document.caretPositionFromPoint?.(event.clientX, event.clientY)
+      const node = caret?.offsetNode ?? document.caretRangeFromPoint?.(event.clientX, event.clientY)?.startContainer
+      const offset = caret?.offset ?? document.caretRangeFromPoint?.(event.clientX, event.clientY)?.startOffset
+      if (node?.nodeType === Node.TEXT_NODE && bodyRef.current?.contains(node)) {
+        const text = node.textContent
+        let start = offset
+        let end = offset
+        while (start > 0 && /\S/.test(text[start - 1])) start -= 1
+        while (end < text.length && /\S/.test(text[end])) end += 1
+        const range = document.createRange()
+        range.setStart(node, start)
+        range.setEnd(node, end)
+        if (!range.toString().trim()) return
+        selection.removeAllRanges()
+        selection.addRange(range)
+      }
+    }
     const picked = selection?.toString().replace(EDGE_PUNCTUATION, '')
     if (!picked || !selection.rangeCount || !bodyRef.current?.contains(selection.anchorNode)) return
     const rect = selection.getRangeAt(0).getBoundingClientRect()
