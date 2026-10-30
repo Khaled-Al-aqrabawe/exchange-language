@@ -1,5 +1,5 @@
 import CallNowModal from '../components/CallNowModal'
-import { CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, Phone, Play, Sparkles, Star, Video, X } from 'lucide-react'
+import { BookOpen, CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, MessagesSquare, Phone, Play, Sparkles, Star, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -363,6 +363,11 @@ export default function PartnerProfile() {
                           ? t(`profile.days.${DAYS.find((d) => d.value === slot.day_of_week)?.key}`)
                           : new Date(`${slot.specific_date}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric' })}
                         {' '}{formatTime12(slot.start_time)}–{formatTime12(slot.end_time)}
+                        <span className="opacity-60">·</span>
+                        {slot.session_type === 'conversation' ? <MessagesSquare size={13} /> : <BookOpen size={13} />}
+                        {slot.session_type === 'conversation'
+                          ? t('partners.typeConversation', 'Free conversation')
+                          : `${t('partners.typeLesson', 'From the lessons')}${slot.lesson ? ` · ${t('partners.lessonOption', { n: slot.lesson })}` : ''}`}
                       </button>
                     ))}
                   </div>

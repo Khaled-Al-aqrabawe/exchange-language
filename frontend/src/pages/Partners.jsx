@@ -390,6 +390,11 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, on
                 <Clock size={11} />
                 {nextDateForDayOfWeek(slot.day_of_week, slot.start_time).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })}
                 {' '}{formatTime12(slot.start_time)}–{formatTime12(slot.end_time)}
+                <span className="opacity-60">·</span>
+                {slot.session_type === 'conversation' ? <MessagesSquare size={11} /> : <BookOpen size={11} />}
+                {slot.session_type === 'conversation'
+                  ? t('partners.typeConversation', 'Free conversation')
+                  : `${t('partners.typeLesson', 'From the lessons')}${slot.lesson ? ` · ${t('partners.lessonOption', { n: slot.lesson })}` : ''}`}
               </button>
             ))}
           </div>
