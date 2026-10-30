@@ -239,6 +239,10 @@
     "learning": "Learning",
     "finishProfile": "Finish setting up your profile to get matched with partners",
     "findAPartner": "Find a partner",
+    "courseProgress": "Your course progress",
+    "lessonsDone": "{{done}} of {{total}} lessons finished",
+    "continueLesson": "Continue · Lesson {{n}}",
+    "courseDone": "Course completed 🎉",
     "tipOfDay": "Tip of the day",
     "tips": [
       "Consistency beats intensity — 15 minutes of daily practice builds more fluency than a single 3-hour cram session.",

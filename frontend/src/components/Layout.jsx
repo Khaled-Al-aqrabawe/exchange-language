@@ -301,8 +301,6 @@ export default function Layout() {
                   <>
                     <Link to="/profile" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.profile')}</Link>
                     <Link to="/schedule" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.schedule')}</Link>
-                    <Link to="/about" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.about')}</Link>
-                    <Link to="/faq" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.faq')}</Link>
                   </>
                 ) : (
                   <>
