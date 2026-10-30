@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, CalendarCheck, CalendarPlus, CheckCircle2, Clock, GraduationCap, Globe2, Info, MapPin, MessageCircle, MessagesSquare, Phone, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
+import { ArrowRight, BookOpen, CalendarCheck, CalendarPlus, CheckCircle2, Clock, GraduationCap, Globe2, Info, Layers, MapPin, MessageCircle, MessagesSquare, Phone, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
@@ -473,8 +473,7 @@ export default function Partners() {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibility, setVisibility] = useState('now')
-  const [filters, setFilters] = useState({ type: 'lesson', lesson: '', date: '', time: '' })
-  const myLessons = useMyLessons()
+  const [filters, setFilters] = useState({ type: '' }) // '' = both kinds
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
   const [showMyTimes, setShowMyTimes] = useState(false)
   const [callTarget, setCallTarget] = useState(null)
@@ -483,8 +482,6 @@ export default function Partners() {
     setLoading(true)
     const params = {}
     if (learningLanguage) params.language = learningLanguage
-    if (filters.type === 'lesson' && filters.lesson) params.lesson = filters.lesson
-    if (filters.date) params.day = dateToDayOfWeek(filters.date)
     client.get('/matching/partners/', { params })
       .then(({ data }) => setPartners(data))
       .finally(() => setLoading(false))
@@ -492,17 +489,14 @@ export default function Partners() {
 
   useEffect(load, [filters, learningLanguage, t])
 
-  const slotMatchesTime = (slot) =>
-    (slot.session_type || 'lesson') === filters.type
-    && (!filters.time || (slot.start_time.slice(0, 5) <= filters.time && filters.time <= slot.end_time.slice(0, 5)))
-  const withAvailability = partners.filter((p) => p.availability?.some(slotMatchesTime))
-  const availableNow = partners.filter((p) => p.is_available_now)
+  // With a session type picked, only partners who offered that kind of time are listed.
+  const matchesType = (p) => !filters.type || p.availability?.some((slot) => (slot.session_type || 'lesson') === filters.type)
+  const availableNow = partners.filter((p) => p.is_available_now && matchesType(p))
+  const allPartners = partners.filter(matchesType)
   // Highest-rated first; unrated partners last. Array#sort is stable, so ties keep the
   // server order (exchange matches first).
   const byRating = (list) => [...list].sort((x, y) => (y.average_rating || 0) - (x.average_rating || 0))
-  const visiblePartners = byRating(
-    visibility === 'now' ? availableNow : visibility === 'scheduled' ? withAvailability : partners,
-  )
+  const visiblePartners = byRating(visibility === 'now' ? availableNow : allPartners)
 
   const handleCall = (p) => {
     setCallTarget({ id: p.user_id, name: p.full_name })
@@ -515,10 +509,9 @@ export default function Partners() {
 
   const tabs = [
     ['now', t('partners.visibilityNow'), availableNow.length],
-    ['scheduled', t('partners.visibilityScheduled'), withAvailability.length],
-    ['all', t('partners.visibilityAll'), partners.length],
+    ['all', t('partners.visibilityAll'), allPartners.length],
   ]
-  const hasFilters = !!(filters.type !== 'lesson' || filters.lesson || filters.date || filters.time)
+  const hasFilters = !!filters.type
 
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
@@ -549,13 +542,7 @@ export default function Partners() {
                   <button
                     key={key}
                     type="button"
-                    onClick={() => {
-                      setVisibility(key)
-                      if (key !== 'scheduled') setFilters((f) => ({ ...f, date: '', time: '' }))
-                      // people available right now are called straight away, so no session type applies
-                      if (key !== 'scheduled') setFilters((f) => ({ ...f, type: 'lesson' }))
-                      if (key !== 'scheduled') setFilters((f) => ({ ...f, lesson: '' }))
-                    }}
+                    onClick={() => setVisibility(key)}
                     className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
                     style={visibility === key
                       ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
@@ -576,7 +563,7 @@ export default function Partners() {
               {hasFilters && (
                 <button
                   type="button"
-                  onClick={() => setFilters({ type: 'lesson', lesson: '', date: '', time: '' })}
+                  onClick={() => setFilters({ type: '' })}
                   className="text-sm font-semibold hover:opacity-70"
                   style={{ color: 'var(--accent)' }}
                 >
@@ -585,53 +572,24 @@ export default function Partners() {
               )}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-end gap-4">
-              {visibility === 'scheduled' && (
-              <div>
-                <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.sessionType', 'Session type')}</span>
-                <div className="inline-flex h-11 items-center gap-1 rounded-xl p-1" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
-                  {[['lesson', BookOpen, t('partners.typeLesson', 'From the lessons')], ['conversation', MessagesSquare, t('partners.typeConversation', 'Free conversation')]].map(([value, Icon, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setFilters({ ...filters, type: value, lesson: '' })}
-                      className="inline-flex h-full items-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-bold transition-all"
-                      style={filters.type === value
-                        ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
-                        : { color: 'var(--ink-soft)' }}
-                    >
-                      <Icon size={15} /> {label}
-                    </button>
-                  ))}
-                </div>
+            <div className="mt-4">
+              <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.sessionType', 'Session type')}</span>
+              <div className="inline-flex h-11 items-center gap-1 rounded-xl p-1" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+                {[['', Layers, t('partners.typeBoth', 'Both')], ['lesson', BookOpen, t('partners.typeLesson', 'From the lessons')], ['conversation', MessagesSquare, t('partners.typeConversation', 'Free conversation')]].map(([value, Icon, label]) => (
+                  <button
+                    key={value || 'both'}
+                    type="button"
+                    onClick={() => setFilters({ type: value })}
+                    className="inline-flex h-full items-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-bold transition-all"
+                    style={filters.type === value
+                      ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
+                      : { color: 'var(--ink-soft)' }}
+                  >
+                    <Icon size={15} /> {label}
+                  </button>
+                ))}
               </div>
-              )}
-              {visibility === 'scheduled' && filters.type === 'lesson' && (
-                <FilterField label={t('partners.lessonFilter')} icon={GraduationCap} className="w-full sm:w-64">
-                  <select value={filters.lesson} onChange={(e) => setFilters({ ...filters, lesson: e.target.value })} className={fieldClass} style={fieldStyle}>
-                    <option value="">{t('partners.anyLesson')}</option>
-                    {myLessons.map((l) => <option key={l.order} value={l.order} style={l.finished ? FINISHED_STYLE : undefined}>{lessonLabel(t, l)}</option>)}
-                  </select>
-                </FilterField>
-              )}
-              {visibility === 'scheduled' && (
-                <>
-                  <FilterField label={t('partners.date')} icon={CalendarCheck} className="w-full sm:w-52">
-                    <input type="date" min={todayStr()} value={filters.date} onChange={(e) => setFilters({ ...filters, date: e.target.value })} className={fieldClass} style={fieldStyle} />
-                  </FilterField>
-                  <FilterField label={t('partners.time')} icon={Clock} className="w-full sm:w-44">
-                    <input type="time" value={filters.time} onChange={(e) => setFilters({ ...filters, time: e.target.value })} className={fieldClass} style={fieldStyle} />
-                  </FilterField>
-                </>
-              )}
             </div>
-
-            {visibility === 'scheduled' && (
-              <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
-                <Info size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />
-                {t('partners.lessonFilterNote')}
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -657,7 +615,7 @@ export default function Partners() {
               <Search size={22} />
             </span>
             <p className="mx-auto max-w-sm text-sm" style={{ color: 'var(--ink-soft)' }}>
-              {visibility === 'now' ? t('partners.emptyNow') : visibility === 'scheduled' ? t('partners.emptyAvailable') : t('partners.empty')}
+              {visibility === 'now' ? t('partners.emptyNow') : t('partners.empty')}
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {visibility !== 'all' && (
@@ -666,7 +624,7 @@ export default function Partners() {
                 </button>
               )}
               {hasFilters && (
-                <button type="button" onClick={() => setFilters({ type: 'lesson', lesson: '', date: '', time: '' })} className="lp-btn-secondary">
+                <button type="button" onClick={() => setFilters({ type: '' })} className="lp-btn-secondary">
                   {t('partners.clearFilters')}
                 </button>
               )}
@@ -681,9 +639,7 @@ export default function Partners() {
                 i={i}
                 t={t}
                 i18n={i18n}
-                filterDayOfWeek={filters.date ? dateToDayOfWeek(filters.date) : null}
-                filterTime={filters.time}
-                filterType={visibility === 'scheduled' ? filters.type : undefined}
+                filterType={filters.type || undefined}
                 onMessage={handleMessage}
                 onCall={handleCall}
                 onSchedule={(partner, slotId) => setScheduleFor({ ...partner, slotId })}
@@ -691,20 +647,13 @@ export default function Partners() {
             ))}
           </div>
         )}
-
-        {!loading && visiblePartners.length > 0 && visibility === 'scheduled' && withAvailability.length < partners.length && (
-          <p className="mt-8 flex items-center justify-center gap-1.5 text-xs" style={{ color: 'var(--ink-soft)' }}>
-            <Sparkles size={13} style={{ color: 'var(--accent)' }} />
-            {t('partners.moreWithAllHint', { count: partners.length - withAvailability.length })}
-          </p>
-        )}
       </div>
 
       {scheduleFor && (
         <SendSessionRequestModal
           lockedPartnerId={scheduleFor.user_id}
           initialSlotId={scheduleFor.slotId}
-          sessionType={visibility === 'scheduled' ? filters.type : undefined}
+          sessionType={filters.type || undefined}
           onClose={() => setScheduleFor(null)}
           onSent={load}
         />

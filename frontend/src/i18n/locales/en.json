@@ -353,6 +353,7 @@
     "repeatsWeekly": "Repeats weekly",
     "endAdjusted": "The end time was moved to keep the session at least 40 minutes.",
     "sessionSoon": "Has a session in {{count}} min",
+    "typeBoth": "Both",
     "minDurationError": "An available time must be at least 40 minutes long.",
     "callNowSubtitle": "What do you want to do with {{name}}?",
     "lessonFilter": "Lesson",
