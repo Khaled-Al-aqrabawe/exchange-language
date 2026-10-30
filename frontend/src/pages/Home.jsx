@@ -63,45 +63,32 @@ function CourseProgress({ lessons, language, level }) {
   const total = lessons.length
   const percent = Math.round((done / total) * 100)
   const next = lessons.find((l) => !l.finished)
-  const R = 38
-  const C = 2 * Math.PI * R
 
   return (
-    <div className="lp-card lp-animate-in lp-delay-2 mb-8 flex flex-col items-center gap-6 sm:flex-row" style={{ padding: '1.4rem 1.6rem', background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--surface)), var(--surface))' }}>
-      <div className="relative h-28 w-28 shrink-0">
-        <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-          <circle cx="50" cy="50" r={R} fill="none" stroke="var(--line)" strokeWidth="9" />
-          <circle
-            cx="50" cy="50" r={R} fill="none" stroke="var(--accent)" strokeWidth="9" strokeLinecap="round"
-            strokeDasharray={C} strokeDashoffset={C * (1 - done / total)} style={{ transition: 'stroke-dashoffset .8s ease' }}
-          />
-        </svg>
-        <span className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display text-2xl font-extrabold leading-none" style={{ color: 'var(--ink)' }}>{percent}%</span>
-          <span className="mt-1 text-[11px] font-semibold" style={{ color: 'var(--ink-soft)' }}>{done}/{total}</span>
-        </span>
-      </div>
-
-      <div className="min-w-0 flex-1 text-center sm:text-start">
-        <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
-          {t('dashboard.courseProgress', 'Your course progress')}
+    <Link
+      to="/materials"
+      className="lp-card lp-card--hover lp-animate-in lp-delay-2 mb-6 flex items-center gap-3.5"
+      style={{ padding: '0.7rem 1rem' }}
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold" style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)' }}>
+        {percent}%
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="flex items-baseline justify-between gap-2 text-sm font-bold" style={{ color: 'var(--ink)' }}>
+          <span className="truncate">{[language, level].filter(Boolean).join(' · ')}</span>
+          <span className="shrink-0" style={{ color: 'var(--accent)' }}>{done}/{total}</span>
         </p>
-        <h2 className="mt-1 font-display text-xl font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
-          {t('dashboard.lessonsDone', { done, total, defaultValue: '{{done}} of {{total}} lessons finished' })}
-        </h2>
-        <p className="mt-0.5 text-sm" style={{ color: 'var(--ink-soft)' }}>{[language, level].filter(Boolean).join(' · ')}</p>
-        <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
-          <div className="h-full rounded-full" style={{ width: `${percent}%`, background: 'var(--gradient-brand)', transition: 'width .8s ease' }} />
+        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
+          <div className="h-full rounded-full" style={{ width: `${percent}%`, background: 'var(--gradient-brand)' }} />
         </div>
       </div>
-
-      <Link to="/materials" className="lp-btn-primary shrink-0">
+      <span className="hidden shrink-0 items-center gap-1 text-xs font-semibold sm:flex" style={{ color: 'var(--accent)' }}>
         {next
           ? t('dashboard.continueLesson', { n: next.order, defaultValue: 'Continue · Lesson {{n}}' })
           : t('dashboard.courseDone', 'Course completed 🎉')}
-        <ArrowRight size={16} className="rtl:rotate-180" />
-      </Link>
-    </div>
+        <ArrowRight size={14} className="rtl:rotate-180" />
+      </span>
+    </Link>
   )
 }
 
