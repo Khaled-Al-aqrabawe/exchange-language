@@ -7,6 +7,7 @@ from .views import (
     MaterialProgressView,
     MaterialTextView,
     NextLessonView,
+    SpeechView,
     TranslateView,
 )
 
@@ -16,6 +17,7 @@ urlpatterns = [
     path('materials/<int:pk>/', MaterialDetailView.as_view(), name='material-detail'),
     path('materials/<int:pk>/text/', MaterialTextView.as_view(), name='material-text'),
     path('translate/', TranslateView.as_view(), name='translate'),
+    path('speech/', SpeechView.as_view(), name='speech'),
     path('next/', NextLessonView.as_view(), name='next-lesson'),
     path('progress/', MaterialProgressView.as_view(), name='material-progress'),
 ]

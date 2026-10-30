@@ -657,11 +657,16 @@ function speak(text, language) {
   const voices = synth ? synth.getVoices() : []
   // Some computers (Windows without the Arabic language pack, for one) have no voice for a language,
   // so the browser stays silent; those are read through an online voice instead.
-  if (!synth || (voices.length > 0 && !voices.some((v) => v.lang.toLowerCase().startsWith(prefix)))) {
+  if (!synth || !voices.some((v) => v.lang.toLowerCase().startsWith(prefix))) {
     synth?.cancel()
     fallbackAudio?.pause()
-    fallbackAudio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${prefix}&q=${encodeURIComponent(text)}`)
-    fallbackAudio.play().catch(() => {})
+    client.get('/courses/speech/', { params: { text, language }, responseType: 'blob' })
+      .then(({ data }) => {
+        fallbackAudio?.pause()
+        fallbackAudio = new Audio(URL.createObjectURL(data))
+        return fallbackAudio.play()
+      })
+      .catch(() => {})
     return
   }
   fallbackAudio?.pause()

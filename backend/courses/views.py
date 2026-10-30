@@ -10,7 +10,7 @@ from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
 from django.core.cache import cache
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from rest_framework import permissions, status
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.generics import DestroyAPIView, ListCreateAPIView
@@ -265,3 +265,29 @@ class TranslateView(APIView):
                 return {'translation': json.load(response)['responseData']['translatedText'], 'transliteration': ''}
         except (URLError, OSError, ValueError, KeyError):
             return None
+
+
+class SpeechView(APIView):
+    """Spoken audio for a word or phrase, for browsers that have no voice installed for that language."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        text = (request.query_params.get('text') or '').strip()
+        language = request.query_params.get('language', '')
+        if not text or len(text) > 200:
+            raise ValidationError({'text': 'Send a word or short phrase (up to 200 characters).'})
+        if language not in TRANSLATE_CODES:
+            raise ValidationError({'detail': 'Unknown language.'})
+
+        key = 'speech-' + hashlib.sha1(f'{language}|{text}'.encode()).hexdigest()
+        audio = cache.get(key)
+        if audio is None:
+            query = urlencode({'ie': 'UTF-8', 'client': 'tw-ob', 'tl': TRANSLATE_CODES[language], 'q': text})
+            try:
+                with urlopen(Request(f'https://translate.google.com/translate_tts?{query}', headers={'User-Agent': 'Mozilla/5.0'}), timeout=6) as response:
+                    audio = response.read()
+            except (URLError, OSError):
+                return Response({'detail': 'Speech is not available right now.'}, status=status.HTTP_502_BAD_GATEWAY)
+            cache.set(key, audio, 60 * 60 * 24)
+        return HttpResponse(audio, content_type='audio/mpeg')
