@@ -18,6 +18,7 @@ import { avatarUrl } from '../utils/images'
 import LanguageSwitcher from './LanguageSwitcher'
 import PresenceToggle from './PresenceToggle'
 import IncomingCallBox from './IncomingCallBox'
+import OngoingSessionBanner from './OngoingSessionBanner'
 import NotificationBell from './NotificationBell'
 import ThemeToggle from './ThemeToggle'
 
@@ -249,6 +250,7 @@ export default function Layout() {
         </div>
       </nav>
 
+      <OngoingSessionBanner />
       <IncomingCallBox />
 
       <main className="flex-1">

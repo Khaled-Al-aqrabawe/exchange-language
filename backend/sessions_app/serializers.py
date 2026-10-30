@@ -23,12 +23,13 @@ class ScheduledSessionSerializer(serializers.ModelSerializer):
     # step and is created already confirmed.
     auto_confirm = serializers.BooleanField(write_only=True, required=False, default=False)
     my_rating = serializers.SerializerMethodField()
+    my_joined = serializers.SerializerMethodField()
 
     class Meta:
         model = ScheduledSession
         fields = [
             'id', 'host', 'partner', 'partner_id', 'auto_confirm', 'scheduled_time', 'window_end_time',
-            'duration_minutes', 'status', 'notes', 'cancellation_reason', 'room_id', 'created_at', 'my_rating',
+            'duration_minutes', 'status', 'notes', 'cancellation_reason', 'room_id', 'created_at', 'my_rating', 'my_joined',
         ]
         read_only_fields = ['id', 'host', 'partner', 'status', 'cancellation_reason', 'room_id', 'created_at']
 
@@ -38,6 +39,12 @@ class ScheduledSessionSerializer(serializers.ModelSerializer):
             return None
         rating = obj.ratings.filter(rater=request.user).first()
         return {'score': rating.score, 'comment': rating.comment} if rating else None
+
+    def get_my_joined(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        return bool(obj.host_joined_at if obj.host_id == request.user.id else obj.partner_joined_at)
 
     def validate_partner_id(self, value):
         if not User.objects.filter(id=value).exists():

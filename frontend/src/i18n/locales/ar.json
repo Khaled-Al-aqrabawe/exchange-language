@@ -419,6 +419,8 @@
     "minutesShort": "{{count}} د",
     "confirm": "تأكيد",
     "cancelSession": "إلغاء",
+    "ongoingSession": "لديك جلسة جارية مع {{name}}",
+    "returnToSession": "العودة إلى الجلسة",
     "joinCall": "انضم إلى المكالمة",
     "status": {
       "label": "الحالة",

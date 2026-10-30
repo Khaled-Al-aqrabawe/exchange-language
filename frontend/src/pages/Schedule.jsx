@@ -322,14 +322,10 @@ export default function Schedule() {
   }
   const isOpen = (session) => ['pending', 'confirmed'].includes(session.status)
 
-  // open sessions first (soonest at the top), then the rest with the newest at the top
+  // newest at the top
   const filteredSessions = sessions
     .filter((s) => inTab(s, tab) && matchesDate(s))
-    .sort((a, b) => {
-      if (isOpen(a) !== isOpen(b)) return isOpen(a) ? -1 : 1
-      const diff = new Date(a.scheduled_time) - new Date(b.scheduled_time)
-      return isOpen(a) ? diff : -diff
-    })
+    .sort((a, b) => new Date(b.scheduled_time) - new Date(a.scheduled_time))
 
   const locale = i18n.resolvedLanguage
 

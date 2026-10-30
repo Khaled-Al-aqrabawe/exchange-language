@@ -393,6 +393,7 @@ function AnnotationToolbar({ pen, t }) {
 
 function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slide, onSlide, translate, t }) {
   const [slideCount, setSlideCount] = useState(0)
+  const [pptxFailed, setPptxFailed] = useState(false)
   const bodyRef = useRef(null)
 
   // Selecting text on the slide sends it to the Translate panel.

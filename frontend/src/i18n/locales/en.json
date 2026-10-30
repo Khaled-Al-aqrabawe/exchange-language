@@ -427,6 +427,8 @@
     "minutesShort": "{{count}} min",
     "confirm": "Confirm",
     "cancelSession": "Cancel",
+    "ongoingSession": "You have a session in progress with {{name}}",
+    "returnToSession": "Return to session",
     "joinCall": "Join call",
     "status": {
       "label": "Status",

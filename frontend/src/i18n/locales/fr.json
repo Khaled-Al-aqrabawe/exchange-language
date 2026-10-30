@@ -385,6 +385,8 @@
     "minutesShort": "{{count}} min",
     "confirm": "Confirmer",
     "cancelSession": "Annuler",
+    "ongoingSession": "Vous avez une session en cours avec {{name}}",
+    "returnToSession": "Retourner à la session",
     "joinCall": "Rejoindre l'appel",
     "status": {
       "label": "Statut",
