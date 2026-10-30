@@ -234,14 +234,34 @@ class TranslateView(APIView):
         if source == target:
             return Response({'translation': text})
 
-        key = 'translate-' + hashlib.sha1(f'{source}|{target}|{text}'.encode()).hexdigest()
-        translation = cache.get(key)
-        if translation is None:
-            query = urlencode({'q': text, 'langpair': f'{TRANSLATE_CODES[source]}|{TRANSLATE_CODES[target]}'})
-            try:
-                with urlopen(Request(f'https://api.mymemory.translated.net/get?{query}', headers={'User-Agent': 'LanguagePartner'}), timeout=6) as response:
-                    translation = json.load(response)['responseData']['translatedText']
-            except (URLError, OSError, ValueError, KeyError):
+        key = 'translate2-' + hashlib.sha1(f'{source}|{target}|{text}'.encode()).hexdigest()
+        result = cache.get(key)
+        if result is None:
+            result = self._google(text, source, target) or self._mymemory(text, source, target)
+            if result is None:
                 return Response({'detail': 'Translation is not available right now.'}, status=status.HTTP_502_BAD_GATEWAY)
-            cache.set(key, translation, 60 * 60 * 24)
-        return Response({'translation': translation})
+            cache.set(key, result, 60 * 60 * 24)
+        return Response(result)
+
+    @staticmethod
+    def _google(text, source, target):
+        """Much better than a translation memory for short phrases; also gives the word's romanisation."""
+        query = urlencode([('client', 'gtx'), ('sl', TRANSLATE_CODES[source]), ('tl', TRANSLATE_CODES[target]),
+                           ('dt', 't'), ('dt', 'rm'), ('q', text)])
+        try:
+            with urlopen(Request(f'https://translate.googleapis.com/translate_a/single?{query}', headers={'User-Agent': 'Mozilla/5.0'}), timeout=6) as response:
+                parts = json.load(response)[0]
+            translation = ''.join(p[0] for p in parts if p and p[0])
+            transliteration = ''.join(p[3] for p in parts if p and len(p) > 3 and isinstance(p[3], str))
+        except (URLError, OSError, ValueError, KeyError, IndexError, TypeError):
+            return None
+        return {'translation': translation, 'transliteration': transliteration} if translation else None
+
+    @staticmethod
+    def _mymemory(text, source, target):
+        query = urlencode({'q': text, 'langpair': f'{TRANSLATE_CODES[source]}|{TRANSLATE_CODES[target]}'})
+        try:
+            with urlopen(Request(f'https://api.mymemory.translated.net/get?{query}', headers={'User-Agent': 'LanguagePartner'}), timeout=6) as response:
+                return {'translation': json.load(response)['responseData']['translatedText'], 'transliteration': ''}
+        except (URLError, OSError, ValueError, KeyError):
+            return None

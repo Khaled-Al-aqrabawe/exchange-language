@@ -393,10 +393,9 @@ function AnnotationToolbar({ pen, t }) {
 
 function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slide, onSlide, translate, t }) {
   const [slideCount, setSlideCount] = useState(0)
-  const [bubble, setBubble] = useState(null)
   const bodyRef = useRef(null)
 
-  // Selecting text on the slide itself shows its translation in a bubble right beside the selection.
+  // Selecting text on the slide sends it to the Translate panel.
   const onSelect = async (event) => {
     if (!translate || pen.on) return
     const selection = window.getSelection()
@@ -421,21 +420,18 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slid
     }
     const picked = selection?.toString().replace(EDGE_PUNCTUATION, '')
     if (!picked || !selection.rangeCount || !bodyRef.current?.contains(selection.anchorNode)) return
-    const rect = selection.getRangeAt(0).getBoundingClientRect()
-    const box = bodyRef.current.getBoundingClientRect()
-    const place = { x: rect.left - box.left + rect.width / 2, top: rect.bottom - box.top + 8, bottom: box.bottom - rect.top + 8, below: rect.bottom - box.top < box.height * 0.6 }
     speak(picked, translate.source)
-    setBubble({ ...place, word: picked, loading: true })
+    translate.onPick?.(picked)
+    translate.onResult({ word: picked, loading: true })
     try {
       const text = translate.source === 'Arabic' ? stripArabicMarks(picked) : picked
       const { data } = await client.get('/courses/translate/', { params: { text, source: translate.source, target: translate.target } })
-      setBubble({ ...place, word: picked, translation: data.translation })
-      translate.onResult?.({ word: picked, translation: data.translation })
+      translate.onResult({ word: picked, translation: data.translation, transliteration: data.transliteration })
     } catch {
-      setBubble({ ...place, word: picked, error: true })
+      translate.onResult({ word: picked, error: true })
     }
   }
-  const [pptxFailed, setPptxFailed] = useState(false)
+
   const name = material.file_name || material.title
   const ext = name.split('.').pop()?.toLowerCase()
   const isImage = IMAGE_EXTENSIONS.includes(ext)
@@ -491,7 +487,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slid
         </div>
       </div>
 
-      <div ref={bodyRef} className="relative flex-1 min-h-0" onMouseUp={onSelect} onMouseDown={() => setBubble(null)}>
+      <div ref={bodyRef} className="relative flex-1 min-h-0" onMouseUp={onSelect}>
         {canEmbed ? (
           isImage ? (
             <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-black" />
@@ -528,27 +524,6 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slid
           </div>
         )}
         <AnnotationLayer active={pen.on} tool={pen.tool} color={pen.color} strokes={pen.strokes} onDraw={pen.onDraw} onUpdate={pen.onUpdate} onDelete={pen.onDelete} />
-        {bubble && (
-          <div
-            onMouseDown={(e) => e.stopPropagation()}
-            onMouseUp={(e) => e.stopPropagation()}
-            className="absolute z-30 w-max max-w-[22rem] -translate-x-1/2 rounded-2xl bg-slate-900/95 px-4 py-3 text-white shadow-xl ring-1 ring-white/15 backdrop-blur"
-            style={{ left: Math.max(120, bubble.x), ...(bubble.below ? { top: bubble.top } : { bottom: bubble.bottom }) }}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <p className="flex items-center gap-2 text-sm text-slate-300" dir="auto">
-                {bubble.word}
-                <button type="button" onClick={() => speak(bubble.word, translate.source)} className="text-slate-400 hover:text-white" aria-label="Listen"><Volume2 size={13} /></button>
-              </p>
-              <button type="button" onClick={() => setBubble(null)} className="shrink-0 text-slate-400 hover:text-white" aria-label="Close"><X size={13} /></button>
-            </div>
-            <p className="mt-1 flex items-center gap-2 text-lg font-semibold" style={{ color: bubble.error ? '#f87171' : '#7dd3fc' }} dir="auto">
-              {bubble.loading ? t('translate.loading') : bubble.error ? t('translate.error') : bubble.translation}
-              {bubble.translation && <button type="button" onClick={() => speak(bubble.translation, translate.target)} className="text-slate-400 hover:text-white" aria-label="Listen"><Volume2 size={14} /></button>}
-            </p>
-            <p className="mt-1 text-[11px] text-slate-500">{translate.source} → {translate.target}</p>
-          </div>
-        )}
       </div>
     </div>
   )
@@ -671,14 +646,29 @@ function ReportModal({ sessionId, partnerName, getRecording, onClose, onSent, t 
   )
 }
 
+let fallbackAudio = null
+
 function speak(text, language) {
   const lang = SPEECH_LANGUAGES[language]
-  if (!lang || !('speechSynthesis' in window)) return
+  if (!lang) return
+  const synth = 'speechSynthesis' in window ? window.speechSynthesis : null
+  const prefix = lang.split('-')[0].toLowerCase()
+  const voices = synth ? synth.getVoices() : []
+  // Some computers (Windows without the Arabic language pack, for one) have no voice for a language,
+  // so the browser stays silent; those are read through an online voice instead.
+  if (!synth || (voices.length > 0 && !voices.some((v) => v.lang.toLowerCase().startsWith(prefix)))) {
+    synth?.cancel()
+    fallbackAudio?.pause()
+    fallbackAudio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${prefix}&q=${encodeURIComponent(text)}`)
+    fallbackAudio.play().catch(() => {})
+    return
+  }
+  fallbackAudio?.pause()
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.lang = lang
   utterance.rate = 0.85
-  window.speechSynthesis.cancel()
-  window.speechSynthesis.speak(utterance)
+  synth.cancel()
+  synth.speak(utterance)
 }
 
 const EDGE_PUNCTUATION = /^[\s.,;:!?()«»"“”'،؛؟\-–—]+|[\s.,;:!?()«»"“”'،؛؟\-–—]+$/g
@@ -700,7 +690,10 @@ function TranslatePanel({ material, items, source, target, onLookup, onAddNote, 
         {items.map((item) => (
           <div key={item.word} className="rounded-2xl bg-white/5 p-3">
             <div className="flex items-start justify-between gap-2">
-              <p className="min-w-0 text-base font-semibold leading-snug text-white" dir="auto">{item.word}</p>
+              <div className="min-w-0">
+                <p className="text-base font-semibold leading-snug text-white" dir="auto">{item.word}</p>
+                {item.transliteration && <p className="text-xs italic text-slate-400">{item.transliteration}</p>}
+              </div>
               <button type="button" onClick={() => speak(item.word, source)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" title={t('translate.listen')}>
                 <Volume2 size={15} />
               </button>
@@ -1014,6 +1007,7 @@ export default function Call() {
   const [materialsLoading, setMaterialsLoading] = useState(false)
   const [sharedMaterial, setSharedMaterial] = useState(null)
   const [sharedSlide, setSharedSlide] = useState(0)
+  const pickedByPartnerRef = useRef(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Who asked for this session: from the call link (instant call) or the session's host.
@@ -1257,6 +1251,8 @@ export default function Call() {
           setStrokes((list) => list.filter((st) => st.id !== data.id))
         } else if (data.type === 'draw-clear') {
           setStrokes([])
+        } else if (data.type === 'translate-pick' && typeof data.word === 'string') {
+          pickedByPartnerRef.current?.(data.word.slice(0, 300))
         } else if (data.type === 'material-slide' && Number.isInteger(data.index)) {
           setSharedSlide(data.index)
         } else if (data.type === 'material-share-stop') {
@@ -1486,20 +1482,23 @@ export default function Call() {
     .find((l) => l && l !== translateSource) || 'English'
 
   const [translations, setTranslations] = useState([])
-  const addTranslation = (entry) => setTranslations((list) => [entry, ...list.filter((r) => r.word !== entry.word)].slice(0, 30))
-  const lookupTyped = async (raw) => {
+  const addTranslation = (entry) => setTranslations((list) => [entry, ...list.filter((r) => r.word !== entry.word)])
+  const lookupTyped = async (raw, silent) => {
     const word = raw.replace(EDGE_PUNCTUATION, '')
     if (!word) return
-    speak(word, translateSource)
+    if (!silent) speak(word, translateSource)
     addTranslation({ word, loading: true })
     try {
       const text = translateSource === 'Arabic' ? stripArabicMarks(word) : word
       const { data } = await client.get('/courses/translate/', { params: { text, source: translateSource, target: translateTarget } })
-      addTranslation({ word, translation: data.translation })
+      addTranslation({ word, translation: data.translation, transliteration: data.transliteration })
     } catch {
       addTranslation({ word, error: true })
     }
   }
+
+  // What the other person picks on the slide is translated here too, into this person's own language.
+  pickedByPartnerRef.current = (word) => lookupTyped(word, true)
 
   const openSidebar = (tab) => {
     if (notesOpen && sidebarTab === tab) setNotesOpen(false)
@@ -1525,7 +1524,9 @@ export default function Call() {
   const downloadSummary = async () => {
     try {
       const { data } = await client.get(`/sessions/${sessionId}/summary/`)
-      downloadText(`session-summary-${sessionId}.txt`, buildSummaryText(data, t, i18n.resolvedLanguage))
+      const words = translations.filter((r) => r.translation).reverse().map((r) => `- ${r.word} = ${r.translation}`)
+      const text = buildSummaryText(data, t, i18n.resolvedLanguage) + (words.length ? `\n\n== ${t('translate.title', 'Translate')} ==\n${words.join('\n')}` : '')
+      downloadText(`session-summary-${sessionId}.txt`, text)
     } catch {
       // the summary page after leaving has the same download
     }
@@ -2093,7 +2094,7 @@ export default function Call() {
                 onFinish={sharedMaterial.from === 'you' && sharedMaterial.id ? () => askFinished(sharedMaterial, 'next') : undefined}
                 pen={penApi}
                 fullWidth
-                translate={{ source: translateSource, target: translateTarget, onResult: addTranslation }}
+                translate={{ source: translateSource, target: translateTarget, onResult: addTranslation, onPick: (word) => send({ type: 'translate-pick', word }) }}
                 slide={sharedSlide}
                 onSlide={changeSlide}
                 t={t}
