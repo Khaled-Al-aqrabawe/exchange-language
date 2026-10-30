@@ -73,8 +73,14 @@ export default function PptxSlideViewer({ url, index, onReady, onError }) {
     setReady(false)
     const observer = new MutationObserver(applyBackground)
     observer.observe(stage, { childList: true, subtree: true })
-    fetch(url)
-      .then((r) => { if (!r.ok) throw new Error('fetch'); return r.arrayBuffer() })
+    // The API can hand back an http:// (or :80) media URL behind a TLS proxy; an https page may not fetch that.
+    const target = new URL(url, window.location.href)
+    if (window.location.protocol === 'https:' && target.protocol === 'http:') {
+      target.protocol = 'https:'
+      if (target.port === '80') target.port = ''
+    }
+    fetch(target.href)
+      .then((r) => { if (!r.ok) throw new Error(`fetch ${r.status}`); return r.arrayBuffer() })
       .then(async (buffer) => {
         if (cancelled) return
         backgroundsRef.current = await readSlideBackgrounds(buffer).catch(() => [])
@@ -88,7 +94,10 @@ export default function PptxSlideViewer({ url, index, onReady, onError }) {
         setReady(true)
         callbacks.current.onReady?.(previewer.slideCount)
       })
-      .catch(() => { if (!cancelled) callbacks.current.onError?.() })
+      .catch((error) => {
+        console.error('PPTX preview failed', error)
+        if (!cancelled) callbacks.current.onError?.()
+      })
     return () => {
       cancelled = true
       observer.disconnect()
