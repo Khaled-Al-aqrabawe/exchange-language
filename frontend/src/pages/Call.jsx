@@ -1569,7 +1569,18 @@ export default function Call() {
     exitCall()
   }
 
+  // Whether the other person was ever in the call; if they never showed up there is nothing to rate or summarise.
+  const partnerMetRef = useRef(false)
+  if (['connected', 'joined', 'left', 'ended'].includes(status)) partnerMetRef.current = true
+
   const handleLeaveClick = () => {
+    if (!partnerMetRef.current) {
+      stopRecording()
+      cleanupMedia()
+      writeCallState(roomId, null)
+      navigate(sessionId ? '/home' : '/partners', { replace: true })
+      return
+    }
     if (sessionEndTime && Date.now() < sessionEndTime && !autoEndedRef.current) {
       setShowLeaveChoice(true)
       return

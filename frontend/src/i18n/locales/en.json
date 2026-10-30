@@ -351,6 +351,7 @@
     "myAvailableTimesSubtitle": "The times partners can see and ask you for.",
     "noAvailableTimes": "You have not added any available times yet.",
     "repeatsWeekly": "Repeats weekly",
+    "endAdjusted": "The end time was moved to keep the session at least 40 minutes.",
     "minDurationError": "An available time must be at least 40 minutes long.",
     "callNowSubtitle": "What do you want to do with {{name}}?",
     "lessonFilter": "Lesson",

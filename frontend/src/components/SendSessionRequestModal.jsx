@@ -19,7 +19,7 @@ function describeSlot(slot, timeZone) {
   return { slot, start, end, from: hhmm(start), to: hhmm(end), lastStart: timeStrPlusMinutes(hhmm(end), -SESSION_MINUTES) }
 }
 
-export default function SendSessionRequestModal({ lockedPartnerId, initialSlotId, onClose, onSent }) {
+export default function SendSessionRequestModal({ lockedPartnerId, initialSlotId, sessionType, onClose, onSent }) {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const language = user?.profile?.learning_language || ''
@@ -59,8 +59,10 @@ export default function SendSessionRequestModal({ lockedPartnerId, initialSlotId
       .filter((slot) => !isSlotExpiredToday(slot))
       .map((slot) => describeSlot(slot, partnerDetail.timezone))
       .filter((o) => o.end > new Date())
+      // coming from one time tag: only that time; otherwise only the kind of session being looked for
+      .filter((o) => (initialSlotId ? o.slot.id === initialSlotId : !sessionType || (o.slot.session_type || 'lesson') === sessionType))
       .sort((a, b) => a.start - b.start)
-  }, [partnerDetail])
+  }, [partnerDetail, initialSlotId, sessionType])
 
   // Coming from a time tag on a partner's card: that time is already selected.
   useEffect(() => {

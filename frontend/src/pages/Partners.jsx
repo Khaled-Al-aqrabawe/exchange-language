@@ -113,7 +113,18 @@ function AddAvailabilityModal({ onClose, onSaved }) {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
   // Every session is 40 minutes, so the end time follows the start time.
-  const setStart = (start_time) => setSlot((s) => ({ ...s, start_time, end_time: timeStrPlusMinutes(start_time, 40) }))
+  const [adjusted, setAdjusted] = useState(false)
+  const setStart = (start_time) => {
+    setAdjusted(false)
+    setSlot((s) => ({ ...s, start_time, end_time: timeStrPlusMinutes(start_time, 40) }))
+  }
+  // An end time that leaves less than 40 minutes is pushed straight back to start + 40, with a note saying so.
+  const setEnd = (end_time) => {
+    const minEnd = timeStrPlusMinutes(slot.start_time, 40)
+    const tooShort = end_time && slot.start_time && minEnd > slot.start_time && end_time < minEnd
+    setAdjusted(Boolean(tooShort))
+    setSlot({ ...slot, end_time: tooShort ? minEnd : end_time })
+  }
 
   // Checked as the times are typed, so a bad time is flagged straight away.
   const minutesOf = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5))
@@ -235,13 +246,18 @@ function AddAvailabilityModal({ onClose, onSaved }) {
                   type="time"
                   min={timeStrPlusMinutes(slot.start_time, 40)}
                   value={slot.end_time}
-                  onChange={(e) => setSlot({ ...slot, end_time: e.target.value })}
+                  onChange={(e) => setEnd(e.target.value)}
                   className={`${modalInputClass} ps-11`}
                   style={modalInputStyle}
                 />
               </ModalField>
             </div>
             {timeError && <p className="mt-2 text-sm font-semibold" style={{ color: '#f87171' }}>{timeError}</p>}
+            {adjusted && !timeError && (
+              <p className="mt-2 text-sm font-semibold" style={{ color: 'var(--accent)' }}>
+                {t('partners.endAdjusted', 'The end time was moved to keep the session at least 40 minutes.')}
+              </p>
+            )}
           </div>
 
           </div>
@@ -509,6 +525,9 @@ export default function Partners() {
                     onClick={() => {
                       setVisibility(key)
                       if (key !== 'scheduled') setFilters((f) => ({ ...f, date: '', time: '' }))
+                      // people available right now are called straight away, so no session type applies
+                      if (key !== 'scheduled') setFilters((f) => ({ ...f, type: 'lesson' }))
+                      if (key !== 'scheduled') setFilters((f) => ({ ...f, lesson: '' }))
                     }}
                     className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
                     style={visibility === key
@@ -540,6 +559,7 @@ export default function Partners() {
             </div>
 
             <div className="mt-4 flex flex-wrap items-end gap-4">
+              {visibility === 'scheduled' && (
               <div>
                 <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.sessionType', 'Session type')}</span>
                 <div className="inline-flex h-11 items-center gap-1 rounded-xl p-1" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
@@ -558,7 +578,8 @@ export default function Partners() {
                   ))}
                 </div>
               </div>
-              {filters.type === 'lesson' && (
+              )}
+              {visibility === 'scheduled' && filters.type === 'lesson' && (
                 <FilterField label={t('partners.lessonFilter')} icon={GraduationCap} className="w-full sm:w-64">
                   <select value={filters.lesson} onChange={(e) => setFilters({ ...filters, lesson: e.target.value })} className={fieldClass} style={fieldStyle}>
                     <option value="">{t('partners.anyLesson')}</option>
@@ -578,10 +599,12 @@ export default function Partners() {
               )}
             </div>
 
-            <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
-              <Info size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />
-              {t('partners.lessonFilterNote')}
-            </p>
+            {visibility === 'scheduled' && (
+              <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
+                <Info size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />
+                {t('partners.lessonFilterNote')}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -653,6 +676,7 @@ export default function Partners() {
         <SendSessionRequestModal
           lockedPartnerId={scheduleFor.user_id}
           initialSlotId={scheduleFor.slotId}
+          sessionType={visibility === 'scheduled' ? filters.type : undefined}
           onClose={() => setScheduleFor(null)}
           onSent={load}
         />

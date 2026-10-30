@@ -343,6 +343,7 @@
     "myAvailableTimesSubtitle": "الأوقات التي يراها الشركاء ويستطيعون طلبك فيها.",
     "noAvailableTimes": "لم تضف أي أوقات متاحة بعد.",
     "repeatsWeekly": "يتكرر أسبوعياً",
+    "endAdjusted": "تم تعديل وقت النهاية ليكون الوقت 40 دقيقة على الأقل.",
     "minDurationError": "يجب ألا يقل الوقت المتاح عن 40 دقيقة.",
     "callNowSubtitle": "ماذا تريد أن تفعل مع {{name}}؟",
     "lessonFilter": "الدرس",
