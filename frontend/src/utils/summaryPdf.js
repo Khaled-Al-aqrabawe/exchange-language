@@ -17,7 +17,7 @@ const section = (title, body) => `
 const muted = (text) => `<div data-block style="color:#64748b;font-size:13px;font-style:italic;padding:4px 0 0 15px">${escapeHtml(text)}</div>`
 
 function buildHtml(summary, t, locale, words) {
-  const fmt = (value) => new Date(value).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })
+  const fmt = (value) => new Date(value).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short', hour12: true })
   const { session, note, chat, files, my_rating: rating } = summary
   const statusLabel = t(`summary.status.${session.status}`, session.status)
 

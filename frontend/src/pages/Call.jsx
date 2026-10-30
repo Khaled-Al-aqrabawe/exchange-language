@@ -1054,6 +1054,9 @@ export default function Call() {
   const [reportOpen, setReportOpen] = useState(false)
   // Who takes the first turn: the one who completed more lessons when both learn the same language.
   const [turnInfo, setTurnInfo] = useState(null)
+  // A free conversation has no turns: the whole time is shared, nobody leads.
+  const [sessionType, setSessionType] = useState('lesson')
+  const freeTalk = sessionType === 'conversation'
   // Notepad sidebar (saved on the server per session) and the files shared during the call.
   const [notesOpen, setNotesOpen] = useState(false)
   const [noteText, setNoteText] = useState('')
@@ -1100,6 +1103,7 @@ export default function Call() {
         if (!session) return
         const endTime = new Date(session.scheduled_time).getTime() + session.duration_minutes * 60000
         setSessionId(session.id)
+        setSessionType(session.session_type || 'lesson')
         const otherPerson = session.host.id === user?.id ? session.partner : session.host
         setOtherName(otherPerson.full_name)
         setOtherId(otherPerson.id)
@@ -1770,10 +1774,12 @@ export default function Call() {
   }, [liveStart])
 
   const elapsedMs = liveStart ? Math.max(0, now - liveStart) : 0
-  const liveTurn = Math.min(Math.floor(elapsedMs / TURN_MS), 1)
-  const turnRemaining = liveStart ? Math.ceil((TURN_MS - (elapsedMs - liveTurn * TURN_MS)) / 1000) : null
+  const liveTurn = freeTalk ? 0 : Math.min(Math.floor(elapsedMs / TURN_MS), 1)
+  const turnRemaining = !liveStart ? null
+    : freeTalk ? Math.max(0, Math.ceil((2 * TURN_MS - elapsedMs) / 1000))
+      : Math.ceil((TURN_MS - (elapsedMs - liveTurn * TURN_MS)) / 1000)
   const firstUserId = turnInfo ? turnInfo.first_user_id : (sessionId ? null : requester?.id ?? null)
-  const orderReady = firstUserId != null
+  const orderReady = freeTalk || firstUserId != null
   const iGoFirst = firstUserId === user?.id
   const isMyTurn = liveTurn === 0 ? iGoFirst : !iGoFirst
   const liveActive = !!liveStart && !!requester && orderReady && !liveEnded
@@ -1797,7 +1803,7 @@ export default function Call() {
 
   // Note of who sent the request, shown when the session starts.
   useEffect(() => {
-    if (!liveStart || !requester || !orderReady) return undefined
+    if (!liveStart || !requester || !orderReady || freeTalk) return undefined
     const byProgress = turnInfo?.same_language && turnInfo.counts[turnInfo.first_user_id] > Math.min(...Object.values(turnInfo.counts))
     const who = requester.name || t('call.yourPartner')
     setStartNote(
@@ -1812,6 +1818,7 @@ export default function Call() {
   // A turn begins: its owner opens their next lesson; the previous owner is asked how it went.
   useEffect(() => {
     if (!liveStart || !requester || !orderReady) return
+    if (freeTalk) return
     const key = `turn-${liveTurn}`
     if (firedRef.current.has(key)) return
     firedRef.current.add(key)
@@ -1824,7 +1831,7 @@ export default function Call() {
   useEffect(() => {
     if (!liveStart || !requester || !orderReady) return
     const inTurnMin = (elapsedMs - liveTurn * TURN_MS) / 60000
-    for (const mark of [10, 20]) {
+    for (const mark of freeTalk ? [] : [10, 20]) {
       const key = `${liveTurn}-${mark}`
       if (inTurnMin >= mark && inTurnMin < mark + 1 && !firedRef.current.has(key)) {
         firedRef.current.add(key)
@@ -1836,7 +1843,7 @@ export default function Call() {
       firedRef.current.add('end')
       setLiveEnded(true)
       const mine = sharedRef.current
-      if (isMyTurn && mine?.from === 'you' && mine.id) askFinished(mine, 'turn')
+      if (!freeTalk && isMyTurn && mine?.from === 'you' && mine.id) askFinished(mine, 'turn')
     }
   }, [now])
 
@@ -2021,9 +2028,9 @@ export default function Call() {
             {liveActive && (
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums"
-                style={{ background: isMyTurn ? 'var(--accent)' : 'rgb(255 255 255 / 0.1)', color: '#fff' }}
+                style={{ background: freeTalk || isMyTurn ? 'var(--accent)' : 'rgb(255 255 255 / 0.1)', color: '#fff' }}
               >
-                <Clock size={12} /> {isMyTurn ? t('call.yourTurn') : t('call.partnerTurn')} · {formatClock(turnRemaining)}
+                <Clock size={12} /> {freeTalk ? t('partners.typeConversation', 'Free conversation') : isMyTurn ? t('call.yourTurn') : t('call.partnerTurn')} · {formatClock(turnRemaining)}
               </span>
             )}
           </div>

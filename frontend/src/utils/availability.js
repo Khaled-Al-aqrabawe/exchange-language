@@ -19,6 +19,13 @@ export function dateToDayOfWeek(dateStr) {
 export const todayStr = () => new Date().toISOString().slice(0, 10)
 export const nowTimeStr = () => new Date().toTimeString().slice(0, 5)
 
+// 'HH:mm' (or 'HH:mm:ss') as a 12-hour clock time, e.g. '16:30' -> '4:30 PM'.
+export function formatTime12(timeStr) {
+  if (!timeStr) return ''
+  const [h, m] = timeStr.slice(0, 5).split(':').map(Number)
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`
+}
+
 export function timeStrPlusMinutes(timeStr, minutes) {
   const [h, m] = timeStr.split(':').map(Number)
   const total = h * 60 + m + minutes

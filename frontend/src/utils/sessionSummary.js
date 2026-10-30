@@ -1,6 +1,6 @@
 // Turns the /sessions/<id>/summary/ response into a plain-text file the user can keep.
 export function buildSummaryText(summary, t, locale) {
-  const fmt = (value) => new Date(value).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })
+  const fmt = (value) => new Date(value).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short', hour12: true })
   const lines = []
   const { session, note, chat, files, my_rating: rating } = summary
 

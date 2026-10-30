@@ -12,7 +12,7 @@ function shortTime(value, locale) {
   const date = new Date(value)
   const now = new Date()
   const sameDay = date.toDateString() === now.toDateString()
-  if (sameDay) return date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })
+  if (sameDay) return date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true })
   const days = (now - date) / 86400000
   if (days < 6) return date.toLocaleDateString(locale, { weekday: 'short' })
   return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' })

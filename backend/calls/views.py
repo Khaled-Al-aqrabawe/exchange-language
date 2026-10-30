@@ -6,7 +6,7 @@ from channels.layers import get_channel_layer
 from django.core.cache import cache
 from django.utils import timezone
 from rest_framework import permissions
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -23,7 +23,7 @@ def _cache_key(user_id):
     return f'incoming_call_{user_id}'
 
 
-def _notify_partner(request, partner, room_id):
+def _notify_partner(request, partner, room_id, session=None):
     avatar = getattr(request.user.profile, 'avatar', None)
     payload = {
         'event': 'incoming-call',
@@ -33,6 +33,9 @@ def _notify_partner(request, partner, room_id):
             'name': request.user.full_name,
             'avatar': request.build_absolute_uri(avatar.url) if avatar else None,
         },
+        # what the caller wants to do, so the other person can decide before answering
+        'session_type': session.session_type if session else 'lesson',
+        'lesson': session.lesson if session else None,
     }
     cache.set(_cache_key(partner.id), payload, RING_SECONDS)
     try:
@@ -59,14 +62,21 @@ class RingPartnerView(APIView):
         except (User.DoesNotExist, ValueError, TypeError):
             raise NotFound('Partner not found')
 
+        session_type = request.data.get('session_type', 'lesson')
+        if session_type not in ('lesson', 'conversation'):
+            raise ValidationError({'session_type': 'Choose a lesson or a free conversation.'})
+        lesson = request.data.get('lesson')
+        lesson = int(lesson) if session_type == 'lesson' and str(lesson or '').isdigit() else None
+
         room_id = uuid.uuid4().hex
         # The call is a real session so it can be completed and rated like a booked one.
-        ScheduledSession.objects.create(
+        session = ScheduledSession.objects.create(
             host=request.user, partner=partner, scheduled_time=timezone.now(),
             duration_minutes=INSTANT_CALL_MINUTES, status='confirmed', room_id=room_id, is_instant=True,
+            session_type=session_type, lesson=lesson,
         )
         if request.data.get('notify', True) is not False:
-            _notify_partner(request, partner, room_id)
+            _notify_partner(request, partner, room_id, session)
         return Response({'room_id': room_id})
 
 
@@ -81,7 +91,7 @@ class NotifyCallView(APIView):
         ).first()
         if not session:
             raise NotFound('Call not found')
-        _notify_partner(request, session.partner, session.room_id)
+        _notify_partner(request, session.partner, session.room_id, session)
         return Response(status=204)
 
 

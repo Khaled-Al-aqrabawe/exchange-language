@@ -1,4 +1,4 @@
-import { MessageCircle, Phone, PhoneOff } from 'lucide-react'
+import { BookOpen, MessageCircle, MessagesSquare, Phone, PhoneOff } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -117,6 +117,12 @@ export default function IncomingCallBox() {
           {t('call.incoming', { name: call.caller.name })}
         </p>
       </div>
+      <p className="mb-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 12%, var(--surface))', color: 'var(--accent)' }}>
+        {call.session_type === 'conversation' ? <MessagesSquare size={13} /> : <BookOpen size={13} />}
+        {call.session_type === 'conversation'
+          ? t('partners.typeConversation', 'Free conversation')
+          : `${t('partners.typeLesson', 'From the lessons')}${call.lesson ? ` · ${t('partners.lessonOption', { n: call.lesson })}` : ''}`}
+      </p>
       <div className="flex gap-2">
         <button type="button" onClick={answer} className="lp-btn-primary flex-1 justify-center">
           <Phone size={15} /> {t('call.answer')}

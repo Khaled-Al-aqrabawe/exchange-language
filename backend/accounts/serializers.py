@@ -197,6 +197,10 @@ class AvailabilitySlotSerializer(serializers.ModelSerializer):
 
         if start_time is not None and end_time is not None and end_time <= start_time:
             raise serializers.ValidationError({'end_time': 'End time must be after start time.'})
+        if start_time is not None and end_time is not None:
+            length = (end_time.hour * 60 + end_time.minute) - (start_time.hour * 60 + start_time.minute)
+            if length < 40:
+                raise serializers.ValidationError({'end_time': 'An available time must be at least 40 minutes long.'})
 
         if not is_recurring and not specific_date:
             raise serializers.ValidationError({'specific_date': 'A specific date is required for a one-time slot.'})

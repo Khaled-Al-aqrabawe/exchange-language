@@ -1,3 +1,4 @@
+import CallNowModal from '../components/CallNowModal'
 import { ArrowLeft, Phone, Send } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,13 +29,9 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
   const listRef = useRef(null)
 
   // Same as "Call now": rings the partner and opens a real session (notes, rating, timer).
-  const startCall = async () => {
-    try {
-      const { data } = await client.post('/calls/ring/', { partner_id: partner.id, notify: false })
-      navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
-    } catch {
-      window.alert(t('call.ringError'))
-    }
+  const [callOpen, setCallOpen] = useState(false)
+  const startCall = () => {
+    setCallOpen(true)
   }
 
   useEffect(() => {
@@ -75,6 +72,7 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
 
   return (
     <div className="flex h-full flex-col">
+      {callOpen && <CallNowModal partnerId={partner.id} partnerName={partner.full_name} onClose={() => setCallOpen(false)} />}
       {/* Header */}
       <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="flex min-w-0 items-center gap-3">
@@ -143,7 +141,7 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
                     {m.text}
                   </div>
                   <span className="mt-1 px-1 text-[10.5px]" style={{ color: 'var(--ink-soft)' }}>
-                    {new Date(m.created_at).toLocaleTimeString(i18n.resolvedLanguage, { hour: 'numeric', minute: '2-digit' })}
+                    {new Date(m.created_at).toLocaleTimeString(i18n.resolvedLanguage, { hour: 'numeric', minute: '2-digit', hour12: true })}
                   </span>
                 </div>
               </div>

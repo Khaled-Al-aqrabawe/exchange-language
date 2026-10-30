@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
-import { isSlotExpiredToday, slotOccurrenceUtcInstant, timeStrPlusMinutes } from '../utils/availability'
+import { formatTime12, isSlotExpiredToday, slotOccurrenceUtcInstant, timeStrPlusMinutes } from '../utils/availability'
 import ModalShell, { ModalField, modalInputClass, modalInputStyle } from './ModalShell'
 
 const SESSION_MINUTES = 40 // every session is the same length
@@ -19,7 +19,7 @@ function describeSlot(slot, timeZone) {
   return { slot, start, end, from: hhmm(start), to: hhmm(end), lastStart: timeStrPlusMinutes(hhmm(end), -SESSION_MINUTES) }
 }
 
-export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSent }) {
+export default function SendSessionRequestModal({ lockedPartnerId, initialSlotId, onClose, onSent }) {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const language = user?.profile?.learning_language || ''
@@ -62,9 +62,21 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
       .sort((a, b) => a.start - b.start)
   }, [partnerDetail])
 
+  // Coming from a time tag on a partner's card: that time is already selected.
+  useEffect(() => {
+    const wanted = options.find((o) => o.slot.id === initialSlotId)
+    if (wanted) {
+      setSlotId(wanted.slot.id)
+      setStartTime(wanted.from)
+    }
+  }, [options, initialSlotId])
+
   const chosen = options.find((o) => o.slot.id === slotId) || null
   const dayLabel = (date) => date.toLocaleDateString(i18n.resolvedLanguage, { weekday: 'long', month: 'short', day: 'numeric' })
-  const startHint = (o) => t('schedule.startBetween', { from: o.from, to: o.lastStart, defaultValue: 'Choose a start time between {{from}} and {{to}}.' })
+  const startHint = (o) => t('schedule.startBetween', { from: formatTime12(o.from), to: formatTime12(o.lastStart), defaultValue: 'Choose a start time between {{from}} and {{to}}.' })
+
+  // Flagged as soon as a start time is typed: the whole 40 minutes has to fit inside the offered time.
+  const startError = chosen && startTime && (startTime < chosen.from || startTime > chosen.lastStart) ? startHint(chosen) : ''
 
   const pickSlot = (option) => {
     setSlotId(option.slot.id)
@@ -134,7 +146,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
       footer={sent ? null : (
         <div className="flex items-center gap-3">
           <button type="button" onClick={onClose} className="lp-btn-secondary shrink-0">{t('common.cancel')}</button>
-          <button type="submit" form="session-request-form" disabled={submitting || !chosen} className="lp-btn-primary flex-1 disabled:opacity-50">
+          <button type="submit" form="session-request-form" disabled={submitting || !chosen || !!startError} className="lp-btn-primary flex-1 disabled:opacity-50">
             {submitting ? t('schedule.submitting') : t('schedule.submit')}
           </button>
         </div>
@@ -189,12 +201,14 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
                 <div className="grid gap-3 sm:grid-cols-2">
                   {options.map((o) => {
                     const active = o.slot.id === slotId
+                    const tooShort = o.lastStart < o.from
                     return (
                       <button
                         key={o.slot.id}
                         type="button"
+                        disabled={tooShort}
                         onClick={() => pickSlot(o)}
-                        className="rounded-2xl p-3.5 text-start transition-all"
+                        className="rounded-2xl p-3.5 text-start transition-all disabled:cursor-not-allowed disabled:opacity-50"
                         style={active
                           ? { background: 'color-mix(in srgb, var(--accent) 12%, var(--surface))', border: '2px solid var(--accent)' }
                           : { background: 'var(--surface)', border: '2px solid var(--line)' }}
@@ -203,9 +217,10 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
                           <CalendarCheck size={15} style={{ color: 'var(--accent)' }} /> {dayLabel(o.start)}
                         </span>
                         <span className="mt-1 flex items-center gap-2 text-sm" style={{ color: 'var(--ink-soft)' }}>
-                          <Clock size={14} /> {o.from}–{o.to}
+                          <Clock size={14} /> {formatTime12(o.from)}–{formatTime12(o.to)}
                         </span>
                         <span className="mt-1.5 block">{typeBadge(o.slot)}</span>
+                        {tooShort && <span className="mt-1 block text-xs font-semibold" style={{ color: '#f87171' }}>{t('schedule.tooShort', 'Shorter than 40 minutes')}</span>}
                       </button>
                     )
                   })}
@@ -216,7 +231,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
 
           {chosen && (
             <div className="rounded-2xl p-4" style={{ background: 'color-mix(in srgb, var(--accent) 8%, var(--surface))', border: '1px solid color-mix(in srgb, var(--accent) 25%, var(--line))' }}>
-              <ModalField label={`${t('schedule.chooseStart', 'Start time')} *`} icon={Clock} hint={startHint(chosen)}>
+              <ModalField label={`${t('schedule.chooseStart', 'Start time')} *`} icon={Clock} hint={startError ? undefined : startHint(chosen)}>
                 <input
                   required
                   type="time"
@@ -228,9 +243,10 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
                   style={modalInputStyle}
                 />
               </ModalField>
+              {startError && <p className="mt-2 text-sm font-semibold" style={{ color: '#f87171' }}>{startError}</p>}
               <p className="mt-3 text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>
                 {dayLabel(chosen.start)} · {SESSION_MINUTES} min
-                {startTime && ` · ${startTime}–${timeStrPlusMinutes(startTime, SESSION_MINUTES)}`}
+                {startTime && ` · ${formatTime12(startTime)}–${formatTime12(timeStrPlusMinutes(startTime, SESSION_MINUTES))}`}
               </p>
             </div>
           )}

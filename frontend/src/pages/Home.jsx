@@ -1,3 +1,4 @@
+import CallNowModal from '../components/CallNowModal'
 import {
   ArrowRight,
   BookOpenCheck,
@@ -103,13 +104,9 @@ export default function Home() {
     .filter((s) => s.status === 'confirmed' && new Date(s.scheduled_time) > new Date())
     .sort((a, b) => new Date(a.scheduled_time) - new Date(b.scheduled_time))
 
-  const handleCall = async (p) => {
-    try {
-      const { data } = await client.post('/calls/ring/', { partner_id: p.user_id, notify: false })
-      navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
-    } catch {
-      window.alert(t('call.ringError'))
-    }
+  const [callTarget, setCallTarget] = useState(null)
+  const handleCall = (p) => {
+    setCallTarget({ id: p.user_id, name: p.full_name })
   }
 
   const availableNow = partners.filter((p) => p.is_available_now).slice(0, 4)
@@ -117,6 +114,7 @@ export default function Home() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
+      {callTarget && <CallNowModal partnerId={callTarget.id} partnerName={callTarget.name} onClose={() => setCallTarget(null)} />}
       {summaryId && (
         <ModalShell
           icon={FileText}

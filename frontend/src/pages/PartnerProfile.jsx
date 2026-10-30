@@ -1,3 +1,4 @@
+import CallNowModal from '../components/CallNowModal'
 import { CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, Phone, Play, Sparkles, Star, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
@@ -6,7 +7,7 @@ import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import ConversationThread from './ConversationThread'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
-import { bookableStartTimes, DAYS, isSlotExpiredToday, slotOccurrenceUtcInstant } from '../utils/availability'
+import { bookableStartTimes, DAYS, formatTime12, isSlotExpiredToday, slotOccurrenceUtcInstant } from '../utils/availability'
 import { resolveAvatarUrl } from '../utils/images'
 
 function BookSlotModal({ slot, partner, userId, onClose, onBooked }) {
@@ -66,7 +67,7 @@ function BookSlotModal({ slot, partner, userId, onClose, onBooked }) {
         ) : (
           <>
             <p className="text-sm mb-4" style={{ color: 'var(--ink-soft)' }}>
-              {t('partnerProfile.bookSubtitle', { name: partner.full_name, day: dayLabel, start: slot.start_time.slice(0, 5), end: slot.end_time.slice(0, 5) })}
+              {t('partnerProfile.bookSubtitle', { name: partner.full_name, day: dayLabel, start: formatTime12(slot.start_time), end: formatTime12(slot.end_time) })}
             </p>
 
             {options.length > 1 ? (
@@ -85,7 +86,7 @@ function BookSlotModal({ slot, partner, userId, onClose, onBooked }) {
                         color: selected === opt ? 'var(--accent-ink)' : 'var(--ink-soft)',
                       }}
                     >
-                      {opt}
+                      {formatTime12(opt)}
                     </button>
                   ))}
                 </div>
@@ -95,7 +96,7 @@ function BookSlotModal({ slot, partner, userId, onClose, onBooked }) {
                 className="flex items-center gap-2 mb-5 px-4 py-3 text-sm font-semibold"
                 style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-card)', color: 'var(--ink)' }}
               >
-                <Clock size={15} style={{ color: 'var(--accent)' }} /> {selected} ({t('schedule.minutesShort', { count: 40 })})
+                <Clock size={15} style={{ color: 'var(--accent)' }} /> {formatTime12(selected)} ({t('schedule.minutesShort', { count: 40 })})
               </div>
             )}
 
@@ -162,13 +163,9 @@ export default function PartnerProfile() {
     setChatId(data.id)
   }
 
-  const handleCall = async () => {
-    try {
-      const { data } = await client.post('/calls/ring/', { partner_id: userId, notify: false })
-      navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
-    } catch {
-      window.alert(t('call.ringError'))
-    }
+  const [callOpen, setCallOpen] = useState(false)
+  const handleCall = () => {
+    setCallOpen(true)
   }
 
   if (loading) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.loading')}</div>
@@ -179,6 +176,7 @@ export default function PartnerProfile() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+      {callOpen && <CallNowModal partnerId={userId} partnerName={partner.full_name} onClose={() => setCallOpen(false)} />}
       <div
         className="absolute -top-20 -end-20 h-80 w-80 rounded-full pointer-events-none lp-blob-drift"
         style={{ background: 'var(--accent)', opacity: 0.14, filter: 'blur(80px)' }}
@@ -364,7 +362,7 @@ export default function PartnerProfile() {
                         {slot.is_recurring
                           ? t(`profile.days.${DAYS.find((d) => d.value === slot.day_of_week)?.key}`)
                           : new Date(`${slot.specific_date}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric' })}
-                        {' '}{slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
+                        {' '}{formatTime12(slot.start_time)}–{formatTime12(slot.end_time)}
                       </button>
                     ))}
                   </div>

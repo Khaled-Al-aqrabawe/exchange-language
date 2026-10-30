@@ -452,14 +452,14 @@ export default function Schedule() {
                         <Clock size={13} />
                         {s.window_end_time ? (
                           <>
-                            {start.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
+                            {start.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true })}
                             {'–'}
-                            {new Date(s.window_end_time).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
+                            {new Date(s.window_end_time).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true })}
                             {' · '}{t('schedule.chooseATime')}
                           </>
                         ) : (
                           <>
-                            {start.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
+                            {start.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true })}
                             {' · '}{t('schedule.minutesShort', { count: s.duration_minutes })}
                           </>
                         )}

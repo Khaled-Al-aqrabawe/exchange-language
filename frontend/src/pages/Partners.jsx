@@ -5,10 +5,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import ModalShell, { Chip, ModalField, Switch, localDateString, modalInputClass, modalInputStyle } from '../components/ModalShell'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
+import CallNowModal from '../components/CallNowModal'
 import SessionTypePicker, { lessonLabel, useMyLessons } from '../components/SessionTypePicker'
 import { useAuth } from '../context/AuthContext'
 import {
   dateToDayOfWeek,
+  formatTime12,
   isSlotExpiredToday,
   nextDateForDayOfWeek,
   nowTimeStr,
@@ -60,7 +62,7 @@ function MyAvailabilityModal({ onClose, onChanged, onAdd }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
-                    {dateOf(s).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'long' })} · {s.start_time.slice(0, 5)}–{s.end_time.slice(0, 5)}
+                    {dateOf(s).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'long' })} · {formatTime12(s.start_time)}–{formatTime12(s.end_time)}
                   </p>
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs" style={{ color: 'var(--ink-soft)' }}>
                     <span className="inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--accent)' }}>
@@ -113,15 +115,19 @@ function AddAvailabilityModal({ onClose, onSaved }) {
   // Every session is 40 minutes, so the end time follows the start time.
   const setStart = (start_time) => setSlot((s) => ({ ...s, start_time, end_time: timeStrPlusMinutes(start_time, 40) }))
 
+  // Checked as the times are typed, so a bad time is flagged straight away.
+  const minutesOf = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5))
+  const timeError = !slot.start_time || !slot.end_time ? ''
+    : slot.date === todayStr() && slot.start_time < nowTimeStr() ? t('partners.pastTimeError')
+      : slot.end_time <= slot.start_time ? t('partners.timeRangeError')
+        : minutesOf(slot.end_time) - minutesOf(slot.start_time) < 40 ? t('partners.minDurationError', 'An available time must be at least 40 minutes long.')
+          : ''
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (slot.end_time <= slot.start_time) {
-      setError(t('partners.timeRangeError'))
-      return
-    }
-    if (slot.date === todayStr() && slot.start_time < nowTimeStr()) {
-      setError(t('partners.pastTimeError'))
+    if (timeError) {
+      setError(timeError)
       return
     }
     setSaving(true)
@@ -160,7 +166,7 @@ function AddAvailabilityModal({ onClose, onSaved }) {
       subtitle={saved ? undefined : t('partners.addAvailableTimeSubtitle')}
       onClose={onClose}
       footer={saved ? null : (
-        <button type="submit" form="availability-form" disabled={saving} className="lp-btn-primary w-full disabled:opacity-50">
+        <button type="submit" form="availability-form" disabled={saving || !!timeError} className="lp-btn-primary w-full disabled:opacity-50">
           {saving ? t('profile.saving') : t('partners.addAvailableTime')}
         </button>
       )}
@@ -227,6 +233,7 @@ function AddAvailabilityModal({ onClose, onSaved }) {
               <ModalField label={t('profile.endTime')} icon={Clock}>
                 <input
                   type="time"
+                  min={timeStrPlusMinutes(slot.start_time, 40)}
                   value={slot.end_time}
                   onChange={(e) => setSlot({ ...slot, end_time: e.target.value })}
                   className={`${modalInputClass} ps-11`}
@@ -234,6 +241,7 @@ function AddAvailabilityModal({ onClose, onSaved }) {
                 />
               </ModalField>
             </div>
+            {timeError && <p className="mt-2 text-sm font-semibold" style={{ color: '#f87171' }}>{timeError}</p>}
           </div>
 
           </div>
@@ -356,11 +364,17 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, on
         {visibleAvailability.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {visibleAvailability.slice(0, 2).map((slot) => (
-              <span key={slot.id} className="lp-tag lp-tag--accent2">
+              <button
+                key={slot.id}
+                type="button"
+                onClick={() => onSchedule(p, slot.id)}
+                className="lp-tag lp-tag--accent2 cursor-pointer transition-transform hover:-translate-y-px hover:opacity-80"
+                title={t('partners.scheduleThisTime', 'Schedule a session at this time')}
+              >
                 <Clock size={11} />
                 {nextDateForDayOfWeek(slot.day_of_week, slot.start_time).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })}
-                {' '}{slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
-              </span>
+                {' '}{formatTime12(slot.start_time)}–{formatTime12(slot.end_time)}
+              </button>
             ))}
           </div>
         )}
@@ -420,6 +434,7 @@ export default function Partners() {
   const myLessons = useMyLessons()
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
   const [showMyTimes, setShowMyTimes] = useState(false)
+  const [callTarget, setCallTarget] = useState(null)
 
   const load = () => {
     setLoading(true)
@@ -446,13 +461,8 @@ export default function Partners() {
     visibility === 'now' ? availableNow : visibility === 'scheduled' ? withAvailability : partners,
   )
 
-  const handleCall = async (p) => {
-    try {
-      const { data } = await client.post('/calls/ring/', { partner_id: p.user_id, notify: false })
-      navigate(`/call/${data.room_id}?from=${user.id}&name=${encodeURIComponent(user.full_name)}`)
-    } catch {
-      window.alert(t('call.ringError'))
-    }
+  const handleCall = (p) => {
+    setCallTarget({ id: p.user_id, name: p.full_name })
   }
 
   const handleMessage = async (p) => {
@@ -625,7 +635,7 @@ export default function Partners() {
                 filterTime={filters.time}
                 onMessage={handleMessage}
                 onCall={handleCall}
-                onSchedule={(partner) => setScheduleFor(partner)}
+                onSchedule={(partner, slotId) => setScheduleFor({ ...partner, slotId })}
               />
             ))}
           </div>
@@ -642,10 +652,13 @@ export default function Partners() {
       {scheduleFor && (
         <SendSessionRequestModal
           lockedPartnerId={scheduleFor.user_id}
+          initialSlotId={scheduleFor.slotId}
           onClose={() => setScheduleFor(null)}
           onSent={load}
         />
       )}
+
+      {callTarget && <CallNowModal partnerId={callTarget.id} partnerName={callTarget.name} onClose={() => setCallTarget(null)} />}
 
       {showMyTimes && (
         <MyAvailabilityModal
