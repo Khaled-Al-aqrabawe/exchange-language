@@ -304,7 +304,7 @@
     "loading": "Partner werden geladen...",
     "empty": "Keine Partner gefunden. Erweitere deine Filter.",
     "exchangeMatch": "Austausch-Match",
-    "peerPractice": "Übung mit Gleichgesinnten",
+    "peerPractice": "Übung in derselben Sprache",
     "speaksLearning": "Spricht {{native}} · Lernt {{learning}}",
     "viewProfile": "Profil ansehen"
   },
@@ -312,7 +312,7 @@
     "loading": "Wird geladen...",
     "notFound": "Partner nicht gefunden.",
     "exchangeMatch": "Austausch-Match",
-    "peerPractice": "Übung mit Gleichgesinnten",
+    "peerPractice": "Übung in derselben Sprache",
     "speaksLearning": "Spricht <native>{{native}}</native> · Lernt <learning>{{learning}}</learning>",
     "bio": "Über mich",
     "learningGoals": "Lernziele",

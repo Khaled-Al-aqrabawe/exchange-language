@@ -304,7 +304,7 @@
     "loading": "Partnerler yükleniyor...",
     "empty": "Partner bulunamadı. Filtrelerini genişletmeyi dene.",
     "exchangeMatch": "Değişim eşleşmesi",
-    "peerPractice": "Akran pratiği",
+    "peerPractice": "Aynı dilde pratik",
     "speaksLearning": "{{native}} konuşuyor · {{learning}} öğreniyor",
     "viewProfile": "Profili görüntüle"
   },
@@ -312,7 +312,7 @@
     "loading": "Yükleniyor...",
     "notFound": "Partner bulunamadı.",
     "exchangeMatch": "Değişim eşleşmesi",
-    "peerPractice": "Akran pratiği",
+    "peerPractice": "Aynı dilde pratik",
     "speaksLearning": "<native>{{native}}</native> konuşuyor · <learning>{{learning}}</learning> öğreniyor",
     "bio": "Biyografi",
     "learningGoals": "Öğrenme hedefleri",

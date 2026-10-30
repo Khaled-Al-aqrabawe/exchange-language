@@ -304,7 +304,7 @@
     "loading": "Cargando compañeros...",
     "empty": "No se encontraron compañeros. Prueba a ampliar tus filtros.",
     "exchangeMatch": "Intercambio",
-    "peerPractice": "Práctica entre compañeros",
+    "peerPractice": "Práctica del mismo idioma",
     "speaksLearning": "Habla {{native}} · Aprende {{learning}}",
     "viewProfile": "Ver perfil"
   },
@@ -312,7 +312,7 @@
     "loading": "Cargando...",
     "notFound": "Compañero no encontrado.",
     "exchangeMatch": "Intercambio",
-    "peerPractice": "Práctica entre compañeros",
+    "peerPractice": "Práctica del mismo idioma",
     "speaksLearning": "Habla <native>{{native}}</native> · Aprende <learning>{{learning}}</learning>",
     "bio": "Biografía",
     "learningGoals": "Objetivos de aprendizaje",

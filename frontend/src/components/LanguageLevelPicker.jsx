@@ -16,7 +16,7 @@ function without(obj, key) {
 
 // Pick languages and a CEFR level for each one (by choice or via the placement exam).
 // Any level can be chosen in both modes.
-export default function LanguageLevelPicker({ mode, selected, levels, onChange, single = false }) {
+export default function LanguageLevelPicker({ mode, selected, levels, onChange, single = false, exclude = [] }) {
   const { t } = useTranslation()
   const [examFor, setExamFor] = useState(null)
   const [notice, setNotice] = useState('')
@@ -55,7 +55,7 @@ export default function LanguageLevelPicker({ mode, selected, levels, onChange, 
   return (
     <div>
       <div className="flex flex-wrap gap-2">
-        {LANGUAGES.map((l) => {
+        {LANGUAGES.filter((l) => !exclude.includes(l)).map((l) => {
           const on = selected.includes(l)
           return (
             <button

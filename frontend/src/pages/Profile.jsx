@@ -108,6 +108,22 @@ export default function Profile() {
   const updateProfile = (field) => (e) =>
     setForm({ ...form, profile: { ...form.profile, [field]: e.target.value } })
 
+  // Your native language is already known, so it can't also be taught or learned from the lists.
+  const changeNative = (e) => {
+    const native = e.target.value
+    const { [native]: _dropped, ...levels } = form.profile.language_levels || {}
+    setForm({
+      ...form,
+      profile: {
+        ...form.profile,
+        native_language: native,
+        spoken_languages: (form.profile.spoken_languages || []).filter((l) => l !== native),
+        learning_languages: (form.profile.learning_languages || []).filter((l) => l !== native),
+        language_levels: levels,
+      },
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -340,7 +356,7 @@ export default function Profile() {
                 {tab === 'languages' && (
                   <div className="space-y-5">
                     <LangSection step={1} icon={Home} title={t('profile.myNativeLanguage')} hint={t('profile.nativeLanguageHint', 'The language you grew up speaking.')}>
-                      <select value={form.profile.native_language || ''} onChange={updateProfile('native_language')} className={`${fieldClass} px-4`} style={fieldStyle}>
+                      <select value={form.profile.native_language || ''} onChange={changeNative} className={`${fieldClass} px-4`} style={fieldStyle}>
                         <option value="">{t('profile.select')}</option>
                         {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
                       </select>
@@ -349,6 +365,7 @@ export default function Profile() {
                     <LangSection step={2} icon={Users} title={t('profile.spokenLanguages')} hint={t('profile.spokenLanguagesHint')}>
                       <LanguageLevelPicker
                         mode="speak"
+                        exclude={[form.profile.native_language]}
                         selected={form.profile.spoken_languages || []}
                         levels={form.profile.language_levels || {}}
                         onChange={(spoken, levels) =>
@@ -359,6 +376,7 @@ export default function Profile() {
                     <LangSection step={3} icon={GraduationCap} title={t('profile.learningLanguages')} hint={t('profile.learningLanguagesHint')}>
                       <LanguageLevelPicker
                         mode="learn"
+                        exclude={[form.profile.native_language]}
                         single
                         selected={form.profile.learning_languages || []}
                         levels={form.profile.language_levels || {}}

@@ -38,14 +38,21 @@ class PartnerSerializer(serializers.ModelSerializer):
     availability = serializers.SerializerMethodField()
     is_available_now = serializers.SerializerMethodField()
     age = serializers.ReadOnlyField()
+    learning_level = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = [
             'user_id', 'email', 'full_name', 'bio', 'gender', 'country', 'age', 'native_language',
-            'learning_language', 'proficiency_level', 'timezone', 'learning_goals', 'avatar', 'intro_video',
+            'learning_language', 'learning_level', 'proficiency_level', 'timezone', 'learning_goals', 'avatar', 'intro_video',
             'match_type', 'is_available_now', 'sessions_completed', 'average_rating', 'ratings_count', 'availability',
         ]
+
+    def get_learning_level(self, obj):
+        """CEFR level in the language they are learning (older profiles only have a broad level)."""
+        legacy = {'beginner': 'A1', 'elementary': 'A2', 'intermediate': 'B1', 'advanced': 'B2', 'fluent': 'C1'}
+        chosen = {k.lower(): v for k, v in (obj.language_levels or {}).items()}
+        return chosen.get((obj.learning_language or '').lower()) or legacy.get(obj.proficiency_level, '')
 
     def get_is_available_now(self, obj):
         if not obj.available_now or not obj.last_seen:

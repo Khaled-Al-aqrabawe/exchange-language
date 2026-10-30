@@ -304,7 +304,7 @@
     "loading": "Chargement des partenaires...",
     "empty": "Aucun partenaire trouvé. Essayez d'élargir vos filtres.",
     "exchangeMatch": "Échange",
-    "peerPractice": "Pratique entre pairs",
+    "peerPractice": "Pratique de la même langue",
     "speaksLearning": "Parle {{native}} · Apprend {{learning}}",
     "viewProfile": "Voir le profil"
   },
@@ -312,7 +312,7 @@
     "loading": "Chargement...",
     "notFound": "Partenaire introuvable.",
     "exchangeMatch": "Échange",
-    "peerPractice": "Pratique entre pairs",
+    "peerPractice": "Pratique de la même langue",
     "speaksLearning": "Parle <native>{{native}}</native> · Apprend <learning>{{learning}}</learning>",
     "bio": "Bio",
     "learningGoals": "Objectifs d'apprentissage",

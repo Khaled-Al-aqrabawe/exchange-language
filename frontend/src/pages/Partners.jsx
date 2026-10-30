@@ -236,6 +236,8 @@ function AddAvailabilityModal({ onClose, onSaved }) {
 }
 
 // A labelled field on the filter bar
+const CEFR_NAMES = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper-intermediate', C1: 'Advanced', C2: 'Proficient' }
+
 function FilterField({ label, icon: Icon, children, className = '' }) {
   return (
     <label className={`block ${className}`}>
@@ -307,12 +309,22 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, on
           </p>
         )}
 
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <span className="lp-tag">{p.native_language}</span>
-          <ArrowRight size={13} className="rtl:rotate-180" style={{ color: 'var(--ink-soft)' }} />
-          <span className="lp-tag lp-tag--accent">
-            {p.learning_language} · {t(`levels.${p.proficiency_level}`, p.proficiency_level)}
-          </span>
+        <div className="mt-3 space-y-1.5 rounded-2xl p-3" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.teaches', 'Can teach')}</span>
+            <span className="font-bold" style={{ color: 'var(--ink)' }}>{p.native_language}</span>
+          </div>
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.learning', 'Learning')}</span>
+            <span className="inline-flex items-center gap-2 font-bold" style={{ color: 'var(--ink)' }}>
+              {p.learning_language}
+              {p.learning_level && (
+                <span className="lp-tag lp-tag--accent" title={CEFR_NAMES[p.learning_level]}>
+                  {p.learning_level}{CEFR_NAMES[p.learning_level] ? ` · ${t(`partners.cefr.${p.learning_level}`, CEFR_NAMES[p.learning_level])}` : ''}
+                </span>
+              )}
+            </span>
+          </div>
         </div>
 
         <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
