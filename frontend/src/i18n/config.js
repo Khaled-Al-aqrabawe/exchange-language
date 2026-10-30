@@ -6,7 +6,11 @@ import de from './locales/de.json'
 import en from './locales/en.json'
 import es from './locales/es.json'
 import fr from './locales/fr.json'
+import pt from './locales/pt.json'
+import ru from './locales/ru.json'
 import tr from './locales/tr.json'
+import ur from './locales/ur.json'
+import zh from './locales/zh.json'
 
 export const LANGUAGE_OPTIONS = [
   { code: 'en', label: 'English', nativeLabel: 'English', dir: 'ltr' },
@@ -15,6 +19,10 @@ export const LANGUAGE_OPTIONS = [
   { code: 'es', label: 'Spanish', nativeLabel: 'Español', dir: 'ltr' },
   { code: 'fr', label: 'French', nativeLabel: 'Français', dir: 'ltr' },
   { code: 'tr', label: 'Turkish', nativeLabel: 'Türkçe', dir: 'ltr' },
+  { code: 'pt', label: 'Portuguese', nativeLabel: 'Português', dir: 'ltr' },
+  { code: 'ru', label: 'Russian', nativeLabel: 'Русский', dir: 'ltr' },
+  { code: 'ur', label: 'Urdu', nativeLabel: 'اردو', dir: 'rtl' },
+  { code: 'zh', label: 'Chinese', nativeLabel: '中文', dir: 'ltr' },
 ]
 
 export function dirFor(code) {
@@ -37,9 +45,13 @@ i18n
       es: { translation: es },
       fr: { translation: fr },
       tr: { translation: tr },
+      pt: { translation: pt },
+      ru: { translation: ru },
+      ur: { translation: ur },
+      zh: { translation: zh },
     },
     fallbackLng: 'en',
-    supportedLngs: ['en', 'ar', 'de', 'es', 'fr', 'tr'],
+    supportedLngs: ['en', 'ar', 'de', 'es', 'fr', 'tr', 'pt', 'ru', 'ur', 'zh'],
     detection: {
       order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'lp_language',

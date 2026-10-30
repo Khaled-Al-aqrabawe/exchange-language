@@ -6,7 +6,7 @@ import client from '../api/client'
 import PptxSlideViewer from '../components/PptxSlideViewer'
 import { useAuth } from '../context/AuthContext'
 import { LANGUAGES, MATERIAL_LEVELS } from '../constants'
-import { downloadBlob, downloadFile } from '../utils/downloadFile'
+import { downloadBlob, downloadFile, secureUrl } from '../utils/downloadFile'
 
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
 const OFFICE_EXTENSIONS = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx']
@@ -90,7 +90,7 @@ function MaterialViewer({ material, onClose, t }) {
   // Office Online can only fetch publicly reachable URLs, so it won't work on localhost
   const isLocal = ['localhost', '127.0.0.1'].includes(new URL(material.file, window.location.href).hostname)
   const src = isOffice
-    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(material.file)}`
+    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(secureUrl(material.file))}`
     : `${material.file}${material.file.includes('?') ? '&' : '?'}embed=1`
   const canView = isImage || !isOffice || !isLocal
 

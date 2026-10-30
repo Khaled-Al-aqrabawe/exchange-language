@@ -2,8 +2,19 @@
 // (the API runs on a different origin/port than the SPA), so it just opens
 // the file instead of saving it. Fetching the bytes ourselves and saving via
 // a blob object URL forces an actual download regardless of origin.
+// The API can hand back an http:// (or :80) media URL behind a TLS proxy; an https page may not fetch that.
+export function secureUrl(url) {
+  const target = new URL(url, window.location.href)
+  if (window.location.protocol === 'https:' && target.protocol === 'http:') {
+    target.protocol = 'https:'
+    if (target.port === '80') target.port = ''
+  }
+  return target.href
+}
+
 export async function downloadFile(url, filename) {
-  const response = await fetch(url)
+  const response = await fetch(secureUrl(url))
+  if (!response.ok) throw new Error(`download ${response.status}`)
   const blob = await response.blob()
   const objectUrl = URL.createObjectURL(blob)
 
