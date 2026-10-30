@@ -299,11 +299,12 @@ function FilterField({ label, icon: Icon, children, className = '' }) {
 const fieldClass = 'h-11 w-full rounded-xl ps-10 pe-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
 const fieldStyle = { background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--ink)' }
 
-function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, onSchedule, onCall }) {
+function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, filterType, onMessage, onSchedule, onCall }) {
   const exchange = p.match_type === 'exchange'
   const visibleAvailability = (p.availability || [])
     .filter((slot) => !isSlotExpiredToday(slot))
     .filter((slot) => filterDayOfWeek == null || slot.day_of_week === filterDayOfWeek)
+    .filter((slot) => !filterType || (slot.session_type || 'lesson') === filterType)
     .filter((slot) => !filterTime || (slot.start_time.slice(0, 5) <= filterTime && filterTime <= slot.end_time.slice(0, 5)))
 
   const cover = exchange
@@ -667,6 +668,7 @@ export default function Partners() {
                 i18n={i18n}
                 filterDayOfWeek={filters.date ? dateToDayOfWeek(filters.date) : null}
                 filterTime={filters.time}
+                filterType={visibility === 'scheduled' ? filters.type : undefined}
                 onMessage={handleMessage}
                 onCall={handleCall}
                 onSchedule={(partner, slotId) => setScheduleFor({ ...partner, slotId })}
