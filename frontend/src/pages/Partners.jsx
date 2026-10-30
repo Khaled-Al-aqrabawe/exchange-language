@@ -6,7 +6,7 @@ import client from '../api/client'
 import ModalShell, { Chip, ModalField, Switch, localDateString, modalInputClass, modalInputStyle } from '../components/ModalShell'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import CallNowModal from '../components/CallNowModal'
-import SessionTypePicker, { lessonLabel, useMyLessons } from '../components/SessionTypePicker'
+import SessionTypePicker, { FINISHED_STYLE, lessonLabel, useMyLessons } from '../components/SessionTypePicker'
 import { useAuth } from '../context/AuthContext'
 import {
   dateToDayOfWeek,
@@ -562,7 +562,7 @@ export default function Partners() {
                 <FilterField label={t('partners.lessonFilter')} icon={GraduationCap} className="w-full sm:w-64">
                   <select value={filters.lesson} onChange={(e) => setFilters({ ...filters, lesson: e.target.value })} className={fieldClass} style={fieldStyle}>
                     <option value="">{t('partners.anyLesson')}</option>
-                    {myLessons.map((l) => <option key={l.order} value={l.order}>{lessonLabel(t, l)}</option>)}
+                    {myLessons.map((l) => <option key={l.order} value={l.order} style={l.finished ? FINISHED_STYLE : undefined}>{lessonLabel(t, l)}</option>)}
                   </select>
                 </FilterField>
               )}

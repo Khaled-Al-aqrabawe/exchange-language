@@ -27,6 +27,9 @@ export function useMyLessons() {
   return lessons
 }
 
+// Finished lessons get a green background in the dropdown list.
+export const FINISHED_STYLE = { backgroundColor: '#d1fae5', color: '#065f46' }
+
 export function lessonLabel(t, lesson) {
   const base = t('partners.lessonOption', { n: lesson.order })
   return lesson.finished ? `${base} · ✓ ${t('partners.lessonFinished', 'finished')}` : base
@@ -82,7 +85,7 @@ export default function SessionTypePicker({ type, lesson, onChange }) {
               style={modalInputStyle}
             >
               <option value="">{t('partners.anyLesson')}</option>
-              {lessons.map((l) => <option key={l.order} value={l.order}>{lessonLabel(t, l)}</option>)}
+              {lessons.map((l) => <option key={l.order} value={l.order} style={l.finished ? FINISHED_STYLE : undefined}>{lessonLabel(t, l)}</option>)}
             </select>
           </ModalField>
         </div>
