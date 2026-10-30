@@ -391,8 +391,30 @@ function AnnotationToolbar({ pen, t }) {
   )
 }
 
-function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slide, onSlide, t }) {
+function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slide, onSlide, translate, t }) {
   const [slideCount, setSlideCount] = useState(0)
+  const [bubble, setBubble] = useState(null)
+  const bodyRef = useRef(null)
+
+  // Selecting text on the slide itself shows its translation in a bubble right beside the selection.
+  const onSelect = async () => {
+    if (!translate) return
+    const selection = window.getSelection()
+    const picked = selection?.toString().replace(EDGE_PUNCTUATION, '')
+    if (!picked || !selection.rangeCount || !bodyRef.current?.contains(selection.anchorNode)) return
+    const rect = selection.getRangeAt(0).getBoundingClientRect()
+    const box = bodyRef.current.getBoundingClientRect()
+    const place = { x: rect.left - box.left + rect.width / 2, top: rect.bottom - box.top + 8, bottom: box.bottom - rect.top + 8, below: rect.bottom - box.top < box.height * 0.6 }
+    speak(picked, translate.source)
+    setBubble({ ...place, word: picked, loading: true })
+    try {
+      const text = translate.source === 'Arabic' ? stripArabicMarks(picked) : picked
+      const { data } = await client.get('/courses/translate/', { params: { text, source: translate.source, target: translate.target } })
+      setBubble({ ...place, word: picked, translation: data.translation })
+    } catch {
+      setBubble({ ...place, word: picked, error: true })
+    }
+  }
   const [pptxFailed, setPptxFailed] = useState(false)
   const name = material.file_name || material.title
   const ext = name.split('.').pop()?.toLowerCase()
@@ -449,7 +471,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slid
         </div>
       </div>
 
-      <div className="relative flex-1 min-h-0">
+      <div ref={bodyRef} className="relative flex-1 min-h-0" onMouseUp={onSelect} onMouseDown={() => setBubble(null)}>
         {canEmbed ? (
           isImage ? (
             <img src={material.file} alt={material.title} className="w-full h-full object-contain bg-black" />
@@ -486,6 +508,23 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slid
           </div>
         )}
         <AnnotationLayer active={pen.on} tool={pen.tool} color={pen.color} strokes={pen.strokes} onDraw={pen.onDraw} onUpdate={pen.onUpdate} onDelete={pen.onDelete} />
+        {bubble && (
+          <div
+            onMouseDown={(e) => e.stopPropagation()}
+            onMouseUp={(e) => e.stopPropagation()}
+            className="absolute z-30 w-max max-w-[22rem] -translate-x-1/2 rounded-2xl bg-slate-900/95 px-4 py-3 text-white shadow-xl ring-1 ring-white/15 backdrop-blur"
+            style={{ left: Math.max(120, bubble.x), ...(bubble.below ? { top: bubble.top } : { bottom: bubble.bottom }) }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm text-slate-300" dir="auto">{bubble.word}</p>
+              <button type="button" onClick={() => setBubble(null)} className="shrink-0 text-slate-400 hover:text-white" aria-label="Close"><X size={13} /></button>
+            </div>
+            <p className="mt-1 text-lg font-semibold" style={{ color: bubble.error ? '#f87171' : '#7dd3fc' }} dir="auto">
+              {bubble.loading ? t('translate.loading') : bubble.error ? t('translate.error') : bubble.translation}
+            </p>
+            <p className="mt-1 text-[11px] text-slate-500">{translate.source} → {translate.target}</p>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -2119,6 +2158,7 @@ export default function Call() {
                 onFinish={sharedMaterial.from === 'you' && sharedMaterial.id ? () => askFinished(sharedMaterial, 'next') : undefined}
                 pen={penApi}
                 fullWidth
+                translate={{ source: translateSource, target: translateTarget }}
                 slide={sharedSlide}
                 onSlide={changeSlide}
                 t={t}
