@@ -17,6 +17,79 @@ import {
 } from '../utils/availability'
 import { resolveAvatarUrl } from '../utils/images'
 
+// Everything this person has offered: when, whether it repeats, what it is for. Each can be removed.
+function MyAvailabilityModal({ onClose, onChanged, onAdd }) {
+  const { t, i18n } = useTranslation()
+  const [slots, setSlots] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const load = () => client.get('/auth/me/availability/').then(({ data }) => setSlots(data))
+  useEffect(() => { load().finally(() => setLoading(false)) }, [])
+
+  const dateOf = (s) => (s.is_recurring ? nextDateForDayOfWeek(s.day_of_week, s.start_time) : new Date(`${s.specific_date}T00:00:00`))
+  const remove = async (id) => {
+    await client.delete(`/auth/me/availability/${id}/`)
+    await load()
+    onChanged?.()
+  }
+
+  return (
+    <ModalShell
+      icon={CalendarCheck}
+      title={t('partners.myAvailableTimes')}
+      subtitle={t('partners.myAvailableTimesSubtitle', 'The times partners can see and ask you for.')}
+      onClose={onClose}
+      footer={<button type="button" onClick={onAdd} className="lp-btn-primary w-full"><CalendarPlus size={16} /> {t('partners.addAvailableTime')}</button>}
+    >
+      {loading ? (
+        <p className="py-6 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partners.loading')}</p>
+      ) : slots.length === 0 ? (
+        <p className="rounded-2xl px-4 py-6 text-center text-sm" style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)' }}>
+          {t('partners.noAvailableTimes', 'You have not added any available times yet.')}
+        </p>
+      ) : (
+        <div className="space-y-2.5">
+          {[...slots].sort((a, b) => dateOf(a) - dateOf(b)).map((s) => {
+            const conversation = s.session_type === 'conversation'
+            const TypeIcon = conversation ? MessagesSquare : BookOpen
+            return (
+              <div key={s.id} className="flex items-center gap-3 rounded-2xl p-3.5" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+                <span className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl text-[10px] font-extrabold uppercase leading-none" style={{ background: 'color-mix(in srgb, var(--accent) 14%, var(--surface))', color: 'var(--accent)' }}>
+                  {dateOf(s).toLocaleDateString(i18n.resolvedLanguage, { month: 'short' })}
+                  <span className="mt-0.5 text-base">{dateOf(s).getDate()}</span>
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
+                    {dateOf(s).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'long' })} · {s.start_time.slice(0, 5)}–{s.end_time.slice(0, 5)}
+                  </p>
+                  <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs" style={{ color: 'var(--ink-soft)' }}>
+                    <span className="inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--accent)' }}>
+                      <TypeIcon size={12} />
+                      {conversation
+                        ? t('partners.typeConversation', 'Free conversation')
+                        : `${t('partners.typeLesson', 'From the lessons')}${s.lesson ? ` · ${t('partners.lessonOption', { n: s.lesson })}` : ''}`}
+                    </span>
+                    <span>{s.is_recurring ? t('partners.repeatsWeekly', 'Repeats weekly') : t('partners.oneTime')}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => remove(s.id)}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-[color-mix(in_srgb,#f87171_22%,transparent)]"
+                  style={{ color: '#f87171' }}
+                  aria-label={t('profile.removeSlot')}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </ModalShell>
+  )
+}
+
 function AddAvailabilityModal({ onClose, onSaved }) {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
@@ -37,22 +110,6 @@ function AddAvailabilityModal({ onClose, onSaved }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
-  const [mySlots, setMySlots] = useState([])
-  const [slotsLoading, setSlotsLoading] = useState(true)
-
-  const loadSlots = () => client.get('/auth/me/availability/').then(({ data }) => setMySlots(data))
-
-  useEffect(() => {
-    loadSlots().finally(() => setSlotsLoading(false))
-  }, [])
-
-  const formatSlotDate = (s) => {
-    const date = s.is_recurring
-      ? nextDateForDayOfWeek(s.day_of_week, s.start_time)
-      : new Date(`${s.specific_date}T00:00:00`)
-    return date.toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric' })
-  }
-
   // Every session is 40 minutes, so the end time follows the start time.
   const setStart = (start_time) => setSlot((s) => ({ ...s, start_time, end_time: timeStrPlusMinutes(start_time, 40) }))
 
@@ -79,7 +136,6 @@ function AddAvailabilityModal({ onClose, onSaved }) {
         lesson: slot.session_type === 'lesson' && slot.lesson ? Number(slot.lesson) : null,
       })
       setSaved(true)
-      await loadSlots()
       onSaved?.()
     } catch (err) {
       const data = err.response?.data
@@ -87,12 +143,6 @@ function AddAvailabilityModal({ onClose, onSaved }) {
     } finally {
       setSaving(false)
     }
-  }
-
-  const handleDelete = async (id) => {
-    await client.delete(`/auth/me/availability/${id}/`)
-    await loadSlots()
-    onSaved?.()
   }
 
   const dayChips = [0, 1].map((offset) => {
@@ -115,34 +165,6 @@ function AddAvailabilityModal({ onClose, onSaved }) {
         </button>
       )}
     >
-      {!slotsLoading && mySlots.length > 0 && (
-        <div className="mb-5">
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.myAvailableTimes')}</p>
-          <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto">
-            {mySlots.map((s) => (
-              <span
-                key={s.id}
-                className="inline-flex items-center gap-2 rounded-full py-1.5 ps-3.5 pe-1.5 text-xs font-semibold"
-                style={{ background: 'color-mix(in srgb, var(--accent) 14%, var(--surface))', color: 'var(--ink)' }}
-              >
-                <span style={{ color: 'var(--accent)' }}>{formatSlotDate(s)}</span>
-                {s.start_time.slice(0, 5)}–{s.end_time.slice(0, 5)}
-                {!s.is_recurring && <span style={{ color: 'var(--ink-soft)' }}>· {t('partners.oneTime')}</span>}
-                <button
-                  type="button"
-                  onClick={() => handleDelete(s.id)}
-                  className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-[color-mix(in_srgb,#f87171_22%,transparent)]"
-                  style={{ color: '#f87171' }}
-                  aria-label={t('profile.removeSlot')}
-                >
-                  <Trash2 size={13} />
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
       {saved ? (
         <div className="lp-animate-in py-6 text-center">
           <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ background: 'color-mix(in srgb, #34d399 18%, transparent)', color: '#34d399' }}>
@@ -397,6 +419,7 @@ export default function Partners() {
   const [filters, setFilters] = useState({ type: 'lesson', lesson: '', date: '', time: '' })
   const myLessons = useMyLessons()
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
+  const [showMyTimes, setShowMyTimes] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -455,9 +478,14 @@ export default function Partners() {
               </h1>
               <p className="mt-2 max-w-xl text-sm sm:text-base" style={{ color: 'var(--ink-soft)' }}>{t('partners.subtitle')}</p>
             </div>
-            <button type="button" onClick={() => setShowAvailabilityModal(true)} className="lp-btn-primary shrink-0">
-              <CalendarPlus size={16} /> {t('partners.addAvailableTime')}
-            </button>
+            <div className="flex shrink-0 flex-wrap items-center gap-3">
+              <button type="button" onClick={() => setShowMyTimes(true)} className="lp-btn-secondary shrink-0">
+                <CalendarCheck size={16} /> {t('partners.myAvailableTimes')}
+              </button>
+              <button type="button" onClick={() => setShowAvailabilityModal(true)} className="lp-btn-primary shrink-0">
+                <CalendarPlus size={16} /> {t('partners.addAvailableTime')}
+              </button>
+            </div>
           </div>
 
           {/* Filter bar */}
@@ -616,6 +644,14 @@ export default function Partners() {
           lockedPartnerId={scheduleFor.user_id}
           onClose={() => setScheduleFor(null)}
           onSent={load}
+        />
+      )}
+
+      {showMyTimes && (
+        <MyAvailabilityModal
+          onClose={() => setShowMyTimes(false)}
+          onChanged={load}
+          onAdd={() => { setShowMyTimes(false); setShowAvailabilityModal(true) }}
         />
       )}
 

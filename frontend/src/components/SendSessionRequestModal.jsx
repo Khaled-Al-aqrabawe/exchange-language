@@ -1,99 +1,105 @@
-import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Info, User } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { BookOpen, CalendarCheck, CalendarPlus, CheckCircle2, Clock, MessagesSquare, User } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
-import { DAYS, isSlotExpiredToday, isWithinAvailability, timeStrPlusMinutes } from '../utils/availability'
 import { useAuth } from '../context/AuthContext'
-import SessionTypePicker from './SessionTypePicker'
-import ModalShell, { Chip, ModalField, localDateString, modalInputClass, modalInputStyle } from './ModalShell'
+import { isSlotExpiredToday, slotOccurrenceUtcInstant, timeStrPlusMinutes } from '../utils/availability'
+import ModalShell, { ModalField, modalInputClass, modalInputStyle } from './ModalShell'
 
-const nowTimeStr = () => new Date().toTimeString().slice(0, 5)
 const SESSION_MINUTES = 40 // every session is the same length
+
+const pad = (n) => String(n).padStart(2, '0')
+const hhmm = (date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`
+const dayString = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+
+// A partner's available slot as it falls for this person: the real dates and local times it covers.
+function describeSlot(slot, timeZone) {
+  const start = slotOccurrenceUtcInstant(slot, slot.start_time.slice(0, 5), timeZone)
+  const end = slotOccurrenceUtcInstant(slot, slot.end_time.slice(0, 5), timeZone)
+  return { slot, start, end, from: hhmm(start), to: hhmm(end), lastStart: timeStrPlusMinutes(hhmm(end), -SESSION_MINUTES) }
+}
 
 export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSent }) {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
+  const language = user?.profile?.learning_language || ''
   const [partners, setPartners] = useState([])
   const [partnersLoading, setPartnersLoading] = useState(true)
-  const [partnerFilters, setPartnerFilters] = useState({ language: user?.profile?.learning_language || '' })
-  const [lockedPartnerDetail, setLockedPartnerDetail] = useState(null)
-  const [form, setForm] = useState({
-    partner_id: lockedPartnerId || '',
-    date: '',
-    start_time: '',
-    end_time: '',
-        notes: '',
-    session_type: 'lesson',
-    lesson: '',
-  })
+  const [partnerId, setPartnerId] = useState(lockedPartnerId || '')
+  const [partnerDetail, setPartnerDetail] = useState(null)
+  const [slotId, setSlotId] = useState(null)
+  const [startTime, setStartTime] = useState('')
+  const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
 
   const lockedFromPartner = Boolean(lockedPartnerId)
-  const today = localDateString(0)
 
   useEffect(() => {
-    if (!lockedPartnerId) return
-    client.get(`/matching/partners/${lockedPartnerId}/`)
-      .then(({ data }) => {
-        setPartnerFilters({ language: data.learning_language })
-        setLockedPartnerDetail(data)
-      })
-      .catch(() => {})
-  }, [lockedPartnerId])
-
-  useEffect(() => {
+    if (lockedFromPartner) return
     setPartnersLoading(true)
-    const params = {}
-    if (partnerFilters.language) params.language = partnerFilters.language
-    client.get('/matching/partners/', { params })
-      .then(({ data }) => {
-        setPartners(data)
-        setForm((f) => (f.partner_id && !data.some((p) => String(p.user_id) === String(f.partner_id))
-          ? { ...f, partner_id: '' }
-          : f))
-      })
+    client.get('/matching/partners/', { params: language ? { language } : {} })
+      .then(({ data }) => setPartners(data))
       .finally(() => setPartnersLoading(false))
-  }, [partnerFilters])
+  }, [language, lockedFromPartner])
 
-  // Picking a start time or a length fills in the end time, which can still be changed by hand.
-  const setStart = (start_time) => setForm((f) => ({ ...f, start_time, end_time: start_time ? timeStrPlusMinutes(start_time, SESSION_MINUTES) : '' }))
+  // The chosen partner's available times are the only times that can be asked for.
+  useEffect(() => {
+    setPartnerDetail(null)
+    setSlotId(null)
+    setStartTime('')
+    if (!partnerId) return
+    client.get(`/matching/partners/${partnerId}/`).then(({ data }) => setPartnerDetail(data)).catch(() => {})
+  }, [partnerId])
+
+  const options = useMemo(() => {
+    if (!partnerDetail) return []
+    return (partnerDetail.availability || [])
+      .filter((slot) => !isSlotExpiredToday(slot))
+      .map((slot) => describeSlot(slot, partnerDetail.timezone))
+      .filter((o) => o.end > new Date())
+      .sort((a, b) => a.start - b.start)
+  }, [partnerDetail])
+
+  const chosen = options.find((o) => o.slot.id === slotId) || null
+  const dayLabel = (date) => date.toLocaleDateString(i18n.resolvedLanguage, { weekday: 'long', month: 'short', day: 'numeric' })
+  const startHint = (o) => t('schedule.startBetween', { from: o.from, to: o.lastStart, defaultValue: 'Choose a start time between {{from}} and {{to}}.' })
+
+  const pickSlot = (option) => {
+    setSlotId(option.slot.id)
+    setStartTime(option.from)
+    setError('')
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!partnerFilters.language || !form.partner_id || !form.date || !form.start_time || !form.end_time) {
+    if (!partnerId || !chosen || !startTime) {
       setError(t('schedule.errorMissing'))
       return
     }
-    const startDateTime = new Date(`${form.date}T${form.start_time}`)
+    if (startTime < chosen.from || startTime > chosen.lastStart) {
+      setError(startHint(chosen))
+      return
+    }
+    const startDateTime = new Date(`${dayString(chosen.start)}T${startTime}`)
     if (startDateTime <= new Date()) {
       setError(t('partners.pastTimeError'))
       return
     }
-    const endDateTime = new Date(`${form.date}T${form.end_time}`)
-    if (endDateTime <= startDateTime) {
-      setError(t('schedule.windowEndBeforeStart'))
-      return
-    }
-    if (
-      lockedPartnerDetail
-      && !isWithinAvailability(startDateTime, lockedPartnerDetail.timezone, lockedPartnerDetail.availability)
-    ) {
-      setError(t('schedule.outsideAvailability'))
-      return
-    }
+    const endDateTime = new Date(startDateTime.getTime() + SESSION_MINUTES * 60000)
     setSubmitting(true)
     try {
       await client.post('/sessions/', {
-        partner_id: form.partner_id,
+        partner_id: partnerId,
         duration_minutes: SESSION_MINUTES,
-        notes: form.notes,
-        session_type: form.session_type,
-        lesson: form.session_type === 'lesson' && form.lesson ? Number(form.lesson) : null,
+        notes,
         scheduled_time: startDateTime.toISOString(),
         window_end_time: endDateTime.toISOString(),
+        // what the time is for was decided by the partner when they offered it
+        session_type: chosen.slot.session_type || 'lesson',
+        lesson: chosen.slot.session_type === 'conversation' ? null : chosen.slot.lesson || null,
       })
       setSent(true)
       onSent?.()
@@ -105,13 +111,18 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
     }
   }
 
-  const partnerSlots = (lockedPartnerDetail?.availability || []).filter((slot) => !isSlotExpiredToday(slot))
-  const dayChips = [0, 1].map((offset) => {
-    const value = localDateString(offset)
-    const label = offset === 0 ? t('modal.today') : offset === 1 ? t('modal.tomorrow')
-      : new Date(`${value}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })
-    return { value, label }
-  })
+  const typeBadge = (slot) => {
+    const conversation = slot.session_type === 'conversation'
+    const Icon = conversation ? MessagesSquare : BookOpen
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--accent)' }}>
+        <Icon size={13} />
+        {conversation
+          ? t('partners.typeConversation', 'Free conversation')
+          : `${t('partners.typeLesson', 'From the lessons')}${slot.lesson ? ` · ${t('partners.lessonOption', { n: slot.lesson })}` : ''}`}
+      </span>
+    )
+  }
 
   return (
     <ModalShell
@@ -123,7 +134,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
       footer={sent ? null : (
         <div className="flex items-center gap-3">
           <button type="button" onClick={onClose} className="lp-btn-secondary shrink-0">{t('common.cancel')}</button>
-          <button type="submit" form="session-request-form" disabled={submitting} className="lp-btn-primary flex-1 disabled:opacity-50">
+          <button type="submit" form="session-request-form" disabled={submitting || !chosen} className="lp-btn-primary flex-1 disabled:opacity-50">
             {submitting ? t('schedule.submitting') : t('schedule.submit')}
           </button>
         </div>
@@ -139,7 +150,13 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
         </div>
       ) : (
         <form id="session-request-form" onSubmit={handleSubmit} className="space-y-5">
-          <div>
+          {lockedFromPartner ? (
+            partnerDetail && (
+              <p className="flex items-center gap-2 text-sm font-bold" style={{ color: 'var(--ink)' }}>
+                <User size={16} style={{ color: 'var(--accent)' }} /> {partnerDetail.full_name}
+              </p>
+            )
+          ) : (
             <ModalField
               label={`${t('schedule.partner')} *`}
               icon={User}
@@ -147,88 +164,81 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
             >
               <select
                 required
-                value={form.partner_id}
-                onChange={(e) => setForm({ ...form, partner_id: e.target.value })}
-                className={`${modalInputClass} ps-11 ${(lockedFromPartner || partnersLoading) ? 'cursor-not-allowed opacity-60' : ''}`}
+                value={partnerId}
+                onChange={(e) => setPartnerId(e.target.value)}
+                className={`${modalInputClass} ps-11 ${partnersLoading ? 'cursor-not-allowed opacity-60' : ''}`}
                 style={modalInputStyle}
-                disabled={partnersLoading || lockedFromPartner}
+                disabled={partnersLoading}
               >
                 <option value="" disabled>{partnersLoading ? t('partners.loading') : t('schedule.selectAPartner')}</option>
                 {partners.map((p) => <option key={p.user_id} value={p.user_id}>{p.full_name}</option>)}
               </select>
             </ModalField>
-          </div>
+          )}
 
-          <SessionTypePicker type={form.session_type} lesson={form.lesson} onChange={(patch) => setForm((f) => ({ ...f, ...patch }))} />
-
-          <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <ModalField label={`${t('schedule.date')} *`} icon={CalendarCheck}>
-              <input
-                required
-                type="date"
-                min={today}
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className={`${modalInputClass} ps-11`}
-                style={modalInputStyle}
-              />
-            </ModalField>
-            <div className="mt-2.5 flex flex-wrap gap-2">
-              {dayChips.map((c) => (
-                <Chip key={c.value} active={form.date === c.value} onClick={() => setForm({ ...form, date: c.value })}>{c.label}</Chip>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="grid grid-cols-2 gap-4">
-              <ModalField label={`${t('schedule.fromTime')} *`} icon={Clock}>
-                <input
-                  required
-                  type="time"
-                  min={form.date === today ? nowTimeStr() : undefined}
-                  value={form.start_time}
-                  onChange={(e) => setStart(e.target.value)}
-                  className={`${modalInputClass} ps-11`}
-                  style={modalInputStyle}
-                />
-              </ModalField>
-              <ModalField label={`${t('schedule.toTime')} *`} icon={Clock}>
-                <input
-                  required
-                  type="time"
-                  min={form.date === today ? form.start_time || nowTimeStr() : undefined}
-                  value={form.end_time}
-                  onChange={(e) => setForm({ ...form, end_time: e.target.value })}
-                  className={`${modalInputClass} ps-11`}
-                  style={modalInputStyle}
-                />
-              </ModalField>
-            </div>
-          </div>
-
-          </div>
-
-          {partnerSlots.length > 0 && (
-            <div className="rounded-2xl p-4" style={{ background: 'color-mix(in srgb, var(--accent) 10%, var(--surface))', border: '1px solid color-mix(in srgb, var(--accent) 25%, var(--line))' }}>
-              <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
-                <Info size={14} /> {t('schedule.partnerAvailability')} · {lockedPartnerDetail.timezone}
+          {partnerId && partnerDetail && (
+            <div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>
+                {t('schedule.pickAvailableTime', 'Choose one of their available times')}
               </p>
-              <div className="flex flex-wrap gap-2">
-                {partnerSlots.map((slot) => (
-                  <span key={slot.id} className="lp-tag lp-tag--accent">
-                    {t(`profile.days.${DAYS.find((d) => d.value === slot.day_of_week)?.key}`)} {slot.start_time.slice(0, 5)}–{slot.end_time.slice(0, 5)}
-                  </span>
-                ))}
-              </div>
+              {options.length === 0 ? (
+                <p className="rounded-2xl px-4 py-3 text-sm" style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)' }}>
+                  {t('schedule.noAvailability', 'This partner has no available times right now.')}
+                </p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {options.map((o) => {
+                    const active = o.slot.id === slotId
+                    return (
+                      <button
+                        key={o.slot.id}
+                        type="button"
+                        onClick={() => pickSlot(o)}
+                        className="rounded-2xl p-3.5 text-start transition-all"
+                        style={active
+                          ? { background: 'color-mix(in srgb, var(--accent) 12%, var(--surface))', border: '2px solid var(--accent)' }
+                          : { background: 'var(--surface)', border: '2px solid var(--line)' }}
+                      >
+                        <span className="flex items-center gap-2 text-sm font-bold" style={{ color: 'var(--ink)' }}>
+                          <CalendarCheck size={15} style={{ color: 'var(--accent)' }} /> {dayLabel(o.start)}
+                        </span>
+                        <span className="mt-1 flex items-center gap-2 text-sm" style={{ color: 'var(--ink-soft)' }}>
+                          <Clock size={14} /> {o.from}–{o.to}
+                        </span>
+                        <span className="mt-1.5 block">{typeBadge(o.slot)}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {chosen && (
+            <div className="rounded-2xl p-4" style={{ background: 'color-mix(in srgb, var(--accent) 8%, var(--surface))', border: '1px solid color-mix(in srgb, var(--accent) 25%, var(--line))' }}>
+              <ModalField label={`${t('schedule.chooseStart', 'Start time')} *`} icon={Clock} hint={startHint(chosen)}>
+                <input
+                  required
+                  type="time"
+                  min={chosen.from}
+                  max={chosen.lastStart}
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className={`${modalInputClass} ps-11`}
+                  style={modalInputStyle}
+                />
+              </ModalField>
+              <p className="mt-3 text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>
+                {dayLabel(chosen.start)} · {SESSION_MINUTES} min
+                {startTime && ` · ${startTime}–${timeStrPlusMinutes(startTime, SESSION_MINUTES)}`}
+              </p>
             </div>
           )}
 
           <ModalField label={t('schedule.notes')}>
             <textarea
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
               rows={2}
               className="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
               style={modalInputStyle}
