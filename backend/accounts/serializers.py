@@ -106,6 +106,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     speaking_level = serializers.ChoiceField(
         choices=Profile.LEVEL_CHOICES, write_only=True, required=False, default='fluent',
     )
+    spoken_languages = serializers.ListField(child=serializers.CharField(), write_only=True, required=False, max_length=5)
+    learning_languages = serializers.ListField(child=serializers.CharField(), write_only=True, required=False, max_length=5)
+    language_levels = serializers.DictField(child=serializers.CharField(), write_only=True, required=False)
     timezone = serializers.CharField(write_only=True, required=False, allow_blank=True)
     ui_language = serializers.ChoiceField(
         choices=Profile.UI_LANGUAGE_CHOICES, write_only=True, required=False, default='en',
@@ -115,8 +118,23 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'email', 'password', 'first_name', 'last_name', 'gender', 'country', 'date_of_birth',
-            'native_language', 'learning_language', 'proficiency_level', 'speaking_level', 'timezone', 'ui_language',
+            'native_language', 'learning_language', 'spoken_languages', 'learning_languages', 'language_levels',
+            'proficiency_level', 'speaking_level', 'timezone', 'ui_language',
         ]
+
+    def validate(self, attrs):
+        levels = attrs.get('language_levels', {})
+        native = attrs.get('native_language', '')
+        errors = {}
+        for lang in attrs.get('learning_languages', []):
+            if levels.get(lang) not in CEFR_LEVELS:
+                errors['language_levels'] = f'Choose your level in {lang}.'
+        for lang in attrs.get('spoken_languages', []):
+            if lang != native and levels.get(lang) not in SPOKEN_MIN_LEVELS:
+                errors['language_levels'] = f'Languages you can teach need at least level B1 ({lang}).'
+        if errors:
+            raise serializers.ValidationError(errors)
+        return attrs
 
     def validate_email(self, value):
         value = value.lower().strip()

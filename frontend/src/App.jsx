@@ -17,7 +17,6 @@ import PartnerProfile from './pages/PartnerProfile'
 import Profile from './pages/Profile'
 import Register from './pages/Register'
 import Schedule from './pages/Schedule'
-import Settings from './pages/Settings'
 
 function App() {
   return (
@@ -43,7 +42,6 @@ function App() {
           <Route path="/materials" element={<Materials />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/notes" element={<Notes />} />
-          <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
     </Routes>

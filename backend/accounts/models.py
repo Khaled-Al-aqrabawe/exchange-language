@@ -202,7 +202,13 @@ class PendingRegistration(models.Model):
             profile.date_of_birth = date.fromisoformat(date_of_birth)
         profile.native_language = payload.get('native_language', '')
         profile.learning_language = payload.get('learning_language', '')
-        profile.proficiency_level = payload.get('proficiency_level', 'beginner')
+        profile.spoken_languages = payload.get('spoken_languages', [])
+        profile.learning_languages = payload.get('learning_languages', [])
+        profile.language_levels = payload.get('language_levels', {})
+        # The learning language's CEFR level also sets the older five-step level.
+        cefr_to_level = {'A1': 'beginner', 'A2': 'elementary', 'B1': 'intermediate', 'B2': 'intermediate', 'C1': 'advanced', 'C2': 'fluent'}
+        learning_cefr = profile.language_levels.get(profile.learning_language)
+        profile.proficiency_level = cefr_to_level.get(learning_cefr) or payload.get('proficiency_level', 'beginner')
         profile.speaking_level = payload.get('speaking_level', 'fluent')
         profile.timezone = payload.get('timezone') or 'UTC'
         profile.ui_language = payload.get('ui_language', 'en')

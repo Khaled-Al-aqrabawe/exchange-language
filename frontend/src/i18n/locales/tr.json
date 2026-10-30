@@ -223,8 +223,8 @@
   },
   "dashboard": {
     "eyebrow": "Ana Sayfa",
-    "welcome": "Tekrar hoş geldin",
-    "welcomeWithName": "Tekrar hoş geldin, {{name}}",
+    "welcome": "Hoş geldin",
+    "welcomeWithName": "Hoş geldin, {{name}}",
     "speaking": "Konuştuğu dil",
     "learning": "Öğrendiği dil",
     "finishProfile": "Partnerlerle eşleşmek için profilini tamamla",

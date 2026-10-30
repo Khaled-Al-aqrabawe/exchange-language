@@ -223,8 +223,8 @@
   },
   "dashboard": {
     "eyebrow": "Start",
-    "welcome": "Willkommen zurück",
-    "welcomeWithName": "Willkommen zurück, {{name}}",
+    "welcome": "Willkommen",
+    "welcomeWithName": "Willkommen, {{name}}",
     "speaking": "Muttersprache",
     "learning": "Lernt",
     "finishProfile": "Vervollständige dein Profil, um mit Partnern gematcht zu werden",

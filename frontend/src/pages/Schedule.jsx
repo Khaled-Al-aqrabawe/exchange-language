@@ -358,7 +358,7 @@ export default function Schedule() {
                     onClick={() => setTab(key)}
                     className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
                     style={tab === key
-                      ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(124 92 255 / 0.9)' }
+                      ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
                       : { color: 'var(--ink-soft)' }}
                   >
                     {t(`schedule.tab.${key}`)}

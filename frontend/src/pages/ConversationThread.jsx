@@ -136,7 +136,7 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
                     className="whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-sm leading-relaxed lp-animate-in-scale"
                     style={
                       isMine
-                        ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', borderEndEndRadius: '6px', boxShadow: '0 8px 20px -12px rgb(124 92 255 / 0.9)' }
+                        ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', borderEndEndRadius: '6px', boxShadow: '0 8px 20px -12px rgb(20 184 166 / 0.9)' }
                         : { background: 'var(--surface-2)', color: 'var(--ink)', borderEndStartRadius: '6px' }
                     }
                   >
@@ -165,7 +165,7 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
           type="submit"
           disabled={!text.trim()}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white transition-transform hover:scale-105 disabled:opacity-40"
-          style={{ background: 'var(--gradient-brand)', boxShadow: '0 10px 22px -10px rgb(124 92 255 / 0.9)' }}
+          style={{ background: 'var(--gradient-brand)', boxShadow: '0 10px 22px -10px rgb(20 184 166 / 0.9)' }}
           aria-label={t('conversationThread.send')}
         >
           <Send size={18} className="rtl:-scale-x-100" />

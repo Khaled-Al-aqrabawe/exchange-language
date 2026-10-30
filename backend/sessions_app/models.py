@@ -75,6 +75,22 @@ class SessionNote(models.Model):
         return f'SessionNote<{self.session_id}: {self.user_id}>'
 
 
+class GeneralNote(models.Model):
+    """A free-form note that belongs to the user, not to any session or course."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='general_notes', on_delete=models.CASCADE)
+    title = models.CharField(max_length=120, blank=True)
+    text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f'GeneralNote<{self.id}: {self.user_id}>'
+
+
 def report_recording_path(instance, filename):
     """Random file names, so a recording cannot be found by guessing a URL."""
     extension = os.path.splitext(filename)[1].lower() or '.webm'

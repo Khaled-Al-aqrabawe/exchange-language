@@ -35,18 +35,21 @@ export default function AuthImagePanel({ quote }) {
   const slide = slides[active]
 
   return (
-    <div className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-slate-950 bg-dots p-10">
+    <div
+      className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-dots p-10"
+      style={{ background: 'linear-gradient(155deg, #0b3b3a 0%, #0d9488 60%, #14b8a6 100%)' }}
+    >
       <div
         className="pointer-events-none absolute -top-32 -right-20 h-96 w-96 rounded-full blur-3xl lp-blob-drift"
-        style={{ background: 'color-mix(in srgb, var(--accent) 35%, transparent)' }}
+        style={{ background: 'rgb(255 255 255 / 0.14)' }}
       />
       <div
         className="pointer-events-none absolute -bottom-32 -left-20 h-96 w-96 rounded-full blur-3xl lp-blob-drift"
-        style={{ background: 'color-mix(in srgb, var(--accent-2) 25%, transparent)', animationDelay: '3s' }}
+        style={{ background: 'rgb(255 107 87 / 0.38)', animationDelay: '3s' }}
       />
       <div
         className="pointer-events-none absolute top-1/3 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl lp-blob-drift"
-        style={{ background: 'color-mix(in srgb, var(--accent) 12%, transparent)', animationDelay: '6s' }}
+        style={{ background: 'rgb(255 255 255 / 0.08)', animationDelay: '6s' }}
       />
 
       {GREETINGS.map((g, i) => (
@@ -60,30 +63,30 @@ export default function AuthImagePanel({ quote }) {
       ))}
 
       <div className="relative flex items-center gap-2 text-white">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-          <BrandMark className="h-7 w-7" />
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white shadow-lg">
+          <BrandMark className="h-8 w-8" />
         </span>
-        <span className="font-extrabold tracking-tight">Lingua Hub</span>
+        <span className="text-xl font-extrabold tracking-tight">Lingua<span style={{ color: '#ffb4a8' }}>Hub</span></span>
       </div>
 
       <div className="relative">
         <div className="flex -space-x-3 mb-6">
           {chipSeeds.map((seed) => (
-            <img key={seed} src={avatarUrl(seed, 64)} alt="" className="h-10 w-10 rounded-full ring-2 ring-slate-950 object-cover" />
+            <img key={seed} src={avatarUrl(seed, 64)} alt="" className="h-10 w-10 rounded-full ring-2 ring-[#0d9488] object-cover" />
           ))}
         </div>
 
-        <div key={active} className="lp-animate-in-fade min-h-[6rem]">
+        <div key={active} className="lp-animate-in-fade min-h-[7rem]">
           {slide.kind === 'quote' ? (
-            <p className="text-white text-2xl font-medium leading-snug max-w-sm tracking-tight">
+            <p className="text-white text-2xl font-semibold leading-snug max-w-md tracking-tight">
               {slide.text}
             </p>
           ) : (
             <>
-              <p className="text-white text-xl font-bold leading-snug max-w-sm tracking-tight mb-1.5">
+              <p className="text-white text-2xl font-bold leading-snug max-w-md tracking-tight mb-2">
                 {slide.headline}
               </p>
-              <p className="text-white/60 text-sm leading-relaxed max-w-sm">
+              <p className="text-white/75 text-sm leading-relaxed max-w-md">
                 {slide.body}
               </p>
             </>
@@ -98,7 +101,7 @@ export default function AuthImagePanel({ quote }) {
               onClick={() => setActive(i)}
               aria-label={`Slide ${i + 1}`}
               className="h-1.5 rounded-full transition-all duration-300"
-              style={{ width: i === active ? '20px' : '6px', background: i === active ? 'var(--accent)' : 'rgb(255 255 255 / 0.25)' }}
+              style={{ width: i === active ? '20px' : '6px', background: i === active ? '#ffffff' : 'rgb(255 255 255 / 0.3)' }}
             />
           ))}
         </div>

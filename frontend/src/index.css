@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ---- Lingua Hub design tokens: midnight with a violet glow (dark by default, light on request) ---- */
+/* ---- Lingua Hub design tokens: teal and coral from the logo (dark by default, light on request) ---- */
 
 @theme {
   /* Soft, generous corners across every Tailwind `rounded-*` utility */
@@ -18,35 +18,35 @@
   --font-body: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
 
-  /* white, with one violet accent used sparingly */
+  /* white, with one teal accent used sparingly */
   --bg: #ffffff;
   --surface: #ffffff;
   --surface-2: #f5f6fa;
   --ink: #0f1222;
   --ink-soft: #666d86;
   --line: #e6e8f0;
-  --accent: #5b43e8;
+  --accent: #0d9488;
   --accent-ink: #ffffff;
-  --accent-2: #0b86c4;
+  --accent-2: #e8503a;
   --accent-2-ink: #ffffff;
-  --gold: #e11d74;              /* small pink highlight (old token name, so every page picks it up) */
+  --gold: #ff6b57;              /* logo coral highlight (old token name, so every page picks it up) */
   --navy-deep: #f5f6fa;
   --on-navy: #0f1222;
   --on-navy-soft: #666d86;
-  --gradient-brand: linear-gradient(135deg, #6a52f0 0%, #5b43e8 100%);
-  --gradient-hero: linear-gradient(135deg, #f6f4ff 0%, #ffffff 100%);
+  --gradient-brand: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  --gradient-hero: linear-gradient(135deg, #effaf8 0%, #ffffff 100%);
   --panel-border: #e6e8f0;
-  --panel-glow: rgb(91 67 232 / 0.07);
+  --panel-glow: rgb(13 148 136 / 0.07);
   --glow-a: 6%;
   --glow-b: 4%;
   --glow-c: 3%;
   --badge-glow: none;
-  --btn-shadow: 0 8px 18px -10px rgb(91 67 232 / 0.55);
-  --btn-shadow-hover: 0 12px 24px -10px rgb(91 67 232 / 0.6);
+  --btn-shadow: 0 8px 18px -10px rgb(13 148 136 / 0.55);
+  --btn-shadow-hover: 0 12px 24px -10px rgb(13 148 136 / 0.6);
   --gold-btn-bg: var(--accent);
   --gold-btn-ink: #ffffff;
   --shadow-card: 0 1px 2px rgb(20 20 60 / 0.04), 0 6px 18px -12px rgb(20 20 60 / 0.12);
-  --shadow-card-hover: 0 2px 6px rgb(20 20 60 / 0.06), 0 18px 34px -18px rgb(91 67 232 / 0.3);
+  --shadow-card-hover: 0 2px 6px rgb(20 20 60 / 0.06), 0 18px 34px -18px rgb(13 148 136 / 0.3);
   --radius-card: 20px;
   --radius-pill: 999px;
   --radius-tag: 999px;
@@ -56,34 +56,34 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #070816;
-  --surface: #0f1229;
-  --surface-2: #171b3a;
-  --ink: #eef0ff;
-  --ink-soft: #9aa3c7;
-  --line: #242a55;
-  --accent: #8b7cff;
+  --bg: #061312;
+  --surface: #0c1f1d;
+  --surface-2: #12302d;
+  --ink: #ecfaf8;
+  --ink-soft: #9bbdb8;
+  --line: #1e4541;
+  --accent: #2dd4bf;
   --accent-ink: #ffffff;
-  --accent-2: #38bdf8;
-  --accent-2-ink: #04202e;
-  --gold: #f472b6;
-  --navy-deep: #050613;
-  --on-navy: #f2f1ff;
-  --on-navy-soft: #b4b3e6;
-  --gradient-brand: linear-gradient(135deg, #8b6cff 0%, #5b6bff 100%);
-  --gradient-hero: linear-gradient(135deg, #3b2bd0 0%, #6a46ff 52%, #b04bf0 100%);
+  --accent-2: #ff8a7a;
+  --accent-2-ink: #2a0a05;
+  --gold: #ff8a7a;
+  --navy-deep: #040d0c;
+  --on-navy: #effcfa;
+  --on-navy-soft: #b0d6d1;
+  --gradient-brand: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+  --gradient-hero: linear-gradient(135deg, #0b3b3a 0%, #0d9488 52%, #ff6b57 100%);
   --panel-border: transparent;
   --panel-glow: rgb(255 255 255 / 0.28);
   --glow-a: 34%;
   --glow-b: 22%;
   --glow-c: 20%;
   --badge-glow: 0 0 22px -6px color-mix(in srgb, var(--accent) 70%, transparent);
-  --btn-shadow: 0 10px 26px -10px rgb(124 92 255 / 0.85), inset 0 1px 0 rgb(255 255 255 / 0.25);
-  --btn-shadow-hover: 0 16px 32px -10px rgb(124 92 255 / 0.95), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  --btn-shadow: 0 10px 26px -10px rgb(20 184 166 / 0.85), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  --btn-shadow-hover: 0 16px 32px -10px rgb(20 184 166 / 0.95), inset 0 1px 0 rgb(255 255 255 / 0.3);
   --gold-btn-bg: #ffffff;
-  --gold-btn-ink: #3b2bd0;
+  --gold-btn-ink: #0b3b3a;
   --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 10px 30px -14px rgb(0 0 0 / 0.7);
-  --shadow-card-hover: 0 0 0 1px rgb(139 124 255 / 0.4), 0 24px 50px -20px rgb(110 86 255 / 0.55);
+  --shadow-card-hover: 0 0 0 1px rgb(45 212 191 / 0.4), 0 24px 50px -20px rgb(20 184 166 / 0.55);
 }
 
 * {
@@ -295,7 +295,7 @@ button.lp-card:hover {
   transform: translateY(-1px);
 }
 
-/* White button, used on the violet gradient panels */
+/* White button, used on the brand gradient panels */
 .lp-btn-gold {
   display: inline-flex;
   align-items: center;
@@ -450,9 +450,9 @@ button.lp-card:hover {
   --ink: var(--on-navy);
   --ink-soft: var(--on-navy-soft);
   --line: rgb(255 255 255 / 0.1);
-  --accent: #a89cff;
-  --gold: #f472b6;
-  --surface: #14173a;
+  --accent: #5eead4;
+  --gold: #ff8a7a;
+  --surface: #0e2a27;
   background: var(--navy-deep);
   color: var(--on-navy);
 }

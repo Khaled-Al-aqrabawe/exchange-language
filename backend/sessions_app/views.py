@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 
 from .emails import send_session_confirmed_email, send_session_invitation_email
 from .models import (
+    GeneralNote,
     ScheduledSession,
     SessionNote,
     SessionNoteRevision,
@@ -281,6 +282,54 @@ class SessionNoteView(APIView):
             else:
                 SessionNoteRevision.objects.create(note=note, text=text)
         return Response({'text': note.text, 'updated_at': note.updated_at})
+
+
+class GeneralNotesView(APIView):
+    """The signed-in user's free-form notes (list and create)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        return Response([_general_note_data(n) for n in GeneralNote.objects.filter(user=request.user)])
+
+    def post(self, request):
+        title, text = _general_note_fields(request)
+        note = GeneralNote.objects.create(user=request.user, title=title, text=text)
+        return Response(_general_note_data(note), status=status.HTTP_201_CREATED)
+
+
+class GeneralNoteDetailView(APIView):
+    """Update or delete one of the signed-in user's free-form notes."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _note(self, request, pk):
+        try:
+            return GeneralNote.objects.get(pk=pk, user=request.user)
+        except GeneralNote.DoesNotExist:
+            raise PermissionDenied('Not your note.')
+
+    def put(self, request, pk):
+        note = self._note(request, pk)
+        note.title, note.text = _general_note_fields(request)
+        note.save()
+        return Response(_general_note_data(note))
+
+    def delete(self, request, pk):
+        self._note(request, pk).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def _general_note_data(note):
+    return {'id': note.id, 'title': note.title, 'text': note.text, 'created_at': note.created_at, 'updated_at': note.updated_at}
+
+
+def _general_note_fields(request):
+    title = request.data.get('title', '')
+    text = request.data.get('text', '')
+    if not isinstance(title, str) or not isinstance(text, str):
+        raise ValidationError({'text': 'Notes must be text.'})
+    return title.strip()[:120], text
 
 
 class NotesListView(APIView):

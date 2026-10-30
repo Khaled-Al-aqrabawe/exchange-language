@@ -223,8 +223,8 @@
   },
   "dashboard": {
     "eyebrow": "Inicio",
-    "welcome": "Bienvenido de nuevo",
-    "welcomeWithName": "Bienvenido de nuevo, {{name}}",
+    "welcome": "Bienvenido",
+    "welcomeWithName": "Bienvenido, {{name}}",
     "speaking": "Habla",
     "learning": "Aprende",
     "finishProfile": "Completa tu perfil para que te emparejemos con compañeros",

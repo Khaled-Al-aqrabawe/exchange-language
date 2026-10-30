@@ -2,49 +2,32 @@ import { CalendarDays, Globe2, Languages, Lock, Mail, MailCheck, Sparkles, UserP
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import AuthHeroBackground from '../components/AuthHeroBackground'
+import AuthShell, { AuthStepHeader as StepHeader, authInputClass as inputClass, authInputStyle as inputStyle, authLabelClass } from '../components/AuthShell'
 import EmailVerifyForm from '../components/EmailVerifyForm'
-import { COUNTRIES, GENDERS, LANGUAGES, LEVELS } from '../constants'
+import { COUNTRIES, GENDERS, LANGUAGES, MATERIAL_LEVELS } from '../constants'
 import { useAuth } from '../context/AuthContext'
 import { detectTimezone } from '../utils/timezone'
-
-const inputClass = 'w-full rounded-xl ps-10 pe-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent'
-const inputStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
 
 const STEPS = ['account', 'about', 'languages']
 
 function IconField({ icon: Icon, children }) {
   return (
     <div className="relative">
-      <Icon size={16} className="absolute top-1/2 -translate-y-1/2 start-3.5 pointer-events-none z-10" style={{ color: 'var(--ink-soft)' }} />
+      <Icon size={18} className="absolute top-1/2 -translate-y-1/2 start-4 pointer-events-none z-10" style={{ color: 'var(--ink-soft)' }} />
       {children}
     </div>
   )
 }
 
-function StepHeader({ icon: Icon, title, subtitle }) {
-  return (
-    <div className="flex flex-col items-center text-center mb-6 lp-animate-in-scale">
-      <span className="lp-icon-badge h-12 w-12 mb-4">
-        <Icon size={20} />
-      </span>
-      <h1 className="font-display text-3xl font-semibold tracking-tight">{title}</h1>
-      <p className="text-sm mt-1.5 max-w-xs" style={{ color: 'var(--ink-soft)' }}>{subtitle}</p>
-    </div>
-  )
-}
-
 function StepDots({ current }) {
+  const index = STEPS.indexOf(current)
   return (
-    <div className="flex items-center justify-center gap-1.5 mb-7">
+    <div className="mb-6 flex items-center gap-2">
       {STEPS.map((s, i) => (
         <span
           key={s}
-          className="h-1.5 rounded-full transition-all duration-300"
-          style={{
-            width: STEPS.indexOf(current) === i ? '20px' : '6px',
-            background: STEPS.indexOf(current) >= i ? 'var(--accent)' : 'var(--line)',
-          }}
+          className="h-1.5 flex-1 rounded-full transition-all duration-300"
+          style={{ background: index >= i ? 'var(--gradient-brand)' : 'var(--line)' }}
         />
       ))}
     </div>
@@ -65,7 +48,7 @@ export default function Register() {
   const [step, setStep] = useState('account')
   const [form, setForm] = useState({
     email: '', password: '', first_name: '', last_name: '', gender: '', country: '', date_of_birth: '',
-    native_language: 'English', learning_language: 'Arabic', proficiency_level: 'beginner', speaking_level: 'fluent',
+    native_language: 'Arabic', spoken_language: '', spoken_level: 'B1', learning_language: 'English', learning_level: 'A1',
   })
   const [confirmPassword, setConfirmPassword] = useState('')
   const [accountError, setAccountError] = useState('')
@@ -73,7 +56,15 @@ export default function Register() {
   const [submitting, setSubmitting] = useState(false)
   const [registeredEmail, setRegisteredEmail] = useState('')
 
-  const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
+  const update = (field) => (e) => {
+    const next = { ...form, [field]: e.target.value }
+    // the three languages must differ: drop a clash with the native language, then re-pick what to learn
+    if (next.spoken_language === next.native_language) next.spoken_language = ''
+    if (next.learning_language === next.native_language || next.learning_language === next.spoken_language) {
+      next.learning_language = LANGUAGES.find((l) => l !== next.native_language && l !== next.spoken_language)
+    }
+    setForm(next)
+  }
 
   const goNext = (e, next) => {
     e.preventDefault()
@@ -95,7 +86,18 @@ export default function Register() {
     setError('')
     setSubmitting(true)
     try {
-      const data = await register({ ...form, timezone: detectTimezone(), ui_language: i18n.resolvedLanguage })
+      const { spoken_language, spoken_level, learning_level, ...rest } = form
+      const data = await register({
+        ...rest,
+        spoken_languages: spoken_language ? [spoken_language] : [],
+        learning_languages: [form.learning_language],
+        language_levels: {
+          [form.learning_language]: learning_level,
+          ...(spoken_language ? { [spoken_language]: spoken_level } : {}),
+        },
+        timezone: detectTimezone(),
+        ui_language: i18n.resolvedLanguage,
+      })
       setRegisteredEmail(data.email)
     } catch (err) {
       const data = err.response?.data
@@ -107,24 +109,21 @@ export default function Register() {
 
   if (registeredEmail) {
     return (
-      <div className="relative overflow-hidden lp-hero-bg bg-dots min-h-[calc(100vh-4rem)] flex flex-col items-center px-6 py-14">
-        <AuthHeroBackground />
-        <div className="lp-auth-card relative w-full max-w-md m-auto lp-animate-in">
+      <AuthShell>
+        <div className="lp-animate-in">
           <StepHeader icon={MailCheck} title={t('auth.register.checkEmailTitle')} subtitle={t('auth.register.checkEmailBody', { email: registeredEmail })} />
           <EmailVerifyForm email={registeredEmail} onVerified={() => navigate('/home')} />
           <p className="mt-6 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
             <Link to="/login" className="font-semibold" style={{ color: 'var(--accent)' }}>{t('auth.register.logIn')}</Link>
           </p>
         </div>
-      </div>
+      </AuthShell>
     )
   }
 
   return (
-    <div className="relative overflow-hidden lp-hero-bg bg-dots min-h-[calc(100vh-4rem)] flex flex-col items-center px-6 py-14">
-      <AuthHeroBackground />
-
-      <div className="lp-auth-card relative w-full max-w-md m-auto">
+    <AuthShell>
+      <div>
         <StepDots current={step} />
 
         <div key={step} className="lp-animate-in-scale">
@@ -134,38 +133,40 @@ export default function Register() {
               <form onSubmit={handleAccountSubmit} className="space-y-3.5">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.firstName')}</label>
+                    <label className={authLabelClass}>{t('auth.register.firstName')}</label>
                     <IconField icon={UserRound}>
                       <input required value={form.first_name} onChange={update('first_name')} className={inputClass} style={inputStyle} />
                     </IconField>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.lastName')}</label>
+                    <label className={authLabelClass}>{t('auth.register.lastName')}</label>
                     <IconField icon={UserRound}>
                       <input required value={form.last_name} onChange={update('last_name')} className={inputClass} style={inputStyle} />
                     </IconField>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.email')}</label>
+                  <label className={authLabelClass}>{t('auth.register.email')}</label>
                   <IconField icon={Mail}>
                     <input type="email" required value={form.email} onChange={update('email')} className={inputClass} style={inputStyle} />
                   </IconField>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.password')}</label>
-                  <IconField icon={Lock}>
-                    <input type="password" required minLength={8} value={form.password} onChange={update('password')} className={inputClass} style={inputStyle} />
-                  </IconField>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.confirmPassword')}</label>
-                  <IconField icon={Lock}>
-                    <input type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputClass} style={inputStyle} />
-                  </IconField>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={authLabelClass}>{t('auth.register.password')}</label>
+                    <IconField icon={Lock}>
+                      <input type="password" required minLength={8} value={form.password} onChange={update('password')} className={inputClass} style={inputStyle} />
+                    </IconField>
+                  </div>
+                  <div>
+                    <label className={authLabelClass}>{t('auth.register.confirmPassword')}</label>
+                    <IconField icon={Lock}>
+                      <input type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputClass} style={inputStyle} />
+                    </IconField>
+                  </div>
                 </div>
                 {accountError && <p className="text-sm" style={{ color: '#c1443d' }}>{accountError}</p>}
-                <button type="submit" className="lp-btn-primary w-full">{t('auth.register.continue')}</button>
+                <button type="submit" className="lp-btn-primary w-full" style={{ height: '2.75rem', fontSize: '0.9rem' }}>{t('auth.register.continue')}</button>
               </form>
               <p className="mt-5 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
                 {t('auth.register.haveAccount')}{' '}
@@ -179,7 +180,7 @@ export default function Register() {
               <StepHeader icon={Globe2} title={t('auth.register.step2Title')} subtitle={t('auth.register.step2Subtitle')} />
               <form onSubmit={(e) => goNext(e, 'languages')} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.gender')}</label>
+                  <label className={authLabelClass}>{t('auth.register.gender')}</label>
                   <IconField icon={Users}>
                     <select required value={form.gender} onChange={update('gender')} className={inputClass} style={inputStyle}>
                       <option value="" disabled>{t('profile.select')}</option>
@@ -188,13 +189,13 @@ export default function Register() {
                   </IconField>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.dateOfBirth')}</label>
+                  <label className={authLabelClass}>{t('auth.register.dateOfBirth')}</label>
                   <IconField icon={CalendarDays}>
                     <input type="date" required max={maxDateOfBirth()} value={form.date_of_birth} onChange={update('date_of_birth')} className={inputClass} style={inputStyle} />
                   </IconField>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.country')}</label>
+                  <label className={authLabelClass}>{t('auth.register.country')}</label>
                   <IconField icon={Globe2}>
                     <select required value={form.country} onChange={update('country')} className={inputClass} style={inputStyle}>
                       <option value="" disabled>{t('profile.select')}</option>
@@ -203,8 +204,8 @@ export default function Register() {
                   </IconField>
                 </div>
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setStep('account')} className="lp-btn-secondary w-full">{t('auth.register.back')}</button>
-                  <button type="submit" className="lp-btn-primary w-full">{t('auth.register.continue')}</button>
+                  <button type="button" onClick={() => setStep('account')} className="lp-btn-secondary w-full" style={{ height: '2.75rem', fontSize: '0.9rem' }}>{t('auth.register.back')}</button>
+                  <button type="submit" className="lp-btn-primary w-full" style={{ height: '2.75rem', fontSize: '0.9rem' }}>{t('auth.register.continue')}</button>
                 </div>
               </form>
             </>
@@ -214,46 +215,55 @@ export default function Register() {
             <>
               <StepHeader icon={Languages} title={t('auth.register.step3Title')} subtitle={t('auth.register.step3Subtitle')} />
               <form onSubmit={handleSubmit} className="space-y-3.5">
-                <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={authLabelClass}>{t('auth.register.nativeLanguage')}</label>
+                  <IconField icon={Languages}>
+                    <select value={form.native_language} onChange={update('native_language')} className={inputClass} style={inputStyle}>
+                      {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                  </IconField>
+                </div>
+                <div className="grid grid-cols-[1.6fr_1fr] gap-3">
                   <div>
-                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iSpeak')}</label>
+                    <label className={authLabelClass}>{t('auth.register.canTeach')}</label>
                     <IconField icon={Languages}>
-                      <select value={form.native_language} onChange={update('native_language')} className={inputClass} style={inputStyle}>
-                        {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+                      <select value={form.spoken_language} onChange={update('spoken_language')} className={inputClass} style={inputStyle}>
+                        <option value="">{t('auth.register.none')}</option>
+                        {LANGUAGES.filter((l) => l !== form.native_language && l !== form.learning_language).map((l) => <option key={l} value={l}>{l}</option>)}
                       </select>
                     </IconField>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.iAmLearning')}</label>
-                    <IconField icon={Languages}>
-                      <select value={form.learning_language} onChange={update('learning_language')} className={inputClass} style={inputStyle}>
-                        {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+                    <label className={authLabelClass}>{t('auth.register.myLevel')}</label>
+                    <IconField icon={Sparkles}>
+                      <select disabled={!form.spoken_language} value={form.spoken_level} onChange={update('spoken_level')} className={`${inputClass} disabled:opacity-50`} style={inputStyle}>
+                        {MATERIAL_LEVELS.slice(2).map((lv) => <option key={lv} value={lv}>{lv}</option>)}
                       </select>
                     </IconField>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-[1.6fr_1fr] gap-3">
                   <div>
-                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.myLevel')}</label>
-                    <IconField icon={Sparkles}>
-                      <select value={form.speaking_level} onChange={update('speaking_level')} className={inputClass} style={inputStyle}>
-                        {LEVELS.map(([value]) => <option key={value} value={value}>{t(`levels.${value}`)}</option>)}
+                    <label className={authLabelClass}>{t('auth.register.wantToLearn')}</label>
+                    <IconField icon={Languages}>
+                      <select value={form.learning_language} onChange={update('learning_language')} className={inputClass} style={inputStyle}>
+                        {LANGUAGES.filter((l) => l !== form.native_language && l !== form.spoken_language).map((l) => <option key={l} value={l}>{l}</option>)}
                       </select>
                     </IconField>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.register.myLevel')}</label>
+                    <label className={authLabelClass}>{t('auth.register.myLevel')}</label>
                     <IconField icon={Sparkles}>
-                      <select value={form.proficiency_level} onChange={update('proficiency_level')} className={inputClass} style={inputStyle}>
-                        {LEVELS.map(([value]) => <option key={value} value={value}>{t(`levels.${value}`)}</option>)}
+                      <select value={form.learning_level} onChange={update('learning_level')} className={inputClass} style={inputStyle}>
+                        {MATERIAL_LEVELS.map((lv) => <option key={lv} value={lv}>{lv}</option>)}
                       </select>
                     </IconField>
                   </div>
                 </div>
                 {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setStep('about')} className="lp-btn-secondary w-full">{t('auth.register.back')}</button>
-                  <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50">
+                  <button type="button" onClick={() => setStep('about')} className="lp-btn-secondary w-full" style={{ height: '2.75rem', fontSize: '0.9rem' }}>{t('auth.register.back')}</button>
+                  <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50" style={{ height: '2.75rem', fontSize: '0.9rem' }}>
                     {submitting ? t('auth.register.submitting') : t('auth.register.submit')}
                   </button>
                 </div>
@@ -262,6 +272,6 @@ export default function Register() {
           )}
         </div>
       </div>
-    </div>
+    </AuthShell>
   )
 }

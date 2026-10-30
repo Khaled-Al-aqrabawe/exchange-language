@@ -266,7 +266,7 @@ export default function Profile() {
                   onClick={() => { setTab(key); setSaved(false) }}
                   className="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
                   style={tab === key
-                    ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(124 92 255 / 0.9)' }
+                    ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
                     : { color: 'var(--ink-soft)' }}
                 >
                   <Icon size={15} /> {label}

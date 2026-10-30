@@ -1,6 +1,8 @@
 from django.urls import path
 
 from .views import (
+    GeneralNoteDetailView,
+    GeneralNotesView,
     NotesListView,
     NotificationsSeenView,
     NotificationsView,
@@ -20,6 +22,8 @@ urlpatterns = [
     path('', SessionListCreateView.as_view(), name='session-list'),
     path('notifications/', NotificationsView.as_view(), name='session-notifications'),
     path('notifications/seen/', NotificationsSeenView.as_view(), name='session-notifications-seen'),
+    path('general-notes/', GeneralNotesView.as_view(), name='general-notes'),
+    path('general-notes/<int:pk>/', GeneralNoteDetailView.as_view(), name='general-note'),
     path('notes/', NotesListView.as_view(), name='session-notes'),
     path('<int:pk>/first-turn/', SessionFirstTurnView.as_view(), name='session-first-turn'),
     path('<int:pk>/summary/', SessionSummaryView.as_view(), name='session-summary'),

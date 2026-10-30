@@ -223,8 +223,8 @@
   },
   "dashboard": {
     "eyebrow": "Accueil",
-    "welcome": "Content de vous revoir",
-    "welcomeWithName": "Content de vous revoir, {{name}}",
+    "welcome": "Bienvenue",
+    "welcomeWithName": "Bienvenue, {{name}}",
     "speaking": "Langue maternelle",
     "learning": "Apprend",
     "finishProfile": "Complétez votre profil pour être mis en relation avec des partenaires",

@@ -225,8 +225,8 @@
   },
   "dashboard": {
     "eyebrow": "الرئيسية",
-    "welcome": "مرحبًا بعودتك",
-    "welcomeWithName": "مرحبًا بعودتك، {{name}}",
+    "welcome": "مرحبًا",
+    "welcomeWithName": "مرحبًا، {{name}}",
     "speaking": "يتحدث",
     "learning": "يتعلم",
     "finishProfile": "أكمل ملفك الشخصي لتتم مطابقتك مع شركاء",
