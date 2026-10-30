@@ -1,10 +1,11 @@
-import { ArrowRight, CalendarCheck, CalendarPlus, CheckCircle2, Clock, GraduationCap, Globe2, Info, MapPin, MessageCircle, Phone, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
+import { ArrowRight, BookOpen, CalendarCheck, CalendarPlus, CheckCircle2, Clock, GraduationCap, Globe2, Info, MapPin, MessageCircle, MessagesSquare, Phone, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import ModalShell, { Chip, ModalField, Switch, localDateString, modalInputClass, modalInputStyle } from '../components/ModalShell'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
+import SessionTypePicker, { lessonLabel, useMyLessons } from '../components/SessionTypePicker'
 import { useAuth } from '../context/AuthContext'
 import {
   dateToDayOfWeek,
@@ -18,12 +19,9 @@ import { resolveAvatarUrl } from '../utils/images'
 
 function AddAvailabilityModal({ onClose, onSaved }) {
   const { t, i18n } = useTranslation()
-  const { user, refreshUser } = useAuth()
+  const { user } = useAuth()
   const profileLang = user?.profile
   const speakOptions = [...new Set([profileLang?.native_language, ...(profileLang?.spoken_languages || [])].filter(Boolean))]
-  const learnOptions = profileLang?.learning_languages?.length
-    ? profileLang.learning_languages
-    : [profileLang?.learning_language].filter(Boolean)
   const [slot, setSlot] = useState(() => {
     const start = nowTimeStr()
     return {
@@ -32,7 +30,8 @@ function AddAvailabilityModal({ onClose, onSaved }) {
       end_time: timeStrPlusMinutes(start, 40),
       weekly: true,
       native_language: speakOptions[0] || '',
-      learning_language: learnOptions[0] || '',
+      session_type: 'lesson',
+      lesson: '',
     }
   })
   const [saving, setSaving] = useState(false)
@@ -54,14 +53,8 @@ function AddAvailabilityModal({ onClose, onSaved }) {
     return date.toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric' })
   }
 
-  // The length chips set the end time from the start time
-  const lengthOf = () => {
-    const [sh, sm] = slot.start_time.split(':').map(Number)
-    const [eh, em] = slot.end_time.split(':').map(Number)
-    return (eh * 60 + em) - (sh * 60 + sm)
-  }
-  const setLength = (minutes) => setSlot((s) => ({ ...s, end_time: timeStrPlusMinutes(s.start_time, minutes) }))
-  const setStart = (start_time) => setSlot((s) => ({ ...s, start_time, end_time: timeStrPlusMinutes(start_time, Math.max(lengthOf(), 30) || 40) }))
+  // Every session is 40 minutes, so the end time follows the start time.
+  const setStart = (start_time) => setSlot((s) => ({ ...s, start_time, end_time: timeStrPlusMinutes(start_time, 40) }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -76,17 +69,14 @@ function AddAvailabilityModal({ onClose, onSaved }) {
     }
     setSaving(true)
     try {
-      const profile = user?.profile
-      if (slot.learning_language && slot.learning_language !== profile?.learning_language) {
-        await client.patch('/auth/me/', { profile: { learning_language: slot.learning_language } })
-        await refreshUser()
-      }
       await client.post('/auth/me/availability/', {
         day_of_week: dateToDayOfWeek(slot.date),
         start_time: slot.start_time,
         end_time: slot.end_time,
         is_recurring: slot.weekly,
         specific_date: slot.weekly ? null : slot.date,
+        session_type: slot.session_type,
+        lesson: slot.session_type === 'lesson' && slot.lesson ? Number(slot.lesson) : null,
       })
       setSaved(true)
       await loadSlots()
@@ -105,7 +95,7 @@ function AddAvailabilityModal({ onClose, onSaved }) {
     onSaved?.()
   }
 
-  const dayChips = [0, 1, 2].map((offset) => {
+  const dayChips = [0, 1].map((offset) => {
     const value = localDateString(offset)
     const label = offset === 0 ? t('modal.today') : offset === 1 ? t('modal.tomorrow')
       : new Date(`${value}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })
@@ -166,24 +156,19 @@ function AddAvailabilityModal({ onClose, onSaved }) {
         </div>
       ) : (
         <form id="availability-form" onSubmit={handleSubmit} className="space-y-5">
-          {(speakOptions.length > 1 || learnOptions.length > 1) && (
+          {speakOptions.length > 1 && (
             <div className="grid grid-cols-2 gap-4">
               {speakOptions.length > 1 && (
-                <ModalField label={t('auth.register.iSpeak')} icon={Globe2}>
+                <ModalField label={t('partners.iTeach', 'I want to teach')} icon={Globe2}>
                   <select value={slot.native_language} onChange={(e) => setSlot({ ...slot, native_language: e.target.value })} className={`${modalInputClass} ps-11`} style={modalInputStyle}>
                     {speakOptions.map((l) => <option key={l} value={l}>{l}</option>)}
                   </select>
                 </ModalField>
               )}
-              {learnOptions.length > 1 && (
-                <ModalField label={t('auth.register.iAmLearning')} icon={GraduationCap}>
-                  <select value={slot.learning_language} onChange={(e) => setSlot({ ...slot, learning_language: e.target.value })} className={`${modalInputClass} ps-11`} style={modalInputStyle}>
-                    {learnOptions.map((l) => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                </ModalField>
-              )}
             </div>
           )}
+
+          <SessionTypePicker type={slot.session_type} lesson={slot.lesson} onChange={(patch) => setSlot((s) => ({ ...s, ...patch }))} />
 
           <div className="grid gap-5 sm:grid-cols-2">
           <div>
@@ -226,12 +211,6 @@ function AddAvailabilityModal({ onClose, onSaved }) {
                   style={modalInputStyle}
                 />
               </ModalField>
-            </div>
-            <div className="mt-2.5 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>{t('modal.length')}</span>
-              {[30, 40, 60, 90].map((m) => (
-                <Chip key={m} active={lengthOf() === m} onClick={() => setLength(m)}>{t('schedule.minutesShort', { count: m })}</Chip>
-              ))}
             </div>
           </div>
 
@@ -396,45 +375,33 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, onMessage, on
 export default function Partners() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
-  const myLearning = user?.profile?.learning_languages?.length
-    ? user.profile.learning_languages
-    : (user?.profile?.learning_language ? [user.profile.learning_language] : [])
+  // A person learns the one language set in their profile, so partners are always matched on it.
+  const learningLanguage = user?.profile?.learning_language || ''
   const navigate = useNavigate()
   const [scheduleFor, setScheduleFor] = useState(null)
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibility, setVisibility] = useState('now')
-  const [filters, setFilters] = useState({ learning: '', lesson: '', date: '', time: '' })
+  const [filters, setFilters] = useState({ type: 'lesson', lesson: '', date: '', time: '' })
+  const myLessons = useMyLessons()
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
-  const [lessonCount, setLessonCount] = useState(12)
-
-  // The lesson list runs up to the highest lesson number in the course files.
-  useEffect(() => {
-    client.get('/courses/materials/')
-      .then(({ data }) => setLessonCount(Math.max(1, ...data.map((m) => m.order || 0))))
-      .catch(() => {})
-  }, [])
 
   const load = () => {
     setLoading(true)
     const params = {}
-    if (filters.learning) params.language = filters.learning
-    if (filters.lesson) params.lesson = filters.lesson
+    if (learningLanguage) params.language = learningLanguage
+    if (filters.type === 'lesson' && filters.lesson) params.lesson = filters.lesson
     if (filters.date) params.day = dateToDayOfWeek(filters.date)
     client.get('/matching/partners/', { params })
       .then(({ data }) => setPartners(data))
       .finally(() => setLoading(false))
   }
 
-  // With a single learning language in the profile, pre-select it in the filter.
-  useEffect(() => {
-    if (myLearning.length === 1) setFilters((f) => (f.learning ? f : { ...f, learning: myLearning[0] }))
-  }, [myLearning.join('|')])
-
-  useEffect(load, [filters, t])
+  useEffect(load, [filters, learningLanguage, t])
 
   const slotMatchesTime = (slot) =>
-    !filters.time || (slot.start_time.slice(0, 5) <= filters.time && filters.time <= slot.end_time.slice(0, 5))
+    (slot.session_type || 'lesson') === filters.type
+    && (!filters.time || (slot.start_time.slice(0, 5) <= filters.time && filters.time <= slot.end_time.slice(0, 5)))
   const withAvailability = partners.filter((p) => p.availability?.some(slotMatchesTime))
   const availableNow = partners.filter((p) => p.is_available_now)
   // Highest-rated first; unrated partners last. Array#sort is stable, so ties keep the
@@ -463,7 +430,7 @@ export default function Partners() {
     ['scheduled', t('partners.visibilityScheduled'), withAvailability.length],
     ['all', t('partners.visibilityAll'), partners.length],
   ]
-  const hasFilters = !!(filters.learning || filters.lesson || filters.date || filters.time)
+  const hasFilters = !!(filters.type !== 'lesson' || filters.lesson || filters.date || filters.time)
 
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
@@ -513,7 +480,7 @@ export default function Partners() {
               {hasFilters && (
                 <button
                   type="button"
-                  onClick={() => setFilters({ learning: '', lesson: '', date: '', time: '' })}
+                  onClick={() => setFilters({ type: 'lesson', lesson: '', date: '', time: '' })}
                   className="text-sm font-semibold hover:opacity-70"
                   style={{ color: 'var(--accent)' }}
                 >
@@ -522,27 +489,39 @@ export default function Partners() {
               )}
             </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <FilterField label={t('auth.register.iAmLearning')} icon={Globe2}>
-                <select value={filters.learning} onChange={(e) => setFilters({ ...filters, learning: e.target.value })} className={fieldClass} style={fieldStyle}>
-                  <option value="">{t('partners.anyLanguage')}</option>
-                  {myLearning.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </FilterField>
-              <FilterField label={t('partners.lessonFilter')} icon={GraduationCap}>
-                <select value={filters.lesson} onChange={(e) => setFilters({ ...filters, lesson: e.target.value })} className={fieldClass} style={fieldStyle}>
-                  <option value="">{t('partners.anyLesson')}</option>
-                  {Array.from({ length: lessonCount }, (_, n) => n + 1).map((n) => (
-                    <option key={n} value={n}>{t('partners.lessonOption', { n })}</option>
+            <div className="mt-4 flex flex-wrap items-end gap-4">
+              <div>
+                <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.sessionType', 'Session type')}</span>
+                <div className="inline-flex h-11 items-center gap-1 rounded-xl p-1" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+                  {[['lesson', BookOpen, t('partners.typeLesson', 'From the lessons')], ['conversation', MessagesSquare, t('partners.typeConversation', 'Free conversation')]].map(([value, Icon, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setFilters({ ...filters, type: value, lesson: '' })}
+                      className="inline-flex h-full items-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-bold transition-all"
+                      style={filters.type === value
+                        ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
+                        : { color: 'var(--ink-soft)' }}
+                    >
+                      <Icon size={15} /> {label}
+                    </button>
                   ))}
-                </select>
-              </FilterField>
+                </div>
+              </div>
+              {filters.type === 'lesson' && (
+                <FilterField label={t('partners.lessonFilter')} icon={GraduationCap} className="w-full sm:w-64">
+                  <select value={filters.lesson} onChange={(e) => setFilters({ ...filters, lesson: e.target.value })} className={fieldClass} style={fieldStyle}>
+                    <option value="">{t('partners.anyLesson')}</option>
+                    {myLessons.map((l) => <option key={l.order} value={l.order}>{lessonLabel(t, l)}</option>)}
+                  </select>
+                </FilterField>
+              )}
               {visibility === 'scheduled' && (
                 <>
-                  <FilterField label={t('partners.date')} icon={CalendarCheck}>
+                  <FilterField label={t('partners.date')} icon={CalendarCheck} className="w-full sm:w-52">
                     <input type="date" min={todayStr()} value={filters.date} onChange={(e) => setFilters({ ...filters, date: e.target.value })} className={fieldClass} style={fieldStyle} />
                   </FilterField>
-                  <FilterField label={t('partners.time')} icon={Clock}>
+                  <FilterField label={t('partners.time')} icon={Clock} className="w-full sm:w-44">
                     <input type="time" value={filters.time} onChange={(e) => setFilters({ ...filters, time: e.target.value })} className={fieldClass} style={fieldStyle} />
                   </FilterField>
                 </>
@@ -587,7 +566,7 @@ export default function Partners() {
                 </button>
               )}
               {hasFilters && (
-                <button type="button" onClick={() => setFilters({ learning: '', lesson: '', date: '', time: '' })} className="lp-btn-secondary">
+                <button type="button" onClick={() => setFilters({ type: 'lesson', lesson: '', date: '', time: '' })} className="lp-btn-secondary">
                   {t('partners.clearFilters')}
                 </button>
               )}

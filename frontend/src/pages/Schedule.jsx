@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import { toDatetimeLocalValue } from '../utils/availability'
 import { downloadText } from '../utils/downloadFile'
 import { avatarUrl } from '../utils/images'
-import { buildSummaryText } from '../utils/sessionSummary'
+import { downloadSummaryPdf } from '../utils/summaryPdf'
 
 const statusTint = {
   pending: 'lp-tag',
@@ -240,11 +240,11 @@ function SessionDetailsModal({ session, other, onClose }) {
 export default function Schedule() {
   const { t, i18n } = useTranslation()
 
-  // The summary (notes, chat, shared lessons) is a text file; there is no page for it.
+  // The summary (notes, chat, shared lessons) is a PDF; there is no page for it.
   const downloadSummary = async (sessionId) => {
     try {
       const { data } = await client.get(`/sessions/${sessionId}/summary/`)
-      downloadText(`session-summary-${sessionId}.txt`, buildSummaryText(data, t, i18n.resolvedLanguage))
+      await downloadSummaryPdf(`session-summary-${sessionId}.pdf`, data, t, i18n.resolvedLanguage)
     } catch {
       window.alert(t('summary.notFound'))
     }

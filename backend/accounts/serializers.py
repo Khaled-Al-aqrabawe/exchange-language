@@ -23,6 +23,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         langs = attrs.get('learning_languages')
+        if langs and len(langs) > 1:
+            raise serializers.ValidationError({'learning_languages': 'You can learn one language at a time.'})
         if langs:
             attrs['learning_language'] = langs[0]
 
@@ -183,7 +185,7 @@ class AvailabilitySlotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AvailabilitySlot
-        fields = ['id', 'day_of_week', 'start_time', 'end_time', 'is_recurring', 'specific_date']
+        fields = ['id', 'day_of_week', 'start_time', 'end_time', 'is_recurring', 'specific_date', 'session_type', 'lesson']
         read_only_fields = ['id']
 
     def validate(self, attrs):

@@ -265,6 +265,11 @@ class AvailabilitySlot(models.Model):
     # When False, it's only available once, on `specific_date`.
     is_recurring = models.BooleanField(default=True)
     specific_date = models.DateField(null=True, blank=True)
+    # What the time is for: a lesson from the course, or an ordinary free conversation.
+    SESSION_TYPES = [('lesson', 'Lesson'), ('conversation', 'Free conversation')]
+    session_type = models.CharField(max_length=20, choices=SESSION_TYPES, default='lesson')
+    # Optional: the lesson number the two want to work through (only for a lesson).
+    lesson = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ['day_of_week', 'start_time']

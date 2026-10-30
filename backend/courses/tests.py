@@ -150,10 +150,14 @@ class SlideTextAndTranslateTests(APITestCase):
         import json
         from unittest import mock
 
-        reply = io.BytesIO(json.dumps({'responseData': {'translatedText': 'hello'}}).encode())
-        with mock.patch('courses.views.urlopen', return_value=mock.MagicMock(__enter__=lambda s: reply, __exit__=lambda *a: False)):
+        def reply(*args, **kwargs):
+            body = json.dumps([[['hello', 'marhaba', None, "marhaba"]], None, 'ar']).encode()
+            return mock.MagicMock(__enter__=lambda s: io.BytesIO(body), __exit__=lambda *a: False)
+
+        with mock.patch('courses.views.urlopen', side_effect=reply):
             r = self.client.get('/api/courses/translate/', {'text': 'marhaba', 'source': 'Arabic', 'target': 'English'})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data['translation'], 'hello')
+        self.assertEqual(r.data['transliteration'], 'marhaba')
         self.assertEqual(self.client.get('/api/courses/translate/', {'text': 'x', 'source': 'Klingon', 'target': 'English'}).status_code, 400)
         self.assertEqual(self.client.get('/api/courses/translate/', {'text': '', 'source': 'Arabic', 'target': 'English'}).status_code, 400)

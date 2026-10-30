@@ -7,7 +7,7 @@ import PptxSlideViewer from '../components/PptxSlideViewer'
 import { LOW_RATING_MAX, SPEECH_LANGUAGES } from '../constants'
 import { useAuth } from '../context/AuthContext'
 import { downloadFile, downloadText } from '../utils/downloadFile'
-import { buildSummaryText } from '../utils/sessionSummary'
+import { downloadSummaryPdf } from '../utils/summaryPdf'
 
 const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }]
 
@@ -1530,9 +1530,7 @@ export default function Call() {
   const downloadSummary = async () => {
     try {
       const { data } = await client.get(`/sessions/${sessionId}/summary/`)
-      const words = translations.filter((r) => r.translation).reverse().map((r) => `- ${r.word} = ${r.translation}`)
-      const text = buildSummaryText(data, t, i18n.resolvedLanguage) + (words.length ? `\n\n== ${t('translate.title', 'Translate')} ==\n${words.join('\n')}` : '')
-      downloadText(`session-summary-${sessionId}.txt`, text)
+      await downloadSummaryPdf(`session-summary-${sessionId}.pdf`, data, t, i18n.resolvedLanguage, translations.filter((r) => r.translation).reverse())
     } catch {
       // the summary page after leaving has the same download
     }

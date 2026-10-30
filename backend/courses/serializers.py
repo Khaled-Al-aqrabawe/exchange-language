@@ -11,7 +11,7 @@ class MaterialSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Material
-        fields = ['id', 'title', 'language', 'level', 'description', 'file', 'file_name', 'my_status', 'my_slide', 'created_at']
+        fields = ['id', 'title', 'language', 'level', 'order', 'description', 'file', 'file_name', 'my_status', 'my_slide', 'created_at']
 
     def get_file_name(self, obj):
         return obj.file.name.rsplit('/', 1)[-1] if obj.file else ''

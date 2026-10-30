@@ -29,7 +29,7 @@ class ScheduledSessionSerializer(serializers.ModelSerializer):
         model = ScheduledSession
         fields = [
             'id', 'host', 'partner', 'partner_id', 'auto_confirm', 'scheduled_time', 'window_end_time',
-            'duration_minutes', 'status', 'notes', 'cancellation_reason', 'room_id', 'created_at', 'my_rating', 'my_joined',
+            'duration_minutes', 'status', 'notes', 'cancellation_reason', 'room_id', 'created_at', 'my_rating', 'my_joined', 'session_type', 'lesson',
         ]
         read_only_fields = ['id', 'host', 'partner', 'status', 'cancellation_reason', 'room_id', 'created_at']
 

@@ -31,6 +31,11 @@ class ScheduledSession(models.Model):
     reminder_sent_at = models.DateTimeField(null=True, blank=True)
     # Started with "Call now" instead of being booked: no invitation, reminder or notification.
     is_instant = models.BooleanField(default=False)
+    # What the time is for: a lesson from the course, or an ordinary free conversation.
+    SESSION_TYPES = [('lesson', 'Lesson'), ('conversation', 'Free conversation')]
+    session_type = models.CharField(max_length=20, choices=SESSION_TYPES, default='lesson')
+    # Optional: the lesson number the two want to work through (only for a lesson).
+    lesson = models.PositiveIntegerField(null=True, blank=True)
     # Stamped the moment each participant joins the call room, so a completed
     # session can be told apart from one where someone was a no-show.
     host_joined_at = models.DateTimeField(null=True, blank=True)

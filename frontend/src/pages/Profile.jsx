@@ -1,4 +1,4 @@
-import { Camera, CheckCircle2, Globe2, KeyRound, Languages, User, Video, X } from 'lucide-react'
+import { Camera, CheckCircle2, Globe2, GraduationCap, Home, KeyRound, Languages, User, Users, Video, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
@@ -8,6 +8,26 @@ import { ModalField as Field, modalInputClass as fieldClass, modalInputStyle as 
 import { useAuth } from '../context/AuthContext'
 import { resolveAvatarUrl } from '../utils/images'
 import { detectTimezone, formatTimezoneOption, timezoneOptions } from '../utils/timezone'
+
+// A numbered card for one question on the Languages tab.
+function LangSection({ step, icon: Icon, title, hint, children }) {
+  return (
+    <section className="rounded-3xl p-5" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+      <div className="mb-4 flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: 'var(--gradient-brand)', color: 'var(--accent-ink)' }}>
+          <Icon size={19} />
+        </span>
+        <div className="min-w-0">
+          <h3 className="font-display text-base font-bold" style={{ color: 'var(--ink)' }}>
+            <span className="me-1.5" style={{ color: 'var(--accent)' }}>{step}.</span>{title}
+          </h3>
+          <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{hint}</p>
+        </div>
+      </div>
+      {children}
+    </section>
+  )
+}
 
 // Latest date of birth that makes someone at least 16 years old today.
 function maxDateOfBirth() {
@@ -75,9 +95,8 @@ export default function Profile() {
         profile: {
           ...user.profile,
           timezone,
-          learning_languages: user.profile.learning_languages?.length
-            ? user.profile.learning_languages
-            : (user.profile.learning_language ? [user.profile.learning_language] : []),
+          // a person learns one language at a time
+          learning_languages: [user.profile.learning_language || user.profile.learning_languages?.[0]].filter(Boolean),
         },
       })
     }
@@ -319,9 +338,15 @@ export default function Profile() {
                 )}
 
                 {tab === 'languages' && (
-                  <div className="space-y-6">
-                    <div>
-                      <p className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('profile.spokenLanguages')}</p>
+                  <div className="space-y-5">
+                    <LangSection step={1} icon={Home} title={t('profile.myNativeLanguage')} hint={t('profile.nativeLanguageHint', 'The language you grew up speaking.')}>
+                      <select value={form.profile.native_language || ''} onChange={updateProfile('native_language')} className={`${fieldClass} px-4`} style={fieldStyle}>
+                        <option value="">{t('profile.select')}</option>
+                        {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+                      </select>
+                    </LangSection>
+
+                    <LangSection step={2} icon={Users} title={t('profile.spokenLanguages')} hint={t('profile.spokenLanguagesHint')}>
                       <LanguageLevelPicker
                         mode="speak"
                         selected={form.profile.spoken_languages || []}
@@ -329,19 +354,19 @@ export default function Profile() {
                         onChange={(spoken, levels) =>
                           setForm({ ...form, profile: { ...form.profile, spoken_languages: spoken, language_levels: levels } })}
                       />
-                      <p className="mt-2 text-xs" style={{ color: 'var(--ink-soft)' }}>{t('profile.spokenLanguagesHint')}</p>
-                    </div>
-                    <div>
-                      <p className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('profile.learningLanguages')}</p>
+                    </LangSection>
+
+                    <LangSection step={3} icon={GraduationCap} title={t('profile.learningLanguages')} hint={t('profile.learningLanguagesHint')}>
                       <LanguageLevelPicker
                         mode="learn"
+                        single
                         selected={form.profile.learning_languages || []}
                         levels={form.profile.language_levels || {}}
                         onChange={(learning, levels) =>
                           setForm({ ...form, profile: { ...form.profile, learning_languages: learning, language_levels: levels } })}
                       />
-                      <p className="mt-2 text-xs" style={{ color: 'var(--ink-soft)' }}>{t('profile.learningLanguagesHint')}</p>
-                    </div>
+                    </LangSection>
+
                     <Field label={t('profile.learningGoals')}>
                       <textarea
                         value={form.profile.learning_goals}

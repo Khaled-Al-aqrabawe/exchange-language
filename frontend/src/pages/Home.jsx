@@ -16,7 +16,7 @@ import client from '../api/client'
 import ModalShell from '../components/ModalShell'
 import { useAuth } from '../context/AuthContext'
 import { downloadText } from '../utils/downloadFile'
-import { buildSummaryText } from '../utils/sessionSummary'
+import { downloadSummaryPdf } from '../utils/summaryPdf'
 import { resolveAvatarUrl } from '../utils/images'
 
 const dayOfYear = () => {
@@ -71,7 +71,7 @@ export default function Home() {
     setSummaryBusy(true)
     try {
       const { data } = await client.get(`/sessions/${summaryId}/summary/`)
-      downloadText(`session-summary-${summaryId}.txt`, buildSummaryText(data, t, i18n.resolvedLanguage))
+      await downloadSummaryPdf(`session-summary-${summaryId}.pdf`, data, t, i18n.resolvedLanguage)
     } finally {
       setSummaryBusy(false)
       closeSummary()

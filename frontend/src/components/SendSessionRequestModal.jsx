@@ -1,27 +1,30 @@
-import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Globe2, Info, User } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, CheckCircle2, Clock, Info, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
-import { LANGUAGES } from '../constants'
 import { DAYS, isSlotExpiredToday, isWithinAvailability, timeStrPlusMinutes } from '../utils/availability'
+import { useAuth } from '../context/AuthContext'
+import SessionTypePicker from './SessionTypePicker'
 import ModalShell, { Chip, ModalField, localDateString, modalInputClass, modalInputStyle } from './ModalShell'
 
 const nowTimeStr = () => new Date().toTimeString().slice(0, 5)
-const DURATIONS = [30, 40, 60]
+const SESSION_MINUTES = 40 // every session is the same length
 
 export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSent }) {
   const { t, i18n } = useTranslation()
+  const { user } = useAuth()
   const [partners, setPartners] = useState([])
   const [partnersLoading, setPartnersLoading] = useState(true)
-  const [partnerFilters, setPartnerFilters] = useState({ language: '' })
+  const [partnerFilters, setPartnerFilters] = useState({ language: user?.profile?.learning_language || '' })
   const [lockedPartnerDetail, setLockedPartnerDetail] = useState(null)
   const [form, setForm] = useState({
     partner_id: lockedPartnerId || '',
     date: '',
     start_time: '',
     end_time: '',
-    duration_minutes: 40,
-    notes: '',
+        notes: '',
+    session_type: 'lesson',
+    lesson: '',
   })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -55,12 +58,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
   }, [partnerFilters])
 
   // Picking a start time or a length fills in the end time, which can still be changed by hand.
-  const setStart = (start_time) => setForm((f) => ({ ...f, start_time, end_time: start_time ? timeStrPlusMinutes(start_time, f.duration_minutes) : '' }))
-  const setDuration = (minutes) => setForm((f) => ({
-    ...f,
-    duration_minutes: minutes,
-    end_time: f.start_time ? timeStrPlusMinutes(f.start_time, minutes) : f.end_time,
-  }))
+  const setStart = (start_time) => setForm((f) => ({ ...f, start_time, end_time: start_time ? timeStrPlusMinutes(start_time, SESSION_MINUTES) : '' }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -90,8 +88,10 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
     try {
       await client.post('/sessions/', {
         partner_id: form.partner_id,
-        duration_minutes: form.duration_minutes,
+        duration_minutes: SESSION_MINUTES,
         notes: form.notes,
+        session_type: form.session_type,
+        lesson: form.session_type === 'lesson' && form.lesson ? Number(form.lesson) : null,
         scheduled_time: startDateTime.toISOString(),
         window_end_time: endDateTime.toISOString(),
       })
@@ -106,7 +106,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
   }
 
   const partnerSlots = (lockedPartnerDetail?.availability || []).filter((slot) => !isSlotExpiredToday(slot))
-  const dayChips = [0, 1, 2].map((offset) => {
+  const dayChips = [0, 1].map((offset) => {
     const value = localDateString(offset)
     const label = offset === 0 ? t('modal.today') : offset === 1 ? t('modal.tomorrow')
       : new Date(`${value}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', day: 'numeric' })
@@ -139,20 +139,7 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
         </div>
       ) : (
         <form id="session-request-form" onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ModalField label={`${t('schedule.language')} *`} icon={Globe2}>
-              <select
-                required
-                disabled={lockedFromPartner}
-                value={partnerFilters.language}
-                onChange={(e) => setPartnerFilters({ ...partnerFilters, language: e.target.value })}
-                className={`${modalInputClass} ps-11 ${lockedFromPartner ? 'cursor-not-allowed opacity-60' : ''}`}
-                style={modalInputStyle}
-              >
-                <option value="" disabled>{t('schedule.selectLanguage')}</option>
-                {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
-            </ModalField>
+          <div>
             <ModalField
               label={`${t('schedule.partner')} *`}
               icon={User}
@@ -171,6 +158,8 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
               </select>
             </ModalField>
           </div>
+
+          <SessionTypePicker type={form.session_type} lesson={form.lesson} onChange={(patch) => setForm((f) => ({ ...f, ...patch }))} />
 
           <div className="grid gap-5 sm:grid-cols-2">
           <div>
@@ -216,12 +205,6 @@ export default function SendSessionRequestModal({ lockedPartnerId, onClose, onSe
                   style={modalInputStyle}
                 />
               </ModalField>
-            </div>
-            <div className="mt-2.5 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold" style={{ color: 'var(--ink-soft)' }}>{t('modal.length')}</span>
-              {DURATIONS.map((m) => (
-                <Chip key={m} active={form.duration_minutes === m} onClick={() => setDuration(m)}>{t('schedule.minutesShort', { count: m })}</Chip>
-              ))}
             </div>
           </div>
 
