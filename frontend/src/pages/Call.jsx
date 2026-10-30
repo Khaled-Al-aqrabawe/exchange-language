@@ -430,6 +430,7 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slid
       const text = translate.source === 'Arabic' ? stripArabicMarks(picked) : picked
       const { data } = await client.get('/courses/translate/', { params: { text, source: translate.source, target: translate.target } })
       setBubble({ ...place, word: picked, translation: data.translation })
+      translate.onResult?.({ word: picked, translation: data.translation })
     } catch {
       setBubble({ ...place, word: picked, error: true })
     }
@@ -535,11 +536,15 @@ function SharedMaterialStage({ material, onClose, onFinish, pen, fullWidth, slid
             style={{ left: Math.max(120, bubble.x), ...(bubble.below ? { top: bubble.top } : { bottom: bubble.bottom }) }}
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="text-sm text-slate-300" dir="auto">{bubble.word}</p>
+              <p className="flex items-center gap-2 text-sm text-slate-300" dir="auto">
+                {bubble.word}
+                <button type="button" onClick={() => speak(bubble.word, translate.source)} className="text-slate-400 hover:text-white" aria-label="Listen"><Volume2 size={13} /></button>
+              </p>
               <button type="button" onClick={() => setBubble(null)} className="shrink-0 text-slate-400 hover:text-white" aria-label="Close"><X size={13} /></button>
             </div>
-            <p className="mt-1 text-lg font-semibold" style={{ color: bubble.error ? '#f87171' : '#7dd3fc' }} dir="auto">
+            <p className="mt-1 flex items-center gap-2 text-lg font-semibold" style={{ color: bubble.error ? '#f87171' : '#7dd3fc' }} dir="auto">
               {bubble.loading ? t('translate.loading') : bubble.error ? t('translate.error') : bubble.translation}
+              {bubble.translation && <button type="button" onClick={() => speak(bubble.translation, translate.target)} className="text-slate-400 hover:text-white" aria-label="Listen"><Volume2 size={14} /></button>}
             </p>
             <p className="mt-1 text-[11px] text-slate-500">{translate.source} → {translate.target}</p>
           </div>
@@ -682,158 +687,53 @@ const isLatinText = (text) => (text.match(/[A-Za-z\u00C0-\u024F\u1E00-\u1EFF]/g)
 // Arabic vowel marks and stretching confuse the translator, so they are removed before looking a word up
 const stripArabicMarks = (text) => text.replace(/[\u064B-\u065F\u0670\u0640]/g, '')
 
-// Click a word in the lesson's slide text (or select a phrase) to see its translation
-// beside the slide and hear it spoken. The slide itself is drawn by another site's viewer,
-// so its text is read from the file and shown here, where words can be picked.
-function TranslatePanel({ material, source, target, onAddNote, t }) {
-  const [slides, setSlides] = useState([])
-  const [slideIndex, setSlideIndex] = useState(0)
-  const [result, setResult] = useState(null)
-  const [recent, setRecent] = useState([])
+// Words and phrases picked on the slide are translated beside the selection; this panel keeps
+// the list of them, each with its translation and a button to hear either side.
+function TranslatePanel({ material, items, source, target, onLookup, onAddNote, t }) {
   const [typed, setTyped] = useState('')
-  const [added, setAdded] = useState(false)
-
-  useEffect(() => {
-    if (!material?.id) {
-      setSlides([])
-      return
-    }
-    client.get(`/courses/materials/${material.id}/text/`)
-      .then(({ data }) => {
-        setSlides(data.slides)
-        setSlideIndex(Math.max(0, (material.start_slide || 1) - 1))
-      })
-      .catch(() => setSlides([]))
-  }, [material?.id])
-
-  // `shown` is the spelling to display under the word (e.g. the transliteration that was clicked)
-  const lookup = async (raw, shown) => {
-    const word = raw.replace(EDGE_PUNCTUATION, '')
-    if (!word) return
-    speak(word, source)
-    setAdded(false)
-    setResult({ word, shown, loading: true })
-    try {
-      const text = source === 'Arabic' ? stripArabicMarks(word) : word
-      const { data } = await client.get('/courses/translate/', { params: { text, source, target } })
-      setResult({ word, shown, translation: data.translation })
-      setRecent((list) => [{ word, shown, translation: data.translation }, ...list.filter((r) => r.word !== word)].slice(0, 8))
-    } catch {
-      setResult({ word, shown, error: true })
-    }
-  }
-
-  // Lessons print the original, then its transliteration. Clicking a transliteration word
-  // looks up the matching original word, which translates and is pronounced correctly.
-  const pick = (lineIndex, wordIndex, word) => {
-    const lines = slides[slideIndex] || []
-    const previous = lines[lineIndex - 1]
-    if (NON_LATIN_LANGUAGES.includes(source) && isLatinText(lines[lineIndex]) && previous && !isLatinText(previous)) {
-      const original = previous.split(/\s+/).filter(Boolean)
-      const sounds = lines[lineIndex].split(/\s+/).filter(Boolean)
-      if (original.length === sounds.length) return lookup(original[wordIndex], word)
-      return lookup(previous, lines[lineIndex])
-    }
-    return lookup(word)
-  }
-
-  // dragging over several words translates the whole phrase
-  const onMouseUp = () => {
-    const picked = window.getSelection()?.toString().trim()
-    if (picked && /\s/.test(picked)) lookup(picked)
-  }
-
-  const lines = slides[slideIndex] || []
+  const [added, setAdded] = useState({})
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="border-b border-white/10 p-4">
-        {result ? (
-          <div>
+      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+        {items.length === 0 && <p className="text-sm text-slate-400">{material?.id || material ? t('translate.hint') : t('translate.shareFirst')}</p>}
+        {items.map((item) => (
+          <div key={item.word} className="rounded-2xl bg-white/5 p-3">
             <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-xl font-semibold leading-snug text-white" dir="auto">{result.word}</p>
-                {result.shown && <p className="text-xs italic text-slate-400">{result.shown}</p>}
-              </div>
-              <button type="button" onClick={() => speak(result.word, source)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" title={t('translate.listen')}>
+              <p className="min-w-0 text-base font-semibold leading-snug text-white" dir="auto">{item.word}</p>
+              <button type="button" onClick={() => speak(item.word, source)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" title={t('translate.listen')}>
                 <Volume2 size={15} />
               </button>
             </div>
-            <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-white/5 px-3 py-2">
-              <p className="text-base font-medium" style={{ color: result.error ? '#f87171' : '#7dd3fc' }} dir="auto">
-                {result.loading ? t('translate.loading') : result.error ? t('translate.error') : result.translation}
+            <div className="mt-2 flex items-center justify-between gap-2 rounded-xl bg-white/5 px-3 py-2">
+              <p className="text-base font-medium" style={{ color: item.error ? '#f87171' : '#7dd3fc' }} dir="auto">
+                {item.loading ? t('translate.loading') : item.error ? t('translate.error') : item.translation}
               </p>
-              {result.translation && (
-                <button type="button" onClick={() => speak(result.translation, target)} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-slate-300 hover:bg-white/20" title={t('translate.listen')}>
+              {item.translation && (
+                <button type="button" onClick={() => speak(item.translation, target)} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-slate-300 hover:bg-white/20" title={t('translate.listen')}>
                   <Volume2 size={13} />
                 </button>
               )}
             </div>
             <div className="mt-2 flex items-center justify-between gap-2">
               <p className="text-[11px] text-slate-500">{source} → {target}</p>
-              {result.translation && (
+              {item.translation && (
                 <button
                   type="button"
-                  disabled={added}
-                  onClick={() => { onAddNote(`${result.word} = ${result.translation}`); setAdded(true) }}
+                  disabled={added[item.word]}
+                  onClick={() => { onAddNote(`${item.word} = ${item.translation}`); setAdded((a) => ({ ...a, [item.word]: true })) }}
                   className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-slate-200 hover:bg-white/20 disabled:opacity-60"
                 >
-                  {added ? t('translate.addedToNotes') : t('translate.addToNotes')}
+                  {added[item.word] ? t('translate.addedToNotes') : t('translate.addToNotes')}
                 </button>
               )}
             </div>
           </div>
-        ) : (
-          <p className="text-sm text-slate-400">{t('translate.hint')}</p>
-        )}
+        ))}
       </div>
 
-      {recent.length > 1 && (
-        <div className="flex gap-1.5 overflow-x-auto border-b border-white/10 px-4 py-2">
-          {recent.map((r) => (
-            <button
-              key={r.word}
-              type="button"
-              onClick={() => { speak(r.word, source); setAdded(false); setResult(r) }}
-              className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-xs text-slate-200 hover:bg-white/20"
-              dir="auto"
-            >
-              {r.word}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {slides.length > 0 ? (
-        <>
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-slate-400">
-            <button type="button" onClick={() => setSlideIndex((i) => Math.max(0, i - 1))} disabled={slideIndex === 0} className="rounded-full px-2 py-1 hover:bg-white/10 disabled:opacity-30">‹</button>
-            <span>{t('translate.slide', { n: slideIndex + 1, total: slides.length })}</span>
-            <button type="button" onClick={() => setSlideIndex((i) => Math.min(slides.length - 1, i + 1))} disabled={slideIndex === slides.length - 1} className="rounded-full px-2 py-1 hover:bg-white/10 disabled:opacity-30">›</button>
-          </div>
-          <div className="flex-1 space-y-2 overflow-y-auto p-4" onMouseUp={onMouseUp}>
-            {lines.length === 0 && <p className="text-sm text-slate-500">{t('translate.emptySlide')}</p>}
-            {lines.map((line, lineIndex) => {
-              let wordIndex = -1
-              return (
-                <p key={`${lineIndex}-${line}`} dir="auto" className="text-sm leading-relaxed text-slate-200">
-                  {line.split(/(\s+)/).map((part, i) => {
-                    if (!/\S/.test(part)) return part
-                    wordIndex += 1
-                    const index = wordIndex
-                    return <span key={i} onClick={() => pick(lineIndex, index, part)} className="cursor-pointer rounded px-0.5 hover:bg-white/15">{part}</span>
-                  })}
-                </p>
-              )
-            })}
-          </div>
-        </>
-      ) : (
-        <p className="flex-1 p-4 text-sm text-slate-500">{material?.id ? t('translate.noText') : t('translate.shareFirst')}</p>
-      )}
-
       <form
-        onSubmit={(e) => { e.preventDefault(); lookup(typed); setTyped('') }}
+        onSubmit={(e) => { e.preventDefault(); onLookup(typed); setTyped('') }}
         className="flex gap-2 border-t border-white/10 p-3"
       >
         <input
@@ -1585,6 +1485,22 @@ export default function Call() {
   const translateTarget = [user?.profile?.native_language, ...(user?.profile?.spoken_languages || []), 'English']
     .find((l) => l && l !== translateSource) || 'English'
 
+  const [translations, setTranslations] = useState([])
+  const addTranslation = (entry) => setTranslations((list) => [entry, ...list.filter((r) => r.word !== entry.word)].slice(0, 30))
+  const lookupTyped = async (raw) => {
+    const word = raw.replace(EDGE_PUNCTUATION, '')
+    if (!word) return
+    speak(word, translateSource)
+    addTranslation({ word, loading: true })
+    try {
+      const text = translateSource === 'Arabic' ? stripArabicMarks(word) : word
+      const { data } = await client.get('/courses/translate/', { params: { text, source: translateSource, target: translateTarget } })
+      addTranslation({ word, translation: data.translation })
+    } catch {
+      addTranslation({ word, error: true })
+    }
+  }
+
   const openSidebar = (tab) => {
     if (notesOpen && sidebarTab === tab) setNotesOpen(false)
     else {
@@ -2177,7 +2093,7 @@ export default function Call() {
                 onFinish={sharedMaterial.from === 'you' && sharedMaterial.id ? () => askFinished(sharedMaterial, 'next') : undefined}
                 pen={penApi}
                 fullWidth
-                translate={{ source: translateSource, target: translateTarget }}
+                translate={{ source: translateSource, target: translateTarget, onResult: addTranslation }}
                 slide={sharedSlide}
                 onSlide={changeSlide}
                 t={t}
@@ -2417,7 +2333,7 @@ export default function Call() {
             </div>
           </div>
           {sidebarTab === 'translate' ? (
-            <TranslatePanel material={sharedMaterial} source={translateSource} target={translateTarget} onAddNote={(line) => setNoteText((text) => (text.trim() ? `${text}\n${line}` : line))} t={t} />
+            <TranslatePanel material={sharedMaterial} items={translations} onLookup={lookupTyped} source={translateSource} target={translateTarget} onAddNote={(line) => setNoteText((text) => (text.trim() ? `${text}\n${line}` : line))} t={t} />
           ) : sidebarTab === 'chat' ? (
             <CallChat messages={chatMessages} onSend={sendChat} myId={user?.id} t={t} />
           ) : (

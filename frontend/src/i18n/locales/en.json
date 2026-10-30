@@ -836,7 +836,7 @@
     }
   },
   "translate": {
-    "hint": "Click a word in the lesson text, or drag over a phrase, to see its translation and hear it.",
+    "hint": "Click a word on the slide, or drag over a phrase, to see its translation here and hear it.",
     "slide": "Slide {{n}} of {{total}}",
     "emptySlide": "No text on this slide.",
     "noText": "This file has no readable slide text. Type a word below instead.",
