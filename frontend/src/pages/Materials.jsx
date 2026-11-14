@@ -262,13 +262,15 @@ export default function Materials() {
     load()
   }
 
+  const PASTELS = ['#f4d9cf', '#d6def5', '#c9ece2']
+
   const selectStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
 
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       <div className="lp-hero-bg">
         <div className="max-w-6xl mx-auto px-6 pt-10 pb-6 lp-animate-in">
-          <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl mb-1" style={{ color: 'var(--ink)' }}>{t('materials.title')}</h1>
+          <h1 className="lp-serif text-[2.25rem] leading-tight sm:text-[3rem] mb-1" style={{ color: 'var(--ink)' }}>{t('materials.title')}</h1>
           <p className="text-sm mb-6" style={{ color: 'var(--ink-soft)' }}>{t('materials.subtitle')}</p>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -309,9 +311,9 @@ export default function Materials() {
             {languagesPresent.filter((l) => !filters.language || l === filters.language).map((lang, i) => (
               <div key={lang} className={`lp-surface p-6 lp-animate-in lp-delay-${(i % 6) + 1}`}>
                 <div className="flex items-center gap-4 mb-5">
-                  <span className="lp-icon-badge h-12 w-12"><FolderOpen size={20} /></span>
+                  <FolderOpen size={34} strokeWidth={1.5} style={{ color: 'var(--ink-soft)' }} />
                   <div>
-                    <h2 className="text-xl font-bold lp-gradient-text w-fit">{lang}</h2>
+                    <h2 className="lp-serif text-2xl w-fit">{lang}</h2>
                     <p className="text-sm" style={{ color: 'var(--ink-soft)' }}>
                       {t('materials.filesCount', { count: materials.filter((m) => m.language === lang).length })}
                     </p>
@@ -327,18 +329,18 @@ export default function Materials() {
                         type="button"
                         disabled={count === 0}
                         onClick={() => { setOpenLang(lang); setOpenLevel(lvl) }}
-                        className="rounded-xl px-3 py-3 text-center transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-                        style={{ border: '1px solid var(--line)', background: 'var(--surface-2)' }}
+                        className="px-3 py-4 text-center transition-transform hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                        style={{ background: PASTELS[MATERIAL_LEVELS.indexOf(lvl) % 3], color: '#17191d', borderRadius: 'var(--radius-card)' }}
                       >
-                        <span className="block text-lg font-bold lp-gradient-text mx-auto w-fit">{lvl}</span>
-                        <span className="block text-xs" style={{ color: 'var(--ink-soft)' }}>{t('materials.filesCount', { count })}</span>
+                        <span className="lp-serif block text-2xl mx-auto w-fit">{lvl}</span>
+                        <span className="block text-xs" style={{ opacity: 0.72 }}>{t('materials.filesCount', { count })}</span>
                         {count > 0 && (
                           progress.finished ? (
-                            <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--accent-2)' }}>
+                            <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold" style={{ color: '#0f6b55' }}>
                               <CheckCircle2 size={12} /> {t('materials.levelDone')}
                             </span>
                           ) : (
-                            <span className="mt-1 block text-xs" style={{ color: 'var(--ink-soft)' }}>
+                            <span className="mt-1 block text-xs" style={{ opacity: 0.72 }}>
                               {t('materials.progressCount', { done: progress.done, total: progress.total })}
                             </span>
                           )
@@ -360,7 +362,7 @@ export default function Materials() {
                 className="inline-flex items-center gap-1.5 text-sm font-medium"
                 style={{ color: 'var(--ink-soft)' }}
               >
-                <ArrowLeft size={15} /> <span className="lp-gradient-text">{language} · {openLevel}</span>
+                <ArrowLeft size={15} /> <span className="lp-serif text-xl" style={{ color: 'var(--ink)' }}>{language} · {openLevel}</span>
               </button>
               {levelProgress(language, openLevel).finished ? (
                 <span className="lp-tag lp-tag--accent2 inline-flex items-center gap-1">
@@ -387,14 +389,14 @@ export default function Materials() {
             const progress = levelProgress(language, openLevel)
             return (
               <>
-                <div className="lp-surface mb-6 flex flex-wrap items-center gap-4 p-5 lp-animate-in">
+                <div className="mb-6 flex flex-wrap items-center gap-4 p-6 lp-animate-in" style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-card)' }}>
                   <div className="min-w-0 flex-1 basis-56">
-                    <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{language} · {openLevel}</p>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%`, background: '#22c55e' }} />
+                    <p className="lp-serif text-xl" style={{ color: '#fff' }}>{language} · {openLevel}</p>
+                    <div className="mt-3 h-2 overflow-hidden rounded-full" style={{ background: 'rgb(255 255 255 / 0.2)' }}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%`, background: '#7fd8c3' }} />
                     </div>
                   </div>
-                  <span className="text-sm font-bold" style={{ color: 'var(--ink-soft)' }}>{progress.done} / {progress.total}</span>
+                  <span className="text-lg font-semibold" style={{ color: '#7fd8c3' }}>{progress.done} / {progress.total}</span>
                 </div>
                 <ol className="relative">
                   {lessons.map((m, i) => {
@@ -416,15 +418,17 @@ export default function Materials() {
                           {done ? <CheckCircle2 size={20} /> : i + 1}
                         </span>
                         <div
-                          className="flex min-w-0 flex-1 flex-wrap items-center gap-3 rounded-2xl px-4 py-3 transition-colors"
-                          style={isNext
-                            ? { background: 'color-mix(in srgb, var(--accent) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)' }
-                            : undefined}
+                          className="flex min-w-0 flex-1 flex-wrap items-center gap-3 px-5 py-3.5 transition-colors"
+                          style={{
+                            background: isNext ? '#aee2d3' : done ? '#e3efe6' : PASTELS[i % 3],
+                            color: '#17191d',
+                            borderRadius: 'var(--radius-card)',
+                          }}
                         >
                           <div className="min-w-0 flex-1 basis-52">
-                            {isNext && <p className="lp-eyebrow mb-1">{t('materials.nextUp')}</p>}
-                            <h3 className="truncate font-semibold" style={{ color: 'var(--ink)' }}>{m.title}</h3>
-                            <p className="truncate text-sm" style={{ color: done ? '#16a34a' : partial ? '#d97706' : 'var(--ink-soft)' }}>
+                            {isNext && <p className="mb-1 text-xs font-semibold uppercase tracking-widest" style={{ color: '#0f6b55' }}>{t('materials.nextUp')}</p>}
+                            <h3 className="lp-serif truncate text-lg" style={{ color: '#17191d' }}>{m.title}</h3>
+                            <p className="truncate text-sm" style={{ color: done ? '#0f6b55' : partial ? '#8a5a12' : 'rgb(23 25 29 / 0.7)' }}>
                               {done ? t('materials.completed') : partial ? t('materials.inProgress', { slide: m.my_slide }) : (m.description || `${m.language} · ${m.level}`)}
                             </p>
                           </div>

@@ -20,7 +20,6 @@ import PresenceToggle from './PresenceToggle'
 import IncomingCallBox from './IncomingCallBox'
 import OngoingSessionBanner from './OngoingSessionBanner'
 import NotificationBell from './NotificationBell'
-import ThemeToggle from './ThemeToggle'
 
 function useAuthedLinks() {
   const { t } = useTranslation()
@@ -91,9 +90,9 @@ function SocialIcon({ name, href, label }) {
 
 function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-      <BrandMark className="h-10 w-10 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105" />
-      <BrandWordmark className="text-[21px]" />
+    <Link to="/" className="flex items-center gap-2.5 shrink-0">
+      <BrandMark className="h-8 w-8" />
+      <BrandWordmark className="text-[19px]" />
     </Link>
   )
 }
@@ -125,18 +124,15 @@ function UserMenu({ user, onLogout }) {
       </button>
 
       {open && (
-        <div
-          className="absolute end-0 top-full mt-2 w-56 py-1.5 lp-surface lp-animate-in-scale"
-          style={{ boxShadow: 'var(--shadow-card-hover)' }}
-        >
-          <div className="px-3.5 py-2" style={{ borderBottom: '1px solid var(--line)' }}>
-            <p className="text-sm font-semibold truncate" style={{ color: 'var(--ink)' }}>{name}</p>
-            <p className="text-xs truncate" style={{ color: 'var(--ink-soft)' }}>{user.email}</p>
+        <div className="absolute end-0 top-full mt-2 w-56 py-1 lp-pop lp-animate-in-scale">
+          <div className="px-3.5 py-2.5" style={{ borderBottom: '1px solid var(--line)' }}>
+            <p className="text-sm font-medium truncate" style={{ color: 'var(--ink)' }}>{name}</p>
+            <p className="text-xs truncate" style={{ color: 'var(--ink-faint)' }}>{user.email}</p>
           </div>
           <Link
             to="/profile"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
+            className="flex items-center gap-2.5 px-3.5 py-2 text-sm hover:bg-[var(--surface-2)]"
             style={{ color: 'var(--ink-soft)' }}
           >
             <UserRound size={15} />
@@ -145,7 +141,7 @@ function UserMenu({ user, onLogout }) {
           <Link
             to="/notes"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
+            className="flex items-center gap-2.5 px-3.5 py-2 text-sm hover:bg-[var(--surface-2)]"
             style={{ color: 'var(--ink-soft)' }}
           >
             <NotebookPen size={15} />
@@ -156,8 +152,8 @@ function UserMenu({ user, onLogout }) {
               setOpen(false)
               onLogout()
             }}
-            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm hover:opacity-70"
-            style={{ color: '#c1443d' }}
+            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm hover:bg-[var(--surface-2)]"
+            style={{ color: 'var(--danger)', borderTop: '1px solid var(--line)' }}
           >
             <LogOut size={15} />
             {t('nav.logOut')}
@@ -176,13 +172,16 @@ export default function Layout() {
   const location = useLocation()
   const { t } = useTranslation()
   const authedLinks = useAuthedLinks()
+  const darkNav = true
   const hideFooter = NO_FOOTER_PATHS.includes(location.pathname) || location.pathname.startsWith('/call/')
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
       <nav
         className="sticky top-0 z-50 backdrop-blur-md"
-        style={{ background: 'color-mix(in srgb, var(--surface) 88%, transparent)', borderBottom: '1px solid var(--line)', boxShadow: '0 8px 24px -20px rgb(20 20 60 / 0.35)' }}
+        style={darkNav
+          ? { background: '#0b1a2c', borderBottom: '1px solid rgb(255 255 255 / 0.12)', '--ink': '#fff', '--ink-soft': 'rgb(255 255 255 / 0.78)', '--line': 'rgb(255 255 255 / 0.2)', '--surface-2': 'rgb(255 255 255 / 0.1)', '--surface': '#0b1a2c', '--accent': '#7fd8c3', '--accent-2': '#7fd8c3', '--accent-soft': 'rgb(255 255 255 / 0.14)', '--ink-faint': 'rgb(255 255 255 / 0.55)' }
+          : { background: 'color-mix(in srgb, var(--surface) 92%, transparent)', borderBottom: '1px solid var(--line)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Logo />
@@ -194,10 +193,11 @@ export default function Layout() {
                     <NavLink
                       key={to}
                       to={to}
-                      className="relative flex items-center gap-1.5 px-3.5 h-10 rounded-full text-[13.5px] font-semibold transition-colors shrink-0 hover:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]"
+                      className="relative flex items-center gap-1.5 px-3 h-9 text-[13.5px] font-medium transition-colors shrink-0 hover:bg-[var(--surface-2)]"
                       style={({ isActive }) => ({
+                        borderRadius: 'var(--radius-tag)',
                         color: isActive ? 'var(--accent)' : 'var(--ink-soft)',
-                        background: isActive ? 'color-mix(in srgb, var(--accent) 13%, transparent)' : undefined,
+                        background: isActive ? 'var(--accent-soft)' : undefined,
                       })}
                     >
                       <Icon size={15} strokeWidth={1.9} />
@@ -208,7 +208,6 @@ export default function Layout() {
                 <span className="mx-1 hidden sm:inline-block h-5 w-px shrink-0" style={{ background: 'var(--line)' }} />
                 <span className="shrink-0"><PresenceToggle /></span>
                 <span className="shrink-0"><NotificationBell /></span>
-                <span className="shrink-0"><ThemeToggle /></span>
                 <span className="shrink-0"><LanguageSwitcher /></span>
                 <span className="shrink-0">
                   <UserMenu
@@ -236,12 +235,12 @@ export default function Layout() {
                 >
                   {t('nav.faq')}
                 </Link>
-                <ThemeToggle />
+                <span className="mx-1.5 hidden sm:inline-block h-5 w-px shrink-0" style={{ background: 'var(--line)' }} />
                 <LanguageSwitcher />
-                <Link to="/login" className="px-3 py-2 text-[13.5px] font-medium" style={{ borderRadius: 'var(--radius-tag)', color: 'var(--ink-soft)' }}>
+                <Link to="/login" target="_blank" rel="noopener noreferrer" className="px-3 py-2 text-[13.5px] font-medium" style={{ borderRadius: 'var(--radius-tag)', color: 'var(--ink-soft)' }}>
                   {t('nav.login')}
                 </Link>
-                <Link to="/register" className="lp-btn-primary ms-1">
+                <Link to="/register" className={darkNav ? 'lp-cta-mint ms-1' : 'lp-btn-primary ms-1'} style={darkNav ? { height: '2.25rem', padding: '0 1rem', fontSize: '0.875rem' } : undefined}>
                   {t('nav.signUpFree')}
                 </Link>
               </>
@@ -258,14 +257,14 @@ export default function Layout() {
       </main>
 
       {!hideFooter && (
-        <footer className="lp-footer relative" style={{ borderTop: '4px solid var(--gold)' }}>
+        <footer className="lp-footer relative">
           <div className="max-w-6xl mx-auto px-6 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2.5 mb-3">
-                <BrandMark className="h-9 w-9" />
-                <BrandWordmark className="text-xl" />
+                <BrandMark className="h-8 w-8" />
+                <BrandWordmark className="text-lg" />
               </div>
-              <p className="text-sm max-w-xs leading-relaxed mb-5" style={{ color: 'var(--ink-soft)' }}>
+              <p className="text-sm max-w-xs leading-relaxed mb-6" style={{ color: 'var(--ink-soft)' }}>
                 {t('landing.heroSubtitle')}
               </p>
               <div className="flex items-center gap-2">
@@ -304,7 +303,7 @@ export default function Layout() {
                   </>
                 ) : (
                   <>
-                    <Link to="/login" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.login')}</Link>
+                    <Link to="/login" target="_blank" rel="noopener noreferrer" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.login')}</Link>
                     <Link to="/register" className="w-fit hover:opacity-70 transition-opacity" style={{ color: 'var(--ink-soft)' }}>{t('nav.signUpFree')}</Link>
                   </>
                 )}
@@ -312,7 +311,7 @@ export default function Layout() {
             </div>
           </div>
           <div className="max-w-6xl mx-auto px-6 py-5" style={{ borderTop: '1px solid var(--line)' }}>
-            <p className="text-xs" style={{ color: 'var(--ink-soft)' }}>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
+            <p className="text-xs" style={{ color: 'var(--ink-faint)' }}>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
           </div>
         </footer>
       )}

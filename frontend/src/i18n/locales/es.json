@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Lingua Hub",
+    "appName": "LanPro",
     "loading": "Cargando...",
     "loadingDashboard": "Cargando tu inicio...",
     "seeAll": "Ver todo",
@@ -22,11 +22,12 @@
     "signUpFree": "Regístrate gratis",
     "profile": "Perfil",
     "settings": "Ajustes",
-    "logOut": "Cerrar sesión"
+    "logOut": "Cerrar sesión",
+    "notes": "mis notas"
   },
   "footer": {
-    "tagline": "Lingua Hub",
-    "copyright": "© {{year}} Lingua Hub. All rights reserved.",
+    "tagline": "LanPro",
+    "copyright": "© {{year}} LanPro. All rights reserved.",
     "explore": "Explorar",
     "account": "Cuenta",
     "getStarted": "Empezar"
@@ -44,7 +45,7 @@
     "badge": "Gratis durante el acceso anticipado",
     "heroTitleLine1": "Aprende un idioma",
     "heroTitleLine2": "hablándolo de verdad",
-    "heroSubtitle": "Lingua Hub te conecta con hablantes nativos y otros estudiantes para practicar conversación real, además de cursos en vídeo estructurados para construir tu base.",
+    "heroSubtitle": "LanPro te conecta con hablantes nativos y otros estudiantes para practicar conversación real, además de cursos en vídeo estructurados para construir tu base.",
     "findAPartner": "Buscar compañero",
     "getStartedFree": "Empieza gratis",
     "learnMore": "Saber más",
@@ -60,7 +61,7 @@
     },
     "realConversations": "Conversaciones reales",
     "practiceHeadline": "Practica con personas, no con tarjetas de memoria",
-    "practiceBody": "Las apps que solo repasan vocabulario solo te llevan hasta cierto punto. Lingua Hub te pone a hablar con una persona real desde tu primera sesión: mensajes para organizar, vídeo para practicar y cursos para cubrir los vacíos.",
+    "practiceBody": "Las apps que solo repasan vocabulario solo te llevan hasta cierto punto. LanPro te pone a hablar con una persona real desde tu primera sesión: mensajes para organizar, vídeo para practicar y cursos para cubrir los vacíos.",
     "practiceList": {
       "matched": "Emparejado por combinación de idiomas, nivel y zona horaria",
       "builtin": "Chat y vídeo integrados, sin nada que instalar",
@@ -83,14 +84,28 @@
       "freeBody": "Todas las funciones están disponibles durante el acceso anticipado, sin tarjeta de crédito ni muros de pago."
     },
     "ctaTitle": "Gratis, sin trampa",
-    "ctaBody": "Lingua Hub es gratuito durante nuestra fase de acceso anticipado: todas las funciones están disponibles desde el primer día.",
-    "ctaButton": "Crea tu cuenta gratis"
+    "ctaBody": "LanPro es gratuito durante nuestra fase de acceso anticipado: todas las funciones están disponibles desde el primer día.",
+    "ctaButton": "Crea tu cuenta gratis",
+    "strip": {
+      "levels": "Todos los niveles son bienvenidos",
+      "native": "Conversaciones en vivo con hablantes nativos",
+      "anytime": "Cuando quieras, donde quieras, 24/7"
+    },
+    "goals": {
+      "title": "Empieza con tus objetivos",
+      "body": "Te recomendamos lecciones, temas y compañeros para alcanzar tus metas. Tú eliges lo que te hace hablar.",
+      "cta": "Empezar a aprender",
+      "card1Title": "Enfócate en tus objetivos únicos",
+      "card1Body": "Cuéntanos qué quieres decir y con quién quieres hablar, y te emparejamos con los compañeros y lecciones adecuados.",
+      "card2Title": "Elige cómo aprendes",
+      "card2Body": "Estudien una lección estructurada juntos o conversen libremente: tú decides en cada sesión."
+    }
   },
   "about": {
     "eyebrow": "Sobre nosotros",
     "titlePrefix": "La fluidez nace de la",
     "titleHighlight": "conversación",
-    "intro": "Lingua Hub existe porque la forma más rápida de aprender un idioma es hablarlo con otra persona. Conectamos a estudiantes para el intercambio con hablantes nativos, la práctica entre compañeros y cursos estructurados a su propio ritmo, todo en un solo lugar.",
+    "intro": "LanPro existe porque la forma más rápida de aprender un idioma es hablarlo con otra persona. Conectamos a estudiantes para el intercambio con hablantes nativos, la práctica entre compañeros y cursos estructurados a su propio ritmo, todo en un solo lugar.",
     "missionEyebrow": "Nuestra misión",
     "missionHeadline": "Hacer que la práctica auténtica sea accesible para cualquiera, en cualquier lugar",
     "missionBody": "Emparejamos a los estudiantes por combinación de idiomas, nivel y zona horaria, y luego nos apartamos: vídeo y chat integrados para que no haya nada extra que instalar, y cursos para cuando quieras un poco más de estructura entre sesiones.",
@@ -110,7 +125,7 @@
     "title": "Preguntas frecuentes",
     "items": {
       "free": {
-        "q": "¿Lingua Hub es gratis?",
+        "q": "¿LanPro es gratis?",
         "a": "Sí. Durante nuestra fase de acceso anticipado, todas las funciones —emparejamiento de intercambio, práctica entre compañeros, videollamadas y cursos— son completamente gratuitas."
       },
       "matching": {
@@ -178,7 +193,12 @@
       "successTitle": "Contraseña restablecida",
       "successBody": "Tu contraseña ha sido cambiada. Ya puedes iniciar sesión.",
       "backToLogin": "Volver al inicio de sesión",
-      "resendCode": "Reenviar código"
+      "resendCode": "Reenviar código",
+      "pickAvailableTime": "Elige uno de sus horarios disponibles",
+      "noAvailability": "Este socio no tiene horarios disponibles en este momento.",
+      "chooseStart": "Hora de inicio",
+      "startBetween": "Elija una hora de inicio entre {{from}} y {{to}}.",
+      "passwordIncomplete": "Ingrese su contraseña actual y nueva."
     },
     "register": {
       "quote": "«Enseñar mi idioma nativo me enseñó a explicar el que estoy aprendiendo».",
@@ -210,7 +230,11 @@
       "continue": "Continuar",
       "back": "Atrás",
       "confirmPassword": "Confirmar contraseña",
-      "passwordMismatch": "Las contraseñas no coinciden."
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "nativeLanguage": "mi lengua nativa",
+      "canTeach": "Otro idioma que puedo enseñar (opcional)",
+      "none": "Ninguno",
+      "wantToLearn": "Idioma que quiero aprender"
     },
     "verifyEmail": {
       "codeLabel": "Código de verificación",
@@ -219,6 +243,10 @@
       "verifying": "Verificando...",
       "invalidCode": "Código incorrecto o caducado.",
       "success": "¡Correo verificado! Ya puedes iniciar sesión."
+    },
+    "google": {
+      "or": "o",
+      "error": "No se pudo iniciar sesión con Google."
     }
   },
   "dashboard": {
@@ -239,11 +267,12 @@
       "Ponte una meta semanal pequeña y concreta, como 'pedir un café' o 'contar una historia de 2 minutos' — las metas vagas son fáciles de posponer."
     ],
     "howItWorksTitle": "Cómo funciona",
-    "whyTitle": "Por qué los estudiantes eligen Lingua Hub",
+    "whyTitle": "Por qué los estudiantes eligen LanPro",
     "stats": {
       "completed": "Sesiones completadas",
       "upcoming": "Próximas sesiones",
-      "partners": "Compañeros conectados"
+      "partners": "Compañeros conectados",
+      "lessons": "Lecciones completadas"
     },
     "findAPartner": "Buscar compañero",
     "quickActions": {
@@ -262,7 +291,26 @@
     "keepLearningEmpty": "Todavía no hay cursos.",
     "exchange": "Intercambio",
     "peer": "Compañero",
-    "emptyStateBody": "Esta página se irá completando a medida que te conectes con compañeros y se agreguen cursos — ve a <link>Buscar compañero</link> para empezar."
+    "emptyStateBody": "Esta página se irá completando a medida que te conectes con compañeros y se agreguen cursos — ve a <link>Buscar compañero</link> para empezar.",
+    "courseProgress": "El progreso de tu curso",
+    "lessonsDone": "Lecciones {{done}} de {{total}} terminadas",
+    "continueLesson": "Continuar · Lección {{n}}",
+    "courseDone": "Curso completado 🎉",
+    "continueTitle": "Continúe su próxima lección",
+    "viewLessons": "Todas las lecciones",
+    "practiceLesson": "Encuentra un compañero para esta lección",
+    "levelProgress": "{{done}} de lecciones {{total}} completadas en este nivel",
+    "allDone": "Completaste cada lección. ¡Trabajo increíble!",
+    "noLesson": "Elija un idioma que esté aprendiendo en su perfil para ver su próxima lección aquí.",
+    "availableNow": "Disponible ahora",
+    "availableNowEmpty": "Nadie está en línea en este momento. Programe una sesión o vuelva pronto.",
+    "noLessonsYet": "Aún no hay lecciones de {{language}}. ¡Vuelve pronto!",
+    "greetingMorning": "Buenos días",
+    "greetingMorningWithName": "Buenos días, {{name}}",
+    "greetingAfternoon": "Buenas tardes",
+    "greetingAfternoonWithName": "Buenas tardes, {{name}}",
+    "greetingEvening": "Buenas noches",
+    "greetingEveningWithName": "Buenas noches, {{name}}"
   },
   "partners": {
     "eyebrow": "Compañeros",
@@ -306,7 +354,41 @@
     "exchangeMatch": "Intercambio",
     "peerPractice": "Práctica del mismo idioma",
     "speaksLearning": "Habla {{native}} · Aprende {{learning}}",
-    "viewProfile": "Ver perfil"
+    "viewProfile": "Ver perfil",
+    "visibilityNow": "Disponible ahora",
+    "visibilityScheduled": "Programado disponible",
+    "emptyNow": "Nadie está en línea y disponible en este momento. Consulta \"Programado disponible\" para conocer los próximos horarios.",
+    "time": "Tiempo",
+    "callNow": "llama ahora",
+    "levelFilter": "Nivel",
+    "levelFilterNote": "Filtro opcional: elija un nivel (A1 a C2) para ver solo los socios que están en ese nivel en el idioma que están aprendiendo. Las personas que aprenden el mismo idioma que usted siempre se muestran solo en su propio nivel.",
+    "sessionType": "Tipo de sesión",
+    "typeLesson": "De las lecciones",
+    "typeConversation": "conversación libre",
+    "lessonOptional": "Lección (opcional)",
+    "lessonFinished": "finalizado",
+    "typeLessonHint": "Trabajar juntos en una lección del curso.",
+    "typeConversationHint": "Solo habla de lo que quieras",
+    "iTeach": "quiero enseñar",
+    "teaches": "puede enseñar",
+    "learning": "Aprendiendo",
+    "myAvailableTimesSubtitle": "Los horarios que los socios pueden ver y solicitar.",
+    "noAvailableTimes": "Aún no has añadido ningún horario disponible.",
+    "repeatsWeekly": "Se repite semanalmente",
+    "endAdjusted": "La hora de finalización se cambió para mantener la sesión de al menos 40 minutos.",
+    "sessionSoon": "Tiene una sesión en {{count}} min",
+    "typeBoth": "Ambos",
+    "minDurationError": "Un tiempo disponible debe tener una duración mínima de 40 minutos.",
+    "callNowSubtitle": "¿Qué quieres hacer con {{name}}?",
+    "lessonFilter": "Lección",
+    "anyLesson": "cualquier lección",
+    "lessonOption": "Lección {{n}}",
+    "lessonFilterNote": "Filtro opcional: elija una lección para ver solo a los socios que están en esa lección en este momento, es decir, la siguiente lección que no han completado en el idioma que están aprendiendo. Las personas que aprenden el mismo idioma que usted siempre se muestran solo en su propio nivel.",
+    "showAll": "Mostrar todos los socios",
+    "clearFilters": "Limpiar filtros",
+    "scheduleShort": "Cronograma",
+    "quickChat": "Enviar un mensaje rápido",
+    "openFullChat": "Abrir chat completo"
   },
   "partnerProfile": {
     "loading": "Cargando...",
@@ -339,14 +421,23 @@
     "ratingSummary": "{{rating}} ({{count}})",
     "availability": "Disponibilidad",
     "availabilityBookHint": "Toca un horario para enviar una solicitud de sesión para ese momento.",
-    "book": "Reservar"
+    "book": "Reservar",
+    "myNotes": "Tus notas sobre esta persona",
+    "myNotesHint": "De vuestras sesiones juntos. Sólo tú puedes verlos."
   },
   "messages": {
     "title": "Mensajes",
     "loading": "Cargando...",
     "empty": "Aún no hay conversaciones. Escribe a un compañero desde su perfil para empezar.",
     "noMessagesYet": "Todavía no hay mensajes",
-    "selectConversation": "Selecciona una conversación"
+    "selectConversation": "Selecciona una conversación",
+    "eyebrow": "Charlar",
+    "search": "Buscar conversaciones",
+    "noResults": "Ninguna conversación coincide con tu búsqueda.",
+    "you": "Tú",
+    "back": "Atrás",
+    "findPartners": "encontrar socios",
+    "selectHint": "Elija una conversación a la izquierda o envíe un mensaje a un socio desde su perfil."
   },
   "conversationThread": {
     "connected": "Conectado",
@@ -354,7 +445,10 @@
     "videoCall": "Videollamada",
     "typeAMessage": "Escribe un mensaje...",
     "send": "Enviar",
-    "conversation": "Conversación"
+    "conversation": "Conversación",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "sayHello": "¡Saluda y empieza a practicar!"
   },
   "schedule": {
     "dateFrom": "Desde",
@@ -430,7 +524,20 @@
     "rateSubmit": "Enviar calificación",
     "ratingRequired": "Selecciona una calificación de estrellas.",
     "outsideAvailability": "Esta hora está fuera del horario disponible del compañero. Elige una hora dentro de su disponibilidad mostrada abajo.",
-    "partnerAvailability": "Disponible:"
+    "partnerAvailability": "Disponible:",
+    "lowRatingReason": "Por favor escriba por qué le dio una calificación baja.",
+    "lowRatingPlaceholder": "Cuéntanos qué salió mal (obligatorio)...",
+    "eyebrow": "Sesiones",
+    "subtitle": "Sus sesiones reservadas, solicitudes y prácticas anteriores en un solo lugar.",
+    "findPartners": "encontrar un socio",
+    "tab": {
+      "all": "Todo",
+      "upcoming": "Próximo",
+      "past": "Terminado",
+      "uncompleted": "No completado",
+      "closed": "Cancelado"
+    },
+    "requestSubtitle": "Elija un compañero y un horario que funcione para ambos."
   },
   "courses": {
     "title": "Cursos",
@@ -456,7 +563,25 @@
     "sharedByPartner": "compartió",
     "openFile": "Abrir archivo",
     "pickMaterial": "Elige un material para compartir",
-    "stopSharing": "Dejar de compartir"
+    "stopSharing": "Dejar de compartir",
+    "filesCount": "Lecciones {{count}}",
+    "allLevels": "Todos los niveles",
+    "language": "Idioma",
+    "level": "Nivel",
+    "files": "Archivos",
+    "upload": "Subir",
+    "uploading": "Subiendo...",
+    "uploaded": "Archivo(s) {{count}} cargados.",
+    "uploadError": "La carga falló. Por favor inténtalo de nuevo.",
+    "delete": "Borrar",
+    "confirmDelete": "¿Eliminar \"{{title}}\"?",
+    "completed": "Terminado",
+    "inProgress": "En progreso - diapositiva {{slide}}",
+    "levelDone": "Curso completado",
+    "progressCount": "{{done}} de {{total}} hecho",
+    "downloadLevel": "Descargar nivel completo",
+    "preparing": "Preparante...",
+    "pickHint": "Su próxima lección está resaltada."
   },
   "coursePlayer": {
     "loading": "Cargando...",
@@ -524,7 +649,29 @@
       "friday": "Viernes",
       "saturday": "Sábado",
       "sunday": "Domingo"
-    }
+    },
+    "learningLanguages": "El idioma que quiero aprender.",
+    "myNativeLanguage": "mi lengua nativa",
+    "learningLanguagesHint": "Elija el idioma que está aprendiendo. Los socios siempre coinciden en esto.",
+    "spokenLanguages": "Idiomas que puedo enseñar",
+    "spokenLanguagesHint": "Además de tu lengua materna, añade todos los idiomas que hables bien (mínimo B1) y en los que puedas ayudar a otros. Elige tu nivel o haz el examen.",
+    "tabs": {
+      "basics": "Lo esencial",
+      "languages": "Idiomas",
+      "video": "Vídeo de introducción",
+      "security": "Seguridad",
+      "goals": "Objetivos"
+    },
+    "completion": "Completitud del perfil",
+    "completionHint": "Los perfiles completos obtienen más solicitudes de socios.",
+    "introVideoHint": "Un vídeo breve ayuda a los socios a conocerle antes de la primera sesión.",
+    "learningGoalsHint": "¿Qué quieres lograr? Los compañeros lo ven en tu perfil.",
+    "changeEmail": "Cambiar correo",
+    "changeEmailSubtitle": "Tu correo es {{email}}. Introduce tu contraseña para confirmar el cambio.",
+    "newEmail": "Nuevo correo",
+    "changeEmailButton": "Cambiar correo",
+    "changeEmailSuccess": "Correo cambiado.",
+    "changeEmailError": "No se pudo cambiar el correo."
   },
   "settings": {
     "eyebrow": "Ajustes",
@@ -536,7 +683,7 @@
     "appearance": "Apariencia",
     "appearanceBody": "Cambia entre modo claro y oscuro.",
     "language": "Idioma",
-    "languageBody": "Elige el idioma que se usa en Lingua Hub.",
+    "languageBody": "Elige el idioma que se usa en LanPro.",
     "logOut": "Cerrar sesión"
   },
   "call": {
@@ -567,7 +714,71 @@
     "leaveChoiceBody": "El tiempo programado aún no ha terminado. ¿Cómo quieres marcar esta sesión?",
     "markComplete": "Marcar como completada",
     "markIncomplete": "Marcar como no completada",
-    "cancelLeave": "Permanecer en la llamada"
+    "cancelLeave": "Permanecer en la llamada",
+    "stopTheirShare": "Detener su pantalla compartida",
+    "incoming": "{{name}} quiere llamarte",
+    "answer": "Respuesta",
+    "decline": "Rechazar",
+    "ringError": "No se pudo iniciar la llamada. Por favor inténtalo de nuevo.",
+    "yourTurn": "tu turno",
+    "partnerTurn": "turno del compañero",
+    "yourPartner": "tu pareja",
+    "requestedByNote": "{{name}} envió la solicitud para esta sesión.",
+    "youStartedNote": "Empezaste esta sesión. Tu turno es primero.",
+    "turnElapsedMine": "Han pasado {{minutes}} minutos de tu turno.",
+    "turnElapsedPartner": "Han pasado {{minutes}} minutos del turno de tu compañero.",
+    "finishLesson": "terminar la lección",
+    "startAtSlide": "Comience en la diapositiva {{n}}",
+    "finishedTitle": "¿Terminaste esta lección?",
+    "finishedYes": "Si, completado",
+    "finishedNo": "No, no completado",
+    "finishedNone": "no lo estudié en absoluto",
+    "stoppedAtLabel": "¿En qué diapositiva te detuviste?",
+    "stoppedAtSave": "Ahorrar",
+    "progressError": "No se pudo guardar tu progreso. Por favor inténtalo de nuevo.",
+    "joinTitle": "¿Listo para unirte?",
+    "joinHint": "Tu cámara y micrófono están apagados. Actívalos si quieres y luego únete.",
+    "joinNow": "Únete ahora",
+    "back": "Atrás",
+    "cameraOff": "La cámara está apagada",
+    "skipRating": "Saltar",
+    "rateAndContinue": "Califica a tu pareja",
+    "notes": "Notas",
+    "notesPlaceholder": "Escribe tus notas aquí. Se guardan automáticamente.",
+    "notesSaving": "Ahorro...",
+    "notesSaved": "Guardado",
+    "notesError": "No guardado",
+    "notesNotSaved": "No guardado en tu cuenta",
+    "downloadNotes": "Descargar notas",
+    "downloadsTitle": "Descargar",
+    "pen": "Bolígrafo",
+    "clearDrawing": "Borrar dibujo",
+    "sendToAdmin": "Enviar al administrador",
+    "sentToAdmin": "Enviado al administrador",
+    "text": "Texto",
+    "selectText": "Seleccionar, mover o editar",
+    "undo": "Deshacer",
+    "youGoFirstProgress": "Vas primero porque has completado más lecciones.",
+    "partnerGoesFirstProgress": "Tu compañero va primero porque ha completado más lecciones.",
+    "together": "estudiando juntos",
+    "togetherNote": "Ambos aprenden el mismo idioma, por lo que estudian juntos sin turnos. La lección comienza con quien ha hecho más.",
+    "sessionElapsed": "Han pasado {{minutes}} minutos de la sesión.",
+    "skipAndLeave": "salta y vete",
+    "chat": "Charlar",
+    "chatPlaceholder": "Escribe un mensaje...",
+    "chatSend": "Enviar",
+    "downloadSummary": "Descargar resumen de la sesión",
+    "chatAndNotes": "Chat y notas",
+    "share": "Compartir",
+    "shareFile": "Compartir un archivo de lección",
+    "stopShareFile": "Deja de compartir el archivo",
+    "recordingNotice": "Por seguridad, su navegador mantiene una grabación de baja calidad de la sesión. Se elimina cuando te vas y solo se envía al administrador si tú o tu socio presentan un informe.",
+    "recordingBadge": "Grabación",
+    "translate": "Traducir",
+    "nextLesson": "Próxima lección",
+    "declinedTitle": "Llamada rechazada",
+    "declinedBody": "La otra persona rechazó tu llamada.",
+    "backToPartners": "Volver a compañeros"
   },
   "levels": {
     "beginner": "Principiante",
@@ -592,5 +803,149 @@
     "seeAll": "Ver todas las notificaciones",
     "pageTitle": "Notificaciones",
     "pageSubtitle": "Todo sobre tus sesiones, en un solo lugar."
+  },
+  "levelExam": {
+    "title": "Prueba de nivel {{language}}",
+    "questionOf": "Pregunta {{current}} de {{total}}",
+    "next": "Próximo",
+    "finish": "Finalizar",
+    "yourLevel": "Tu nivel {{language}} es",
+    "continue": "Usa este nivel",
+    "takeExam": "tomar examen de nivel",
+    "speakMin": "Los idiomas que hables necesitan al menos el nivel B1.",
+    "chooseLevel": "Elige nivel",
+    "required": "Elige un nivel o haz el examen",
+    "notEnough": "Su nivel {{language}} ({{level}}) no es suficiente para aparecer como idioma que habla; necesita al menos {{min}}. En su lugar, puedes agregarlo a los idiomas que deseas aprender."
+  },
+  "presence": {
+    "on": "Disponible ahora",
+    "off": "No disponible"
+  },
+  "notes": {
+    "title": "mis notas",
+    "subtitle": "Escribe lo que quieras y revisa las notas de tus lecciones pasadas.",
+    "empty": "Aún no hay notas de lecciones. Abre el bloc de notas durante una llamada y lo que escribas aparecerá aquí.",
+    "emptyGeneral": "Aún no hay notas. Crea una nota y escribe lo que quieras.",
+    "newNote": "Nueva nota",
+    "tabGeneral": "mis notas",
+    "tabSessions": "De lecciones",
+    "titlePlaceholder": "Título",
+    "writeHere": "Escribe cualquier cosa aquí...",
+    "delete": "Borrar",
+    "confirmDelete": "¿Eliminar esta nota?",
+    "with": "Sesión con {{name}}",
+    "download": "Descargar",
+    "saving": "Ahorro...",
+    "saved": "Guardado",
+    "error": "No se pudo guardar",
+    "eyebrow": "Computadora portátil",
+    "search": "Busca tus notas",
+    "openSession": "Sesión abierta",
+    "noResults": "Ninguna nota coincide con su búsqueda."
+  },
+  "report": {
+    "link": "Informar un problema",
+    "title": "Informar un problema con {{name}}",
+    "subtitle": "Elige lo que pasó. El administrador verá esto.",
+    "chooseReason": "Por favor elija cuál fue el problema.",
+    "detailsRequired": "Por favor escriba algunas palabras sobre el problema.",
+    "detailsPlaceholder": "Cuéntanos más (opcional)...",
+    "send": "Enviar informe",
+    "error": "No se pudo enviar el informe. Por favor inténtalo de nuevo.",
+    "sentTitle": "Informe enviado",
+    "sentBody": "Gracias. El administrador lo recibió y lo investigará. Estás abandonando la llamada ahora.",
+    "reasons": {
+      "harassment": "Acoso o abuso",
+      "inappropriate_content": "Contenido inapropiado",
+      "no_show": "no apareció",
+      "late_or_left_early": "Tarde o se fue temprano",
+      "off_topic": "No practicar el idioma",
+      "technical": "Problemas de audio o video",
+      "fake_profile": "perfil falso",
+      "spam": "Correo basura",
+      "other": "Otro"
+    },
+    "leaveNow": "Vete ahora",
+    "uploading": "Enviando grabación..."
+  },
+  "summary": {
+    "readyTitle": "Sesión terminada",
+    "readyBody": "El resumen de su sesión está listo. Descárgalo para guardar tus notas, chatear y lecciones compartidas.",
+    "close": "Cerca",
+    "title": "Sesión con {{name}}",
+    "link": "Resumen",
+    "back": "Volver a mis sesiones",
+    "download": "Descargar resumen",
+    "notFound": "Este resumen de sesión no está disponible.",
+    "files": "Lecciones compartidas",
+    "words": "Palabras que tradujiste",
+    "noFiles": "No se compartieron archivos de lecciones.",
+    "notes": "tus notas",
+    "noNotes": "No escribiste ninguna nota.",
+    "history": "Cómo cambiaron tus notas",
+    "versionAt": "Versión {{n}} - {{time}}",
+    "chat": "Chat durante la sesión",
+    "noChat": "No se enviaron mensajes.",
+    "you": "Tú",
+    "rating": "Tu calificación",
+    "status": {
+      "completed": "Terminado",
+      "not_completed": "No completado",
+      "confirmed": "Confirmado",
+      "pending": "Pendiente",
+      "cancelled": "Cancelado",
+      "rejected": "Rechazado"
+    },
+    "progress": {
+      "complete": "Terminado",
+      "partial": "Detenido en la diapositiva {{slide}}",
+      "not_started": "No iniciado"
+    }
+  },
+  "translate": {
+    "hint": "Haga clic en una palabra en la diapositiva o arrastre sobre una frase para ver su traducción aquí y escucharla.",
+    "slide": "Deslice {{n}} de {{total}}",
+    "emptySlide": "No hay texto en esta diapositiva.",
+    "noText": "Este archivo no tiene texto de diapositiva legible. En su lugar, escriba una palabra a continuación.",
+    "shareFirst": "Comparta un archivo de lección para ver su texto aquí o escriba una palabra a continuación.",
+    "placeholder": "Escribe una palabra...",
+    "go": "Traducir",
+    "loading": "Traductorio...",
+    "error": "La traducción no está disponible en este momento.",
+    "listen": "Escuchar",
+    "addToNotes": "Añadir a notas",
+    "addedToNotes": "Añadido a notas"
+  },
+  "modal": {
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "length": "Longitud"
+  },
+  "mockup": {
+    "sara": "Sara",
+    "arabic": "Árabe",
+    "liveSession": "Sesión en vivo",
+    "previewCamera": "Vista previa de la cámara",
+    "cameraUnavailable": "Cámara no disponible",
+    "you": "Tú",
+    "end": "Terminar",
+    "call1": "¿Practicamos mañana? 👋",
+    "call2": "¡Tu acento está mejorando mucho!",
+    "call3": "¿A la misma hora la próxima semana?",
+    "onlineNow": "En línea ahora",
+    "m1": "¡Hola! Vi que estás aprendiendo árabe 👋",
+    "m2": "¡Sí! Me encantaría practicar esta semana",
+    "m3": "¿Quedamos el jueves por la tarde?",
+    "m4": "¡Perfecto, nos vemos entonces! 🎉"
+  },
+  "availability": {
+    "title": "¿Qué quieres hacer ahora?",
+    "subtitle": "Estás disponible ahora. Elige para qué pueden llamarte.",
+    "both": "Ambos",
+    "lessonHint": "Pueden llamarte para estudiar una lección juntos",
+    "conversationHint": "Pueden llamarte solo para conversar",
+    "bothHint": "Tanto lecciones como conversación libre están bien",
+    "later": "Ahora no",
+    "confirm": "Guardar"
   }
 }

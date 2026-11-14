@@ -1,12 +1,9 @@
 import { Camera, Mic, Video } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { avatarUrl } from '../utils/images'
 
-const CHAT_LINES = [
-  "Let's practice tomorrow? 👋",
-  'Your accent is getting so good!',
-  'Same time next week?',
-]
+const CHAT_KEYS = ['call1', 'call2', 'call3']
 
 /**
  * A styled two-tile "video call" mockup for marketing pages. Starts with
@@ -15,7 +12,8 @@ const CHAT_LINES = [
  * unrelated stock footage. The floating chat bubble cycles through a few
  * lines to keep the hero feeling alive without any real video asset.
  */
-export default function CallPreview({ partnerSeed = 'hero-partner', partnerName = 'Sara · Arabic' }) {
+export default function CallPreview({ partnerSeed = 'hero-partner', partnerName }) {
+  const { t } = useTranslation()
   const videoRef = useRef(null)
   const [live, setLive] = useState(false)
   const [error, setError] = useState(false)
@@ -29,7 +27,7 @@ export default function CallPreview({ partnerSeed = 'hero-partner', partnerName 
   }, [])
 
   useEffect(() => {
-    const interval = setInterval(() => setLineIndex((i) => (i + 1) % CHAT_LINES.length), 3800)
+    const interval = setInterval(() => setLineIndex((i) => (i + 1) % CHAT_KEYS.length), 3800)
     return () => clearInterval(interval)
   }, [])
 
@@ -45,76 +43,88 @@ export default function CallPreview({ partnerSeed = 'hero-partner', partnerName 
 
   return (
     <div className="relative w-full max-w-md mx-auto" dir="ltr">
-      <span
-        className="pointer-events-none absolute -inset-6 rounded-[2rem] blur-2xl lp-blob-drift"
-        style={{ background: 'var(--gradient-brand)', opacity: 0.25 }}
-      />
-      <div className="relative rounded-2xl p-3 shadow-2xl" style={{ background: '#0f1117', border: '1px solid rgb(255 255 255 / 0.08)' }}>
-        <div className="flex items-center justify-between px-2 pb-2">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-          </div>
-          <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-400">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </span>
-            Live session
+      <div className="lp-surface relative p-3">
+        <div className="flex items-center justify-end px-1 pb-2.5" style={{ borderBottom: '1px solid var(--line)' }}>
+          <span className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: 'var(--ok)' }}>
+            <span className="lp-dot" />
+            {t('mockup.liveSession')}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-800">
+        <div className="grid grid-cols-2 gap-2 pt-3">
+          <div
+            className="relative aspect-square overflow-hidden"
+            style={{ borderRadius: 'var(--radius-control)', background: 'var(--surface-3)', border: '1px solid var(--line)' }}
+          >
             <img src={avatarUrl(partnerSeed, 300)} alt="" className="h-full w-full object-cover" />
-            <span className="absolute bottom-2 left-2 text-[11px] font-medium text-white bg-black/40 backdrop-blur px-2 py-0.5 rounded-md">
-              {partnerName}
+            <span
+              className="absolute bottom-1.5 left-1.5 text-[11px] font-medium px-1.5 py-0.5"
+              style={{ borderRadius: 'var(--radius-tag)', background: 'var(--surface)', border: '1px solid var(--line)', color: 'var(--ink)' }}
+            >
+              {partnerName || `${t('mockup.sara')} · ${t('mockup.arabic')}`}
             </span>
           </div>
 
-          <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center">
+          <div
+            className="relative aspect-square overflow-hidden flex items-center justify-center"
+            style={{ borderRadius: 'var(--radius-control)', background: 'var(--surface-2)', border: '1px solid var(--line)' }}
+          >
             {live ? (
               <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
             ) : (
               <button
                 onClick={startPreview}
-                className="group flex flex-col items-center gap-2 text-slate-300 hover:text-white transition-colors"
+                className="flex flex-col items-center gap-2 transition-colors hover:opacity-80"
+                style={{ color: 'var(--ink-soft)' }}
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                <span
+                  className="flex h-10 w-10 items-center justify-center"
+                  style={{ borderRadius: 'var(--radius-pill)', background: 'var(--surface)', border: '1px solid var(--line-strong)' }}
+                >
                   <Camera size={17} />
                 </span>
                 <span className="text-[11px] font-medium px-2 text-center leading-tight">
-                  {error ? 'Camera unavailable' : 'Preview your camera'}
+                  {error ? t('mockup.cameraUnavailable') : t('mockup.previewCamera')}
                 </span>
               </button>
             )}
-            <span className="absolute bottom-2 left-2 text-[11px] font-medium text-white bg-black/40 backdrop-blur px-2 py-0.5 rounded-md">
-              You
+            <span
+              className="absolute bottom-1.5 left-1.5 text-[11px] font-medium px-1.5 py-0.5"
+              style={{ borderRadius: 'var(--radius-tag)', background: 'var(--surface)', border: '1px solid var(--line)', color: 'var(--ink)' }}
+            >
+              {t('mockup.you')}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-3 pt-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-slate-300">
+        <div className="flex items-center justify-center gap-2 pt-3 mt-3" style={{ borderTop: '1px solid var(--line)' }}>
+          <span
+            className="flex h-8 w-8 items-center justify-center"
+            style={{ borderRadius: 'var(--radius-pill)', background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--ink-soft)' }}
+          >
             <Mic size={14} />
           </span>
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-slate-300">
+          <span
+            className="flex h-8 w-8 items-center justify-center"
+            style={{ borderRadius: 'var(--radius-pill)', background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--ink-soft)' }}
+          >
             <Video size={14} />
           </span>
-          <span className="flex h-8 items-center rounded-full bg-rose-500 px-4 text-[11px] font-semibold text-white">
-            End
+          <span
+            className="flex h-8 items-center px-3.5 text-[11px] font-medium"
+            style={{ borderRadius: 'var(--radius-pill)', background: 'var(--danger)', color: 'var(--danger-ink)' }}
+          >
+            {t('mockup.end')}
           </span>
         </div>
       </div>
 
       <div
         key={lineIndex}
-        className="absolute -bottom-4 -left-4 rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 lp-animate-in-scale max-w-[220px]"
-        style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
+        className="lp-pop absolute -bottom-4 left-4 px-3 py-2 flex items-center gap-2 lp-animate-in-scale max-w-[220px]"
       >
-        <img src={avatarUrl('hero-msg', 60)} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
-        <span className="text-xs font-medium" style={{ color: 'var(--ink)' }}>{CHAT_LINES[lineIndex]}</span>
+        <img src={avatarUrl('hero-msg', 60)} alt="" className="lp-avatar h-6 w-6 shrink-0" style={{ border: '1px solid var(--line)' }} />
+        <span className="text-xs" style={{ color: 'var(--ink)' }}>{t(`mockup.${CHAT_KEYS[lineIndex]}`)}</span>
       </div>
     </div>
   )

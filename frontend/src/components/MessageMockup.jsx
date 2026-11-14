@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { avatarUrl } from '../utils/images'
 
 const THREAD = [
-  { mine: false, text: "Hey! Saw you're learning Arabic 👋" },
-  { mine: true, text: 'Yes! Would love to practice sometime this week' },
-  { mine: false, text: "Let's do Thursday evening?" },
-  { mine: true, text: 'Perfect, see you then! 🎉' },
+  { mine: false, key: 'm1' },
+  { mine: true, key: 'm2' },
+  { mine: false, key: 'm3' },
+  { mine: true, key: 'm4' },
 ]
 
 export default function MessageMockup() {
+  const { t } = useTranslation()
   const [visible, setVisible] = useState(2)
   const [typing, setTyping] = useState(true)
 
@@ -31,20 +33,15 @@ export default function MessageMockup() {
   const shown = THREAD.slice(0, visible)
 
   return (
-    <div
-      className="relative rounded-2xl shadow-xl p-5 max-w-sm"
-      style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
-      dir="ltr"
-    >
-      <span
-        className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] blur-2xl lp-blob-drift"
-        style={{ background: 'var(--gradient-brand)', opacity: 0.16 }}
-      />
-      <div className="flex items-center gap-2.5 pb-3 mb-3" style={{ borderBottom: '1px solid var(--line)' }}>
-        <img src={avatarUrl('mockup-partner', 60)} alt="" className="h-8 w-8 rounded-full object-cover" />
+    <div className="lp-surface relative p-5 max-w-sm" dir="ltr">
+      <div className="flex items-center gap-2.5 pb-3 mb-4" style={{ borderBottom: '1px solid var(--line)' }}>
+        <img src={avatarUrl('mockup-partner', 60)} alt="" className="lp-avatar h-8 w-8" style={{ border: '1px solid var(--line)' }} />
         <div>
-          <p className="text-sm font-semibold leading-tight" style={{ color: 'var(--ink)' }}>Sara</p>
-          <p className="text-xs" style={{ color: 'var(--accent-2)' }}>Online now</p>
+          <p className="text-sm font-medium leading-tight" style={{ color: 'var(--ink)' }}>{t('mockup.sara')}</p>
+          <p className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--ok)' }}>
+            <span className="lp-dot" />
+            {t('mockup.onlineNow')}
+          </p>
         </div>
       </div>
       <div className="space-y-2.5 min-h-[168px]">
@@ -54,11 +51,11 @@ export default function MessageMockup() {
               className="max-w-[220px] px-3.5 py-2 text-sm"
               style={
                 m.mine
-                  ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', borderRadius: '16px 16px 4px 16px' }
-                  : { background: 'var(--surface-2)', color: 'var(--ink)', borderRadius: '16px 16px 16px 4px' }
+                  ? { background: 'var(--accent)', color: 'var(--accent-ink)', borderRadius: '10px 10px 2px 10px' }
+                  : { background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: '10px 10px 10px 2px' }
               }
             >
-              {m.text}
+              {t(`mockup.${m.key}`)}
             </div>
           </div>
         ))}
@@ -68,7 +65,8 @@ export default function MessageMockup() {
               className="flex items-center gap-1 px-3.5 py-2.5"
               style={{
                 background: 'var(--surface-2)',
-                borderRadius: THREAD[visible]?.mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                border: '1px solid var(--line)',
+                borderRadius: THREAD[visible]?.mine ? '10px 10px 2px 10px' : '10px 10px 10px 2px',
               }}
             >
               <span className="h-1.5 w-1.5 rounded-full animate-bounce [animation-delay:-0.3s]" style={{ background: 'var(--ink-soft)' }} />

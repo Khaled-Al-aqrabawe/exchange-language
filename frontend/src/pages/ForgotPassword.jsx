@@ -8,7 +8,7 @@ import AuthShell, { AuthStepHeader as StepHeader, authInputClass as inputClass, 
 function IconInput({ icon: Icon, ...props }) {
   return (
     <div className="relative">
-      <Icon size={18} className="absolute top-1/2 -translate-y-1/2 start-4 pointer-events-none" style={{ color: 'var(--ink-soft)' }} />
+      <Icon size={16} className="absolute top-1/2 -translate-y-1/2 start-3.5 pointer-events-none" style={{ color: 'var(--ink-faint)' }} />
       <input {...props} className={inputClass} style={inputStyle} />
     </div>
   )
@@ -84,13 +84,18 @@ export default function ForgotPassword() {
                   <label className={authLabelClass}>{t('auth.forgotPassword.email')}</label>
                   <IconInput icon={Mail} type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
-                {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
+                {error && <p
+                  className="px-3.5 py-2.5 text-sm"
+                  style={{ borderRadius: 'var(--radius-control)', color: 'var(--danger)', background: 'var(--danger-soft)', border: '1px solid color-mix(in srgb, var(--danger) 30%, var(--line))' }}
+                >
+                  {error}
+                </p>}
                 <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50" style={{ height: '2.75rem', fontSize: '0.9rem' }}>
                   {submitting ? t('auth.forgotPassword.sending') : t('auth.forgotPassword.sendCode')}
                 </button>
               </form>
               <p className="mt-5 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
-                <Link to="/login" className="font-semibold" style={{ color: 'var(--accent)' }}>
+                <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>
                   {t('auth.forgotPassword.backToLogin')}
                 </Link>
               </p>
@@ -124,7 +129,12 @@ export default function ForgotPassword() {
                   <label className={authLabelClass}>{t('auth.forgotPassword.confirmPassword')}</label>
                   <IconInput icon={Lock} type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                 </div>
-                {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
+                {error && <p
+                  className="px-3.5 py-2.5 text-sm"
+                  style={{ borderRadius: 'var(--radius-control)', color: 'var(--danger)', background: 'var(--danger-soft)', border: '1px solid color-mix(in srgb, var(--danger) 30%, var(--line))' }}
+                >
+                  {error}
+                </p>}
                 <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50" style={{ height: '2.75rem', fontSize: '0.9rem' }}>
                   {submitting ? t('auth.forgotPassword.resetting') : t('auth.forgotPassword.resetSubmit')}
                 </button>
@@ -133,7 +143,7 @@ export default function ForgotPassword() {
                 <Link to="/login" style={{ color: 'var(--ink-soft)' }}>
                   {t('auth.forgotPassword.backToLogin')}
                 </Link>
-                <button type="button" onClick={handleResend} className="font-semibold" style={{ color: 'var(--accent)' }}>
+                <button type="button" onClick={handleResend} className="font-medium" style={{ color: 'var(--accent)' }}>
                   {t('auth.forgotPassword.resendCode')}
                 </button>
               </div>

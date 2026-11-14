@@ -84,10 +84,10 @@ export default function LanguageLevelPicker({ mode, selected, levels, onChange, 
         </p>
       )}
 
-      {selected.length > 0 && (
+      {selected.filter((l) => !exclude.includes(l)).length > 0 && (
         <div className="mt-5 space-y-2.5">
-          <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('levelExam.yourLevel', 'Your level')}</p>
-          {selected.map((lang) => {
+          <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('levelExam.levelHeading', 'Your level')}</p>
+          {selected.filter((l) => !exclude.includes(l)).map((lang) => {
             const chosen = allowed.includes(levels[lang])
             return (
               <div

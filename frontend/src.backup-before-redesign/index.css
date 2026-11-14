@@ -1,0 +1,496 @@
+@import "tailwindcss";
+
+/* ---- LanguagePro design tokens: teal and coral from the logo (dark by default, light on request) ---- */
+
+@theme {
+  /* Soft, generous corners across every Tailwind `rounded-*` utility */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+}
+
+:root {
+  color-scheme: light;
+
+  --font-display: 'Sora', 'Cairo', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
+
+  /* white, with one teal accent used sparingly */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f5f6fa;
+  --ink: #0f1222;
+  --ink-soft: #666d86;
+  --line: #e6e8f0;
+  --accent: #0d9488;
+  --accent-ink: #ffffff;
+  --accent-2: #e8503a;
+  --accent-2-ink: #ffffff;
+  --gold: #ff6b57;              /* logo coral highlight (old token name, so every page picks it up) */
+  --navy-deep: #f5f6fa;
+  --on-navy: #0f1222;
+  --on-navy-soft: #666d86;
+  --gradient-brand: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  --gradient-hero: linear-gradient(135deg, #effaf8 0%, #ffffff 100%);
+  --panel-border: #e6e8f0;
+  --panel-glow: rgb(13 148 136 / 0.07);
+  --glow-a: 6%;
+  --glow-b: 4%;
+  --glow-c: 3%;
+  --badge-glow: none;
+  --btn-shadow: 0 8px 18px -10px rgb(13 148 136 / 0.55);
+  --btn-shadow-hover: 0 12px 24px -10px rgb(13 148 136 / 0.6);
+  --gold-btn-bg: var(--accent);
+  --gold-btn-ink: #ffffff;
+  --shadow-card: 0 1px 2px rgb(20 20 60 / 0.04), 0 6px 18px -12px rgb(20 20 60 / 0.12);
+  --shadow-card-hover: 0 2px 6px rgb(20 20 60 / 0.06), 0 18px 34px -18px rgb(13 148 136 / 0.3);
+  --radius-card: 20px;
+  --radius-pill: 999px;
+  --radius-tag: 999px;
+}
+
+/* midnight, for people who pick the dark theme */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #061312;
+  --surface: #0c1f1d;
+  --surface-2: #12302d;
+  --ink: #ecfaf8;
+  --ink-soft: #9bbdb8;
+  --line: #1e4541;
+  --accent: #2dd4bf;
+  --accent-ink: #ffffff;
+  --accent-2: #ff8a7a;
+  --accent-2-ink: #2a0a05;
+  --gold: #ff8a7a;
+  --navy-deep: #040d0c;
+  --on-navy: #effcfa;
+  --on-navy-soft: #b0d6d1;
+  --gradient-brand: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+  --gradient-hero: linear-gradient(135deg, #0b3b3a 0%, #0d9488 52%, #ff6b57 100%);
+  --panel-border: transparent;
+  --panel-glow: rgb(255 255 255 / 0.28);
+  --glow-a: 34%;
+  --glow-b: 22%;
+  --glow-c: 20%;
+  --badge-glow: 0 0 22px -6px color-mix(in srgb, var(--accent) 70%, transparent);
+  --btn-shadow: 0 10px 26px -10px rgb(20 184 166 / 0.85), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  --btn-shadow-hover: 0 16px 32px -10px rgb(20 184 166 / 0.95), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  --gold-btn-bg: #ffffff;
+  --gold-btn-ink: #0b3b3a;
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 10px 30px -14px rgb(0 0 0 / 0.7);
+  --shadow-card-hover: 0 0 0 1px rgb(45 212 191 / 0.4), 0 24px 50px -20px rgb(20 184 166 / 0.55);
+}
+
+* {
+  scrollbar-color: var(--line) transparent;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Arabic joins letters: any tracking breaks the script */
+[dir='rtl'] *,
+:lang(ar) * {
+  letter-spacing: 0 !important;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Motion ---- */
+
+@keyframes lp-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes lp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lp-scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lp-pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 45%, transparent); }
+  100% { box-shadow: 0 0 0 10px color-mix(in srgb, currentColor 0%, transparent); }
+}
+
+.lp-animate-in {
+  animation: lp-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.lp-animate-in-fade {
+  animation: lp-fade-in 0.45s ease both;
+}
+
+.lp-animate-in-scale {
+  animation: lp-scale-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.lp-delay-1 { animation-delay: 60ms; }
+.lp-delay-2 { animation-delay: 120ms; }
+.lp-delay-3 { animation-delay: 180ms; }
+.lp-delay-4 { animation-delay: 240ms; }
+.lp-delay-5 { animation-delay: 300ms; }
+.lp-delay-6 { animation-delay: 360ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-animate-in, .lp-animate-in-fade, .lp-animate-in-scale {
+    animation: none;
+  }
+}
+
+/* ---- Shared component classes (used across every page) ---- */
+
+.lp-surface {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+
+/* Glass-like card with a faint top sheen */
+.lp-card {
+  background: linear-gradient(180deg, color-mix(in srgb, #fff 4%, var(--surface)), var(--surface));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 240ms ease, transform 240ms ease, border-color 240ms ease;
+}
+
+.lp-card--hover:hover,
+a.lp-card:hover,
+button.lp-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+}
+
+/* Small plain label above a section (no chip) */
+.lp-eyebrow {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft) !important;
+}
+
+.lp-eyebrow--center::after {
+  display: none;
+}
+
+/* Short two-colour bar under a headline */
+.lp-rule {
+  width: 64px;
+  height: 5px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+
+.lp-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-tag);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.lp-tag--accent {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+}
+
+.lp-tag--accent2 {
+  color: var(--accent-2);
+  border-color: color-mix(in srgb, var(--accent-2) 35%, var(--line));
+  background: color-mix(in srgb, var(--accent-2) 12%, var(--surface));
+}
+
+.lp-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-brand);
+  color: var(--accent-ink);
+  border: 0;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  box-shadow: var(--btn-shadow);
+}
+
+.lp-btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.lp-btn-primary:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+.lp-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, var(--line));
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.lp-btn-secondary:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  transform: translateY(-1px);
+}
+
+/* White button, used on the brand gradient panels */
+.lp-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 0.85rem 1.9rem;
+  border-radius: var(--radius-pill);
+  background: var(--gold-btn-bg);
+  color: var(--gold-btn-ink);
+  box-shadow: var(--btn-shadow);
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.lp-btn-gold:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.96);
+}
+
+.lp-social-icon {
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.lp-social-icon:hover {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.lp-avatar {
+  border-radius: var(--radius-pill);
+  object-fit: cover;
+}
+
+/* Headline words in the accent colour */
+.lp-gradient-text {
+  color: var(--accent);
+}
+
+/* Avatar ring in both brand colours */
+.lp-gradient-ring {
+  position: relative;
+}
+
+.lp-gradient-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  padding: 2.5px;
+  background: linear-gradient(135deg, var(--accent), var(--gold));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Glowing tile that holds an icon */
+.lp-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--accent);
+  box-shadow: var(--badge-glow);
+}
+
+.lp-hero-bg {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.lp-hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(45% 60% at 8% 0%, color-mix(in srgb, var(--accent) var(--glow-a), transparent), transparent 70%),
+    radial-gradient(40% 55% at 95% 8%, color-mix(in srgb, var(--accent-2) var(--glow-b), transparent), transparent 70%),
+    radial-gradient(40% 45% at 60% 105%, color-mix(in srgb, var(--gold) var(--glow-c), transparent), transparent 70%);
+}
+
+/* Faint grid that fades out toward the bottom of a hero */
+.lp-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px);
+  background-size: 52px 52px;
+  opacity: 0.7;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 80%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 80%);
+  pointer-events: none;
+}
+
+/* Auth / form card */
+.lp-auth-card {
+  background: linear-gradient(180deg, color-mix(in srgb, #fff 5%, var(--surface)), var(--surface));
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 2.5rem 2.25rem;
+  box-shadow: var(--shadow-card-hover);
+  position: relative;
+}
+
+.lp-auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  right: 2rem;
+  height: 4px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+
+/* Violet gradient panel (hero banners, CTAs) */
+.lp-navy-panel {
+  position: relative;
+  background: var(--gradient-hero);
+  color: var(--on-navy);
+  border: 1px solid var(--panel-border);
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+.lp-navy-panel::after {
+  content: '';
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  right: -100px;
+  top: -140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--panel-glow), transparent 70%);
+  pointer-events: none;
+}
+
+/* Footer: a soft grey band on the white theme, a deep panel on the dark one */
+.lp-footer {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+:root[data-theme='dark'] .lp-footer {
+  --ink: var(--on-navy);
+  --ink-soft: var(--on-navy-soft);
+  --line: rgb(255 255 255 / 0.1);
+  --accent: #5eead4;
+  --gold: #ff8a7a;
+  --surface: #0e2a27;
+  background: var(--navy-deep);
+  color: var(--on-navy);
+}
+
+/* ---- Legacy utilities kept for backward compatibility ---- */
+
+.text-gradient {
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Subtle dot texture on gradient panels */
+.bg-dots {
+  position: relative;
+}
+
+.bg-dots::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 8%, transparent) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+/* Decorative motion (floating words, drifting blobs) is intentionally off */
+.lp-blob-drift,
+.lp-float-1,
+.lp-float-2,
+.lp-float-3 {
+  display: none !important;
+}

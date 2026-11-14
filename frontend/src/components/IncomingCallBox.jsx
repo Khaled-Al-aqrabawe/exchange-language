@@ -99,6 +99,7 @@ export default function IncomingCallBox() {
   }
   const decline = () => {
     clearTimeout(timer.current)
+    client.post('/calls/decline/', { room_id: call.room_id }).catch(() => {})
     client.delete('/calls/incoming/').catch(() => {})
     setCall(null)
   }

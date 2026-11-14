@@ -27,7 +27,7 @@
   },
   "footer": {
     "tagline": "Centro Linguístico",
-    "copyright": "© {{year}} LinguaHub. Todos os direitos reservados.",
+    "copyright": "© {{year}} LanPro. Todos os direitos reservados.",
     "explore": "Explorar",
     "account": "Conta",
     "getStarted": "Comece"
@@ -45,7 +45,7 @@
     "badge": "Gratuito durante o acesso antecipado",
     "heroTitleLine1": "Aprenda um idioma por",
     "heroTitleLine2": "realmente falando isso",
-    "heroSubtitle": "O Lingua Hub conecta você com falantes nativos e outros alunos para prática real de conversação, além de cursos em vídeo estruturados para construir sua base.",
+    "heroSubtitle": "O LanPro conecta você com falantes nativos e outros alunos para prática real de conversação, além de cursos em vídeo estruturados para construir sua base.",
     "findAPartner": "Encontre um parceiro",
     "getStartedFree": "Comece gratuitamente",
     "learnMore": "Saber mais",
@@ -61,7 +61,7 @@
     },
     "realConversations": "Conversas reais",
     "practiceHeadline": "Pratique com pessoas, não com flashcards",
-    "practiceBody": "Aplicativos que apenas aprimoram o vocabulário só podem levar você até certo ponto. O Lingua Hub permite que você converse com uma pessoa real desde a primeira sessão: mensagens para planejar, vídeos para praticar e cursos para preencher as lacunas.",
+    "practiceBody": "Aplicativos que apenas aprimoram o vocabulário só podem levar você até certo ponto. O LanPro permite que você converse com uma pessoa real desde a primeira sessão: mensagens para planejar, vídeos para praticar e cursos para preencher as lacunas.",
     "practiceList": {
       "matched": "Correspondido por par de idiomas, nível e fuso horário",
       "builtin": "Bate-papo e vídeo integrados – nada para instalar",
@@ -84,14 +84,28 @@
       "freeBody": "Todos os recursos são desbloqueados durante o acesso antecipado – sem cartão de crédito, sem acesso pago."
     },
     "ctaTitle": "Gratuito para usar, sem pegadinhas",
-    "ctaBody": "O Lingua Hub é gratuito durante nossa fase de acesso antecipado — todos os recursos são desbloqueados desde o primeiro dia.",
-    "ctaButton": "Crie sua conta gratuita"
+    "ctaBody": "O LanPro é gratuito durante nossa fase de acesso antecipado — todos os recursos são desbloqueados desde o primeiro dia.",
+    "ctaButton": "Crie sua conta gratuita",
+    "strip": {
+      "levels": "Todos os níveis são bem-vindos",
+      "native": "Conversas ao vivo com falantes nativos",
+      "anytime": "A qualquer hora, em qualquer lugar, 24/7"
+    },
+    "goals": {
+      "title": "Comece pelos seus objetivos",
+      "body": "Recomendamos lições, temas e parceiros para ajudar você a alcançar seus objetivos. Você escolhe o que faz você falar.",
+      "cta": "Começar a aprender",
+      "card1Title": "Foque nos seus objetivos únicos",
+      "card1Body": "Diga o que quer dizer e com quem quer falar, e combinamos você com os parceiros e lições certos.",
+      "card2Title": "Escolha como aprender",
+      "card2Body": "Estudem uma lição estruturada juntos ou conversem livremente: a escolha é sua a cada sessão."
+    }
   },
   "about": {
     "eyebrow": "Sobre nós",
     "titlePrefix": "Fluência vem de",
     "titleHighlight": "conversa",
-    "intro": "O Lingua Hub existe porque a maneira mais rápida de aprender um idioma é falá-lo com outra pessoa. Conectamos alunos para intercâmbio de falantes nativos, prática entre pares e cursos estruturados e individualizados — tudo em um só lugar.",
+    "intro": "O LanPro existe porque a maneira mais rápida de aprender um idioma é falá-lo com outra pessoa. Conectamos alunos para intercâmbio de falantes nativos, prática entre pares e cursos estruturados e individualizados — tudo em um só lugar.",
     "missionEyebrow": "Nossa missão",
     "missionHeadline": "Torne a prática autêntica acessível a qualquer pessoa, em qualquer lugar",
     "missionBody": "Combinamos os alunos por par de idiomas, nível e fuso horário e, em seguida, saímos do caminho: vídeo e bate-papo integrados para que não haja nada extra para instalar e cursos para quando você quiser um pouco mais de estrutura entre as sessões.",
@@ -111,7 +125,7 @@
     "title": "Perguntas frequentes",
     "items": {
       "free": {
-        "q": "O LinguaHub é gratuito?",
+        "q": "O LanPro é gratuito?",
         "a": "Sim. Durante nossa fase de acesso antecipado, todos os recursos – troca de correspondência, prática entre pares, videochamadas e cursos – são totalmente gratuitos."
       },
       "matching": {
@@ -229,6 +243,10 @@
       "verifying": "Verificando...",
       "invalidCode": "Código incorreto ou expirado.",
       "success": "E-mail verificado! Agora você pode fazer login."
+    },
+    "google": {
+      "or": "ou",
+      "error": "Não foi possível entrar com o Google."
     }
   },
   "dashboard": {
@@ -254,7 +272,7 @@
       "Estabeleça uma meta semanal pequena e específica, como “pedir café” ou “contar uma história de 2 minutos” – metas vagas são fáceis de adiar."
     ],
     "howItWorksTitle": "Como funciona",
-    "whyTitle": "Por que os alunos escolhem o Lingua Hub",
+    "whyTitle": "Por que os alunos escolhem o LanPro",
     "stats": {
       "completed": "Sessões concluídas",
       "upcoming": "Próximas sessões",
@@ -286,7 +304,13 @@
     "noLesson": "Escolha um idioma que você está aprendendo em seu perfil para ver sua próxima lição aqui.",
     "availableNow": "Disponível agora",
     "availableNowEmpty": "Ninguém está online no momento. Agende uma sessão ou volte em breve.",
-    "noLessonsYet": "Ainda não há aulas de {{language}}. Volte em breve!"
+    "noLessonsYet": "Ainda não há aulas de {{language}}. Volte em breve!",
+    "greetingMorning": "Bom dia",
+    "greetingMorningWithName": "Bom dia, {{name}}",
+    "greetingAfternoon": "Boa tarde",
+    "greetingAfternoonWithName": "Boa tarde, {{name}}",
+    "greetingEvening": "Boa noite",
+    "greetingEveningWithName": "Boa noite, {{name}}"
   },
   "partners": {
     "eyebrow": "Parceiros",
@@ -362,7 +386,9 @@
     "lessonFilterNote": "Filtro opcional: escolha uma lição para ver apenas os parceiros que estão nessa lição no momento, ou seja, a próxima lição que eles não concluíram no idioma que estão aprendendo. As pessoas que aprendem o mesmo idioma que você são sempre mostradas apenas no seu próprio nível.",
     "showAll": "Mostrar todos os parceiros",
     "clearFilters": "Limpar filtros",
-    "scheduleShort": "Agendar"
+    "scheduleShort": "Agendar",
+    "quickChat": "Enviar uma mensagem rápida",
+    "openFullChat": "Abrir conversa completa"
   },
   "partnerProfile": {
     "loading": "Carregando...",
@@ -633,11 +659,19 @@
       "basics": "Noções básicas",
       "languages": "Idiomas",
       "video": "Vídeo de introdução",
-      "security": "Segurança"
+      "security": "Segurança",
+      "goals": "Objetivos"
     },
     "completion": "Completude do perfil",
     "completionHint": "Perfis completos recebem mais solicitações de parceiros.",
-    "introVideoHint": "Um pequeno vídeo ajuda os parceiros a conhecê-lo antes da primeira sessão."
+    "introVideoHint": "Um pequeno vídeo ajuda os parceiros a conhecê-lo antes da primeira sessão.",
+    "learningGoalsHint": "O que você quer alcançar? Os parceiros veem isso no seu perfil.",
+    "changeEmail": "Alterar e-mail",
+    "changeEmailSubtitle": "Seu e-mail é {{email}}. Digite sua senha para confirmar a alteração.",
+    "newEmail": "Novo e-mail",
+    "changeEmailButton": "Alterar e-mail",
+    "changeEmailSuccess": "E-mail alterado.",
+    "changeEmailError": "Não foi possível alterar o e-mail."
   },
   "settings": {
     "eyebrow": "Configurações",
@@ -649,7 +683,7 @@
     "appearance": "Aparência",
     "appearanceBody": "Alternar entre o modo claro e escuro.",
     "language": "Linguagem",
-    "languageBody": "Escolha o idioma usado no Lingua Hub.",
+    "languageBody": "Escolha o idioma usado no LanPro.",
     "logOut": "Sair"
   },
   "call": {
@@ -741,7 +775,10 @@
     "recordingNotice": "Por segurança, seu navegador mantém uma gravação da sessão de baixa qualidade. Ele é excluído quando você sai e só é enviado ao administrador se você ou seu parceiro registrarem uma denúncia.",
     "recordingBadge": "Gravação",
     "translate": "Traduzir",
-    "nextLesson": "Próxima lição"
+    "nextLesson": "Próxima lição",
+    "declinedTitle": "Chamada recusada",
+    "declinedBody": "A outra pessoa recusou sua chamada.",
+    "backToPartners": "Voltar aos parceiros"
   },
   "levels": {
     "beginner": "Novato",
@@ -883,5 +920,32 @@
     "today": "Hoje",
     "tomorrow": "Amanhã",
     "length": "Comprimento"
+  },
+  "mockup": {
+    "sara": "Sara",
+    "arabic": "Árabe",
+    "liveSession": "Sessão ao vivo",
+    "previewCamera": "Pré-visualizar câmera",
+    "cameraUnavailable": "Câmera indisponível",
+    "you": "Você",
+    "end": "Encerrar",
+    "call1": "Vamos praticar amanhã? 👋",
+    "call2": "Seu sotaque está ficando ótimo!",
+    "call3": "No mesmo horário semana que vem?",
+    "onlineNow": "Online agora",
+    "m1": "Oi! Vi que você está aprendendo árabe 👋",
+    "m2": "Sim! Adoraria praticar esta semana",
+    "m3": "Que tal quinta à noite?",
+    "m4": "Perfeito, até lá! 🎉"
+  },
+  "availability": {
+    "title": "O que você quer fazer agora?",
+    "subtitle": "Você está disponível agora. Escolha para que podem ligar para você.",
+    "both": "Ambos",
+    "lessonHint": "Podem ligar para estudar uma lição juntos",
+    "conversationHint": "Podem ligar só para conversar",
+    "bothHint": "Lições e conversa livre são ambos ótimos",
+    "later": "Agora não",
+    "confirm": "Salvar"
   }
 }

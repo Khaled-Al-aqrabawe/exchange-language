@@ -1,5 +1,4 @@
-import CallNowModal from '../components/CallNowModal'
-import { ArrowLeft, Phone, Send } from 'lucide-react'
+import { ArrowLeft, Send, User } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
@@ -27,12 +26,6 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
   const [connected, setConnected] = useState(false)
   const socketRef = useRef(null)
   const listRef = useRef(null)
-
-  // Same as "Call now": rings the partner and opens a real session (notes, rating, timer).
-  const [callOpen, setCallOpen] = useState(false)
-  const startCall = () => {
-    setCallOpen(true)
-  }
 
   useEffect(() => {
     let cancelled = false
@@ -72,7 +65,6 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
 
   return (
     <div className="flex h-full flex-col">
-      {callOpen && <CallNowModal partnerId={partner.id} partnerName={partner.full_name} onClose={() => setCallOpen(false)} />}
       {/* Header */}
       <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="flex min-w-0 items-center gap-3">
@@ -87,8 +79,10 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
             </Link>
           )}
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-bold leading-tight" style={{ color: 'var(--ink)' }}>
-              {partner?.full_name || t('conversationThread.conversation')}
+            <h2 className="truncate leading-tight" style={{ color: 'var(--ink)', fontSize: '1.05rem' }}>
+              {partner ? (
+                <Link to={`/partners/${partner.id}`} className="hover:underline underline-offset-2">{partner.full_name}</Link>
+              ) : t('conversationThread.conversation')}
             </h2>
             <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: connected ? '#34d399' : 'var(--ink-soft)' }}>
               <span
@@ -100,9 +94,9 @@ export default function ConversationThread({ conversationId, partner, onBack }) 
           </div>
         </div>
         {partner && (
-          <button type="button" onClick={startCall} className="lp-btn-primary shrink-0 text-sm" style={{ padding: '0.55rem 1.1rem' }}>
-            <Phone size={14} /> {t('conversationThread.videoCall')}
-          </button>
+          <Link to={`/partners/${partner.id}`} className="lp-btn-secondary shrink-0 text-sm" style={{ padding: '0.5rem 1rem' }}>
+            <User size={14} /> {t('partners.viewProfile')}
+          </Link>
         )}
       </div>
 

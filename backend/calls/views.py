@@ -65,6 +65,10 @@ class RingPartnerView(APIView):
         session_type = request.data.get('session_type', 'lesson')
         if session_type not in ('lesson', 'conversation'):
             raise ValidationError({'session_type': 'Choose a lesson or a free conversation.'})
+        accepted = getattr(getattr(partner, 'profile', None), 'available_types', 'both')
+        if accepted != 'both' and accepted != session_type:
+            raise ValidationError({'session_type': 'This partner only takes %s right now.' % (
+                'lessons' if accepted == 'lesson' else 'free conversation')})
         lesson = request.data.get('lesson')
         lesson = int(lesson) if session_type == 'lesson' and str(lesson or '').isdigit() else None
 
@@ -117,4 +121,33 @@ class IncomingCallView(APIView):
 
     def delete(self, request):
         cache.delete(_cache_key(request.user.id))
+        return Response(status=204)
+
+
+class DeclineCallView(APIView):
+    """The person being called said no: tell the caller (who is waiting in the call room) and
+    drop the unused instant session."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        room_id = request.data.get('room_id')
+        session = ScheduledSession.objects.filter(
+            room_id=room_id, partner=request.user, is_instant=True, partner_joined_at__isnull=True,
+        ).first()
+        cache.delete(_cache_key(request.user.id))
+        if not session:
+            return Response(status=204)
+        payload = {'event': 'call-declined', 'user_id': request.user.id}
+        try:
+            async_to_sync(get_channel_layer().group_send)(
+                f'call_{room_id}', {'type': 'call.signal', 'sender_channel': '', 'payload': payload},
+            )
+        except Exception:
+            logger.exception('Could not push call-declined over the channel layer')
+        if not session.host_joined_at:
+            session.delete()
+        else:
+            session.status = 'cancelled'
+            session.save(update_fields=['status'])
         return Response(status=204)

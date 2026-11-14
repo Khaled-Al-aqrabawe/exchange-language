@@ -1092,6 +1092,7 @@ export default function Call() {
     setSharedFiles((list) => (list.some((f) => f.file === material.file) ? list : [...list, material]))
   }
   const [showLeaveChoice, setShowLeaveChoice] = useState(false)
+  const [declined, setDeclined] = useState(false)
   const reminder5FiredRef = useRef(false)
   const reminder30FiredRef = useRef(false)
   const autoEndedRef = useRef(false)
@@ -1268,6 +1269,8 @@ export default function Call() {
         } else if (data.type === 'material-share-stop') {
           setSharedMaterial(null)
           setStrokes([])
+        } else if (data.event === 'call-declined') {
+          setDeclined(true)
         } else if (data.event === 'peer-left') {
           // A refreshing partner leaves and rejoins within a moment: only treat it as a
           // real departure if no working connection has been re-established by then.
@@ -1321,6 +1324,16 @@ export default function Call() {
     cameraStreamRef.current?.getTracks().forEach((tr) => tr.stop())
     screenStreamRef.current?.getTracks().forEach((tr) => tr.stop())
   }
+
+  // The person I called said no: tell me, then go back to the partners page.
+  useEffect(() => {
+    if (!declined) return undefined
+    cleanupMedia()
+    writeCallState(roomId, null)
+    const id = setTimeout(() => navigate('/partners', { replace: true }), 3000)
+    return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [declined])
 
   const setSessionStatus = (statusValue) => {
     if (!sessionId) return Promise.resolve()
@@ -2032,6 +2045,17 @@ export default function Call() {
       // the sidebar is always shown beside the call and takes its width, so the picture never sits under it
       className={`flex flex-col overflow-hidden bg-slate-950 md:pe-80 ${isFullscreen ? 'h-screen' : 'h-[calc(100vh-4rem)]'}`}
     >
+      {declined && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-6">
+          <div className="lp-surface max-w-sm p-6 text-center lp-animate-in-scale" role="alertdialog">
+            <p className="font-display text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('call.declinedTitle', 'Call declined')}</p>
+            <p className="mt-1 text-sm" style={{ color: 'var(--ink-soft)' }}>{t('call.declinedBody', 'The other person declined your call.')}</p>
+            <button type="button" onClick={() => navigate('/partners', { replace: true })} className="lp-btn-primary mt-4 w-full justify-center">
+              {t('call.backToPartners', 'Back to partners')}
+            </button>
+          </div>
+        </div>
+      )}
       <div className={`${isFullscreen ? 'max-w-none px-4' : 'max-w-6xl px-6'} mx-auto flex min-h-0 w-full flex-1 flex-col py-2`}>
         <div className="mb-2 flex shrink-0 items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">

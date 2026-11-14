@@ -40,6 +40,17 @@ export function AuthProvider({ children }) {
     const { data } = await client.post('/auth/login/', { email, password })
     localStorage.setItem('access_token', data.access)
     localStorage.setItem('refresh_token', data.refresh)
+    try { sessionStorage.removeItem('lp_avail_prompted') } catch { /* ignore */ }
+    setUser(data.user)
+    syncLanguageFromProfile(data.user)
+    return data
+  }
+
+  const googleLogin = async (credential) => {
+    const { data } = await client.post('/auth/google/', { credential })
+    localStorage.setItem('access_token', data.access)
+    localStorage.setItem('refresh_token', data.refresh)
+    try { sessionStorage.removeItem('lp_avail_prompted') } catch { /* ignore */ }
     setUser(data.user)
     syncLanguageFromProfile(data.user)
     return data
@@ -56,6 +67,7 @@ export function AuthProvider({ children }) {
     const { data } = await client.post('/auth/verify-email/', { email, code })
     localStorage.setItem('access_token', data.access)
     localStorage.setItem('refresh_token', data.refresh)
+    try { sessionStorage.removeItem('lp_avail_prompted') } catch { /* ignore */ }
     setUser(data.user)
     syncLanguageFromProfile(data.user)
     return data
@@ -69,13 +81,14 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    try { sessionStorage.removeItem('lp_avail_prompted') } catch { /* ignore */ }
     setUser(null)
   }
 
   return (
     <AuthContext.Provider
       value={{
-        user, loading, login,
+        user, loading, login, googleLogin,
         register, verifyEmail, resendVerification, logout, refreshUser: fetchMe,
       }}
     >

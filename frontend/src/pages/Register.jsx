@@ -1,3 +1,4 @@
+import GoogleButton from '../components/GoogleButton'
 import { CalendarDays, Globe2, Languages, Lock, Mail, MailCheck, Sparkles, UserPlus, UserRound, Users } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,7 +14,7 @@ const STEPS = ['account', 'about', 'languages']
 function IconField({ icon: Icon, children }) {
   return (
     <div className="relative">
-      <Icon size={18} className="absolute top-1/2 -translate-y-1/2 start-4 pointer-events-none z-10" style={{ color: 'var(--ink-soft)' }} />
+      <Icon size={16} className="absolute top-1/2 -translate-y-1/2 start-3.5 pointer-events-none z-10" style={{ color: 'var(--ink-faint)' }} />
       {children}
     </div>
   )
@@ -22,12 +23,12 @@ function IconField({ icon: Icon, children }) {
 function StepDots({ current }) {
   const index = STEPS.indexOf(current)
   return (
-    <div className="mb-6 flex items-center gap-2">
+    <div className="mb-7 flex items-center gap-1.5">
       {STEPS.map((s, i) => (
         <span
           key={s}
-          className="h-1.5 flex-1 rounded-full transition-all duration-300"
-          style={{ background: index >= i ? 'var(--gradient-brand)' : 'var(--line)' }}
+          className="h-0.5 flex-1 transition-colors duration-300"
+          style={{ background: index >= i ? 'var(--accent)' : 'var(--line)' }}
         />
       ))}
     </div>
@@ -114,7 +115,7 @@ export default function Register() {
           <StepHeader icon={MailCheck} title={t('auth.register.checkEmailTitle')} subtitle={t('auth.register.checkEmailBody', { email: registeredEmail })} />
           <EmailVerifyForm email={registeredEmail} onVerified={() => navigate('/home')} />
           <p className="mt-6 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
-            <Link to="/login" className="font-semibold" style={{ color: 'var(--accent)' }}>{t('auth.register.logIn')}</Link>
+            <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>{t('auth.register.logIn')}</Link>
           </p>
         </div>
       </AuthShell>
@@ -135,13 +136,13 @@ export default function Register() {
                   <div>
                     <label className={authLabelClass}>{t('auth.register.firstName')}</label>
                     <IconField icon={UserRound}>
-                      <input required value={form.first_name} onChange={update('first_name')} className={inputClass} style={inputStyle} />
+                      <input type="text" required value={form.first_name} onChange={update('first_name')} className={inputClass} style={inputStyle} />
                     </IconField>
                   </div>
                   <div>
                     <label className={authLabelClass}>{t('auth.register.lastName')}</label>
                     <IconField icon={UserRound}>
-                      <input required value={form.last_name} onChange={update('last_name')} className={inputClass} style={inputStyle} />
+                      <input type="text" required value={form.last_name} onChange={update('last_name')} className={inputClass} style={inputStyle} />
                     </IconField>
                   </div>
                 </div>
@@ -165,12 +166,18 @@ export default function Register() {
                     </IconField>
                   </div>
                 </div>
-                {accountError && <p className="text-sm" style={{ color: '#c1443d' }}>{accountError}</p>}
+                {accountError && <p
+                  className="px-3.5 py-2.5 text-sm"
+                  style={{ borderRadius: 'var(--radius-control)', color: 'var(--danger)', background: 'var(--danger-soft)', border: '1px solid color-mix(in srgb, var(--danger) 30%, var(--line))' }}
+                >
+                  {accountError}
+                </p>}
                 <button type="submit" className="lp-btn-primary w-full" style={{ height: '2.75rem', fontSize: '0.9rem' }}>{t('auth.register.continue')}</button>
               </form>
+              <GoogleButton onError={setAccountError} />
               <p className="mt-5 text-sm text-center" style={{ color: 'var(--ink-soft)' }}>
                 {t('auth.register.haveAccount')}{' '}
-                <Link to="/login" className="font-semibold" style={{ color: 'var(--accent)' }}>{t('auth.register.logIn')}</Link>
+                <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>{t('auth.register.logIn')}</Link>
               </p>
             </>
           )}
@@ -260,7 +267,12 @@ export default function Register() {
                     </IconField>
                   </div>
                 </div>
-                {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
+                {error && <p
+                  className="px-3.5 py-2.5 text-sm"
+                  style={{ borderRadius: 'var(--radius-control)', color: 'var(--danger)', background: 'var(--danger-soft)', border: '1px solid color-mix(in srgb, var(--danger) 30%, var(--line))' }}
+                >
+                  {error}
+                </p>}
                 <div className="flex gap-3">
                   <button type="button" onClick={() => setStep('about')} className="lp-btn-secondary w-full" style={{ height: '2.75rem', fontSize: '0.9rem' }}>{t('auth.register.back')}</button>
                   <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50" style={{ height: '2.75rem', fontSize: '0.9rem' }}>

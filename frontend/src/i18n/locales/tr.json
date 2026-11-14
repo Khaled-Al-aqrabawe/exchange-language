@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Lingua Hub",
+    "appName": "LanPro",
     "loading": "Yükleniyor...",
     "loadingDashboard": "Ana sayfan yükleniyor...",
     "seeAll": "Tümünü gör",
@@ -22,11 +22,12 @@
     "signUpFree": "Ücretsiz kaydol",
     "profile": "Profil",
     "settings": "Ayarlar",
-    "logOut": "Çıkış yap"
+    "logOut": "Çıkış yap",
+    "notes": "notlarım"
   },
   "footer": {
-    "tagline": "Lingua Hub",
-    "copyright": "© {{year}} Lingua Hub. All rights reserved.",
+    "tagline": "LanPro",
+    "copyright": "© {{year}} LanPro. All rights reserved.",
     "explore": "Keşfet",
     "account": "Hesap",
     "getStarted": "Başla"
@@ -44,7 +45,7 @@
     "badge": "Erken erişimde ücretsiz",
     "heroTitleLine1": "Bir dili gerçekten",
     "heroTitleLine2": "konuşarak öğren",
-    "heroSubtitle": "Lingua Hub, gerçek konuşma pratiği için seni ana dili konuşanlarla ve diğer öğrencilerle buluşturur; temellerini oluşturman için yapılandırılmış video kurslar da sunar.",
+    "heroSubtitle": "LanPro, gerçek konuşma pratiği için seni ana dili konuşanlarla ve diğer öğrencilerle buluşturur; temellerini oluşturman için yapılandırılmış video kurslar da sunar.",
     "findAPartner": "Partner bul",
     "getStartedFree": "Ücretsiz başla",
     "learnMore": "Daha fazla bilgi",
@@ -60,7 +61,7 @@
     },
     "realConversations": "Gerçek sohbetler",
     "practiceHeadline": "Kartlarla değil, insanlarla pratik yap",
-    "practiceBody": "Sadece kelime çalıştıran uygulamalar seni ancak belirli bir noktaya kadar götürür. Lingua Hub, daha ilk seansından itibaren seni gerçek biriyle konuşturur — planlamak için mesajlaşma, pratik için video ve boşlukları doldurmak için kurslar.",
+    "practiceBody": "Sadece kelime çalıştıran uygulamalar seni ancak belirli bir noktaya kadar götürür. LanPro, daha ilk seansından itibaren seni gerçek biriyle konuşturur — planlamak için mesajlaşma, pratik için video ve boşlukları doldurmak için kurslar.",
     "practiceList": {
       "matched": "Dil çifti, seviye ve saat dilimine göre eşleştirme",
       "builtin": "Yerleşik sohbet ve video — kurulacak hiçbir şey yok",
@@ -83,14 +84,28 @@
       "freeBody": "Erken erişim süresince tüm özellikler açık — kredi kartı yok, ücretli duvar yok."
     },
     "ctaTitle": "Ücretsiz kullanım, gizli koşul yok",
-    "ctaBody": "Lingua Hub, erken erişim aşamamız boyunca ücretsizdir — tüm özellikler ilk günden itibaren açıktır.",
-    "ctaButton": "Ücretsiz hesabını oluştur"
+    "ctaBody": "LanPro, erken erişim aşamamız boyunca ücretsizdir — tüm özellikler ilk günden itibaren açıktır.",
+    "ctaButton": "Ücretsiz hesabını oluştur",
+    "strip": {
+      "levels": "Her seviye hoş geldin",
+      "native": "Ana dili konuşanlarla canlı sohbetler",
+      "anytime": "Her zaman, her yerde, 7/24"
+    },
+    "goals": {
+      "title": "Hedeflerinle başla",
+      "body": "Hedeflerine ulaşmana yardımcı olacak dersler, konular ve partnerler öneriyoruz. Seni konuşturan şeyi sen seçersin.",
+      "cta": "Öğrenmeye başla",
+      "card1Title": "Kendi hedeflerine odaklan",
+      "card1Body": "Ne söylemek istediğini ve kiminle konuşmak istediğini anlat, sana uygun partner ve dersleri eşleştirelim.",
+      "card2Title": "Öğrenme şeklini seç",
+      "card2Body": "Birlikte yapılandırılmış bir ders çalış ya da serbestçe sohbet et - her oturumda karar senin."
+    }
   },
   "about": {
     "eyebrow": "Hakkımızda",
     "titlePrefix": "Akıcılık",
     "titleHighlight": "sohbetten doğar",
-    "intro": "Lingua Hub var, çünkü bir dili öğrenmenin en hızlı yolu onu başka biriyle gerçekten konuşmaktır. Öğrencileri ana dili konuşanlarla değişim, akranlarla pratik ve kendi hızında yapılandırılmış kurslar için tek bir yerde bir araya getiriyoruz.",
+    "intro": "LanPro var, çünkü bir dili öğrenmenin en hızlı yolu onu başka biriyle gerçekten konuşmaktır. Öğrencileri ana dili konuşanlarla değişim, akranlarla pratik ve kendi hızında yapılandırılmış kurslar için tek bir yerde bir araya getiriyoruz.",
     "missionEyebrow": "Misyonumuz",
     "missionHeadline": "Gerçek pratiği herkes için, her yerde erişilebilir kılmak",
     "missionBody": "Öğrencileri dil çifti, seviye ve saat dilimine göre eşleştirir, sonra araya girmeyiz — yerleşik video ve sohbet sayesinde kurulacak ekstra bir şey olmaz, seanslar arasında biraz daha yapı istediğinde kurslar devreye girer.",
@@ -110,7 +125,7 @@
     "title": "Sık Sorulan Sorular",
     "items": {
       "free": {
-        "q": "Lingua Hub ücretsiz mi?",
+        "q": "LanPro ücretsiz mi?",
         "a": "Evet. Erken erişim aşamamız boyunca değişim eşleştirmesi, akran pratiği, video görüşmeleri ve kurslar dahil tüm özellikler tamamen ücretsizdir."
       },
       "matching": {
@@ -178,7 +193,12 @@
       "successTitle": "Şifre sıfırlandı",
       "successBody": "Şifren değiştirildi. Artık giriş yapabilirsin.",
       "backToLogin": "Girişe dön",
-      "resendCode": "Kodu yeniden gönder"
+      "resendCode": "Kodu yeniden gönder",
+      "pickAvailableTime": "Müsait zamanlarından birini seçin",
+      "noAvailability": "Bu ortağın şu anda müsait zamanı yok.",
+      "chooseStart": "Başlangıç ​​zamanı",
+      "startBetween": "{{from}} ve {{to}} arasında bir başlangıç ​​zamanı seçin.",
+      "passwordIncomplete": "Mevcut ve yeni şifrenizi girin."
     },
     "register": {
       "quote": "“Ana dilimi öğretmek, öğrendiğim dili nasıl açıklayacağımı öğretti.”",
@@ -210,7 +230,11 @@
       "continue": "Devam et",
       "back": "Geri",
       "confirmPassword": "Şifreyi onayla",
-      "passwordMismatch": "Şifreler eşleşmiyor."
+      "passwordMismatch": "Şifreler eşleşmiyor.",
+      "nativeLanguage": "Benim ana dilim",
+      "canTeach": "Öğretebileceğim başka bir dil (isteğe bağlı)",
+      "none": "Hiçbiri",
+      "wantToLearn": "Öğrenmek istediğim dil"
     },
     "verifyEmail": {
       "codeLabel": "Doğrulama kodu",
@@ -219,6 +243,10 @@
       "verifying": "Doğrulanıyor...",
       "invalidCode": "Kod hatalı veya süresi dolmuş.",
       "success": "E-posta doğrulandı! Artık giriş yapabilirsin."
+    },
+    "google": {
+      "or": "veya",
+      "error": "Google ile giriş yapılamadı."
     }
   },
   "dashboard": {
@@ -239,11 +267,12 @@
       "'Kahve sipariş etmek' ya da '2 dakikalık bir hikaye anlatmak' gibi küçük, somut bir haftalık hedef koy — belirsiz hedefler kolayca ertelenir."
     ],
     "howItWorksTitle": "Nasıl çalışır",
-    "whyTitle": "Öğrenciler neden Lingua Hub'ı seçiyor",
+    "whyTitle": "Öğrenciler neden LanPro'ı seçiyor",
     "stats": {
       "completed": "Tamamlanan oturumlar",
       "upcoming": "Yaklaşan oturumlar",
-      "partners": "Bağlantı kurulan partnerler"
+      "partners": "Bağlantı kurulan partnerler",
+      "lessons": "Tamamlanan dersler"
     },
     "findAPartner": "Partner bul",
     "quickActions": {
@@ -262,7 +291,26 @@
     "keepLearningEmpty": "Henüz kurs yok.",
     "exchange": "Değişim",
     "peer": "Akran",
-    "emptyStateBody": "Partnerlerle bağlantı kurdukça ve kurslar eklendikçe bu sayfa dolacak — başlamak için <link>Partner bul</link> sayfasına git."
+    "emptyStateBody": "Partnerlerle bağlantı kurdukça ve kurslar eklendikçe bu sayfa dolacak — başlamak için <link>Partner bul</link> sayfasına git.",
+    "courseProgress": "Kurs ilerlemeniz",
+    "lessonsDone": "{{total}} derslerinden {{done}} tamamlandı",
+    "continueLesson": "Devam · Ders {{n}}",
+    "courseDone": "Kurs tamamlandı 🎉",
+    "continueTitle": "Bir sonraki dersinize devam edin",
+    "viewLessons": "Tüm dersler",
+    "practiceLesson": "Bu ders için bir ortak bulun",
+    "levelProgress": "Bu seviyede tamamlanan {{total}} derslerinin {{done}}'si",
+    "allDone": "Her dersi tamamladın. Harika iş!",
+    "noLesson": "Bir sonraki dersinizi burada görmek için profilinizde öğrendiğiniz bir dili seçin.",
+    "availableNow": "Şu anda mevcut",
+    "availableNowEmpty": "Şu anda kimse çevrimiçi değil. Bir oturum planlayın veya kısa süre sonra tekrar kontrol edin.",
+    "noLessonsYet": "Henüz {{language}} dersi yok. Yakında tekrar kontrol edin!",
+    "greetingMorning": "Günaydın",
+    "greetingMorningWithName": "Günaydın, {{name}}",
+    "greetingAfternoon": "İyi günler",
+    "greetingAfternoonWithName": "İyi günler, {{name}}",
+    "greetingEvening": "İyi akşamlar",
+    "greetingEveningWithName": "İyi akşamlar, {{name}}"
   },
   "partners": {
     "eyebrow": "Partnerler",
@@ -306,7 +354,41 @@
     "exchangeMatch": "Değişim eşleşmesi",
     "peerPractice": "Aynı dilde pratik",
     "speaksLearning": "{{native}} konuşuyor · {{learning}} öğreniyor",
-    "viewProfile": "Profili görüntüle"
+    "viewProfile": "Profili görüntüle",
+    "visibilityNow": "Şu anda mevcut",
+    "visibilityScheduled": "Planlanmış mevcut",
+    "emptyNow": "Şu anda kimse çevrimiçi ve müsait değil. Yaklaşan zamanlar için \"Planlanmış müsait\" seçeneğini işaretleyin.",
+    "time": "Zaman",
+    "callNow": "Şimdi ara",
+    "levelFilter": "Seviye",
+    "levelFilterNote": "İsteğe bağlı filtre: yalnızca öğrendikleri dilde o seviyede olan ortakları görmek için bir seviye (A1'den C2'ye) seçin. Sizinle aynı dili öğrenen kişiler her zaman yalnızca kendi seviyenizde gösterilir.",
+    "sessionType": "Oturum türü",
+    "typeLesson": "Derslerden",
+    "typeConversation": "Ücretsiz konuşma",
+    "lessonOptional": "Ders (isteğe bağlı)",
+    "lessonFinished": "bitti",
+    "typeLessonHint": "Kursun bir dersini birlikte çalışın",
+    "typeConversationHint": "Sadece hoşunuza giden herhangi bir şey hakkında konuşun",
+    "iTeach": "öğretmek istiyorum",
+    "teaches": "Öğretebilir",
+    "learning": "Öğrenme",
+    "myAvailableTimesSubtitle": "Ortakların görebileceği ve sizden isteyebileceği zamanlar.",
+    "noAvailableTimes": "Henüz müsait bir zaman eklemediniz.",
+    "repeatsWeekly": "Haftalık olarak tekrarlanır",
+    "endAdjusted": "Oturumu en az 40 dakika tutacak şekilde bitiş saati kaydırıldı.",
+    "sessionSoon": "{{count}} dakika içinde bir oturumu var",
+    "typeBoth": "İkisi birden",
+    "minDurationError": "Kullanılabilir bir süre en az 40 dakika uzunluğunda olmalıdır.",
+    "callNowSubtitle": "{{name}} ile ne yapmak istiyorsunuz?",
+    "lessonFilter": "Ders",
+    "anyLesson": "Herhangi bir ders",
+    "lessonOption": "Ders {{n}}",
+    "lessonFilterNote": "İsteğe bağlı filtre: Yalnızca şu anda o derste olan ortakları görmek için bir ders seçin; bu, öğrendikleri dilde henüz tamamlamadıkları bir sonraki ders anlamına gelir. Sizinle aynı dili öğrenen kişiler her zaman yalnızca kendi seviyenizde gösterilir.",
+    "showAll": "Tüm ortakları göster",
+    "clearFilters": "Filtreleri temizle",
+    "scheduleShort": "Takvim",
+    "quickChat": "Hızlı mesaj gönder",
+    "openFullChat": "Sohbeti tam aç"
   },
   "partnerProfile": {
     "loading": "Yükleniyor...",
@@ -339,14 +421,23 @@
     "ratingSummary": "{{rating}} ({{count}})",
     "availability": "Uygunluk",
     "availabilityBookHint": "Bir zamana dokunarak o zaman dilimi için seans talebi gönder.",
-    "book": "Rezerve et"
+    "book": "Rezerve et",
+    "myNotesHint": "Birlikte yaptığınız seanslardan. Bunları yalnızca siz görebilirsiniz.",
+    "myNotes": "Bu kişi hakkındaki notlarınız"
   },
   "messages": {
     "title": "Mesajlar",
     "loading": "Yükleniyor...",
     "empty": "Henüz konuşma yok. Başlamak için bir partnerin profilinden mesaj gönder.",
     "noMessagesYet": "Henüz mesaj yok",
-    "selectConversation": "Bir konuşma seç"
+    "selectConversation": "Bir konuşma seç",
+    "eyebrow": "Sohbet",
+    "search": "Konuşmaları arayın",
+    "noResults": "Aramanızla eşleşen konuşma yok.",
+    "you": "Sen",
+    "back": "Geri",
+    "findPartners": "İş ortakları bulun",
+    "selectHint": "Soldan bir konuşma seçin veya bir iş ortağına profilinden mesaj gönderin."
   },
   "conversationThread": {
     "connected": "Bağlandı",
@@ -354,7 +445,10 @@
     "videoCall": "Video görüşme",
     "typeAMessage": "Bir mesaj yaz...",
     "send": "Gönder",
-    "conversation": "Konuşma"
+    "conversation": "Konuşma",
+    "today": "Bugün",
+    "yesterday": "Dün",
+    "sayHello": "Merhaba deyin ve pratik yapmaya başlayın!"
   },
   "schedule": {
     "dateFrom": "Başlangıç",
@@ -430,7 +524,20 @@
     "rateSubmit": "Değerlendirmeyi gönder",
     "ratingRequired": "Lütfen bir yıldız değerlendirmesi seç.",
     "outsideAvailability": "Bu saat partnerin uygun olduğu saatlerin dışında. Lütfen aşağıda gösterilen uygunluk saatlerinden birini seç.",
-    "partnerAvailability": "Uygun saatler:"
+    "partnerAvailability": "Uygun saatler:",
+    "lowRatingReason": "Lütfen neden düşük puan verdiğinizi yazın.",
+    "lowRatingPlaceholder": "Neyin yanlış gittiğini bize bildirin (gerekli)...",
+    "eyebrow": "Oturumlar",
+    "subtitle": "Rezervasyon yaptığınız seanslar, istekleriniz ve geçmiş antrenmanlarınız tek bir yerde.",
+    "findPartners": "Bir ortak bulun",
+    "tab": {
+      "all": "Tüm",
+      "upcoming": "Yaklaşan",
+      "past": "Tamamlanmış",
+      "uncompleted": "Tamamlanmadı",
+      "closed": "İptal edildi"
+    },
+    "requestSubtitle": "İkiniz için de uygun bir partner ve zaman seçin."
   },
   "courses": {
     "title": "Kurslar",
@@ -456,7 +563,25 @@
     "sharedByPartner": "paylaştı",
     "openFile": "Dosyayı aç",
     "pickMaterial": "Paylaşmak için bir materyal seç",
-    "stopSharing": "Paylaşımı durdur"
+    "stopSharing": "Paylaşımı durdur",
+    "level": "Seviye",
+    "filesCount": "{{count}} dersleri",
+    "allLevels": "Tüm seviyeler",
+    "language": "Dil",
+    "files": "Dosyalar",
+    "upload": "Yüklemek",
+    "uploading": "Yükleniyor...",
+    "uploaded": "{{count}} dosya(lar)ı yüklendi.",
+    "uploadError": "Yükleme başarısız oldu. Lütfen tekrar deneyin.",
+    "delete": "Silmek",
+    "confirmDelete": "\"{{title}}\" silinsin mi?",
+    "completed": "Tamamlanmış",
+    "inProgress": "Devam ediyor - slayt {{slide}}",
+    "levelDone": "Kurs tamamlandı",
+    "progressCount": "{{total}}'nin {{done}}'si tamamlandı",
+    "downloadLevel": "Tam seviyeyi indir",
+    "preparing": "Hazırlanıyor...",
+    "pickHint": "Bir sonraki dersiniz vurgulanır."
   },
   "coursePlayer": {
     "loading": "Yükleniyor...",
@@ -524,7 +649,29 @@
       "friday": "Cuma",
       "saturday": "Cumartesi",
       "sunday": "Pazar"
-    }
+    },
+    "myNativeLanguage": "Benim ana dilim",
+    "tabs": {
+      "video": "Giriş videosu",
+      "security": "Güvenlik",
+      "basics": "Temel bilgiler",
+      "languages": "Diller",
+      "goals": "Hedefler"
+    },
+    "completion": "Profil bütünlüğü",
+    "completionHint": "Tam profiller daha fazla iş ortağı isteği alır.",
+    "introVideoHint": "Kısa bir video, ortakların ilk oturumdan önce sizi tanımasına yardımcı olur.",
+    "learningLanguages": "Öğrenmek istediğim dil",
+    "learningLanguagesHint": "Öğrendiğiniz dili seçin. Ortaklar her zaman bu konuda eşleştirilir.",
+    "spokenLanguages": "Öğretebileceğim diller",
+    "spokenLanguagesHint": "Ana dilinizin yanı sıra, iyi konuştuğunuz her dili (minimum B1) ekleyin ve başkalarına yardımcı olabilirsiniz. Seviyenizi seçin veya sınava girin.",
+    "learningGoalsHint": "Neyi başarmak istiyorsun? Partnerler bunu profilinde görür.",
+    "changeEmail": "E-postayı değiştir",
+    "changeEmailSubtitle": "E-postan {{email}}. Değişikliği onaylamak için şifreni gir.",
+    "newEmail": "Yeni e-posta",
+    "changeEmailButton": "E-postayı değiştir",
+    "changeEmailSuccess": "E-posta değiştirildi.",
+    "changeEmailError": "E-posta değiştirilemedi."
   },
   "settings": {
     "eyebrow": "Ayarlar",
@@ -536,7 +683,7 @@
     "appearance": "Görünüm",
     "appearanceBody": "Açık ve koyu mod arasında geçiş yap.",
     "language": "Dil",
-    "languageBody": "Lingua Hub genelinde kullanılan dili seç.",
+    "languageBody": "LanPro genelinde kullanılan dili seç.",
     "logOut": "Çıkış yap"
   },
   "call": {
@@ -567,7 +714,71 @@
     "leaveChoiceBody": "Planlanan süre henüz dolmadı. Bu seansı nasıl işaretlemek istersin?",
     "markComplete": "Tamamlandı olarak işaretle",
     "markIncomplete": "Tamamlanmadı olarak işaretle",
-    "cancelLeave": "Görüşmede kal"
+    "cancelLeave": "Görüşmede kal",
+    "stopTheirShare": "Ekran paylaşımlarını durdurun",
+    "incoming": "{{name}} seni aramak istiyor",
+    "answer": "Cevap",
+    "decline": "Reddetmek",
+    "ringError": "Arama başlatılamadı. Lütfen tekrar deneyin.",
+    "yourTurn": "Sıra sende",
+    "partnerTurn": "Partnerin sırası",
+    "yourPartner": "ortağın",
+    "requestedByNote": "{{name}} bu oturum için istek gönderdi.",
+    "youStartedNote": "Bu oturumu başlattınız. Sıra önce gelir.",
+    "turnElapsedMine": "Sıranızın {{minutes}} dakikası geçti.",
+    "turnElapsedPartner": "Ortağınızın sırasının {{minutes}} dakikası geçti.",
+    "finishLesson": "Dersi bitir",
+    "startAtSlide": "{{n}} slaytından başlayın",
+    "finishedTitle": "Bu dersi bitirdiniz mi?",
+    "finishedYes": "Evet tamamlandı",
+    "finishedNo": "Hayır tamamlanmadı",
+    "finishedNone": "hiç çalışmadım",
+    "stoppedAtLabel": "Hangi slaytta durdunuz?",
+    "stoppedAtSave": "Kaydetmek",
+    "progressError": "İlerlemeniz kaydedilemedi. Lütfen tekrar deneyin.",
+    "joinTitle": "Katılmaya hazır mısınız?",
+    "joinHint": "Kameranız ve mikrofonunuz kapalı. İsterseniz bunları açın ve ardından katılın.",
+    "joinNow": "Şimdi katıl",
+    "back": "Geri",
+    "cameraOff": "Kamera kapalı",
+    "skipRating": "Atlamak",
+    "rateAndContinue": "Partnerinizi derecelendirin",
+    "notes": "Notlar",
+    "notesPlaceholder": "Notlarınızı buraya yazın. Otomatik olarak kaydedilirler.",
+    "notesSaving": "Kaydediliyor...",
+    "notesSaved": "Kaydedildi",
+    "notesError": "Kaydedilmedi",
+    "notesNotSaved": "Hesabınıza kaydedilmedi",
+    "downloadNotes": "Notları indir",
+    "downloadsTitle": "İndirmek",
+    "pen": "Dolma kalem",
+    "clearDrawing": "Çizimi temizle",
+    "sendToAdmin": "Yöneticiye gönder",
+    "sentToAdmin": "Yöneticiye gönderildi",
+    "text": "Metin",
+    "selectText": "Seçin, taşıyın veya düzenleyin",
+    "undo": "Geri al",
+    "youGoFirstProgress": "İlk siz gidin çünkü daha fazla dersi tamamladınız.",
+    "partnerGoesFirstProgress": "Partneriniz daha fazla ders tamamladığı için ilk sırada yer alır.",
+    "together": "Birlikte çalışmak",
+    "togetherNote": "İkiniz de aynı dili öğreniyorsunuz, dolayısıyla sıra beklemeden birlikte çalışıyorsunuz. Ders kim daha fazlasını yaptıysa ondan başlar.",
+    "sessionElapsed": "Seansın {{minutes}} dakikası geçti.",
+    "skipAndLeave": "Atla ve ayrıl",
+    "chat": "Sohbet",
+    "chatPlaceholder": "Bir mesaj yazın...",
+    "chatSend": "Göndermek",
+    "downloadSummary": "Oturum özetini indir",
+    "chatAndNotes": "Sohbet ve notlar",
+    "share": "Paylaşmak",
+    "shareFile": "Ders dosyasını paylaşma",
+    "stopShareFile": "Dosyayı paylaşmayı durdur",
+    "recordingNotice": "Güvenliğiniz için tarayıcınız oturumun düşük kaliteli kaydını tutar. Ayrıldığınızda silinir ve yalnızca siz veya partneriniz bir rapor sunduğunda yöneticiye gönderilir.",
+    "recordingBadge": "Kayıt",
+    "translate": "Çevir",
+    "nextLesson": "Sonraki ders",
+    "declinedTitle": "Arama reddedildi",
+    "declinedBody": "Karşı taraf aramanızı reddetti.",
+    "backToPartners": "Partnerlere dön"
   },
   "levels": {
     "beginner": "Başlangıç",
@@ -592,5 +803,149 @@
     "seeAll": "Tüm bildirimleri gör",
     "pageTitle": "Bildirimler",
     "pageSubtitle": "Seanslarınla ilgili her şey, tek bir yerde."
+  },
+  "levelExam": {
+    "title": "{{language}} seviye testi",
+    "questionOf": "{{total}}'nin {{current}} sorusu",
+    "next": "Sonraki",
+    "finish": "Sona ermek",
+    "yourLevel": "{{language}} seviyeniz:",
+    "continue": "Bu seviyeyi kullan",
+    "takeExam": "Seviye sınavına girin",
+    "speakMin": "Konuştuğunuz dillerin en az B1 düzeyinde olması gerekir.",
+    "chooseLevel": "Seviye seçin",
+    "required": "Bir seviye seçin veya sınava girin",
+    "notEnough": "{{language}} seviyeniz ({{level}}), konuştuğunuz dil olarak listelenmek için yeterli değildir; en azından {{min}}'ye ihtiyacınız vardır. Bunun yerine öğrenmek istediğiniz dillerin arasına ekleyebilirsiniz."
+  },
+  "presence": {
+    "on": "Şu anda mevcut",
+    "off": "Müsait değil"
+  },
+  "notes": {
+    "title": "notlarım",
+    "subtitle": "Beğendiğiniz herhangi bir şeyi yazın ve geçmiş derslerinizdeki notlara tekrar bakın.",
+    "empty": "Henüz ders notu yok. Görüşme sırasında not defterini açtığınızda yazdıklarınız burada görünecektir.",
+    "emptyGeneral": "Henüz not yok. Bir not oluşturun ve istediğiniz her şeyi yazın.",
+    "newNote": "Yeni not",
+    "tabGeneral": "notlarım",
+    "tabSessions": "Derslerden",
+    "titlePlaceholder": "Başlık",
+    "writeHere": "Buraya bir şey yaz...",
+    "delete": "Silmek",
+    "confirmDelete": "Bu not silinsin mi?",
+    "with": "{{name}} ile Oturum",
+    "download": "İndirmek",
+    "saving": "Kaydediliyor...",
+    "saved": "Kaydedildi",
+    "error": "Kaydedilemedi",
+    "eyebrow": "Defter",
+    "search": "Notlarınızı arayın",
+    "openSession": "Açık oturum",
+    "noResults": "Aramanızla eşleşen not yok."
+  },
+  "report": {
+    "link": "Sorun bildir",
+    "title": "{{name}} ile ilgili bir sorunu bildirin",
+    "subtitle": "Ne olduğunu seçin. Yönetici bunu görecektir.",
+    "chooseReason": "Lütfen sorunun ne olduğunu seçin.",
+    "detailsRequired": "Lütfen sorunla ilgili birkaç kelime yazın.",
+    "detailsPlaceholder": "Bize daha fazlasını anlatın (isteğe bağlı)...",
+    "send": "Raporu gönder",
+    "error": "Rapor gönderilemedi. Lütfen tekrar deneyin.",
+    "sentTitle": "Rapor gönderildi",
+    "sentBody": "Teşekkür ederim. Yönetici bunu aldı ve inceleyecek. Artık görüşmeden ayrılıyorsunuz.",
+    "reasons": {
+      "harassment": "Taciz veya istismar",
+      "inappropriate_content": "Uygunsuz içerik",
+      "no_show": "ortaya çıkmadı",
+      "late_or_left_early": "Geç veya erken ayrıldı",
+      "off_topic": "Dili pratik etmemek",
+      "technical": "Ses veya video sorunları",
+      "fake_profile": "Sahte profil",
+      "spam": "İstenmeyen e-posta",
+      "other": "Diğer"
+    },
+    "leaveNow": "Şimdi ayrıl",
+    "uploading": "Kayıt gönderiliyor..."
+  },
+  "summary": {
+    "readyTitle": "Oturum tamamlandı",
+    "readyBody": "Oturum özetiniz hazır. Notlarınızı, sohbetinizi ve paylaşılan derslerinizi saklamak için indirin.",
+    "close": "Kapalı",
+    "title": "{{name}} ile Oturum",
+    "link": "Özet",
+    "back": "Seanslarıma geri dön",
+    "download": "Özeti indir",
+    "notFound": "Bu oturum özeti mevcut değil.",
+    "files": "Paylaşılan dersler",
+    "words": "Çevirdiğiniz kelimeler",
+    "noFiles": "Hiçbir ders dosyası paylaşılmadı.",
+    "notes": "Notlarınız",
+    "noNotes": "Herhangi bir not yazmadınız.",
+    "history": "Notlarınız nasıl değişti?",
+    "versionAt": "Sürüm {{n}} - {{time}}",
+    "chat": "Oturum sırasında sohbet edin",
+    "noChat": "Hiçbir mesaj gönderilmedi.",
+    "you": "Sen",
+    "rating": "Derecelendirmeniz",
+    "status": {
+      "completed": "Tamamlanmış",
+      "not_completed": "Tamamlanmadı",
+      "confirmed": "Onaylandı",
+      "pending": "Askıda olması",
+      "cancelled": "İptal edildi",
+      "rejected": "Reddedilmiş"
+    },
+    "progress": {
+      "complete": "Tamamlanmış",
+      "partial": "{{slide}} slaytında durduruldu",
+      "not_started": "Başlatılmadı"
+    }
+  },
+  "translate": {
+    "hint": "Çevirisini burada görmek ve duymak için slayttaki bir kelimeye tıklayın veya bir ifadenin üzerine sürükleyin.",
+    "slide": "{{total}}'nin {{n}} slaytı",
+    "emptySlide": "Bu slaytta metin yok.",
+    "noText": "Bu dosyada okunabilir slayt metni yok. Bunun yerine aşağıya bir kelime yazın.",
+    "shareFirst": "Metnini burada görmek için bir ders dosyasını paylaşın veya aşağıya bir kelime yazın.",
+    "placeholder": "Bir kelime yazın...",
+    "go": "Çevir",
+    "loading": "Çeviri...",
+    "error": "Çeviri şu anda kullanılamıyor.",
+    "listen": "Dinlemek",
+    "addToNotes": "Notlara ekle",
+    "addedToNotes": "Notlara eklendi"
+  },
+  "modal": {
+    "today": "Bugün",
+    "tomorrow": "Yarın",
+    "length": "Uzunluk"
+  },
+  "mockup": {
+    "sara": "Sara",
+    "arabic": "Arapça",
+    "liveSession": "Canlı oturum",
+    "previewCamera": "Kamerayı önizle",
+    "cameraUnavailable": "Kamera kullanılamıyor",
+    "you": "Sen",
+    "end": "Bitir",
+    "call1": "Yarın pratik yapalım mı? 👋",
+    "call2": "Aksanın çok güzelleşiyor!",
+    "call3": "Gelecek hafta aynı saatte?",
+    "onlineNow": "Şu an çevrimiçi",
+    "m1": "Merhaba! Arapça öğrendiğini gördüm 👋",
+    "m2": "Evet! Bu hafta pratik yapmak isterim",
+    "m3": "Perşembe akşamı olur mu?",
+    "m4": "Harika, o zaman görüşürüz! 🎉"
+  },
+  "availability": {
+    "title": "Şimdi ne yapmak istiyorsun?",
+    "subtitle": "Şu an müsaitsin. İnsanların seni ne için arayabileceğini seç.",
+    "both": "İkisi de",
+    "lessonHint": "İnsanlar seni birlikte ders çalışmak için arayabilir",
+    "conversationHint": "İnsanlar seni sadece sohbet için arayabilir",
+    "bothHint": "Dersler ve serbest sohbet ikisi de uygun",
+    "later": "Şimdi değil",
+    "confirm": "Kaydet"
   }
 }

@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
-const inputClass = 'w-full rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent'
-const inputStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
+const inputClass = 'w-full px-3.5'
+const inputStyle = { borderRadius: 'var(--radius-control)', height: '2.75rem' }
 
 export default function EmailVerifyForm({ email, onVerified }) {
   const { t } = useTranslation()
@@ -36,7 +36,7 @@ export default function EmailVerifyForm({ email, onVerified }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>{t('auth.verifyEmail.codeLabel')}</label>
+        <label className="block text-[13px] font-medium mb-1.5" style={{ color: 'var(--ink-soft)' }}>{t('auth.verifyEmail.codeLabel')}</label>
         <input
           type="text"
           inputMode="numeric"
@@ -50,11 +50,18 @@ export default function EmailVerifyForm({ email, onVerified }) {
           placeholder={t('auth.verifyEmail.codePlaceholder')}
         />
       </div>
-      {error && <p className="text-sm" style={{ color: '#c1443d' }}>{error}</p>}
-      <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50">
+      {error && (
+        <p
+          className="px-3.5 py-2.5 text-sm"
+          style={{ borderRadius: 'var(--radius-control)', color: 'var(--danger)', background: 'var(--danger-soft)', border: '1px solid color-mix(in srgb, var(--danger) 30%, var(--line))' }}
+        >
+          {error}
+        </p>
+      )}
+      <button type="submit" disabled={submitting} className="lp-btn-primary w-full disabled:opacity-50" style={{ height: '2.75rem' }}>
         {submitting ? t('auth.verifyEmail.verifying') : t('auth.verifyEmail.verify')}
       </button>
-      <button type="button" onClick={handleResend} disabled={resent} className="text-sm font-semibold w-full disabled:opacity-50" style={{ color: 'var(--accent)' }}>
+      <button type="button" onClick={handleResend} disabled={resent} className="text-[13px] font-medium w-full disabled:opacity-50" style={{ color: 'var(--accent)' }}>
         {resent ? t('auth.register.resent') : t('auth.register.resend')}
       </button>
     </form>

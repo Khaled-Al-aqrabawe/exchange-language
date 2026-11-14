@@ -17,9 +17,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = [
             'bio', 'gender', 'country', 'date_of_birth', 'age', 'ui_language', 'native_language',
             'learning_language', 'learning_languages', 'spoken_languages', 'language_levels', 'proficiency_level', 'timezone', 'learning_goals', 'avatar',
-            'intro_video', 'available_now', 'updated_at',
+            'intro_video', 'available_now', 'available_types', 'updated_at',
         ]
-        read_only_fields = ['avatar', 'intro_video', 'age', 'updated_at', 'available_now']
+        read_only_fields = ['avatar', 'intro_video', 'age', 'updated_at', 'available_now', 'available_types']
 
     def validate(self, attrs):
         langs = attrs.get('learning_languages')

@@ -49,14 +49,14 @@ export default function ModalShell({ icon: Icon, title, subtitle, onClose, child
 }
 
 export const modalInputClass = 'h-12 w-full rounded-2xl px-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
-export const modalInputStyle = { background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--ink)' }
+export const modalInputStyle = { fontSize: '0.8125rem', fontWeight: 500, background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--ink)' }
 
 // A labelled form field; `icon` sits inside the left of the control
 export function ModalField({ label, icon: Icon, hint, children, className = '' }) {
   return (
     <label className={`block ${className}`}>
       <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{label}</span>
-      <span className="relative block">
+      <span className={`relative block ${Icon ? '[&_input]:ps-11! [&_select]:ps-11! [&_textarea]:ps-11!' : ''}`}>
         {Icon && <Icon size={16} className="pointer-events-none absolute start-4 top-1/2 z-10 -translate-y-1/2" style={{ color: 'var(--accent)' }} />}
         {children}
       </span>

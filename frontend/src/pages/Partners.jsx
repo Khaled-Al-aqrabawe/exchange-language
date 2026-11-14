@@ -6,6 +6,9 @@ import client from '../api/client'
 import ModalShell, { Chip, ModalField, Switch, localDateString, modalInputClass, modalInputStyle } from '../components/ModalShell'
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import CallNowModal from '../components/CallNowModal'
+import ConversationThread from './ConversationThread'
+import { flagUrl } from '../utils/countries'
+import AvailabilityTypeModal from '../components/AvailabilityTypeModal'
 import SessionTypePicker, { FINISHED_STYLE, lessonLabel, useMyLessons } from '../components/SessionTypePicker'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -103,7 +106,7 @@ function AddAvailabilityModal({ onClose, onSaved }) {
       date: todayStr(),
       start_time: start,
       end_time: timeStrPlusMinutes(start, 40),
-      weekly: true,
+      weekly: false,
       native_language: speakOptions[0] || '',
       session_type: 'lesson',
       lesson: '',
@@ -307,6 +310,9 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, filterType, o
     .filter((slot) => !filterType || (slot.session_type || 'lesson') === filterType)
     .filter((slot) => !filterTime || (slot.start_time.slice(0, 5) <= filterTime && filterTime <= slot.end_time.slice(0, 5)))
 
+  // Scheduling is only offered when the partner has at least one upcoming available time.
+  const canSchedule = (p.availability || []).some((slot) => !isSlotExpiredToday(slot))
+
   // The card shows the nearest day of each kind (a free conversation day and a lesson day),
   // with every time that falls on that day.
   const slotDate = (slot) => (!slot.is_recurring && slot.specific_date
@@ -367,7 +373,10 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, filterType, o
         </Link>
         {p.country && (
           <p className="mt-0.5 inline-flex items-center gap-1 text-xs" style={{ color: 'var(--ink-soft)' }}>
-            <MapPin size={12} /> {p.country}
+            {flagUrl(p.country)
+              ? <img src={flagUrl(p.country)} alt="" className="h-3 w-[18px] rounded-[2px] object-cover" style={{ boxShadow: '0 0 0 1px var(--line)' }} onError={(e) => { e.currentTarget.style.display = 'none' }} />
+              : <MapPin size={12} />}
+            {p.country}
           </p>
         )}
 
@@ -438,25 +447,30 @@ function PartnerCard({ p, i, t, i18n, filterDayOfWeek, filterTime, filterType, o
             <button type="button" onClick={() => onCall(p)} className="lp-btn-primary w-full">
               <Phone size={15} /> {t('partners.callNow')}
             </button>
-          ) : (
+          ) : canSchedule ? (
             <button type="button" onClick={() => onSchedule(p)} className="lp-btn-primary w-full">
               <CalendarPlus size={15} /> {t('partnerProfile.scheduleSession')}
             </button>
-          )}
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => onMessage(p)} className="lp-btn-secondary" style={{ padding: '0.55rem 0.5rem' }}>
-              <MessageCircle size={14} /> {t('partnerProfile.message')}
+          ) : (
+            <button type="button" onClick={() => onMessage(p)} className="lp-btn-primary w-full">
+              <MessageCircle size={15} /> {t('partnerProfile.message')}
             </button>
-            {p.is_available_now ? (
-              <button type="button" onClick={() => onSchedule(p)} className="lp-btn-secondary" style={{ padding: '0.55rem 0.5rem' }}>
-                <CalendarPlus size={14} /> {t('partners.scheduleShort')}
+          )}
+          {(p.is_available_now || canSchedule) && (
+            <div className={`grid gap-2 ${p.is_available_now && canSchedule ? 'grid-cols-2' : ''}`}>
+              <button type="button" onClick={() => onMessage(p)} className="lp-btn-secondary" style={{ padding: '0.55rem 0.5rem' }}>
+                <MessageCircle size={14} /> {t('partnerProfile.message')}
               </button>
-            ) : (
-              <Link to={`/partners/${p.user_id}`} className="lp-btn-secondary" style={{ padding: '0.55rem 0.5rem' }}>
-                <User size={14} /> {t('partners.viewProfile')}
-              </Link>
-            )}
-          </div>
+              {p.is_available_now && canSchedule && (
+                <button type="button" onClick={() => onSchedule(p)} className="lp-btn-secondary" style={{ padding: '0.55rem 0.5rem' }}>
+                  <CalendarPlus size={14} /> {t('partners.scheduleShort')}
+                </button>
+              )}
+            </div>
+          )}
+          <Link to={`/partners/${p.user_id}`} className="lp-btn-secondary w-full" style={{ padding: '0.55rem 0.5rem' }}>
+            <User size={14} /> {t('partners.viewProfile')}
+          </Link>
         </div>
       </div>
     </article>
@@ -473,45 +487,82 @@ export default function Partners() {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibility, setVisibility] = useState('now')
-  const [filters, setFilters] = useState({ type: '' }) // '' = both kinds
+  const [filters, setFilters] = useState({ type: '', lesson: '', date: '', time: '' }) // type '' = both kinds
+  const myLessons = useMyLessons()
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
+  const [chat, setChat] = useState(null) // { id, partner } for the floating chat window
   const [showMyTimes, setShowMyTimes] = useState(false)
   const [callTarget, setCallTarget] = useState(null)
+  const [typeModal, setTypeModal] = useState(null) // current choice while the "what do you want to do" box is open
+
+  // First visit of this login: if "Available now" is on, ask what the person is up for.
+  useEffect(() => {
+    let seen = false
+    try { seen = !!sessionStorage.getItem('lp_avail_prompted') } catch { /* ignore */ }
+    if (seen) return
+    client.post('/auth/me/presence/', {})
+      .then(({ data }) => {
+        try { sessionStorage.setItem('lp_avail_prompted', '1') } catch { /* ignore */ }
+        if (data.available_now) setTypeModal(data.available_types || 'both')
+      })
+      .catch(() => {})
+  }, [])
+
+  // "Not now": the person is not available after all, so switch "Available now" off.
+  const goUnavailable = () => {
+    client.post('/auth/me/presence/', { available: false }).catch(() => {})
+    window.dispatchEvent(new CustomEvent('lp-presence', { detail: false }))
+    setTypeModal(null)
+  }
+
+  const saveAvailableTypes = async (types) => {
+    await client.post('/auth/me/presence/', { types })
+    setTypeModal(null)
+  }
 
   const load = () => {
     setLoading(true)
     const params = {}
     if (learningLanguage) params.language = learningLanguage
+    if (visibility === 'scheduled') {
+      if (filters.type === 'lesson' && filters.lesson) params.lesson = filters.lesson
+      if (filters.date) params.day = dateToDayOfWeek(filters.date)
+    }
     client.get('/matching/partners/', { params })
       .then(({ data }) => setPartners(data))
       .finally(() => setLoading(false))
   }
 
-  useEffect(load, [filters, learningLanguage, t])
+  useEffect(load, [filters, visibility, learningLanguage, t])
 
-  // With a session type picked, only partners who offered that kind of time are listed.
-  const matchesType = (p) => !filters.type || p.availability?.some((slot) => (slot.session_type || 'lesson') === filters.type)
-  const availableNow = partners.filter((p) => p.is_available_now && matchesType(p))
-  const allPartners = partners.filter(matchesType)
+  // Scheduled tab: partners who offered a time of the chosen kind (both kinds when none is picked).
+  const slotMatches = (slot) =>
+    (!filters.type || (slot.session_type || 'lesson') === filters.type)
+    && (!filters.time || (slot.start_time.slice(0, 5) <= filters.time && filters.time <= slot.end_time.slice(0, 5)))
+  const withAvailability = partners.filter((p) => p.availability?.some(slotMatches))
+  const availableNow = partners.filter((p) => p.is_available_now && (!filters.type || !p.available_types || p.available_types === 'both' || p.available_types === filters.type))
   // Highest-rated first; unrated partners last. Array#sort is stable, so ties keep the
   // server order (exchange matches first).
   const byRating = (list) => [...list].sort((x, y) => (y.average_rating || 0) - (x.average_rating || 0))
-  const visiblePartners = byRating(visibility === 'now' ? availableNow : allPartners)
+  const visiblePartners = byRating(
+    visibility === 'now' ? availableNow : visibility === 'scheduled' ? withAvailability : partners,
+  )
 
   const handleCall = (p) => {
-    setCallTarget({ id: p.user_id, name: p.full_name })
+    setCallTarget({ id: p.user_id, name: p.full_name, types: p.available_types })
   }
 
   const handleMessage = async (p) => {
     const { data } = await client.post('/chat/conversations/start/', { partner_id: p.user_id })
-    navigate(`/messages/${data.id}`)
+    setChat({ id: data.id, partner: { id: p.user_id, full_name: p.full_name } })
   }
 
   const tabs = [
     ['now', t('partners.visibilityNow'), availableNow.length],
-    ['all', t('partners.visibilityAll'), allPartners.length],
+    ['scheduled', t('partners.visibilityScheduled'), withAvailability.length],
+    ['all', t('partners.visibilityAll'), partners.length],
   ]
-  const hasFilters = !!filters.type
+  const hasFilters = !!(filters.type || filters.lesson || filters.date || filters.time)
 
   return (
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
@@ -542,7 +593,11 @@ export default function Partners() {
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setVisibility(key)}
+                    onClick={() => {
+                      setVisibility(key)
+                      // lesson, date and time belong to the scheduled tab; the session type also applies to "now"
+                      if (key !== 'scheduled') setFilters((f) => ({ type: key === 'all' ? '' : f.type, lesson: '', date: '', time: '' }))
+                    }}
                     className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
                     style={visibility === key
                       ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
@@ -563,7 +618,7 @@ export default function Partners() {
               {hasFilters && (
                 <button
                   type="button"
-                  onClick={() => setFilters({ type: '' })}
+                  onClick={() => setFilters({ type: '', lesson: '', date: '', time: '' })}
                   className="text-sm font-semibold hover:opacity-70"
                   style={{ color: 'var(--accent)' }}
                 >
@@ -572,24 +627,48 @@ export default function Partners() {
               )}
             </div>
 
-            <div className="mt-4">
-              <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.sessionType', 'Session type')}</span>
-              <div className="inline-flex h-11 items-center gap-1 rounded-xl p-1" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
-                {[['', Layers, t('partners.typeBoth', 'Both')], ['lesson', BookOpen, t('partners.typeLesson', 'From the lessons')], ['conversation', MessagesSquare, t('partners.typeConversation', 'Free conversation')]].map(([value, Icon, label]) => (
-                  <button
-                    key={value || 'both'}
-                    type="button"
-                    onClick={() => setFilters({ type: value })}
-                    className="inline-flex h-full items-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-bold transition-all"
-                    style={filters.type === value
-                      ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
-                      : { color: 'var(--ink-soft)' }}
-                  >
-                    <Icon size={15} /> {label}
-                  </button>
-                ))}
+            {visibility !== 'all' && (
+              <div className="mt-4 flex flex-wrap items-end gap-4">
+                <div>
+                  <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.sessionType', 'Session type')}</span>
+                  <div className="inline-flex h-11 items-center gap-1 rounded-xl p-1" style={{ background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+                    {[['', Layers, t('partners.typeBoth', 'Both')], ['lesson', BookOpen, t('partners.typeLesson', 'From the lessons')], ['conversation', MessagesSquare, t('partners.typeConversation', 'Free conversation')]].map(([value, Icon, label]) => (
+                      <button
+                        key={value || 'both'}
+                        type="button"
+                        onClick={() => setFilters({ ...filters, type: value, lesson: '' })}
+                        className="inline-flex h-full items-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-bold transition-all"
+                        style={filters.type === value
+                          ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
+                          : { color: 'var(--ink-soft)' }}
+                      >
+                        <Icon size={15} /> {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {visibility === 'scheduled' && filters.type === 'lesson' && (
+                  <FilterField label={t('partners.lessonFilter')} icon={GraduationCap} className="w-full sm:w-64">
+                    <select value={filters.lesson} onChange={(e) => setFilters({ ...filters, lesson: e.target.value })} className={fieldClass} style={fieldStyle}>
+                      <option value="">{t('partners.anyLesson')}</option>
+                      {myLessons.map((l) => <option key={l.order} value={l.order} style={l.finished ? FINISHED_STYLE : undefined}>{lessonLabel(t, l)}</option>)}
+                    </select>
+                  </FilterField>
+                )}
+                {visibility === 'scheduled' && (<>
+                <FilterField label={t('partners.date')} icon={CalendarCheck} className="w-full sm:w-52">
+                  <input type="date" min={todayStr()} value={filters.date} onChange={(e) => setFilters({ ...filters, date: e.target.value })} className={fieldClass} style={fieldStyle} />
+                </FilterField>
+                </>)}
               </div>
-            </div>
+            )}
+
+            {visibility === 'scheduled' && filters.type === 'lesson' && (
+              <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
+                <Info size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />
+                {t('partners.lessonFilterNote')}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -615,7 +694,7 @@ export default function Partners() {
               <Search size={22} />
             </span>
             <p className="mx-auto max-w-sm text-sm" style={{ color: 'var(--ink-soft)' }}>
-              {visibility === 'now' ? t('partners.emptyNow') : t('partners.empty')}
+              {visibility === 'now' ? t('partners.emptyNow') : visibility === 'scheduled' ? t('partners.emptyAvailable') : t('partners.empty')}
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {visibility !== 'all' && (
@@ -624,7 +703,7 @@ export default function Partners() {
                 </button>
               )}
               {hasFilters && (
-                <button type="button" onClick={() => setFilters({ type: '' })} className="lp-btn-secondary">
+                <button type="button" onClick={() => setFilters({ type: '', lesson: '', date: '', time: '' })} className="lp-btn-secondary">
                   {t('partners.clearFilters')}
                 </button>
               )}
@@ -639,7 +718,9 @@ export default function Partners() {
                 i={i}
                 t={t}
                 i18n={i18n}
-                filterType={filters.type || undefined}
+                filterDayOfWeek={visibility === 'scheduled' && filters.date ? dateToDayOfWeek(filters.date) : null}
+                filterTime={visibility === 'scheduled' ? filters.time : ''}
+                filterType={visibility !== 'all' ? filters.type || undefined : undefined}
                 onMessage={handleMessage}
                 onCall={handleCall}
                 onSchedule={(partner, slotId) => setScheduleFor({ ...partner, slotId })}
@@ -653,13 +734,30 @@ export default function Partners() {
         <SendSessionRequestModal
           lockedPartnerId={scheduleFor.user_id}
           initialSlotId={scheduleFor.slotId}
-          sessionType={filters.type || undefined}
+          sessionType={visibility !== 'all' ? filters.type || undefined : undefined}
           onClose={() => setScheduleFor(null)}
           onSent={load}
         />
       )}
 
-      {callTarget && <CallNowModal partnerId={callTarget.id} partnerName={callTarget.name} onClose={() => setCallTarget(null)} />}
+      {chat && (
+        <div className="fixed bottom-4 end-4 z-40 h-[32rem] max-h-[calc(100vh-6rem)] w-[22rem] max-w-[calc(100vw-2rem)]">
+          <button
+            type="button"
+            onClick={() => setChat(null)}
+            className="lp-surface absolute -top-3 -end-3 z-10 flex h-8 w-8 items-center justify-center rounded-full hover:opacity-80"
+            style={{ color: 'var(--ink)', boxShadow: 'var(--shadow-card-hover)' }}
+            aria-label={t('common.close', 'Close')}
+          >
+            <X size={16} />
+          </button>
+          <div className="lp-surface lp-animate-in-scale h-full overflow-hidden" style={{ boxShadow: 'var(--shadow-card-hover)' }}>
+            <ConversationThread key={chat.id} conversationId={chat.id} partner={chat.partner} />
+          </div>
+        </div>
+      )}
+      {typeModal && <AvailabilityTypeModal current={typeModal} onSave={saveAvailableTypes} onLater={goUnavailable} onClose={() => setTypeModal(null)} />}
+      {callTarget && <CallNowModal partnerId={callTarget.id} partnerName={callTarget.name} allowedTypes={callTarget.types || 'both'} onClose={() => setCallTarget(null)} />}
 
       {showMyTimes && (
         <MyAvailabilityModal

@@ -12,7 +12,7 @@ STRINGS = {
             'minutes': '{n} minutes',
         },
         'verify': {
-            'subject': 'Verify your Lingua Hub account',
+            'subject': 'Verify your LanPro account',
             'preheader': 'Your verification code is {code}.',
             'heading': 'Confirm your email address',
             'body': 'Hi {name}, enter the code below on the website to verify your email and activate your account. It expires in 24 hours.',
@@ -20,7 +20,7 @@ STRINGS = {
             'text_expiry': 'This code expires in 24 hours. If you did not create this account, you can ignore this email.',
         },
         'login_code': {
-            'subject': 'Your Lingua Hub login code',
+            'subject': 'Your LanPro login code',
             'preheader': 'Your login code is {code}.',
             'heading': 'Your login code',
             'body': 'Hi {name}, use this code to finish logging in. It expires in 10 minutes.',
@@ -28,7 +28,7 @@ STRINGS = {
             'text_expiry': 'This code expires in 10 minutes. If you did not try to log in, you can ignore this email.',
         },
         'password_reset': {
-            'subject': 'Reset your Lingua Hub password',
+            'subject': 'Reset your LanPro password',
             'preheader': 'Your password reset code is {code}.',
             'heading': 'Reset your password',
             'body': 'Hi {name}, use this code to set a new password. It expires in 15 minutes.',
@@ -72,7 +72,7 @@ STRINGS = {
             'minutes': '{n} دقيقة',
         },
         'verify': {
-            'subject': 'تحقق من حساب Lingua Hub الخاص بك',
+            'subject': 'تحقق من حساب LanPro الخاص بك',
             'preheader': 'رمز التحقق الخاص بك هو {code}.',
             'heading': 'تأكيد بريدك الإلكتروني',
             'body': 'مرحبًا {name}، أدخل الرمز أدناه في الموقع للتحقق من بريدك الإلكتروني وتفعيل حسابك. ينتهي صلاحيته خلال 24 ساعة.',
@@ -80,7 +80,7 @@ STRINGS = {
             'text_expiry': 'تنتهي صلاحية هذا الرمز خلال 24 ساعة. إذا لم تُنشئ هذا الحساب، يمكنك تجاهل هذه الرسالة.',
         },
         'login_code': {
-            'subject': 'رمز تسجيل الدخول الخاص بك في Lingua Hub',
+            'subject': 'رمز تسجيل الدخول الخاص بك في LanPro',
             'preheader': 'رمز تسجيل الدخول الخاص بك هو {code}.',
             'heading': 'رمز تسجيل الدخول',
             'body': 'مرحبًا {name}، استخدم هذا الرمز لإكمال تسجيل الدخول. تنتهي صلاحيته خلال 10 دقائق.',
@@ -88,7 +88,7 @@ STRINGS = {
             'text_expiry': 'تنتهي صلاحية هذا الرمز خلال 10 دقائق. إذا لم تحاول تسجيل الدخول، يمكنك تجاهل هذه الرسالة.',
         },
         'password_reset': {
-            'subject': 'إعادة تعيين كلمة مرور Lingua Hub',
+            'subject': 'إعادة تعيين كلمة مرور LanPro',
             'preheader': 'رمز إعادة تعيين كلمة المرور الخاص بك هو {code}.',
             'heading': 'إعادة تعيين كلمة المرور',
             'body': 'مرحبًا {name}، استخدم هذا الرمز لتعيين كلمة مرور جديدة. تنتهي صلاحيته خلال 15 دقيقة.',
@@ -192,7 +192,7 @@ STRINGS = {
             'minutes': '{n} minutos',
         },
         'verify': {
-            'subject': 'Verifica tu cuenta de Lingua Hub',
+            'subject': 'Verifica tu cuenta de LanPro',
             'preheader': 'Tu código de verificación es {code}.',
             'heading': 'Confirma tu correo electrónico',
             'body': 'Hola {name}, introduce el siguiente código en el sitio web para verificar tu correo y activar tu cuenta. Caduca en 24 horas.',
@@ -200,7 +200,7 @@ STRINGS = {
             'text_expiry': 'Este código caduca en 24 horas. Si no creaste esta cuenta, puedes ignorar este correo.',
         },
         'login_code': {
-            'subject': 'Tu código de inicio de sesión de Lingua Hub',
+            'subject': 'Tu código de inicio de sesión de LanPro',
             'preheader': 'Tu código de inicio de sesión es {code}.',
             'heading': 'Tu código de inicio de sesión',
             'body': 'Hola {name}, usa este código para completar el inicio de sesión. Caduca en 10 minutos.',
@@ -208,7 +208,7 @@ STRINGS = {
             'text_expiry': 'Este código caduca en 10 minutos. Si no intentaste iniciar sesión, puedes ignorar este correo.',
         },
         'password_reset': {
-            'subject': 'Restablece tu contraseña de Lingua Hub',
+            'subject': 'Restablece tu contraseña de LanPro',
             'preheader': 'Tu código para restablecer la contraseña es {code}.',
             'heading': 'Restablece tu contraseña',
             'body': 'Hola {name}, usa este código para establecer una nueva contraseña. Caduca en 15 minutos.',
@@ -252,7 +252,7 @@ STRINGS = {
             'minutes': '{n} minutes',
         },
         'verify': {
-            'subject': 'Vérifiez votre compte Lingua Hub',
+            'subject': 'Vérifiez votre compte LanPro',
             'preheader': 'Votre code de vérification est {code}.',
             'heading': 'Confirmez votre adresse e-mail',
             'body': 'Bonjour {name}, saisissez le code ci-dessous sur le site pour vérifier votre e-mail et activer votre compte. Il expire dans 24 heures.',
@@ -260,7 +260,7 @@ STRINGS = {
             'text_expiry': "Ce code expire dans 24 heures. Si vous n'avez pas créé ce compte, vous pouvez ignorer cet e-mail.",
         },
         'login_code': {
-            'subject': 'Votre code de connexion Lingua Hub',
+            'subject': 'Votre code de connexion LanPro',
             'preheader': 'Votre code de connexion est {code}.',
             'heading': 'Votre code de connexion',
             'body': 'Bonjour {name}, utilisez ce code pour terminer la connexion. Il expire dans 10 minutes.',
@@ -268,7 +268,7 @@ STRINGS = {
             'text_expiry': "Ce code expire dans 10 minutes. Si vous n'avez pas essayé de vous connecter, vous pouvez ignorer cet e-mail.",
         },
         'password_reset': {
-            'subject': 'Réinitialisez votre mot de passe Lingua Hub',
+            'subject': 'Réinitialisez votre mot de passe LanPro',
             'preheader': 'Votre code de réinitialisation est {code}.',
             'heading': 'Réinitialisez votre mot de passe',
             'body': 'Bonjour {name}, utilisez ce code pour définir un nouveau mot de passe. Il expire dans 15 minutes.',
@@ -312,7 +312,7 @@ STRINGS = {
             'minutes': '{n} dakika',
         },
         'verify': {
-            'subject': 'Lingua Hub hesabını doğrula',
+            'subject': 'LanPro hesabını doğrula',
             'preheader': 'Doğrulama kodun: {code}.',
             'heading': 'E-posta adresini onayla',
             'body': 'Merhaba {name}, e-postanı doğrulamak ve hesabını etkinleştirmek için aşağıdaki kodu web sitesine gir. Kodun süresi 24 saat içinde dolar.',
@@ -320,7 +320,7 @@ STRINGS = {
             'text_expiry': 'Bu kodun süresi 24 saat içinde dolar. Bu hesabı sen oluşturmadıysan bu e-postayı yok sayabilirsin.',
         },
         'login_code': {
-            'subject': 'Lingua Hub giriş kodun',
+            'subject': 'LanPro giriş kodun',
             'preheader': 'Giriş kodun: {code}.',
             'heading': 'Giriş kodun',
             'body': 'Merhaba {name}, girişini tamamlamak için bu kodu kullan. 10 dakika içinde süresi dolar.',
@@ -328,7 +328,7 @@ STRINGS = {
             'text_expiry': 'Bu kodun süresi 10 dakika içinde dolar. Giriş yapmayı denemediysen bu e-postayı yok sayabilirsin.',
         },
         'password_reset': {
-            'subject': 'Lingua Hub şifreni sıfırla',
+            'subject': 'LanPro şifreni sıfırla',
             'preheader': 'Şifre sıfırlama kodun: {code}.',
             'heading': 'Şifreni sıfırla',
             'body': 'Merhaba {name}, yeni bir şifre belirlemek için bu kodu kullan. 15 dakika içinde süresi dolar.',

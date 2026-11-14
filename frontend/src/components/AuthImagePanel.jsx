@@ -5,17 +5,17 @@ import { avatarUrl } from '../utils/images'
 
 const chipSeeds = ['auth-1', 'auth-2', 'auth-3']
 
-// Purely decorative multilingual "hello"s drifting around the panel — not UI
-// copy, so intentionally not run through i18n.
+// A quiet row of multilingual "hello"s closing the panel — not UI copy, so
+// intentionally not run through i18n.
 const GREETINGS = [
-  { text: 'Hello', top: '12%', start: '8%', size: 'text-base', float: 'lp-float-1' },
-  { text: 'مرحبا', top: '22%', start: '68%', size: 'text-2xl', float: 'lp-float-2' },
-  { text: 'Bonjour', top: '46%', start: '4%', size: 'text-lg', float: 'lp-float-3' },
-  { text: 'こんにちは', top: '66%', start: '62%', size: 'text-base', float: 'lp-float-1' },
-  { text: 'Hola', top: '30%', start: '32%', size: 'text-xl', float: 'lp-float-2' },
-  { text: 'Merhaba', top: '8%', start: '48%', size: 'text-sm', float: 'lp-float-3' },
-  { text: '你好', top: '58%', start: '84%', size: 'text-2xl', float: 'lp-float-1' },
-  { text: 'Hallo', top: '36%', start: '82%', size: 'text-sm', float: 'lp-float-2' },
+  { text: 'Hello' },
+  { text: 'مرحبا' },
+  { text: 'Bonjour' },
+  { text: 'こんにちは' },
+  { text: 'Hola' },
+  { text: 'Merhaba' },
+  { text: '你好' },
+  { text: 'Hallo' },
 ]
 
 export default function AuthImagePanel({ quote }) {
@@ -36,73 +36,74 @@ export default function AuthImagePanel({ quote }) {
 
   return (
     <div
-      className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-dots p-10"
-      style={{ background: 'linear-gradient(155deg, #0b3b3a 0%, #0d9488 60%, #14b8a6 100%)' }}
+      className="relative hidden lg:flex flex-col justify-between overflow-hidden p-12"
+      style={{
+        // a soft mid-tone: periwinkle fading to mint, dark text on top
+        background: 'linear-gradient(155deg, #c3d0f2 0%, #b9d6ea 55%, #aee2d3 100%)',
+        '--ink': '#0b1a2c', '--ink-soft': 'rgb(11 26 44 / 0.75)', '--ink-faint': 'rgb(11 26 44 / 0.55)',
+        '--line': 'rgb(11 26 44 / 0.16)', '--line-strong': 'rgb(11 26 44 / 0.28)', '--surface-2': '#c3d0f2',
+      }}
     >
-      <div
-        className="pointer-events-none absolute -top-32 -right-20 h-96 w-96 rounded-full blur-3xl lp-blob-drift"
-        style={{ background: 'rgb(255 255 255 / 0.14)' }}
-      />
-      <div
-        className="pointer-events-none absolute -bottom-32 -left-20 h-96 w-96 rounded-full blur-3xl lp-blob-drift"
-        style={{ background: 'rgb(255 107 87 / 0.38)', animationDelay: '3s' }}
-      />
-      <div
-        className="pointer-events-none absolute top-1/3 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl lp-blob-drift"
-        style={{ background: 'rgb(255 255 255 / 0.08)', animationDelay: '6s' }}
-      />
-
-      {GREETINGS.map((g, i) => (
-        <span
-          key={g.text}
-          className={`pointer-events-none absolute font-display font-semibold text-white/25 ${g.size} ${g.float}`}
-          style={{ top: g.top, insetInlineStart: g.start, animationDelay: `${(i % 3) * 0.7}s` }}
-        >
-          {g.text}
+      <span className="pointer-events-none absolute -bottom-24 -end-24 h-72 w-72 rounded-full" style={{ background: '#fff', opacity: 0.25 }} />
+      <span className="pointer-events-none absolute -top-16 -start-16 h-48 w-48 rounded-full" style={{ background: '#fff', opacity: 0.18 }} />
+      <div className="relative flex items-center gap-2.5">
+        <BrandMark className="h-8 w-8" />
+        <span className="font-display text-lg font-semibold tracking-tight" style={{ color: '#0b1a2c' }}>
+          Lan<span style={{ color: '#1b4d7a' }}>Pro</span>
         </span>
-      ))}
-
-      <div className="relative flex items-center gap-2 text-white">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white shadow-lg">
-          <BrandMark className="h-8 w-8" />
-        </span>
-        <span className="text-xl font-extrabold tracking-tight">Lingua<span style={{ color: '#ffb4a8' }}>Hub</span></span>
       </div>
 
       <div className="relative">
-        <div className="flex -space-x-3 mb-6">
+        <div className="flex -space-x-2 rtl:space-x-reverse mb-7">
           {chipSeeds.map((seed) => (
-            <img key={seed} src={avatarUrl(seed, 64)} alt="" className="h-10 w-10 rounded-full ring-2 ring-[#0d9488] object-cover" />
+            <img
+              key={seed}
+              src={avatarUrl(seed, 64)}
+              alt=""
+              className="lp-avatar h-9 w-9"
+              style={{ border: '1px solid var(--line-strong)', outline: '2px solid var(--surface-2)' }}
+            />
           ))}
         </div>
 
         <div key={active} className="lp-animate-in-fade min-h-[7rem]">
           {slide.kind === 'quote' ? (
-            <p className="text-white text-2xl font-semibold leading-snug max-w-md tracking-tight">
+            <p className="lp-serif text-[1.9rem] leading-snug max-w-md" style={{ color: '#0b1a2c' }}>
               {slide.text}
             </p>
           ) : (
             <>
-              <p className="text-white text-2xl font-bold leading-snug max-w-md tracking-tight mb-2">
+              <p className="lp-serif text-[1.9rem] leading-snug max-w-md mb-2.5" style={{ color: '#0b1a2c' }}>
                 {slide.headline}
               </p>
-              <p className="text-white/75 text-sm leading-relaxed max-w-md">
+              <p className="text-sm leading-relaxed max-w-md" style={{ color: 'var(--ink-soft)' }}>
                 {slide.body}
               </p>
             </>
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 mt-5">
+        <div className="flex items-center gap-1.5 mt-7">
           {slides.map((_, i) => (
             <button
               key={i}
               type="button"
               onClick={() => setActive(i)}
               aria-label={`Slide ${i + 1}`}
-              className="h-1.5 rounded-full transition-all duration-300"
-              style={{ width: i === active ? '20px' : '6px', background: i === active ? '#ffffff' : 'rgb(255 255 255 / 0.3)' }}
+              className="h-1 rounded-full transition-all duration-300"
+              style={{ width: i === active ? '24px' : '10px', background: i === active ? '#1b4d7a' : 'rgb(11 26 44 / 0.25)' }}
             />
+          ))}
+        </div>
+
+        <div
+          className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-1.5 pt-6"
+          style={{ borderTop: '1px solid var(--line)' }}
+        >
+          {GREETINGS.map((g) => (
+            <span key={g.text} className="font-display text-sm" style={{ color: 'var(--ink-faint)' }}>
+              {g.text}
+            </span>
           ))}
         </div>
       </div>

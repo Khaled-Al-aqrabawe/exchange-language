@@ -1,6 +1,13 @@
+import json
 import logging
+import os
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.validators import validate_email
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from rest_framework import generics, permissions, status
@@ -132,6 +139,53 @@ class LoginView(APIView):
         })
 
 
+class GoogleLoginView(APIView):
+    """Sign in (or sign up) with a Google account. The browser sends the ID token ("credential")
+    from Google Identity Services; it is checked with Google and must be issued for our client ID.
+    A Google account always has a verified email, so no verification code is needed."""
+
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        client_id = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+        credential = request.data.get('credential')
+        if not client_id:
+            raise ValidationError({'detail': 'Google sign-in is not set up.'})
+        if not credential:
+            raise ValidationError({'detail': 'Missing Google credential.'})
+
+        url = 'https://oauth2.googleapis.com/tokeninfo?' + urllib.parse.urlencode({'id_token': credential})
+        try:
+            with urllib.request.urlopen(url, timeout=10) as resp:
+                info = json.loads(resp.read().decode())
+        except (urllib.error.URLError, ValueError):
+            raise ValidationError({'detail': 'Could not verify the Google sign-in.'})
+
+        if info.get('aud') != client_id or str(info.get('email_verified')).lower() != 'true' or not info.get('email'):
+            raise ValidationError({'detail': 'Could not verify the Google sign-in.'})
+
+        email = info['email'].lower().strip()
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            user = User.objects.create_user(
+                email=email, password=None,
+                first_name=(info.get('given_name') or '')[:100], last_name=(info.get('family_name') or '')[:100],
+                email_verified=True,
+            )
+            user.set_unusable_password()
+            user.save(update_fields=['password'])
+        elif not user.email_verified:
+            user.email_verified = True
+            user.save(update_fields=['email_verified'])
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': UserSerializer(user).data,
+        })
+
+
 class PasswordResetRequestView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -214,6 +268,33 @@ class ChangePasswordView(APIView):
         return Response({'detail': 'Password changed.'})
 
 
+class ChangeEmailView(APIView):
+    """Change the login email. The current password must be given, so a borrowed session
+    cannot take the account over."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        password = request.data.get('password') or ''
+        raw_email = (request.data.get('new_email') or '').strip().lower()
+
+        if not request.user.check_password(password):
+            raise ValidationError({'password': 'Incorrect password.'})
+
+        try:
+            validate_email(raw_email)
+        except DjangoValidationError:
+            raise ValidationError({'new_email': 'Enter a valid email address.'})
+        if raw_email == request.user.email.lower():
+            raise ValidationError({'new_email': 'That is already your email.'})
+        if User.objects.filter(email__iexact=raw_email).exclude(pk=request.user.pk).exists():
+            raise ValidationError({'new_email': 'That email is already in use.'})
+
+        request.user.email = raw_email
+        request.user.save(update_fields=['email'])
+        return Response(UserSerializer(request.user).data)
+
+
 class PresenceView(APIView):
     """Heartbeat + 'Available now' toggle. Body: {"available": bool} (optional)."""
     permission_classes = [permissions.IsAuthenticated]
@@ -222,9 +303,13 @@ class PresenceView(APIView):
         profile = request.user.profile
         if 'available' in request.data:
             profile.available_now = bool(request.data['available'])
+        if 'types' in request.data:
+            if request.data['types'] not in ('lesson', 'conversation', 'both'):
+                raise ValidationError({'types': 'Choose lessons, conversation or both.'})
+            profile.available_types = request.data['types']
         profile.last_seen = timezone.now()
-        profile.save(update_fields=['available_now', 'last_seen'])
-        return Response({'available_now': profile.available_now})
+        profile.save(update_fields=['available_now', 'available_types', 'last_seen'])
+        return Response({'available_now': profile.available_now, 'available_types': profile.available_types})
 
 
 class AvatarUploadView(APIView):

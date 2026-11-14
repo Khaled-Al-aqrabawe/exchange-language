@@ -41,15 +41,15 @@ const TYPE_OPTIONS = [
 ]
 
 // Chooses what a session is for: a lesson from the course (optionally a specific one) or a free conversation.
-export default function SessionTypePicker({ type, lesson, onChange }) {
+export default function SessionTypePicker({ type, lesson, onChange, allowed }) {
   const { t } = useTranslation()
   const lessons = useMyLessons()
 
   return (
     <div>
       <p className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.sessionType', 'Session type')}</p>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {TYPE_OPTIONS.map(({ value, icon: Icon, title, hint }) => {
+      <div className={`grid gap-3 ${allowed && allowed !== 'both' ? '' : 'sm:grid-cols-2'}`}>
+        {TYPE_OPTIONS.filter((o) => !allowed || allowed === 'both' || allowed === o.value).map(({ value, icon: Icon, title, hint }) => {
           const active = type === value
           return (
             <button

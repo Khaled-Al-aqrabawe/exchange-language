@@ -1,7 +1,7 @@
 import CallNowModal from '../components/CallNowModal'
 import { BookOpen, CalendarCheck, CalendarClock, CheckCircle2, Clock, MessageCircle, MessagesSquare, Phone, Play, Sparkles, Star, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -111,23 +111,6 @@ function BookSlotModal({ slot, partner, userId, onClose, onBooked }) {
   )
 }
 
-function StatChip({ icon: Icon, value, label, accent }) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-        style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }}
-      >
-        <Icon size={16} />
-      </span>
-      <div className="min-w-0">
-        <p className="font-display text-base font-bold leading-none" style={{ color: 'var(--ink)' }}>{value}</p>
-        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--ink-soft)' }}>{label}</p>
-      </div>
-    </div>
-  )
-}
-
 export default function PartnerProfile() {
   const { t, i18n } = useTranslation()
   const { userId } = useParams()
@@ -171,110 +154,79 @@ export default function PartnerProfile() {
   if (loading) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.loading')}</div>
   if (!partner) return <div className="p-16 text-center text-sm" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.notFound')}</div>
 
-  const accent = partner.match_type === 'exchange' ? 'var(--accent)' : 'var(--accent-2)'
   const visibleAvailability = partner.availability?.filter((slot) => !isSlotExpiredToday(slot)) || []
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       {callOpen && <CallNowModal partnerId={userId} partnerName={partner.full_name} onClose={() => setCallOpen(false)} />}
-      <div
-        className="absolute -top-20 -end-20 h-80 w-80 rounded-full pointer-events-none lp-blob-drift"
-        style={{ background: 'var(--accent)', opacity: 0.14, filter: 'blur(80px)' }}
-      />
-      <div
-        className="absolute top-[380px] -start-24 h-80 w-80 rounded-full pointer-events-none lp-blob-drift"
-        style={{ background: 'var(--accent-2)', opacity: 0.14, filter: 'blur(80px)', animationDelay: '3s' }}
-      />
 
-      <div className="max-w-4xl mx-auto px-6 py-14 relative">
-        <div className="grid lg:grid-cols-[280px_1fr] gap-12">
-          {/* Left: visual identity + actions */}
-          <div className="lp-animate-in lg:sticky lg:top-24 lg:self-start">
-            <div className="relative w-fit mx-auto lg:mx-0 mb-5">
-              <span
-                className="absolute -inset-3 rounded-full pointer-events-none"
-                style={{ background: accent, filter: 'blur(30px)', opacity: 0.35 }}
-              />
+      {/* Banner: who they are + what you can do */}
+      <div className="lp-hero-bg">
+        <div className="mx-auto max-w-5xl px-6 pb-10 pt-10 lp-animate-in">
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="relative shrink-0">
               <img
                 src={resolveAvatarUrl(partner.avatar, partner.user_id, 280)}
                 alt=""
-                className="relative lp-avatar lp-gradient-ring h-36 w-36 object-cover"
-                style={{ border: '4px solid var(--bg)' }}
+                className="lp-avatar h-28 w-28 object-cover"
+                style={{ border: '4px solid #fff' }}
               />
+              {partner.is_available_now && (
+                <span className="absolute bottom-1 end-1 h-5 w-5 rounded-full" style={{ background: '#22c55e', border: '3px solid #fff' }} title={t('partners.visibilityNow')} />
+              )}
               {partner.intro_video && (
                 <span
-                  className="absolute bottom-1 end-1 flex h-9 w-9 items-center justify-center rounded-full"
-                  style={{ background: 'var(--gradient-brand)', color: 'var(--accent-ink)', border: '3px solid var(--bg)' }}
+                  className="absolute -bottom-1 -start-1 flex h-8 w-8 items-center justify-center rounded-full"
+                  style={{ background: '#0b1a2c', color: '#fff', border: '3px solid #fff' }}
                   title={t('partnerProfile.introVideo')}
                 >
-                  <Video size={15} />
+                  <Video size={13} />
                 </span>
               )}
             </div>
 
-            <div className="text-center lg:text-start mb-6">
-              <h1 className="font-display text-2xl font-bold tracking-tight lp-gradient-text">{partner.full_name}</h1>
-              <span className="inline-flex mt-1.5 text-xs font-semibold" style={{ color: accent }}>
-                {partner.match_type === 'exchange' ? t('partnerProfile.exchangeMatch') : t('partnerProfile.peerPractice')}
-              </span>
+            <div className="min-w-0 flex-1 basis-64">
+              <h1 className="lp-serif text-[2rem] leading-tight sm:text-[2.5rem]" style={{ color: 'var(--ink)' }}>{partner.full_name}</h1>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <span className="rounded-full px-3 py-1 font-semibold" style={{ background: '#0b1a2c', color: '#fff' }}>
+                  {partner.match_type === 'exchange' ? t('partnerProfile.exchangeMatch') : t('partnerProfile.peerPractice')}
+                </span>
+                {partner.country && (
+                  <span className="rounded-full px-3 py-1 font-medium" style={{ background: 'rgb(255 255 255 / 0.7)', color: '#0b1a2c' }}>{partner.country}</span>
+                )}
+                {partner.age != null && (
+                  <span className="rounded-full px-3 py-1 font-medium" style={{ background: 'rgb(255 255 255 / 0.7)', color: '#0b1a2c' }}>{t('partnerProfile.ageYears', { age: partner.age })}</span>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-4 mb-6">
-              <StatChip icon={CalendarCheck} value={partner.sessions_completed} label={t('partnerProfile.sessionsLabel')} accent="var(--accent)" />
-              <StatChip
-                icon={Star}
-                value={partner.ratings_count > 0 ? partner.average_rating : '—'}
-                label={partner.ratings_count > 0 ? t('partnerProfile.ratingsLabel', { count: partner.ratings_count }) : t('partnerProfile.noRatingsYet')}
-                accent="#c98a1c"
-              />
-            </div>
-
-            <div className="flex lg:flex-col gap-2.5">
-              <button onClick={handleMessage} className="lp-btn-primary flex-1 lg:w-full justify-center">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button onClick={handleMessage} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
                 <MessageCircle size={16} /> {t('partnerProfile.message')}
               </button>
               {partner.is_available_now && (
-                <button onClick={handleCall} className="lp-btn-primary flex-1 lg:w-full justify-center">
+                <button onClick={handleCall} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#7fd8c3', color: '#0b1a2c', borderRadius: 'var(--radius-pill)' }}>
                   <Phone size={16} /> {t('partners.callNow')}
                 </button>
               )}
-              <button onClick={() => setShowRequestModal(true)} className="lp-btn-secondary flex-1 lg:w-full justify-center">
-                <CalendarClock size={16} /> {t('partnerProfile.scheduleSession')}
-              </button>
+              {visibleAvailability.length > 0 && (
+                <button onClick={() => setShowRequestModal(true)} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#fff', color: '#0b1a2c', borderRadius: 'var(--radius-pill)' }}>
+                  <CalendarClock size={16} /> {t('partnerProfile.scheduleSession')}
+                </button>
+              )}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Right: story + details */}
-          <div className="lp-animate-in lp-delay-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-8">
-              <Trans
-                i18nKey="partnerProfile.speaksLearning"
-                values={{
-                  native: `${partner.native_language} · ${t('levels.native')}`,
-                  learning: `${partner.learning_language} · ${t(`levels.${partner.proficiency_level}`, partner.proficiency_level)}`,
-                }}
-                components={{
-                  native: (
-                    <span
-                      className="px-2.5 py-1 text-xs font-semibold"
-                      style={{ borderRadius: 'var(--radius-pill)', background: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}
-                    />
-                  ),
-                  learning: (
-                    <span
-                      className="px-2.5 py-1 text-xs font-semibold"
-                      style={{ borderRadius: 'var(--radius-pill)', background: 'color-mix(in srgb, var(--accent-2) 14%, transparent)', color: 'var(--accent-2)' }}
-                    />
-                  ),
-                }}
-              />
-              {partner.age != null && <span className="lp-tag">{t('partnerProfile.ageYears', { age: partner.age })}</span>}
-            </div>
-
-            <div className="mb-8">
-              <p className="lp-eyebrow mb-2">{t('partnerProfile.introVideo')}</p>
+      <div className="mx-auto max-w-5xl px-6 py-10">
+        <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+          {/* Main column */}
+          <div className="min-w-0 space-y-8 lp-animate-in">
+            <div>
+              <h2 className="lp-serif mb-3 text-2xl">{t('partnerProfile.introVideo')}</h2>
               {partner.intro_video ? (
-                <div className="relative rounded-3xl overflow-hidden" style={{ background: 'var(--surface-2)', boxShadow: 'var(--shadow-card)' }}>
+                <div className="relative overflow-hidden" style={{ background: '#0b1a2c', borderRadius: 'var(--radius-card)' }}>
                   <video
                     src={partner.intro_video}
                     controls={videoPlaying}
@@ -286,56 +238,48 @@ export default function PartnerProfile() {
                       type="button"
                       onClick={(e) => { e.currentTarget.previousElementSibling?.play(); setVideoPlaying(true) }}
                       className="absolute inset-0 flex items-center justify-center group"
-                      style={{ background: 'color-mix(in srgb, black 15%, transparent)' }}
+                      style={{ background: 'rgb(11 26 44 / 0.25)' }}
                       aria-label={t('partnerProfile.introVideo')}
                     >
-                      <span
-                        className="flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110"
-                        style={{ background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 8px 24px -8px rgb(0 0 0 / 0.4)' }}
-                      >
+                      <span className="flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110" style={{ background: '#7fd8c3', color: '#0b1a2c' }}>
                         <Play size={22} fill="currentColor" />
                       </span>
                     </button>
                   )}
                 </div>
               ) : (
-                <div
-                  className="flex items-center gap-2 px-4 py-6 rounded-2xl text-sm"
-                  style={{ background: 'var(--surface-2)', color: 'var(--ink-soft)' }}
-                >
-                  <Video size={16} className="shrink-0" />
+                <div className="flex items-center gap-3 px-5 py-6 text-sm" style={{ background: '#d6def5', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+                  <Video size={20} className="shrink-0" style={{ opacity: 0.7 }} />
                   {t('partnerProfile.noVideo')}
                 </div>
               )}
             </div>
 
-            <div className="mb-8">
-              <p className="lp-eyebrow mb-2">{t('partnerProfile.bio')}</p>
+            <div>
+              <h2 className="lp-serif mb-3 text-2xl">{t('partnerProfile.bio')}</h2>
               <p className="text-base leading-relaxed" style={{ color: 'var(--ink)' }}>
                 {partner.bio || t('partnerProfile.noBio')}
               </p>
             </div>
 
-            <div className="mb-8 flex items-start gap-3">
-              <div>
-                <p className="lp-eyebrow mb-1">{t('partnerProfile.learningGoals')}</p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
-                  {partner.learning_goals || t('partnerProfile.noLearningGoals')}
-                </p>
-              </div>
+            <div>
+              <h2 className="lp-serif mb-3 text-2xl">{t('partnerProfile.learningGoals')}</h2>
+              <p className="text-base leading-relaxed" style={{ color: 'var(--ink-soft)' }}>
+                {partner.learning_goals || t('partnerProfile.noLearningGoals')}
+              </p>
             </div>
 
             {myNotes.length > 0 && (
-              <div className="mb-8">
-                <p className="lp-eyebrow mb-1">{t('partnerProfile.myNotes')}</p>
-                <p className="text-xs mb-3" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.myNotesHint')}</p>
+              <div>
+                <h2 className="lp-serif mb-1 text-2xl">{t('partnerProfile.myNotes')}</h2>
+                <p className="mb-3 text-xs" style={{ color: 'var(--ink-soft)' }}>{t('partnerProfile.myNotesHint')}</p>
                 <div className="grid gap-3">
                   {myNotes.map((n) => (
-                    <div key={n.session_id} className="lp-surface p-4">
-                      <p className="text-xs mb-1.5" style={{ color: 'var(--ink-soft)' }}>
+                    <div key={n.session_id} className="p-4" style={{ background: '#f4d9cf', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+                      <p className="mb-1.5 text-xs" style={{ opacity: 0.65 }}>
                         {new Date(n.scheduled_time).toLocaleDateString(i18n.resolvedLanguage, { year: 'numeric', month: 'short', day: 'numeric' })}
                       </p>
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--ink)' }}>{n.text}</p>
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">{n.text}</p>
                     </div>
                   ))}
                 </div>
@@ -343,27 +287,27 @@ export default function PartnerProfile() {
             )}
 
             <div>
-              <p className="lp-eyebrow mb-2">{t('partnerProfile.availability')}</p>
+              <h2 className="lp-serif mb-3 text-2xl">{t('partnerProfile.availability')}</h2>
               {visibleAvailability.length > 0 ? (
                 <>
-                  <p className="text-xs mb-3 inline-flex items-center gap-1.5" style={{ color: 'var(--ink-soft)' }}>
-                    <Sparkles size={12} style={{ color: 'var(--accent)' }} /> {t('partnerProfile.availabilityBookHint')}
+                  <p className="mb-3 inline-flex items-center gap-1.5 text-xs" style={{ color: 'var(--ink-soft)' }}>
+                    <Sparkles size={12} /> {t('partnerProfile.availabilityBookHint')}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {visibleAvailability.map((slot) => (
+                  <div className="flex flex-wrap gap-2.5">
+                    {visibleAvailability.map((slot, i) => (
                       <button
                         key={slot.id}
                         type="button"
                         onClick={() => setBookingSlot(slot)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5"
-                        style={{ borderRadius: 'var(--radius-pill)', background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: 'var(--shadow-card)' }}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold transition-transform hover:-translate-y-0.5"
+                        style={{ borderRadius: 'var(--radius-pill)', background: ['#c9ece2', '#d6def5', '#f4d9cf'][i % 3], color: '#17191d' }}
                       >
                         <CalendarClock size={13} />
                         {slot.is_recurring
                           ? t(`profile.days.${DAYS.find((d) => d.value === slot.day_of_week)?.key}`)
                           : new Date(`${slot.specific_date}T00:00:00`).toLocaleDateString(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric' })}
                         {' '}{formatTime12(slot.start_time)}–{formatTime12(slot.end_time)}
-                        <span className="opacity-60">·</span>
+                        <span className="opacity-50">·</span>
                         {slot.session_type === 'conversation' ? <MessagesSquare size={13} /> : <BookOpen size={13} />}
                         {slot.session_type === 'conversation'
                           ? t('partners.typeConversation', 'Free conversation')
@@ -377,6 +321,32 @@ export default function PartnerProfile() {
               )}
             </div>
           </div>
+
+          {/* Side column: languages + stats */}
+          <aside className="space-y-4 lp-animate-in lp-delay-1 lg:sticky lg:top-24 lg:self-start">
+            <div className="p-6" style={{ background: '#d6def5', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-widest" style={{ opacity: 0.6 }}>{t('partners.teaches', 'Can teach')}</p>
+              <p className="lp-serif text-xl">{partner.native_language} <span className="text-sm" style={{ opacity: 0.65 }}>· {t('levels.native')}</span></p>
+              <p className="mb-1 mt-4 text-xs font-semibold uppercase tracking-widest" style={{ opacity: 0.6 }}>{t('partners.learning', 'Learning')}</p>
+              <p className="lp-serif text-xl">{partner.learning_language} <span className="text-sm" style={{ opacity: 0.65 }}>· {t(`levels.${partner.proficiency_level}`, partner.proficiency_level)}</span></p>
+            </div>
+            <div className="flex items-center gap-4 p-5" style={{ background: '#c9ece2', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+              <CalendarCheck size={30} strokeWidth={1.5} style={{ opacity: 0.7 }} />
+              <div>
+                <p className="lp-serif text-2xl leading-none">{partner.sessions_completed}</p>
+                <p className="mt-1 text-xs" style={{ opacity: 0.7 }}>{t('partnerProfile.sessionsLabel')}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 p-5" style={{ background: '#f4d9cf', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+              <Star size={30} strokeWidth={1.5} style={{ opacity: 0.7 }} />
+              <div>
+                <p className="lp-serif text-2xl leading-none">{partner.ratings_count > 0 ? partner.average_rating : '—'}</p>
+                <p className="mt-1 text-xs" style={{ opacity: 0.7 }}>
+                  {partner.ratings_count > 0 ? t('partnerProfile.ratingsLabel', { count: partner.ratings_count }) : t('partnerProfile.noRatingsYet')}
+                </p>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
 

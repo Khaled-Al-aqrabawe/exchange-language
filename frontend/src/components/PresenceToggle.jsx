@@ -19,6 +19,16 @@ export default function PresenceToggle() {
     return () => clearInterval(id)
   }, [])
 
+  // Other parts of the app (e.g. "Not now" in the Partners page prompt) can switch it off.
+  useEffect(() => {
+    const onChange = (e) => {
+      availableRef.current = !!e.detail
+      setAvailable(!!e.detail)
+    }
+    window.addEventListener('lp-presence', onChange)
+    return () => window.removeEventListener('lp-presence', onChange)
+  }, [])
+
   const toggle = () => {
     const next = !available
     availableRef.current = next

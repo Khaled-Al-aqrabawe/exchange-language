@@ -1,10 +1,9 @@
-import { CalendarClock, CalendarPlus, ChevronRight, Clock, FileText, Star, Video, X, XCircle } from 'lucide-react'
+import { CalendarClock, ChevronRight, Clock, FileText, Star, Video, X, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import client from '../api/client'
 import { LOW_RATING_MAX } from '../constants'
-import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import { useAuth } from '../context/AuthContext'
 import { toDatetimeLocalValue } from '../utils/availability'
 import { downloadText } from '../utils/downloadFile'
@@ -259,7 +258,6 @@ export default function Schedule() {
   const [confirmingId, setConfirmingId] = useState(null)
   const [confirmTime, setConfirmTime] = useState('')
   const [confirmError, setConfirmError] = useState('')
-  const [showRequestModal, setShowRequestModal] = useState(false)
   const [tab, setTab] = useState('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -333,15 +331,7 @@ export default function Schedule() {
     <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
       <div className="lp-hero-bg">
         <div className="mx-auto max-w-6xl px-6 pb-8 pt-10">
-          <div className="lp-animate-in flex flex-wrap items-end justify-between gap-5">
-            <div>
-              <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>{t('schedule.title')}</h1>
-              <p className="mt-2 max-w-md text-sm sm:text-base" style={{ color: 'var(--ink-soft)' }}>{t('schedule.subtitle')}</p>
-            </div>
-            <button type="button" onClick={() => setShowRequestModal(true)} className="lp-btn-primary shrink-0">
-              <CalendarPlus size={16} /> {t('schedule.sendRequestTitle')}
-            </button>
-          </div>
+          <h1 className="lp-serif lp-animate-in text-[2.25rem] leading-tight sm:text-[3rem]" style={{ color: 'var(--ink)' }}>{t('schedule.title')}</h1>
 
           <div className="lp-animate-in lp-delay-1 mt-7 flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex flex-wrap rounded-full p-1" style={{ background: 'var(--surface-2)' }}>
@@ -603,12 +593,6 @@ export default function Schedule() {
         />
       )}
 
-      {showRequestModal && (
-        <SendSessionRequestModal
-          onClose={() => setShowRequestModal(false)}
-          onSent={loadSessions}
-        />
-      )}
     </div>
   )
 }

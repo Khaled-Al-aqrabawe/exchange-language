@@ -1,4 +1,4 @@
-import { Camera, CheckCircle2, Globe2, GraduationCap, Home, KeyRound, Languages, User, Users, Video, X } from 'lucide-react'
+import { Camera, CheckCircle2, Globe2, GraduationCap, Home, KeyRound, Languages, Mail, Target, User, Users, Video, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../api/client'
@@ -14,12 +14,12 @@ function LangSection({ step, icon: Icon, title, hint, children }) {
   return (
     <section className="rounded-3xl p-5" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
       <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: 'var(--gradient-brand)', color: 'var(--accent-ink)' }}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: '#0b1a2c', color: '#7fd8c3' }}>
           <Icon size={19} />
         </span>
         <div className="min-w-0">
-          <h3 className="font-display text-base font-bold" style={{ color: 'var(--ink)' }}>
-            <span className="me-1.5" style={{ color: 'var(--accent)' }}>{step}.</span>{title}
+          <h3 className="lp-serif text-lg" style={{ color: 'var(--ink)' }}>
+            <span className="me-1.5" style={{ color: '#1f9d82' }}>{step}.</span>{title}
           </h3>
           <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{hint}</p>
         </div>
@@ -38,6 +38,67 @@ function maxDateOfBirth() {
 
 // Password fields live in the profile form, so the one "Save changes" button saves
 // everything; leaving them empty just keeps the current password.
+function ChangeEmailCard({ currentEmail, onChanged }) {
+  const { t } = useTranslation()
+  const [newEmail, setNewEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [done, setDone] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  const submit = async () => {
+    setError('')
+    setDone(false)
+    setBusy(true)
+    try {
+      await client.post('/auth/me/change-email/', { new_email: newEmail, password })
+      setNewEmail('')
+      setPassword('')
+      setDone(true)
+      await onChanged()
+    } catch (err) {
+      const data = err.response?.data
+      setError(data ? Object.values(data).flat().join(' ') : t('profile.changeEmailError', 'Could not change the email.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className="lp-animate-in mb-10 pb-10" style={{ borderBottom: '1px solid var(--line)' }}>
+      <h2 className="lp-serif mb-1 flex items-center gap-2 text-xl" style={{ color: 'var(--ink)' }}>
+        <Mail size={18} style={{ color: 'var(--accent)' }} /> {t('profile.changeEmail', 'Change email')}
+      </h2>
+      <p className="mb-5 text-sm" style={{ color: 'var(--ink-soft)' }}>
+        {t('profile.changeEmailSubtitle', 'Your email is {{email}}. Enter your password to confirm the change.', { email: currentEmail })}
+      </p>
+      <div className="max-w-sm space-y-4">
+        <Field label={t('profile.newEmail', 'New email')}>
+          <input type="email" autoComplete="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className={fieldClass} style={fieldStyle} />
+        </Field>
+        <Field label={t('profile.currentPassword')}>
+          <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={fieldClass} style={fieldStyle} />
+        </Field>
+        {error && <p className="text-sm" style={{ color: '#f87171' }}>{error}</p>}
+        {done && (
+          <p className="flex items-center gap-1.5 text-sm" style={{ color: '#34d399' }}>
+            <CheckCircle2 size={15} /> {t('profile.changeEmailSuccess', 'Email changed.')}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={submit}
+          disabled={busy || !newEmail || !password}
+          className="inline-flex h-11 items-center justify-center px-6 text-sm font-semibold disabled:opacity-50"
+          style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}
+        >
+          {t('profile.changeEmailButton', 'Change email')}
+        </button>
+      </div>
+    </section>
+  )
+}
+
 function ChangePasswordCard({ values, onChange, error, done }) {
   const { t } = useTranslation()
   const set = (key) => (e) => onChange({ ...values, [key]: e.target.value })
@@ -94,9 +155,11 @@ export default function Profile() {
         last_name: user.last_name,
         profile: {
           ...user.profile,
+          // the native language never needs a level, so it isn't kept in the lists
+          spoken_languages: (user.profile.spoken_languages || []).filter((l) => l !== user.profile.native_language),
           timezone,
           // a person learns one language at a time
-          learning_languages: [user.profile.learning_language || user.profile.learning_languages?.[0]].filter(Boolean),
+          learning_languages: [user.profile.learning_language || user.profile.learning_languages?.[0]].filter((l) => l && l !== user.profile.native_language),
         },
       })
     }
@@ -226,16 +289,22 @@ export default function Profile() {
   const tabs = [
     ['basics', User, t('profile.tabs.basics')],
     ['languages', Languages, t('profile.tabs.languages')],
+    ['goals', Target, t('profile.tabs.goals', 'Learning goals')],
     ['video', Video, t('profile.tabs.video')],
     ['security', KeyRound, t('profile.tabs.security')],
   ]
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] lp-hero-bg" style={{ background: 'var(--bg)' }}>
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
+      <div className="lp-hero-bg">
+        <div className="mx-auto max-w-5xl px-4 pb-20 pt-10 sm:px-6 lp-animate-in">
+          <h1 className="lp-serif text-[2.25rem] leading-tight sm:text-[3rem]" style={{ color: 'var(--ink)' }}>{t('nav.profile')}</h1>
+        </div>
+      </div>
+      <div className="mx-auto -mt-12 max-w-5xl px-4 pb-12 sm:px-6">
         <div className="grid items-start gap-6 lg:grid-cols-[18rem_1fr]">
           {/* Summary card - stays in view while the forms scroll */}
-          <aside className="lp-card lp-animate-in text-center lg:sticky lg:top-24" style={{ padding: '1.5rem' }}>
+          <aside className="lp-card lp-animate-in text-center lg:sticky lg:top-24" style={{ padding: '1.5rem', boxShadow: 'var(--shadow-pop)' }}>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -243,10 +312,10 @@ export default function Profile() {
               className="group relative mx-auto block"
               aria-label={t('profile.changePhoto')}
             >
-              <img src={resolveAvatarUrl(user.profile.avatar, user.id, 240)} alt="" className="lp-avatar lp-gradient-ring h-24 w-24 object-cover" />
+              <img src={resolveAvatarUrl(user.profile.avatar, user.id, 240)} alt="" className="lp-avatar h-24 w-24 object-cover" style={{ border: '4px solid var(--surface)', boxShadow: '0 0 0 2px #b9d6ea' }} />
               <span
                 className="absolute -bottom-1 -end-1 flex h-8 w-8 items-center justify-center rounded-full text-white transition-transform group-hover:scale-110"
-                style={{ background: 'var(--gradient-brand)', border: '3px solid var(--surface)' }}
+                style={{ background: '#0b1a2c', border: '3px solid var(--surface)' }}
               >
                 <Camera size={14} />
               </span>
@@ -255,7 +324,7 @@ export default function Profile() {
             {uploadError && <p className="mt-2 text-xs" style={{ color: '#f87171' }}>{uploadError}</p>}
             {uploading && <p className="mt-2 text-xs" style={{ color: 'var(--ink-soft)' }}>{t('profile.uploading')}</p>}
 
-            <h1 className="mt-4 truncate font-display text-xl font-extrabold" style={{ color: 'var(--ink)' }}>{fullName}</h1>
+            <h2 className="lp-serif mt-4 truncate" style={{ color: 'var(--ink)', fontSize: '1.4rem' }}>{fullName}</h2>
             <p className="truncate text-xs" style={{ color: 'var(--ink-soft)' }}>{user.email}</p>
 
             {(form.profile.native_language || (form.profile.learning_languages || []).length > 0) && (
@@ -271,14 +340,14 @@ export default function Profile() {
                 <span style={{ color: 'var(--accent)' }}>{completion}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full" style={{ background: 'var(--surface-2)' }}>
-                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${completion}%`, background: 'linear-gradient(90deg, var(--accent), var(--gold))' }} />
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${completion}%`, background: '#7fd8c3' }} />
               </div>
               {completion < 100 && <p className="mt-2 text-xs" style={{ color: 'var(--ink-soft)' }}>{t('profile.completionHint')}</p>}
             </div>
 
             {(
               <div className="mt-5">
-                <button type="submit" form="profile-form" disabled={saving} className="lp-btn-primary w-full disabled:opacity-50">
+                <button type="submit" form="profile-form" disabled={saving} className="inline-flex h-11 w-full items-center justify-center text-sm font-semibold disabled:opacity-50" style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
                   {saving ? t('profile.saving') : t('profile.save')}
                 </button>
                 {saveError && <p className="mt-2 text-xs" style={{ color: '#f87171' }}>{saveError}</p>}
@@ -293,7 +362,7 @@ export default function Profile() {
 
           {/* Tabbed forms: one section at a time keeps the page short */}
           <div className="min-w-0">
-            <div className="lp-animate-in lp-delay-1 mb-4 inline-flex max-w-full overflow-x-auto rounded-full p-1" style={{ background: 'var(--surface-2)' }}>
+            <div className="lp-animate-in lp-delay-1 mb-4 inline-flex max-w-full overflow-x-auto rounded-full p-1" style={{ background: '#d6def5' }}>
               {tabs.map(([key, Icon, label]) => (
                 <button
                   key={key}
@@ -301,8 +370,8 @@ export default function Profile() {
                   onClick={() => { setTab(key); setSaved(false) }}
                   className="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
                   style={tab === key
-                    ? { background: 'var(--gradient-brand)', color: 'var(--accent-ink)', boxShadow: '0 6px 16px -8px rgb(20 184 166 / 0.9)' }
-                    : { color: 'var(--ink-soft)' }}
+                    ? { background: '#0b1a2c', color: '#fff' }
+                    : { color: '#0b1a2c' }}
                 >
                   <Icon size={15} /> {label}
                 </button>
@@ -311,7 +380,12 @@ export default function Profile() {
 
             {(
               <form id="profile-form" onSubmit={handleSubmit} className="lp-card lp-animate-in">
-                {tab === 'security' && <ChangePasswordCard values={passwords} onChange={setPasswords} error={passwordError} done={passwordDone} />}
+                {tab === 'security' && (
+                  <>
+                    <ChangeEmailCard currentEmail={user.email} onChanged={refreshUser} />
+                    <ChangePasswordCard values={passwords} onChange={setPasswords} error={passwordError} done={passwordDone} />
+                  </>
+                )}
                 {tab === 'basics' && (
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label={t('profile.firstName')}>
@@ -384,17 +458,21 @@ export default function Profile() {
                           setForm({ ...form, profile: { ...form.profile, learning_languages: learning, language_levels: levels } })}
                       />
                     </LangSection>
+                  </div>
+                )}
 
-                    <Field label={t('profile.learningGoals')}>
+                {tab === 'goals' && (
+                  <div className="space-y-5">
+                    <LangSection step={4} icon={Target} title={t('profile.learningGoals')} hint={t('profile.learningGoalsHint', 'What do you want to achieve? Partners see this on your profile.')}>
                       <textarea
                         value={form.profile.learning_goals}
                         onChange={updateProfile('learning_goals')}
-                        rows={2}
+                        rows={6}
                         className="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                         style={fieldStyle}
                         placeholder={t('profile.learningGoalsPlaceholder')}
                       />
-                    </Field>
+                    </LangSection>
                   </div>
                 )}
 

@@ -46,7 +46,7 @@ class PartnerSerializer(serializers.ModelSerializer):
         fields = [
             'user_id', 'email', 'full_name', 'bio', 'gender', 'country', 'age', 'native_language',
             'learning_language', 'learning_level', 'proficiency_level', 'timezone', 'learning_goals', 'avatar', 'intro_video',
-            'match_type', 'is_available_now', 'sessions_completed', 'average_rating', 'ratings_count', 'availability',
+            'match_type', 'is_available_now', 'available_types', 'sessions_completed', 'average_rating', 'ratings_count', 'availability',
             'next_session_in_minutes',
         ]
 

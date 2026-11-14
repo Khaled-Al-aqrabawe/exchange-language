@@ -46,13 +46,14 @@ export default function Messages() {
   })
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] lp-hero-bg" style={{ background: 'var(--bg)' }}>
-      <div className="mx-auto max-w-6xl px-6 pb-10 pt-10">
-        <div className="lp-animate-in mb-6">
-          <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>{t('messages.title')}</h1>
+    <div className="min-h-[calc(100vh-4rem)]" style={{ background: 'var(--bg)' }}>
+      <div className="lp-hero-bg">
+        <div className="mx-auto max-w-6xl px-6 pb-16 pt-10 lp-animate-in">
+          <h1 className="lp-serif text-[2.25rem] leading-tight sm:text-[3rem]" style={{ color: 'var(--ink)' }}>{t('messages.title')}</h1>
         </div>
-
-        <div className="lp-card lp-animate-in lp-delay-1 flex overflow-hidden" style={{ padding: 0, height: 'calc(100vh - 17rem)', minHeight: '28rem' }}>
+      </div>
+      <div className="mx-auto max-w-6xl px-6 pb-10">
+        <div className="lp-card lp-animate-in lp-delay-1 -mt-10 flex overflow-hidden" style={{ padding: 0, height: 'calc(100vh - 18rem)', minHeight: '28rem', boxShadow: 'var(--shadow-pop)' }}>
           {/* Conversation list */}
           <aside
             className={`${active ? 'hidden md:flex' : 'flex'} w-full shrink-0 flex-col md:w-80`}
@@ -88,28 +89,37 @@ export default function Messages() {
                   const isActive = String(c.id) === conversationId
                   const mine = c.last_message?.sender?.id === user.id
                   return (
-                    <button
+                    <div
                       key={c.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => navigate(`/messages/${c.id}`)}
-                      className="mb-1 flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-start transition-colors"
-                      style={{ background: isActive ? 'color-mix(in srgb, var(--accent) 16%, transparent)' : 'transparent' }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/messages/${c.id}`) } }}
+                      className="mb-1.5 flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-start transition-colors hover:brightness-95"
+                      style={{ background: isActive ? '#aee2d3' : '#eef1f8', color: '#17191d', borderRadius: 'var(--radius-card)' }}
                     >
                       <img src={avatarUrl(other?.id, 80)} alt="" className="lp-avatar h-12 w-12 shrink-0 object-cover" />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-baseline justify-between gap-2">
-                          <p className="truncate text-sm font-bold" style={{ color: 'var(--ink)' }}>{other?.full_name}</p>
+                          <Link
+                            to={`/partners/${other?.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="lp-serif truncate text-[15px] hover:underline underline-offset-2"
+                            style={{ color: '#17191d' }}
+                          >
+                            {other?.full_name}
+                          </Link>
                           {c.last_message && (
-                            <span className="shrink-0 text-[11px]" style={{ color: 'var(--ink-soft)' }}>
+                            <span className="shrink-0 text-[11px]" style={{ color: 'rgb(23 25 29 / 0.6)' }}>
                               {shortTime(c.last_message.created_at, i18n.resolvedLanguage)}
                             </span>
                           )}
                         </div>
-                        <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--ink-soft)' }}>
+                        <p className="mt-0.5 truncate text-xs" style={{ color: 'rgb(23 25 29 / 0.68)' }}>
                           {c.last_message ? `${mine ? `${t('messages.you')}: ` : ''}${c.last_message.text}` : t('messages.noMessagesYet')}
                         </p>
                       </div>
-                    </button>
+                    </div>
                   )
                 })
               )}
@@ -121,10 +131,10 @@ export default function Messages() {
             {active ? (
               <ConversationThread conversationId={active.id} partner={partner} onBack={() => navigate('/messages')} />
             ) : (
-              <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-                <span className="lp-icon-badge mb-4 h-16 w-16"><MessageCircle size={28} /></span>
-                <p className="font-display text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('messages.selectConversation')}</p>
-                <p className="mt-1 max-w-xs text-sm" style={{ color: 'var(--ink-soft)' }}>{t('messages.selectHint')}</p>
+              <div className="flex h-full flex-col items-center justify-center px-6 text-center" style={{ background: 'linear-gradient(160deg, #f4d9cf55, #d6def566 60%, #c9ece255)' }}>
+                <span className="mb-5 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: '#d6def5', color: '#0b1a2c' }}><MessageCircle size={34} strokeWidth={1.5} /></span>
+                <p className="lp-serif text-2xl" style={{ color: 'var(--ink)' }}>{t('messages.selectConversation')}</p>
+                <p className="mt-2 max-w-xs text-sm" style={{ color: 'var(--ink-soft)' }}>{t('messages.selectHint')}</p>
               </div>
             )}
           </section>

@@ -27,16 +27,15 @@ export default function LanguageSwitcher() {
         onClick={() => setOpen((o) => !o)}
         title={t('language.choose')}
         aria-label={t('language.choose')}
-        className="flex h-9 w-9 items-center justify-center transition-colors hover:opacity-70"
-        style={{ borderRadius: 'var(--radius-tag)', color: 'var(--ink-soft)' }}
+        className="lp-social-icon flex h-9 w-9 items-center justify-center"
+        style={{ borderRadius: 'var(--radius-tag)', border: '1px solid transparent', color: 'var(--ink-soft)' }}
       >
         <Globe size={17} />
       </button>
 
       {open && (
         <div
-          className="absolute end-0 top-full mt-2 w-48 py-1.5 lp-surface"
-          style={{ boxShadow: '0 12px 30px -12px rgb(0 0 0 / 0.25)' }}
+          className="absolute end-0 top-full mt-2 w-48 py-1 lp-pop lp-animate-in-scale"
         >
           {LANGUAGE_OPTIONS.map((lang) => (
             <button
@@ -48,7 +47,7 @@ export default function LanguageSwitcher() {
                   client.patch('/auth/me/', { profile: { ui_language: lang.code } }).catch(() => {})
                 }
               }}
-              className="flex w-full items-center justify-between gap-2 px-3.5 py-2 text-sm hover:opacity-70"
+              className="flex w-full items-center justify-between gap-2 px-3.5 py-1.5 text-sm hover:bg-[var(--surface-2)]"
               style={{ color: lang.code === current.code ? 'var(--accent)' : 'var(--ink)' }}
             >
               <span>{lang.nativeLabel}</span>

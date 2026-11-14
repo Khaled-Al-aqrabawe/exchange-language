@@ -92,6 +92,9 @@ class Profile(models.Model):
     # Presence: the "Available now" header toggle. The client sends a heartbeat while
     # the site is open, so a stale True (closed tab) expires after PRESENCE_TIMEOUT.
     available_now = models.BooleanField(default=False)
+    # What the person is up for while available: lessons, free conversation or both.
+    AVAILABLE_TYPE_CHOICES = [('lesson', 'From the lessons'), ('conversation', 'Free conversation'), ('both', 'Both')]
+    available_types = models.CharField(max_length=12, choices=AVAILABLE_TYPE_CHOICES, default='both')
     last_seen = models.DateTimeField(null=True, blank=True)
     # Proficiency in learning_language.
     proficiency_level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')

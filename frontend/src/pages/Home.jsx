@@ -27,20 +27,19 @@ const dayOfYear = () => {
   return Math.floor((now - start) / 86400000)
 }
 
-function QuickAction({ to, icon: Icon, title, subtitle, tint, delay }) {
+function QuickAction({ to, icon: Icon, title, subtitle, bg, delay }) {
   return (
-    <Link to={to} className={`group lp-card lp-card--hover flex items-center gap-3.5 lp-animate-in lp-delay-${delay}`} style={{ padding: '1.1rem 1.25rem' }}>
-      <span
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-        style={{ background: `color-mix(in srgb, ${tint} 18%, transparent)`, color: tint }}
-      >
-        <Icon size={20} strokeWidth={1.9} />
-      </span>
+    <Link
+      to={to}
+      className={`group flex items-center gap-4 p-5 transition-transform hover:-translate-y-0.5 lp-animate-in lp-delay-${delay}`}
+      style={{ background: bg, color: '#17191d', borderRadius: 'var(--radius-card)' }}
+    >
+      <Icon size={32} strokeWidth={1.5} className="shrink-0" style={{ opacity: 0.7 }} />
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-bold" style={{ color: 'var(--ink)' }}>{title}</h3>
-        <p className="mt-0.5 text-xs" style={{ color: 'var(--ink-soft)' }}>{subtitle}</p>
+        <h3 className="lp-serif text-lg">{title}</h3>
+        <p className="mt-0.5 text-xs" style={{ opacity: 0.72 }}>{subtitle}</p>
       </div>
-      <ArrowRight size={16} className="shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" style={{ color: 'var(--ink-soft)' }} />
+      <ArrowRight size={18} className="shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" style={{ opacity: 0.6 }} />
     </Link>
   )
 }
@@ -49,7 +48,7 @@ function SectionHeader({ title, to }) {
   const { t } = useTranslation()
   return (
     <div className="mb-4 flex items-center justify-between">
-      <h2 className="font-display text-lg font-bold tracking-tight" style={{ color: 'var(--ink)' }}>{title}</h2>
+      <h2 className="lp-serif text-2xl" style={{ color: 'var(--ink)' }}>{title}</h2>
       <Link to={to} className="text-xs font-semibold hover:opacity-70 transition-opacity" style={{ color: 'var(--accent)' }}>{t('common.seeAll')}</Link>
     </div>
   )
@@ -171,48 +170,79 @@ export default function Home() {
         >
         </ModalShell>
       )}
-      <div className="lp-hero-bg">
-        <div className="mx-auto max-w-6xl px-6 pb-14 pt-8">
+      <div style={{ background: 'linear-gradient(120deg, #c3d0f2 0%, #b9d6ea 55%, #aee2d3 100%)', color: '#0b1a2c', '--ink': '#0b1a2c' }}>
+        <div className="mx-auto max-w-6xl px-6 pb-12 pt-10">
           {/* Greeting */}
-          <div className="lp-animate-in flex items-center gap-4">
-            <img
-              src={resolveAvatarUrl(profile?.avatar, user?.id, 128)}
-              alt=""
-              className="lp-avatar lp-gradient-ring h-16 w-16 shrink-0 object-cover"
-            />
-            <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--ink)' }}>
-              {user?.first_name ? t('dashboard.welcomeWithName', { name: user.first_name }) : t('dashboard.welcome')}
-            </h1>
+          <div className="lp-animate-in flex flex-wrap items-center justify-between gap-5">
+            <div className="flex items-center gap-4">
+              <img
+                src={resolveAvatarUrl(profile?.avatar, user?.id, 128)}
+                alt=""
+                className="lp-avatar h-16 w-16 shrink-0 object-cover"
+                style={{ border: '3px solid #fff' }}
+              />
+              <h1 className="lp-serif text-[2.25rem] leading-tight sm:text-[3rem]" style={{ color: '#0b1a2c' }}>
+              {(() => {
+                const h = new Date().getHours()
+                const part = h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening'
+                return user?.first_name
+                  ? t(`dashboard.greeting${part}WithName`, { name: user.first_name })
+                  : t(`dashboard.greeting${part}`)
+              })()}
+              </h1>
+            </div>
+            <Link to="/partners" className="inline-flex h-12 items-center gap-2 px-6 text-[15px] font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
+              <Users size={17} /> {t('dashboard.quickActions.findPartner')}
+            </Link>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-6 pb-16">
+      <div className="mx-auto max-w-6xl px-6 pb-16 pt-10">
         <CourseProgress lessons={myLessons} language={profile?.learning_language} level={profile?.language_levels?.[profile?.learning_language]} />
 
         {/* Available now */}
         <div className="lp-animate-in lp-delay-3">
           <SectionHeader title={t('dashboard.availableNow')} to="/partners" />
           {availableNow.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {availableNow.map((p) => (
-                <div key={p.user_id} className="lp-card lp-card--hover flex flex-col items-center text-center" style={{ padding: '1.25rem 1rem' }}>
-                  <Link to={`/partners/${p.user_id}`} className="flex w-full flex-col items-center">
-                    <div className="relative">
-                      <img src={resolveAvatarUrl(p.avatar, p.user_id, 128)} alt="" className="lp-avatar lp-gradient-ring h-16 w-16 object-cover" />
-                      <span className="absolute bottom-0 end-0 h-4 w-4 rounded-full border-2" style={{ background: '#34d399', borderColor: 'var(--surface)' }} />
-                    </div>
-                    <p className="mt-3 w-full truncate text-sm font-bold" style={{ color: 'var(--ink)' }}>{p.full_name}</p>
-                    <p className="mt-0.5 w-full truncate text-xs" style={{ color: 'var(--ink-soft)' }}>{p.native_language} → {p.learning_language}</p>
-                    {p.next_session_in_minutes != null && (
-                      <p className="mt-1.5 text-[11px] font-bold" style={{ color: '#b45309' }}>
-                        {t('partners.sessionSoon', { count: p.next_session_in_minutes, defaultValue: 'Has a session in {{count}} min' })}
-                      </p>
-                    )}
-                  </Link>
-                  <button type="button" onClick={() => handleCall(p)} className="lp-btn-primary mt-3 w-full">
-                    <Phone size={15} /> {t('partners.callNow')}
-                  </button>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {availableNow.map((p, i) => (
+                <div key={p.user_id} className="flex flex-col overflow-hidden transition-transform hover:-translate-y-0.5" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-card)' }}>
+                  <div className="relative h-16" style={{ background: ['#f4d9cf', '#d6def5', '#c9ece2'][i % 3] }}>
+                    <span className="absolute end-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: 'rgb(255 255 255 / 0.85)', color: '#0f6b55' }}>
+                      <span className="h-2 w-2 rounded-full" style={{ background: '#22c55e', boxShadow: '0 0 0 3px rgb(34 197 94 / 0.25)' }} />
+                      {t('partners.visibilityNow')}
+                    </span>
+                  </div>
+                  <div className="relative -mt-9 flex flex-1 flex-col items-center px-4 pb-5 text-center">
+                    <Link to={`/partners/${p.user_id}`} className="flex w-full flex-col items-center">
+                      <img src={resolveAvatarUrl(p.avatar, p.user_id, 128)} alt="" className="lp-avatar h-[72px] w-[72px] object-cover" style={{ border: '4px solid var(--surface)' }} />
+                      <p className="lp-serif mt-2.5 w-full truncate text-lg" style={{ color: 'var(--ink)' }}>{p.full_name}</p>
+                      <div className="mt-3 w-full space-y-1.5 text-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold uppercase tracking-wider" style={{ color: 'var(--ink-faint)' }}>{t('partners.teaches', 'Can teach')}</span>
+                          <span className="lp-tag">{p.native_language}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold uppercase tracking-wider" style={{ color: 'var(--ink-faint)' }}>{t('partners.learning', 'Learning')}</span>
+                          <span className="lp-tag lp-tag--accent">{p.learning_language}</span>
+                        </div>
+                      </div>
+                      {p.next_session_in_minutes != null && (
+                        <p className="mt-2 text-[11px] font-semibold" style={{ color: '#8a5a12' }}>
+                          {t('partners.sessionSoon', { count: p.next_session_in_minutes, defaultValue: 'Has a session in {{count}} min' })}
+                        </p>
+                      )}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => handleCall(p)}
+                      className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 text-sm font-semibold transition-colors hover:brightness-110"
+                      style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}
+                    >
+                      <Phone size={15} /> {t('partners.callNow')}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -223,9 +253,9 @@ export default function Home() {
 
         {/* Quick actions */}
         <div className="my-8 grid gap-4 sm:grid-cols-3">
-          <QuickAction to="/partners" icon={Users} title={t('dashboard.quickActions.findPartner')} subtitle={t('dashboard.quickActions.findPartnerSub')} tint="var(--accent)" delay={1} />
-          <QuickAction to="/schedule" icon={CalendarClock} title={t('dashboard.quickActions.schedule')} subtitle={t('dashboard.quickActions.scheduleSub')} tint="var(--accent-2)" delay={2} />
-          <QuickAction to="/materials" icon={BookOpenCheck} title={t('dashboard.quickActions.courses')} subtitle={t('dashboard.quickActions.coursesSub')} tint="var(--gold)" delay={3} />
+          <QuickAction to="/partners" icon={Users} title={t('dashboard.quickActions.findPartner')} subtitle={t('dashboard.quickActions.findPartnerSub')} bg="#f4d9cf" delay={1} />
+          <QuickAction to="/schedule" icon={CalendarClock} title={t('dashboard.quickActions.schedule')} subtitle={t('dashboard.quickActions.scheduleSub')} bg="#d6def5" delay={2} />
+          <QuickAction to="/materials" icon={BookOpenCheck} title={t('dashboard.quickActions.courses')} subtitle={t('dashboard.quickActions.coursesSub')} bg="#c9ece2" delay={3} />
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
@@ -266,10 +296,10 @@ export default function Home() {
           {/* Tip of the day */}
           {tipOfDay && (
             <div className="lp-animate-in lp-delay-5">
-              <h2 className="mb-4 font-display text-lg font-bold tracking-tight" style={{ color: 'var(--ink)' }}>{t('dashboard.tipOfDay')}</h2>
-              <div className="lp-card h-[calc(100%-2.75rem)]" style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--accent) 9%, var(--surface)), var(--surface))' }}>
-                <span className="lp-icon-badge mb-3 h-10 w-10"><Lightbulb size={18} /></span>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--ink)' }}>{tipOfDay}</p>
+              <h2 className="lp-serif mb-4 text-2xl" style={{ color: 'var(--ink)' }}>{t('dashboard.tipOfDay')}</h2>
+              <div className="h-[calc(100%-3.25rem)] p-6" style={{ background: '#f4d9cf', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+                <Lightbulb size={30} strokeWidth={1.5} className="mb-3" style={{ opacity: 0.7 }} />
+                <p className="lp-serif text-lg leading-relaxed" style={{ fontWeight: 500 }}>{tipOfDay}</p>
               </div>
             </div>
           )}

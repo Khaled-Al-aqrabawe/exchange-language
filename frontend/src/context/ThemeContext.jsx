@@ -2,11 +2,6 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 
 const ThemeContext = createContext(null)
 
-function getStoredTheme() {
-  const stored = localStorage.getItem('lp_theme')
-  return stored === 'light' || stored === 'dark' ? stored : null
-}
-
 function applyTheme(theme) {
   if (theme) {
     document.documentElement.setAttribute('data-theme', theme)
@@ -16,7 +11,7 @@ function applyTheme(theme) {
 }
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState(() => getStoredTheme() || 'light')
+  const [theme, setThemeState] = useState('light') // dark mode is switched off: always light
 
   useEffect(() => {
     applyTheme(theme)

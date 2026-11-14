@@ -9,11 +9,11 @@ import SessionTypePicker from './SessionTypePicker'
 
 // "Call now": before ringing, choose what the call is for. The other person sees the choice
 // (and the lesson, if one is picked) in the incoming-call notice.
-export default function CallNowModal({ partnerId, partnerName, onClose }) {
+export default function CallNowModal({ partnerId, partnerName, allowedTypes = 'both', onClose }) {
   const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [choice, setChoice] = useState({ session_type: 'lesson', lesson: '' })
+  const [choice, setChoice] = useState({ session_type: allowedTypes === 'conversation' ? 'conversation' : 'lesson', lesson: '' })
   const [busy, setBusy] = useState(false)
 
   const start = async () => {
@@ -47,7 +47,7 @@ export default function CallNowModal({ partnerId, partnerName, onClose }) {
         </div>
       )}
     >
-      <SessionTypePicker type={choice.session_type} lesson={choice.lesson} onChange={(patch) => setChoice((c) => ({ ...c, ...patch }))} />
+      <SessionTypePicker allowed={allowedTypes} type={choice.session_type} lesson={choice.lesson} onChange={(patch) => setChoice((c) => ({ ...c, ...patch }))} />
     </ModalShell>
   )
 }

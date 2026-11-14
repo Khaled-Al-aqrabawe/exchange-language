@@ -1,176 +1,220 @@
 @import "tailwindcss";
 
-/* ---- Lingua Hub design tokens: teal and coral from the logo (dark by default, light on request) ---- */
+/* ============================================================================
+   Language Partner — "Ink" design system
+   Calm and editorial: a near-white warm canvas, one ink-blue accent, hairline
+   rules instead of shadows, tight corners, and colour reserved for meaning.
+   Every token and .lp-* class the pages already use is defined here, so the
+   whole app restyles from this one file.
+   ========================================================================= */
 
 @theme {
-  /* Soft, generous corners across every Tailwind `rounded-*` utility */
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
-  --radius-3xl: 1.75rem;
+  /* Tailwind's rounded-* utilities, pulled back to editorial corners */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 1rem;
 }
 
 :root {
   color-scheme: light;
 
-  --font-display: 'Sora', 'Cairo', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 
-  /* white, with one teal accent used sparingly */
-  --bg: #ffffff;
+  /* --- Ground. Warm off-white, so the white cards read as paper on a desk. --- */
+  --bg: #faf9f7;
   --surface: #ffffff;
-  --surface-2: #f5f6fa;
-  --ink: #0f1222;
-  --ink-soft: #666d86;
-  --line: #e6e8f0;
-  --accent: #0d9488;
+  --surface-2: #f3f2ef;
+  --surface-3: #ebeae6;
+
+  /* --- Ink. Near-black with a trace of blue, never pure #000. --- */
+  --ink: #17191d;
+  --ink-soft: #5a5e68;
+  --ink-faint: #8b8f99;
+  --ink-invert: #ffffff;
+
+  /* --- Rules. Hairlines carry the structure instead of shadows. --- */
+  --line: #e3e1dc;
+  --line-strong: #cfcdc7;
+
+  /* --- The one accent: ink blue. --- */
+  --accent: #1b4d7a;
+  --accent-hover: #163e63;
   --accent-ink: #ffffff;
-  --accent-2: #e8503a;
-  --accent-2-ink: #ffffff;
-  --gold: #ff6b57;              /* logo coral highlight (old token name, so every page picks it up) */
-  --navy-deep: #f5f6fa;
-  --on-navy: #0f1222;
-  --on-navy-soft: #666d86;
-  --gradient-brand: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
-  --gradient-hero: linear-gradient(135deg, #effaf8 0%, #ffffff 100%);
-  --panel-border: #e6e8f0;
-  --panel-glow: rgb(13 148 136 / 0.07);
-  --glow-a: 6%;
-  --glow-b: 4%;
-  --glow-c: 3%;
-  --badge-glow: none;
-  --btn-shadow: 0 8px 18px -10px rgb(13 148 136 / 0.55);
-  --btn-shadow-hover: 0 12px 24px -10px rgb(13 148 136 / 0.6);
-  --gold-btn-bg: var(--accent);
-  --gold-btn-ink: #ffffff;
-  --shadow-card: 0 1px 2px rgb(20 20 60 / 0.04), 0 6px 18px -12px rgb(20 20 60 / 0.12);
-  --shadow-card-hover: 0 2px 6px rgb(20 20 60 / 0.06), 0 18px 34px -18px rgb(13 148 136 / 0.3);
-  --radius-card: 20px;
+  --accent-soft: #eef2f7;
+  --accent-line: #c3d2e2;
+
+  /* --- Semantic colour, used only for state. --- */
+  --ok: #2f6b4f;
+  --ok-soft: #ecf4ef;
+  --warn: #8a5a12;
+  --warn-soft: #f8f1e4;
+  --danger: #9b2c2c;
+  --danger-soft: #faeeee;
+  --danger-ink: #ffffff;
+
+  /* --- Depth: one shadow, for things that genuinely float. --- */
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-pop: 0 1px 2px rgb(23 25 29 / 0.04), 0 12px 28px -12px rgb(23 25 29 / 0.18);
+
+  --radius-card: 10px;
+  --radius-control: 8px;
   --radius-pill: 999px;
-  --radius-tag: 999px;
+  --radius-tag: 6px;
+
+  /* --- Legacy token names, remapped so no page breaks. --- */
+  --accent-2: var(--accent);
+  --accent-2-ink: var(--accent-ink);
+  --gold: var(--accent);
+  --navy-deep: var(--surface-2);
+  --on-navy: var(--ink);
+  --on-navy-soft: var(--ink-soft);
+  --gradient-brand: var(--accent);
+  --gradient-hero: var(--surface-2);
+  --panel-border: var(--line);
+  --panel-glow: transparent;
+  --badge-glow: none;
+  --btn-shadow: none;
+  --btn-shadow-hover: none;
+  --gold-btn-bg: var(--accent);
+  --gold-btn-ink: var(--accent-ink);
+  --glow-a: 0%;
+  --glow-b: 0%;
+  --glow-c: 0%;
 }
 
-/* midnight, for people who pick the dark theme */
+/* --- Dark: the same system with the ground and ink swapped, not inverted. --- */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #061312;
-  --surface: #0c1f1d;
-  --surface-2: #12302d;
-  --ink: #ecfaf8;
-  --ink-soft: #9bbdb8;
-  --line: #1e4541;
-  --accent: #2dd4bf;
-  --accent-ink: #ffffff;
-  --accent-2: #ff8a7a;
-  --accent-2-ink: #2a0a05;
-  --gold: #ff8a7a;
-  --navy-deep: #040d0c;
-  --on-navy: #effcfa;
-  --on-navy-soft: #b0d6d1;
-  --gradient-brand: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
-  --gradient-hero: linear-gradient(135deg, #0b3b3a 0%, #0d9488 52%, #ff6b57 100%);
-  --panel-border: transparent;
-  --panel-glow: rgb(255 255 255 / 0.28);
-  --glow-a: 34%;
-  --glow-b: 22%;
-  --glow-c: 20%;
-  --badge-glow: 0 0 22px -6px color-mix(in srgb, var(--accent) 70%, transparent);
-  --btn-shadow: 0 10px 26px -10px rgb(20 184 166 / 0.85), inset 0 1px 0 rgb(255 255 255 / 0.25);
-  --btn-shadow-hover: 0 16px 32px -10px rgb(20 184 166 / 0.95), inset 0 1px 0 rgb(255 255 255 / 0.3);
-  --gold-btn-bg: #ffffff;
-  --gold-btn-ink: #0b3b3a;
-  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 10px 30px -14px rgb(0 0 0 / 0.7);
-  --shadow-card-hover: 0 0 0 1px rgb(45 212 191 / 0.4), 0 24px 50px -20px rgb(20 184 166 / 0.55);
+  --bg: #121315;
+  --surface: #191b1e;
+  --surface-2: #212428;
+  --surface-3: #2a2e33;
+
+  --ink: #ebeae7;
+  --ink-soft: #9b9fa7;
+  --ink-faint: #71757d;
+  --ink-invert: #121315;
+
+  --line: #2b2e33;
+  --line-strong: #3b3f45;
+
+  --accent: #7ba7d4;
+  --accent-hover: #96b9de;
+  --accent-ink: #10243a;
+  --accent-soft: #1a2531;
+  --accent-line: #2f4459;
+
+  --ok: #6cc099;
+  --ok-soft: #16251f;
+  --warn: #d6a461;
+  --warn-soft: #272014;
+  --danger: #e08585;
+  --danger-soft: #2a1a1a;
+  --danger-ink: #1a0d0d;
+
+  --shadow-pop: 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 32px -16px rgb(0 0 0 / 0.7);
 }
 
-* {
-  scrollbar-color: var(--line) transparent;
-}
+/* ============================================================================
+   Base
+   ========================================================================= */
+
+* { scrollbar-color: var(--line-strong) transparent; }
 
 body {
   margin: 0;
   font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
   background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, .font-display {
+h1, h2 {
+  font-family: 'Source Serif 4', 'IBM Plex Sans Arabic', Georgia, serif;
+}
+h1, h2, h3, h4, .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.025em;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  text-wrap: balance;
+  color: var(--ink);
 }
 
-.font-mono {
-  font-family: var(--font-mono);
-}
+h1 { font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem); letter-spacing: -0.028em; }
+h2 { font-size: clamp(1.3rem, 1.05rem + 1vw, 1.65rem); }
+h3 { font-size: 1.0625rem; letter-spacing: -0.01em; }
 
-/* Arabic joins letters: any tracking breaks the script */
+p { text-wrap: pretty; }
+
+.font-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Figures that line up in columns should actually line up */
+table, .lp-nums { font-variant-numeric: tabular-nums; }
+
+a { color: inherit; }
+
+/* Arabic joins its letters: any tracking breaks the script */
 [dir='rtl'] *,
-:lang(ar) * {
-  letter-spacing: 0 !important;
-}
+:lang(ar) * { letter-spacing: 0 !important; }
 
-::selection {
-  background: color-mix(in srgb, var(--accent) 40%, transparent);
-}
+::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  border-radius: 3px;
 }
 
-/* ---- Motion ---- */
+hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
+
+/* ============================================================================
+   Motion — present, but quiet
+   ========================================================================= */
 
 @keyframes lp-fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
 }
-
-@keyframes lp-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
+@keyframes lp-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes lp-scale-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.99); }
+  to { opacity: 1; transform: none; }
 }
-
 @keyframes lp-pulse-ring {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 45%, transparent); }
-  100% { box-shadow: 0 0 0 10px color-mix(in srgb, currentColor 0%, transparent); }
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 35%, transparent); }
+  100% { box-shadow: 0 0 0 9px color-mix(in srgb, currentColor 0%, transparent); }
 }
 
-.lp-animate-in {
-  animation: lp-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+.lp-animate-in { animation: lp-fade-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.lp-animate-in-fade { animation: lp-fade-in 0.28s ease both; }
+.lp-animate-in-scale { animation: lp-scale-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-.lp-animate-in-fade {
-  animation: lp-fade-in 0.45s ease both;
-}
-
-.lp-animate-in-scale {
-  animation: lp-scale-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.lp-delay-1 { animation-delay: 60ms; }
-.lp-delay-2 { animation-delay: 120ms; }
-.lp-delay-3 { animation-delay: 180ms; }
-.lp-delay-4 { animation-delay: 240ms; }
-.lp-delay-5 { animation-delay: 300ms; }
-.lp-delay-6 { animation-delay: 360ms; }
+.lp-delay-1 { animation-delay: 40ms; }
+.lp-delay-2 { animation-delay: 80ms; }
+.lp-delay-3 { animation-delay: 120ms; }
+.lp-delay-4 { animation-delay: 160ms; }
+.lp-delay-5 { animation-delay: 200ms; }
+.lp-delay-6 { animation-delay: 240ms; }
 
 @media (prefers-reduced-motion: reduce) {
-  .lp-animate-in, .lp-animate-in-fade, .lp-animate-in-scale {
-    animation: none;
-  }
+  .lp-animate-in, .lp-animate-in-fade, .lp-animate-in-scale { animation: none; }
+  * { transition-duration: 1ms !important; }
 }
 
-/* ---- Shared component classes (used across every page) ---- */
+/* ============================================================================
+   Surfaces
+   ========================================================================= */
 
 .lp-surface {
   background: var(--surface);
@@ -178,319 +222,320 @@ h1, h2, .font-display {
   border-radius: var(--radius-card);
 }
 
-/* Glass-like card with a faint top sheen */
 .lp-card {
-  background: linear-gradient(180deg, color-mix(in srgb, #fff 4%, var(--surface)), var(--surface));
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-card);
-  transition: box-shadow 240ms ease, transform 240ms ease, border-color 240ms ease;
+  padding: 1.25rem 1.375rem;
+  transition: border-color 160ms ease, background 160ms ease;
 }
 
 .lp-card--hover:hover,
 a.lp-card:hover,
 button.lp-card:hover {
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  border-color: var(--line-strong);
+  background: color-mix(in srgb, var(--accent) 3%, var(--surface));
 }
 
-/* Small plain label above a section (no chip) */
+/* A quiet panel: used where a block should recede, not lift */
+.lp-panel {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+
+/* Anything that genuinely floats above the page */
+.lp-pop {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-pop);
+}
+
+/* ============================================================================
+   Type helpers
+   ========================================================================= */
+
 .lp-eyebrow {
   display: block;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-soft) !important;
+  color: var(--ink-faint) !important;
 }
 
-.lp-eyebrow--center::after {
-  display: none;
-}
+.lp-eyebrow--center::after { display: none; }
 
-/* Short two-colour bar under a headline */
+/* The old two-colour bar is now a plain hairline */
 .lp-rule {
-  width: 64px;
-  height: 5px;
+  width: 100%;
+  height: 1px;
   border: 0;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--accent), var(--gold));
+  border-radius: 0;
+  background: var(--line);
 }
+
+.lp-lede {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 62ch;
+}
+
+.lp-gradient-text { color: var(--accent); }
+.text-gradient { color: var(--accent); background: none; -webkit-text-fill-color: currentColor; }
+
+/* ============================================================================
+   Tags and status
+   ========================================================================= */
 
 .lp-tag {
   display: inline-flex;
   align-items: center;
-  gap: 0.3em;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 0.25rem 0.7rem;
+  gap: 0.35em;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 0.2rem 0.5rem;
   border-radius: var(--radius-tag);
   border: 1px solid var(--line);
   color: var(--ink-soft);
   background: var(--surface-2);
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
 }
 
 .lp-tag--accent {
   color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
-  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 
-.lp-tag--accent2 {
-  color: var(--accent-2);
-  border-color: color-mix(in srgb, var(--accent-2) 35%, var(--line));
-  background: color-mix(in srgb, var(--accent-2) 12%, var(--surface));
+.lp-tag--accent2 { /* legacy alias */
+  color: var(--accent);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 
-.lp-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 0.875rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-pill);
-  background: var(--gradient-brand);
-  color: var(--accent-ink);
-  border: 0;
-  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
-  box-shadow: var(--btn-shadow);
+.lp-tag--ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 30%, var(--line)); background: var(--ok-soft); }
+.lp-tag--warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 30%, var(--line)); background: var(--warn-soft); }
+.lp-tag--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); background: var(--danger-soft); }
+
+/* A dot that carries state next to a label */
+.lp-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: currentColor; flex: none;
 }
 
-.lp-btn-primary:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.06);
-  box-shadow: var(--btn-shadow-hover);
-}
+/* ============================================================================
+   Controls
+   ========================================================================= */
 
-.lp-btn-primary:active {
-  transform: translateY(0);
-  filter: brightness(0.96);
-}
-
-.lp-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 0.875rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid color-mix(in srgb, var(--ink) 22%, var(--line));
-  color: var(--ink);
-  background: color-mix(in srgb, var(--ink) 4%, transparent);
-  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
-}
-
-.lp-btn-secondary:hover {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  transform: translateY(-1px);
-}
-
-/* White button, used on the brand gradient panels */
+.lp-btn-primary,
+.lp-btn-secondary,
+.lp-btn-ghost,
+.lp-btn-danger,
 .lp-btn-gold {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  font-weight: 800;
-  font-size: 0.9rem;
-  padding: 0.85rem 1.9rem;
-  border-radius: var(--radius-pill);
-  background: var(--gold-btn-bg);
-  color: var(--gold-btn-ink);
-  box-shadow: var(--btn-shadow);
-  transition: transform 180ms ease, filter 180ms ease;
+  gap: 0.45rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1;
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
-.lp-btn-gold:hover {
-  transform: translateY(-2px);
-  filter: brightness(0.96);
+.lp-btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.lp-btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.lp-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.lp-btn-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+.lp-btn-secondary:hover { background: var(--surface-2); border-color: var(--ink-faint); }
+
+.lp-btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: transparent;
+}
+.lp-btn-ghost:hover { background: var(--surface-2); color: var(--ink); }
+
+.lp-btn-danger {
+  background: var(--danger);
+  color: var(--danger-ink);
+  border-color: var(--danger);
+}
+.lp-btn-danger:hover { filter: brightness(1.08); }
+
+/* legacy name, now simply the primary button */
+.lp-btn-gold { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.lp-btn-gold:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.lp-btn-lg { padding: 0.8rem 1.4rem; font-size: 0.9375rem; }
+.lp-btn-sm { padding: 0.4rem 0.7rem; font-size: 0.8125rem; }
+
+/* Inputs, selects and textareas share one look */
+.lp-input,
+input[type='text'], input[type='email'], input[type='password'], input[type='search'],
+input[type='number'], input[type='date'], input[type='time'], input[type='datetime-local'],
+input[type='url'], input[type='tel'], select, textarea {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  padding: 0.55rem 0.75rem;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 
-.lp-social-icon {
-  transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
+input::placeholder, textarea::placeholder { color: var(--ink-faint); }
+
+.lp-input:focus,
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.lp-social-icon:hover {
-  color: var(--accent) !important;
-  border-color: var(--accent) !important;
-}
+label { font-size: 0.8125rem; font-weight: 500; color: var(--ink-soft); }
 
-.lp-avatar {
-  border-radius: var(--radius-pill);
-  object-fit: cover;
-}
+/* ============================================================================
+   Pieces the pages reuse
+   ========================================================================= */
 
-/* Headline words in the accent colour */
-.lp-gradient-text {
-  color: var(--accent);
-}
+.lp-avatar { border-radius: var(--radius-pill); object-fit: cover; }
 
-/* Avatar ring in both brand colours */
-.lp-gradient-ring {
-  position: relative;
-}
-
+/* The ring is now a single hairline, not a two-colour gradient */
+.lp-gradient-ring { position: relative; }
 .lp-gradient-ring::before {
   content: '';
   position: absolute;
-  inset: -3px;
+  inset: -2px;
   border-radius: inherit;
-  padding: 2.5px;
-  background: linear-gradient(135deg, var(--accent), var(--gold));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  border: 1px solid var(--line-strong);
   pointer-events: none;
 }
 
-/* Glowing tile that holds an icon */
 .lp-icon-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  border-radius: var(--radius-control);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
   color: var(--accent);
-  box-shadow: var(--badge-glow);
+  box-shadow: none;
 }
 
+.lp-social-icon { transition: color 140ms ease, border-color 140ms ease; }
+.lp-social-icon:hover { color: var(--accent) !important; border-color: var(--line-strong) !important; }
+
+/* A hero is now just a well-set block closed by a rule — no grid, no glow */
 .lp-hero-bg {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
 }
-
-.lp-hero-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(45% 60% at 8% 0%, color-mix(in srgb, var(--accent) var(--glow-a), transparent), transparent 70%),
-    radial-gradient(40% 55% at 95% 8%, color-mix(in srgb, var(--accent-2) var(--glow-b), transparent), transparent 70%),
-    radial-gradient(40% 45% at 60% 105%, color-mix(in srgb, var(--gold) var(--glow-c), transparent), transparent 70%);
+/* Page banners: soft periwinkle-to-mint band with dark text (light theme only) */
+:root:not([data-theme='dark']) .lp-hero-bg {
+  background: linear-gradient(120deg, #c3d0f2 0%, #b9d6ea 55%, #aee2d3 100%);
+  border-bottom: none;
+  --ink: #0b1a2c;
+  --ink-soft: rgb(11 26 44 / 0.72);
+  --ink-faint: rgb(11 26 44 / 0.55);
+  --line: rgb(11 26 44 / 0.16);
+  --surface-2: rgb(255 255 255 / 0.55);
 }
+:root[data-theme='dark'] .lp-hero-bg { background: linear-gradient(120deg, #12304d, #17405f); border-bottom: none; }
+.lp-hero-bg::before, .lp-hero-bg::after { content: none; }
 
-/* Faint grid that fades out toward the bottom of a hero */
-.lp-hero-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px);
-  background-size: 52px 52px;
-  opacity: 0.7;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 80%);
-  mask-image: linear-gradient(to bottom, #000 0%, transparent 80%);
-  pointer-events: none;
-}
-
-/* Auth / form card */
 .lp-auth-card {
-  background: linear-gradient(180deg, color-mix(in srgb, #fff 5%, var(--surface)), var(--surface));
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 28px;
-  padding: 2.5rem 2.25rem;
-  box-shadow: var(--shadow-card-hover);
+  border-radius: var(--radius-card);
+  padding: 2rem 1.875rem;
+  box-shadow: var(--shadow-pop);
   position: relative;
 }
+.lp-auth-card::before { content: none; }
 
-.lp-auth-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 2rem;
-  right: 2rem;
-  height: 4px;
-  border-radius: 0 0 6px 6px;
-  background: linear-gradient(90deg, var(--accent), var(--gold));
-}
-
-/* Violet gradient panel (hero banners, CTAs) */
+/* The old gradient banner is a recessed panel now */
 .lp-navy-panel {
   position: relative;
-  background: var(--gradient-hero);
-  color: var(--on-navy);
-  border: 1px solid var(--panel-border);
-  border-radius: 32px;
-  overflow: hidden;
-}
-
-.lp-navy-panel::after {
-  content: '';
-  position: absolute;
-  width: 360px;
-  height: 360px;
-  right: -100px;
-  top: -140px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--panel-glow), transparent 70%);
-  pointer-events: none;
-}
-
-/* Footer: a soft grey band on the white theme, a deep panel on the dark one */
-.lp-footer {
   background: var(--surface-2);
   color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.lp-navy-panel::after { content: none; }
+
+.lp-footer {
+  background: #0b1a2c;
+  color: #fff;
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+  /* the footer is always dark, so re-point the text/line tokens inside it */
+  --ink: #fff;
+  --ink-soft: rgb(255 255 255 / 0.72);
+  --ink-faint: rgb(255 255 255 / 0.5);
+  --accent-2: #7fd8c3;
+  --line: rgb(255 255 255 / 0.18);
+  --surface: #0b1a2c;
+  --surface-2: rgb(255 255 255 / 0.08);
+}
+:root[data-theme='dark'] .lp-footer { background: #0b1a2c; }
+
+/* Section divider with a label, used between blocks of a page */
+.lp-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1.125rem;
 }
 
-:root[data-theme='dark'] .lp-footer {
-  --ink: var(--on-navy);
-  --ink-soft: var(--on-navy-soft);
-  --line: rgb(255 255 255 / 0.1);
-  --accent: #5eead4;
-  --gold: #ff8a7a;
-  --surface: #0e2a27;
-  background: var(--navy-deep);
-  color: var(--on-navy);
-}
+/* A plain list where each row is separated by a rule, not a card */
+.lp-rows > * + * { border-top: 1px solid var(--line); }
 
-/* ---- Legacy utilities kept for backward compatibility ---- */
+/* ============================================================================
+   Decoration that the new direction drops
+   ========================================================================= */
 
-.text-gradient {
-  background: linear-gradient(90deg, var(--accent), var(--gold));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+.bg-grid, .bg-dots { background-image: none; }
+.bg-dots::before { content: none; }
 
-.bg-grid {
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px);
-  background-size: 44px 44px;
-}
-
-/* Subtle dot texture on gradient panels */
-.bg-dots {
-  position: relative;
-}
-
-.bg-dots::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(color-mix(in srgb, var(--ink) 8%, transparent) 1.5px, transparent 1.5px);
-  background-size: 22px 22px;
-}
-
-/* Decorative motion (floating words, drifting blobs) is intentionally off */
 .lp-blob-drift,
 .lp-float-1,
 .lp-float-2,
-.lp-float-3 {
-  display: none !important;
+.lp-float-3 { display: none !important; }
+
+
+/* Landing (Cambly-style layout, own colours) */
+.lp-serif { font-family: 'Source Serif 4', 'IBM Plex Sans Arabic', Georgia, serif; font-weight: 600; letter-spacing: -0.01em; }
+.lp-cta-mint {
+  display: inline-flex; align-items: center; gap: 0.5rem; height: 3.25rem; padding: 0 1.75rem;
+  border-radius: var(--radius-pill); background: #7fd8c3; color: #0b1a2c; font-weight: 600; font-size: 1rem;
+  transition: background 0.15s, transform 0.15s;
 }
+.lp-cta-mint:hover { background: #99e3d1; transform: translateY(-1px); }
+.lp-cta-ghost {
+  display: inline-flex; align-items: center; height: 3.25rem; padding: 0 1.5rem; border-radius: var(--radius-pill);
+  border: 1px solid rgb(255 255 255 / 0.4); color: #fff; font-weight: 500; transition: background 0.15s;
+}
+.lp-cta-ghost:hover { background: rgb(255 255 255 / 0.1); }

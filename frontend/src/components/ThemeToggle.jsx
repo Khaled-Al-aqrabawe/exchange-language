@@ -12,8 +12,8 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       title={t(isDark ? 'theme.toggleToLight' : 'theme.toggleToDark')}
       aria-label={t(isDark ? 'theme.toggleToLight' : 'theme.toggleToDark')}
-      className="flex h-9 w-9 items-center justify-center transition-colors hover:opacity-70"
-      style={{ borderRadius: 'var(--radius-tag)', color: 'var(--ink-soft)' }}
+      className="lp-social-icon flex h-9 w-9 items-center justify-center"
+      style={{ borderRadius: 'var(--radius-tag)', border: '1px solid transparent', color: 'var(--ink-soft)' }}
     >
       {isDark ? <Sun size={17} /> : <Moon size={17} />}
     </button>
