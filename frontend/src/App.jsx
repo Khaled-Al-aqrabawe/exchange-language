@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import About from './pages/About'
@@ -18,8 +19,22 @@ import Profile from './pages/Profile'
 import Register from './pages/Register'
 import Schedule from './pages/Schedule'
 
+// Every new page opens at the top (picking another chat inside Messages keeps its place).
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  const previous = useRef(pathname)
+  useEffect(() => {
+    const inMessages = previous.current.startsWith('/messages') && pathname.startsWith('/messages')
+    previous.current = pathname
+    if (!inMessages) window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
 function App() {
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Landing />} />
@@ -45,6 +60,7 @@ function App() {
         </Route>
       </Route>
     </Routes>
+    </>
   )
 }
 

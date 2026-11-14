@@ -76,7 +76,11 @@ function writeCallState(roomId, patch) {
   try {
     const next = patch === null ? null : { ...readCallState(roomId), ...patch }
     if (next) sessionStorage.setItem(`call-${roomId}`, JSON.stringify(next))
-    else sessionStorage.removeItem(`call-${roomId}`)
+    else {
+      sessionStorage.removeItem(`call-${roomId}`)
+      // I left on purpose: the "session in progress" banner must not pull me back
+      localStorage.setItem(`call-left-${roomId}`, String(Date.now()))
+    }
   } catch {
     // storage unavailable - the call still works, it just won't survive a refresh
   }
@@ -977,6 +981,11 @@ function CallRatingModal({ partnerName, onSubmit, onReport, onSummary, t }) {
 export default function Call() {
   const { t, i18n } = useTranslation()
   const { roomId } = useParams()
+
+  // (Re)entering the call clears the "I left" mark
+  useEffect(() => {
+    try { localStorage.removeItem(`call-left-${roomId}`) } catch { /* ignore */ }
+  }, [roomId])
   // Restored after a refresh so the user lands back inside the call.
   const [saved] = useState(() => readCallState(roomId))
   const navigate = useNavigate()
@@ -1606,6 +1615,20 @@ export default function Call() {
     await setSessionStatus(statusValue)
     leaveCall()
   }
+
+  // The other person ended the call: take me straight to the end of the session too (finished
+  // lesson, rating, summary). A short wait lets a partner who only refreshes come back first.
+  const leaveCallRef = useRef(null)
+  leaveCallRef.current = leaveCall
+  const leaveFlowOpenRef = useRef(false)
+  leaveFlowOpenRef.current = showLeaveChoice || ratingOpen || reportOpen || !!finishPrompt
+  useEffect(() => {
+    if (status !== 'left' || !joined) return undefined
+    const id = setTimeout(() => {
+      if (!leaveFlowOpenRef.current) leaveCallRef.current?.()
+    }, 4000)
+    return () => clearTimeout(id)
+  }, [status, joined])
 
   // Clicking a menu link during the meeting must not drop the call: it opens the same
   // "leave the meeting" steps (status, finished lesson, rating) instead of changing page.

@@ -21,7 +21,9 @@ export default function OngoingSessionBanner() {
       const now = Date.now()
       setSession(data.find((s) => {
         const start = new Date(s.scheduled_time).getTime()
-        return s.status === 'confirmed' && s.my_joined && start <= now && now < start + s.duration_minutes * 60000
+        let left = false
+        try { left = !!localStorage.getItem(`call-left-${s.room_id}`) } catch { /* ignore */ }
+        return s.status === 'confirmed' && s.my_joined && !left && start <= now && now < start + s.duration_minutes * 60000
       }) || null)
     }).catch(() => {})
     check()
