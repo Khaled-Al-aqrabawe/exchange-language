@@ -1,4 +1,4 @@
-import { BookOpen, MessageCircle, MessagesSquare, Phone, PhoneOff } from 'lucide-react'
+import { BookOpen, MessageCircle, MessagesSquare, Phone, PhoneOff, Users } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -19,6 +19,7 @@ export default function IncomingCallBox() {
   pathRef.current = location.pathname
   const [call, setCall] = useState(null)
   const [message, setMessage] = useState(null)
+  const [invite, setInvite] = useState(null) // someone invited me to a small group
   const messageTimer = useRef(null)
   const timer = useRef(null)
   const handled = useRef(new Set())
@@ -52,6 +53,7 @@ export default function IncomingCallBox() {
         try {
           const data = JSON.parse(e.data)
           if (data.event === 'incoming-call') show(data)
+          if (data.event === 'group-invite') setInvite(data)
           if (data.event === 'new-message') {
             // The call page announces its own chat, and an open thread already shows the message.
             const path = pathRef.current
@@ -89,7 +91,33 @@ export default function IncomingCallBox() {
     </button>
   )
 
-  if (!call) return messageToast || null
+  const inviteBox = invite && (
+    <div className="fixed top-20 end-4 z-[70] w-80 p-4 lp-surface lp-animate-in-scale" style={{ boxShadow: 'var(--shadow-card-hover)' }} role="alertdialog">
+      <div className="mb-3 flex items-center gap-3">
+        <span className="lp-icon-badge h-12 w-12 shrink-0"><Users size={20} /></span>
+        <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('group.invitedYou', '{{name}} invited you to a small group', { name: invite.host.name })}</p>
+      </div>
+      <p className="mb-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 12%, var(--surface))', color: 'var(--accent)' }}>
+        {invite.session_type === 'conversation' ? <MessagesSquare size={13} /> : <BookOpen size={13} />}
+        {invite.session_type === 'conversation'
+          ? t('partners.typeConversation', 'Free conversation')
+          : `${t('partners.typeLesson', 'From the lessons')}${invite.lesson ? ` · ${t('partners.lessonOption', { n: invite.lesson })}` : ''}`}
+      </p>
+      {invite.scheduled_time && (
+        <p className="mb-3 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+          {new Date(invite.scheduled_time).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+        </p>
+      )}
+      <div className="flex gap-2">
+        <button type="button" onClick={() => { const id = invite.room_id; setInvite(null); navigate(`/group/${id}`) }} className="lp-btn-primary flex-1 justify-center">
+          <Users size={15} /> {t('group.reserve', 'Reserve a seat')}
+        </button>
+        <button type="button" onClick={() => setInvite(null)} className="lp-btn-secondary flex-1 justify-center">{t('group.notNow', 'Not now')}</button>
+      </div>
+    </div>
+  )
+
+  if (!call) return <>{messageToast}{inviteBox}</>
 
   const answer = () => {
     clearTimeout(timer.current)
@@ -107,6 +135,7 @@ export default function IncomingCallBox() {
   return (
     <>
     {messageToast}
+    {inviteBox}
     <div
       className="fixed top-20 end-4 z-[70] w-80 p-4 lp-surface lp-animate-in-scale"
       style={{ boxShadow: 'var(--shadow-card-hover)' }}

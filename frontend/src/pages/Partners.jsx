@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, CalendarCheck, CalendarPlus, CheckCircle2, Clock, GraduationCap, Globe2, Info, Layers, MapPin, MessageCircle, MessagesSquare, Phone, Plus, Search, Sparkles, Star, Trash2, User, Video, X } from 'lucide-react'
+import { ArrowRight, BookOpen, CalendarCheck, CalendarPlus, CheckCircle2, Clock, GraduationCap, Globe2, Info, Layers, MapPin, MessageCircle, MessagesSquare, Phone, Plus, Search, Sparkles, Star, Trash2, User, Users, Video, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
@@ -7,6 +7,8 @@ import ModalShell, { Chip, ModalField, Switch, localDateString, modalInputClass,
 import SendSessionRequestModal from '../components/SendSessionRequestModal'
 import CallNowModal from '../components/CallNowModal'
 import ConversationThread from './ConversationThread'
+import CreateGroupModal from '../components/CreateGroupModal'
+import SmallGroups from '../components/SmallGroups'
 import { flagUrl } from '../utils/countries'
 import AvailabilityTypeModal from '../components/AvailabilityTypeModal'
 import SessionTypePicker, { FINISHED_STYLE, lessonLabel, useMyLessons } from '../components/SessionTypePicker'
@@ -493,7 +495,14 @@ export default function Partners() {
   const [chat, setChat] = useState(null) // { id, partner } for the floating chat window
   const [showMyTimes, setShowMyTimes] = useState(false)
   const [callTarget, setCallTarget] = useState(null)
+  const [showCreateGroup, setShowCreateGroup] = useState(false)
+  const [groupsKey, setGroupsKey] = useState(0)
+  const [groupCount, setGroupCount] = useState(0)
   const [typeModal, setTypeModal] = useState(null) // current choice while the "what do you want to do" box is open
+
+  useEffect(() => {
+    client.get('/calls/groups/').then(({ data }) => setGroupCount(data.length)).catch(() => {})
+  }, [groupsKey])
 
   // First visit of this login: if "Available now" is on, ask what the person is up for.
   useEffect(() => {
@@ -561,6 +570,7 @@ export default function Partners() {
     ['now', t('partners.visibilityNow'), availableNow.length],
     ['scheduled', t('partners.visibilityScheduled'), withAvailability.length],
     ['all', t('partners.visibilityAll'), partners.length],
+    ['groups', t('group.openGroups', 'Small groups'), groupCount],
   ]
   const hasFilters = !!(filters.type || filters.lesson || filters.date || filters.time)
 
@@ -582,6 +592,9 @@ export default function Partners() {
               <button type="button" onClick={() => setShowAvailabilityModal(true)} className="lp-btn-primary shrink-0">
                 <CalendarPlus size={16} /> {t('partners.addAvailableTime')}
               </button>
+              <button type="button" onClick={() => setShowCreateGroup(true)} className="lp-btn-secondary shrink-0">
+                <Users size={16} /> {t('group.create', 'Create a small group')}
+              </button>
             </div>
           </div>
 
@@ -596,7 +609,7 @@ export default function Partners() {
                     onClick={() => {
                       setVisibility(key)
                       // lesson, date and time belong to the scheduled tab; the session type also applies to "now"
-                      if (key !== 'scheduled') setFilters((f) => ({ type: key === 'all' ? '' : f.type, lesson: '', date: '', time: '' }))
+                      if (key !== 'scheduled') setFilters((f) => ({ type: key === 'all' || key === 'groups' ? '' : f.type, lesson: '', date: '', time: '' }))
                     }}
                     className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
                     style={visibility === key
@@ -627,7 +640,7 @@ export default function Partners() {
               )}
             </div>
 
-            {visibility !== 'all' && (
+            {visibility !== 'all' && visibility !== 'groups' && (
               <div className="mt-4 flex flex-wrap items-end gap-4">
                 <div>
                   <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{t('partners.sessionType', 'Session type')}</span>
@@ -674,7 +687,10 @@ export default function Partners() {
       </div>
 
       <div className="mx-auto max-w-6xl px-6 pb-16 pt-6">
-        {loading ? (
+        {/* Small groups: starting soon under Available now; all of them in their own tab */}
+        {visibility === 'now' && <SmallGroups mode="soon" refreshKey={groupsKey} onCount={setGroupCount} />}
+        {visibility === 'groups' && <SmallGroups mode="all" refreshKey={groupsKey} onCount={setGroupCount} />}
+        {visibility === 'groups' ? null : loading ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2, 3, 4, 5].map((n) => (
               <div key={n} className="lp-card animate-pulse" style={{ padding: 0, overflow: 'hidden' }}>
@@ -756,6 +772,7 @@ export default function Partners() {
           </div>
         </div>
       )}
+      {showCreateGroup && <CreateGroupModal onClose={() => setShowCreateGroup(false)} onCreated={() => setGroupsKey((k) => k + 1)} />}
       {typeModal && <AvailabilityTypeModal current={typeModal} onSave={saveAvailableTypes} onLater={goUnavailable} onClose={() => setTypeModal(null)} />}
       {callTarget && <CallNowModal partnerId={callTarget.id} partnerName={callTarget.name} allowedTypes={callTarget.types || 'both'} onClose={() => setCallTarget(null)} />}
 

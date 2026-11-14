@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import About from './pages/About'
 import Call from './pages/Call'
 import FAQ from './pages/FAQ'
+import GroupCall from './pages/GroupCall'
 import ForgotPassword from './pages/ForgotPassword'
 import Home from './pages/Home'
 import Landing from './pages/Landing'
@@ -52,6 +53,7 @@ function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:conversationId" element={<Messages />} />
           <Route path="/call/:roomId" element={<Call />} />
+          <Route path="/group/:roomId" element={<GroupCall />} />
           <Route path="/schedule" element={<Schedule />} />
 
           <Route path="/materials" element={<Materials />} />

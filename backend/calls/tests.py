@@ -262,3 +262,96 @@ class LowRatingAndRecordingTests(TransactionTestCase):
                 self.assertEqual(intruder.post(url, {'recording': again}, format='multipart').status_code, 403)
         finally:
             shutil.rmtree(media, ignore_errors=True)
+
+
+def _soon(minutes=5):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    return (timezone.now() + timedelta(minutes=minutes)).isoformat()
+
+
+class GroupApiTests(TransactionTestCase):
+    def _client(self, user):
+        c = APIClient()
+        c.force_authenticate(user)
+        return c
+
+    def test_group_holds_at_most_four_people(self):
+        users = [User.objects.create_user(f'g{i}@example.com', 'pw12345678', first_name=f'U{i}') for i in range(5)]
+        created = self._client(users[0]).post('/api/calls/groups/', {'session_type': 'conversation', 'scheduled_time': _soon(120)}, format='json')
+        self.assertEqual(created.status_code, 201, created.content)
+        room_id = created.data['room_id']
+        self.assertEqual(created.data['seats_taken'], 1)
+        self.assertFalse(created.data['can_enter'])
+
+        for u in users[1:4]:
+            r = self._client(u).post(f'/api/calls/groups/{room_id}/join/')
+            self.assertEqual(r.status_code, 200, r.content)
+        full = self._client(users[4]).post(f'/api/calls/groups/{room_id}/join/')
+        self.assertEqual(full.status_code, 400)
+
+        # reserving twice is harmless, and full groups are hidden from people outside them
+        self.assertEqual(self._client(users[1]).post(f'/api/calls/groups/{room_id}/join/').status_code, 200)
+        self.assertEqual(self._client(users[4]).get('/api/calls/groups/').data, [])
+        self.assertEqual(len(self._client(users[2]).get('/api/calls/groups/').data), 1)
+
+        # giving a seat back lets someone else in
+        self._client(users[3]).post(f'/api/calls/groups/{room_id}/leave/')
+        self.assertEqual(self._client(users[4]).post(f'/api/calls/groups/{room_id}/join/').status_code, 200)
+
+    def test_needs_a_future_time_and_host_can_cancel(self):
+        a = User.objects.create_user('ga@example.com', 'pw12345678')
+        c = self._client(a)
+        self.assertEqual(c.post('/api/calls/groups/', {}, format='json').status_code, 400)
+        self.assertEqual(c.post('/api/calls/groups/', {'scheduled_time': '2020-01-01T10:00:00Z'}, format='json').status_code, 400)
+        room_id = c.post('/api/calls/groups/', {'scheduled_time': _soon(60)}, format='json').data['room_id']
+        self.assertEqual(len(c.get('/api/calls/groups/').data), 1)
+        c.post(f'/api/calls/groups/{room_id}/leave/')  # the host leaving cancels it
+        self.assertEqual(c.get('/api/calls/groups/').data, [])
+        self.assertEqual(c.post(f'/api/calls/groups/{room_id}/join/').status_code, 404)
+
+
+@override_settings(CHANNEL_LAYERS={'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'}})
+class GroupSocketTests(TransactionTestCase):
+    async def test_only_members_in_the_window_connect_and_signals_are_routed(self):
+        a = await database_sync_to_async(User.objects.create_user)('sa@example.com', 'pw12345678', first_name='Ann')
+        b = await database_sync_to_async(User.objects.create_user)('sb@example.com', 'pw12345678', first_name='Bob')
+        c = await database_sync_to_async(User.objects.create_user)('sc@example.com', 'pw12345678', first_name='Cy')
+
+        def make():
+            ca, cb = APIClient(), APIClient()
+            ca.force_authenticate(a)
+            cb.force_authenticate(b)
+            room = ca.post('/api/calls/groups/', {'scheduled_time': _soon(2)}, format='json').data['room_id']
+            cb.post(f'/api/calls/groups/{room}/join/')
+            later = ca.post('/api/calls/groups/', {'scheduled_time': _soon(180)}, format='json').data['room_id']
+            return room, later
+
+        room, later = await database_sync_to_async(make)()
+        ta, tb, tc = (str(AccessToken.for_user(u)) for u in (a, b, c))
+
+        # not a member, or too early: refused
+        self.assertFalse((await WebsocketCommunicator(application, f'/ws/group/{room}/?token={tc}').connect())[0])
+        self.assertFalse((await WebsocketCommunicator(application, f'/ws/group/{later}/?token={ta}').connect())[0])
+
+        wa = WebsocketCommunicator(application, f'/ws/group/{room}/?token={ta}')
+        self.assertTrue((await wa.connect())[0])
+        self.assertEqual((await wa.receive_json_from(timeout=3))['peers'], [])
+
+        wb = WebsocketCommunicator(application, f'/ws/group/{room}/?token={tb}')
+        self.assertTrue((await wb.connect())[0])
+        peers = (await wb.receive_json_from(timeout=3))['peers']
+        self.assertEqual([p['id'] for p in peers], [a.id])
+        joined = await wa.receive_json_from(timeout=3)
+        self.assertEqual((joined['event'], joined['peer']['id']), ('peer-joined', b.id))
+
+        await wb.send_json_to({'to': a.id, 'type': 'offer', 'sdp': {'x': 1}})
+        got = await wa.receive_json_from(timeout=3)
+        self.assertEqual((got['type'], got['from']), ('offer', b.id))
+
+        await wb.disconnect()
+        left = await wa.receive_json_from(timeout=3)
+        self.assertEqual((left['event'], left['peer']['id']), ('peer-left', b.id))
+        await wa.disconnect()
