@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, Navigate } from 'react-router-dom'
-import CallPreview from '../components/CallPreview'
+import HeroVideo from '../components/HeroVideo'
 import { useAuth } from '../context/AuthContext'
 import { avatarUrl } from '../utils/images'
 
@@ -50,13 +50,13 @@ export default function Landing() {
   return (
     <div className="relative" style={{ color: 'var(--ink)' }}>
       {/* Hero: dark, full width, big headline */}
-      <section style={{ background: 'linear-gradient(135deg, #0b1a2c 0%, #12304d 60%, #17405f 100%)', color: '#fff' }}>
+      <section style={{ background: 'linear-gradient(135deg, #1E293B 0%, #2e1a66 60%, #4c2a9c 100%)', color: '#fff' }}>
         <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-6 pb-24 pt-16 sm:pt-24 lg:grid-cols-[1.1fr_1fr]">
           <div className="lp-animate-in">
             <h1 className="lp-serif text-[2.75rem] leading-[1.08] sm:text-[4rem]" style={{ color: '#fff' }}>
               {t('landing.heroTitleLine1')}
               <br />
-              <span style={{ color: '#7fd8c3' }}>{t('landing.heroTitleLine2')}</span>
+              <span style={{ color: '#fb7185' }}>{t('landing.heroTitleLine2')}</span>
             </h1>
             <p className="mt-6 max-w-lg text-[17px] leading-relaxed" style={{ color: 'rgb(255 255 255 / 0.78)' }}>
               {t('landing.heroSubtitle')}
@@ -70,7 +70,7 @@ export default function Landing() {
             <div className="mt-10 flex items-center gap-4">
               <div className="flex -space-x-2 rtl:space-x-reverse">
                 {learnerSeeds.map((seed) => (
-                  <img key={seed} src={avatarUrl(seed, 64)} alt="" className="lp-avatar h-9 w-9" style={{ outline: '2px solid #12304d' }} />
+                  <img key={seed} src={avatarUrl(seed, 64)} alt="" className="lp-avatar h-9 w-9" style={{ outline: '2px solid #2e1a66' }} />
                 ))}
               </div>
               <p className="text-sm" style={{ color: 'rgb(255 255 255 / 0.75)' }}>
@@ -79,13 +79,13 @@ export default function Landing() {
             </div>
           </div>
           <div className="lp-animate-in lp-delay-2 relative">
-            <CallPreview />
+            <HeroVideo />
           </div>
         </div>
       </section>
 
       {/* Highlights strip */}
-      <section style={{ background: '#7fd8c3', color: '#0b1a2c' }}>
+      <section style={{ background: '#F43F5E', color: '#fff' }}>
         <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 sm:grid-cols-3">
           {[
             [BarChart3, t('landing.strip.levels')],
@@ -109,7 +109,7 @@ export default function Landing() {
           <div className="mt-14 grid gap-5 text-start md:grid-cols-2">
             {[
               { bg: '#f4d9cf', title: t('landing.goals.card1Title'), body: t('landing.goals.card1Body'), icon: Target },
-              { bg: '#d6def5', title: t('landing.goals.card2Title'), body: t('landing.goals.card2Body'), icon: Compass },
+              { bg: '#ede9fe', title: t('landing.goals.card2Title'), body: t('landing.goals.card2Body'), icon: Compass },
             ].map((c) => (
               <div key={c.title} className="flex min-h-[19rem] flex-col justify-between p-8" style={{ background: c.bg, borderRadius: 'var(--radius-card)', color: '#17191d' }}>
                 <div>
@@ -124,7 +124,7 @@ export default function Landing() {
       </section>
 
       {/* How it works */}
-      <section style={{ background: '#0b1a2c', color: '#fff' }}>
+      <section style={{ background: '#1E293B', color: '#fff' }}>
         <div className="mx-auto max-w-6xl px-6 py-24">
           <h2 className="lp-serif lp-animate-in mb-12 text-center text-[2.25rem] sm:text-[2.75rem]" style={{ color: '#fff' }}>{t('landing.howItWorks')}</h2>
           <div className="grid gap-5 md:grid-cols-3">
@@ -132,7 +132,7 @@ export default function Landing() {
               <div
                 key={step.n}
                 className={`lp-animate-in lp-delay-${i + 1} p-8`}
-                style={{ background: ['#f4d9cf', '#d6def5', '#c9ece2'][i], color: '#17191d', borderRadius: 'var(--radius-card)' }}
+                style={{ background: ['#f4d9cf', '#ede9fe', '#FFF1F2'][i], color: '#17191d', borderRadius: 'var(--radius-card)' }}
               >
                 <div className="mb-6 flex items-center justify-between">
                   <step.icon size={34} strokeWidth={1.5} style={{ opacity: 0.7 }} />
@@ -147,7 +147,7 @@ export default function Landing() {
       </section>
 
       {/* Product showcase */}
-      <section style={{ background: '#c9ece2', color: '#0b1a2c' }}>
+      <section style={{ background: '#FFF1F2', color: '#1E293B' }}>
         <div className="mx-auto max-w-3xl px-6 py-24 lp-animate-in">
           <p className="mb-4 text-xs font-semibold uppercase tracking-widest" style={{ opacity: 0.65 }}>{t('landing.realConversations')}</p>
           <h2 className="lp-serif mb-4 text-[2.25rem] leading-tight sm:text-[2.75rem]">{t('landing.practiceHeadline')}</h2>
@@ -175,7 +175,7 @@ export default function Landing() {
               <div
                 key={f.title}
                 className={`lp-animate-in lp-delay-${(i % 6) + 1} p-7 ${f.wide ? 'lg:col-span-2' : ''}`}
-                style={{ background: ['#f4d9cf', '#d6def5', '#d6def5', '#c9ece2', '#f4d9cf', '#c9ece2'][i % 6], color: '#17191d', borderRadius: 'var(--radius-card)' }}
+                style={{ background: ['#f4d9cf', '#ede9fe', '#ede9fe', '#FFF1F2', '#f4d9cf', '#FFF1F2'][i % 6], color: '#17191d', borderRadius: 'var(--radius-card)' }}
               >
                 <f.icon size={28} strokeWidth={1.6} className="mb-5" style={{ opacity: 0.7 }} />
                 <h3 className="lp-serif mb-1.5 text-xl">{f.title}</h3>
@@ -187,7 +187,7 @@ export default function Landing() {
       </section>
 
       {/* Final CTA */}
-      <section style={{ background: 'linear-gradient(135deg, #0b1a2c 0%, #12304d 60%, #17405f 100%)', color: '#fff' }}>
+      <section style={{ background: 'linear-gradient(135deg, #1E293B 0%, #2e1a66 60%, #4c2a9c 100%)', color: '#fff' }}>
         <div className="mx-auto max-w-3xl px-6 py-24 text-center lp-animate-in">
           <h2 className="lp-serif mb-4 text-[2.25rem] sm:text-[2.75rem]" style={{ color: '#fff' }}>{t('landing.ctaTitle')}</h2>
           <p className="mx-auto mb-9 max-w-xl text-[17px] leading-relaxed" style={{ color: 'rgb(255 255 255 / 0.78)' }}>{t('landing.ctaBody')}</p>

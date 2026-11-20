@@ -14,7 +14,7 @@ function LangSection({ step, icon: Icon, title, hint, children }) {
   return (
     <section className="rounded-3xl p-5" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
       <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: '#0b1a2c', color: '#7fd8c3' }}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: '#1E293B', color: '#fb7185' }}>
           <Icon size={19} />
         </span>
         <div className="min-w-0">
@@ -90,7 +90,7 @@ function ChangeEmailCard({ currentEmail, onChanged }) {
           onClick={submit}
           disabled={busy || !newEmail || !password}
           className="inline-flex h-11 items-center justify-center px-6 text-sm font-semibold disabled:opacity-50"
-          style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}
+          style={{ background: '#1E293B', color: '#fff', borderRadius: 'var(--radius-pill)' }}
         >
           {t('profile.changeEmailButton', 'Change email')}
         </button>
@@ -312,10 +312,10 @@ export default function Profile() {
               className="group relative mx-auto block"
               aria-label={t('profile.changePhoto')}
             >
-              <img src={resolveAvatarUrl(user.profile.avatar, user.id, 240)} alt="" className="lp-avatar h-24 w-24 object-cover" style={{ border: '4px solid var(--surface)', boxShadow: '0 0 0 2px #b9d6ea' }} />
+              <img src={resolveAvatarUrl(user.profile.avatar, user.id, 240)} alt="" className="lp-avatar h-24 w-24 object-cover" style={{ border: '4px solid var(--surface)', boxShadow: '0 0 0 2px #fbcfe8' }} />
               <span
                 className="absolute -bottom-1 -end-1 flex h-8 w-8 items-center justify-center rounded-full text-white transition-transform group-hover:scale-110"
-                style={{ background: '#0b1a2c', border: '3px solid var(--surface)' }}
+                style={{ background: '#1E293B', border: '3px solid var(--surface)' }}
               >
                 <Camera size={14} />
               </span>
@@ -340,14 +340,14 @@ export default function Profile() {
                 <span style={{ color: 'var(--accent)' }}>{completion}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full" style={{ background: 'var(--surface-2)' }}>
-                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${completion}%`, background: '#7fd8c3' }} />
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${completion}%`, background: '#fb7185' }} />
               </div>
               {completion < 100 && <p className="mt-2 text-xs" style={{ color: 'var(--ink-soft)' }}>{t('profile.completionHint')}</p>}
             </div>
 
             {(
               <div className="mt-5">
-                <button type="submit" form="profile-form" disabled={saving} className="inline-flex h-11 w-full items-center justify-center text-sm font-semibold disabled:opacity-50" style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
+                <button type="submit" form="profile-form" disabled={saving} className="inline-flex h-11 w-full items-center justify-center text-sm font-semibold disabled:opacity-50" style={{ background: '#1E293B', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
                   {saving ? t('profile.saving') : t('profile.save')}
                 </button>
                 {saveError && <p className="mt-2 text-xs" style={{ color: '#f87171' }}>{saveError}</p>}
@@ -362,7 +362,7 @@ export default function Profile() {
 
           {/* Tabbed forms: one section at a time keeps the page short */}
           <div className="min-w-0">
-            <div className="lp-animate-in lp-delay-1 mb-4 inline-flex max-w-full overflow-x-auto rounded-full p-1" style={{ background: '#d6def5' }}>
+            <div className="lp-animate-in lp-delay-1 mb-4 inline-flex max-w-full overflow-x-auto rounded-full p-1" style={{ background: '#ede9fe' }}>
               {tabs.map(([key, Icon, label]) => (
                 <button
                   key={key}
@@ -370,8 +370,8 @@ export default function Profile() {
                   onClick={() => { setTab(key); setSaved(false) }}
                   className="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all"
                   style={tab === key
-                    ? { background: '#0b1a2c', color: '#fff' }
-                    : { color: '#0b1a2c' }}
+                    ? { background: '#1E293B', color: '#fff' }
+                    : { color: '#1E293B' }}
                 >
                   <Icon size={15} /> {label}
                 </button>

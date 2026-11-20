@@ -96,7 +96,7 @@ export default function Messages() {
                       onClick={() => navigate(`/messages/${c.id}`)}
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/messages/${c.id}`) } }}
                       className="mb-1.5 flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-start transition-colors hover:brightness-95"
-                      style={{ background: isActive ? '#aee2d3' : '#eef1f8', color: '#17191d', borderRadius: 'var(--radius-card)' }}
+                      style={{ background: isActive ? '#fecdd3' : '#eef1f8', color: '#17191d', borderRadius: 'var(--radius-card)' }}
                     >
                       <img src={avatarUrl(other?.id, 80)} alt="" className="lp-avatar h-12 w-12 shrink-0 object-cover" />
                       <div className="min-w-0 flex-1">
@@ -131,8 +131,8 @@ export default function Messages() {
             {active ? (
               <ConversationThread conversationId={active.id} partner={partner} onBack={() => navigate('/messages')} />
             ) : (
-              <div className="flex h-full flex-col items-center justify-center px-6 text-center" style={{ background: 'linear-gradient(160deg, #f4d9cf55, #d6def566 60%, #c9ece255)' }}>
-                <span className="mb-5 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: '#d6def5', color: '#0b1a2c' }}><MessageCircle size={34} strokeWidth={1.5} /></span>
+              <div className="flex h-full flex-col items-center justify-center px-6 text-center" style={{ background: 'linear-gradient(160deg, #f4d9cf55, #ede9fe66 60%, #FFF1F255)' }}>
+                <span className="mb-5 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: '#ede9fe', color: '#1E293B' }}><MessageCircle size={34} strokeWidth={1.5} /></span>
                 <p className="lp-serif text-2xl" style={{ color: 'var(--ink)' }}>{t('messages.selectConversation')}</p>
                 <p className="mt-2 max-w-xs text-sm" style={{ color: 'var(--ink-soft)' }}>{t('messages.selectHint')}</p>
               </div>

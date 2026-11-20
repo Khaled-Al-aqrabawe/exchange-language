@@ -177,7 +177,7 @@ export default function PartnerProfile() {
               {partner.intro_video && (
                 <span
                   className="absolute -bottom-1 -start-1 flex h-8 w-8 items-center justify-center rounded-full"
-                  style={{ background: '#0b1a2c', color: '#fff', border: '3px solid #fff' }}
+                  style={{ background: '#1E293B', color: '#fff', border: '3px solid #fff' }}
                   title={t('partnerProfile.introVideo')}
                 >
                   <Video size={13} />
@@ -188,29 +188,29 @@ export default function PartnerProfile() {
             <div className="min-w-0 flex-1 basis-64">
               <h1 className="lp-serif text-[2rem] leading-tight sm:text-[2.5rem]" style={{ color: 'var(--ink)' }}>{partner.full_name}</h1>
               <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full px-3 py-1 font-semibold" style={{ background: '#0b1a2c', color: '#fff' }}>
+                <span className="rounded-full px-3 py-1 font-semibold" style={{ background: '#1E293B', color: '#fff' }}>
                   {partner.match_type === 'exchange' ? t('partnerProfile.exchangeMatch') : t('partnerProfile.peerPractice')}
                 </span>
                 {partner.country && (
-                  <span className="rounded-full px-3 py-1 font-medium" style={{ background: 'rgb(255 255 255 / 0.7)', color: '#0b1a2c' }}>{partner.country}</span>
+                  <span className="rounded-full px-3 py-1 font-medium" style={{ background: 'rgb(255 255 255 / 0.7)', color: '#1E293B' }}>{partner.country}</span>
                 )}
                 {partner.age != null && (
-                  <span className="rounded-full px-3 py-1 font-medium" style={{ background: 'rgb(255 255 255 / 0.7)', color: '#0b1a2c' }}>{t('partnerProfile.ageYears', { age: partner.age })}</span>
+                  <span className="rounded-full px-3 py-1 font-medium" style={{ background: 'rgb(255 255 255 / 0.7)', color: '#1E293B' }}>{t('partnerProfile.ageYears', { age: partner.age })}</span>
                 )}
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
-              <button onClick={handleMessage} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
+              <button onClick={handleMessage} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#1E293B', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
                 <MessageCircle size={16} /> {t('partnerProfile.message')}
               </button>
               {partner.is_available_now && (
-                <button onClick={handleCall} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#7fd8c3', color: '#0b1a2c', borderRadius: 'var(--radius-pill)' }}>
+                <button onClick={handleCall} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#fb7185', color: '#1E293B', borderRadius: 'var(--radius-pill)' }}>
                   <Phone size={16} /> {t('partners.callNow')}
                 </button>
               )}
               {visibleAvailability.length > 0 && (
-                <button onClick={() => setShowRequestModal(true)} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#fff', color: '#0b1a2c', borderRadius: 'var(--radius-pill)' }}>
+                <button onClick={() => setShowRequestModal(true)} className="inline-flex h-11 items-center gap-2 px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#fff', color: '#1E293B', borderRadius: 'var(--radius-pill)' }}>
                   <CalendarClock size={16} /> {t('partnerProfile.scheduleSession')}
                 </button>
               )}
@@ -226,7 +226,7 @@ export default function PartnerProfile() {
             <div>
               <h2 className="lp-serif mb-3 text-2xl">{t('partnerProfile.introVideo')}</h2>
               {partner.intro_video ? (
-                <div className="relative overflow-hidden" style={{ background: '#0b1a2c', borderRadius: 'var(--radius-card)' }}>
+                <div className="relative overflow-hidden" style={{ background: '#1E293B', borderRadius: 'var(--radius-card)' }}>
                   <video
                     src={partner.intro_video}
                     controls={videoPlaying}
@@ -238,17 +238,17 @@ export default function PartnerProfile() {
                       type="button"
                       onClick={(e) => { e.currentTarget.previousElementSibling?.play(); setVideoPlaying(true) }}
                       className="absolute inset-0 flex items-center justify-center group"
-                      style={{ background: 'rgb(11 26 44 / 0.25)' }}
+                      style={{ background: 'rgb(30 41 59 / 0.25)' }}
                       aria-label={t('partnerProfile.introVideo')}
                     >
-                      <span className="flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110" style={{ background: '#7fd8c3', color: '#0b1a2c' }}>
+                      <span className="flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110" style={{ background: '#fb7185', color: '#1E293B' }}>
                         <Play size={22} fill="currentColor" />
                       </span>
                     </button>
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-3 px-5 py-6 text-sm" style={{ background: '#d6def5', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+                <div className="flex items-center gap-3 px-5 py-6 text-sm" style={{ background: '#ede9fe', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
                   <Video size={20} className="shrink-0" style={{ opacity: 0.7 }} />
                   {t('partnerProfile.noVideo')}
                 </div>
@@ -300,7 +300,7 @@ export default function PartnerProfile() {
                         type="button"
                         onClick={() => setBookingSlot(slot)}
                         className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold transition-transform hover:-translate-y-0.5"
-                        style={{ borderRadius: 'var(--radius-pill)', background: ['#c9ece2', '#d6def5', '#f4d9cf'][i % 3], color: '#17191d' }}
+                        style={{ borderRadius: 'var(--radius-pill)', background: ['#FFF1F2', '#ede9fe', '#f4d9cf'][i % 3], color: '#17191d' }}
                       >
                         <CalendarClock size={13} />
                         {slot.is_recurring
@@ -324,13 +324,13 @@ export default function PartnerProfile() {
 
           {/* Side column: languages + stats */}
           <aside className="space-y-4 lp-animate-in lp-delay-1 lg:sticky lg:top-24 lg:self-start">
-            <div className="p-6" style={{ background: '#d6def5', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+            <div className="p-6" style={{ background: '#ede9fe', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
               <p className="mb-1 text-xs font-semibold uppercase tracking-widest" style={{ opacity: 0.6 }}>{t('partners.teaches', 'Can teach')}</p>
               <p className="lp-serif text-xl">{partner.native_language} <span className="text-sm" style={{ opacity: 0.65 }}>· {t('levels.native')}</span></p>
               <p className="mb-1 mt-4 text-xs font-semibold uppercase tracking-widest" style={{ opacity: 0.6 }}>{t('partners.learning', 'Learning')}</p>
               <p className="lp-serif text-xl">{partner.learning_language} <span className="text-sm" style={{ opacity: 0.65 }}>· {t(`levels.${partner.proficiency_level}`, partner.proficiency_level)}</span></p>
             </div>
-            <div className="flex items-center gap-4 p-5" style={{ background: '#c9ece2', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+            <div className="flex items-center gap-4 p-5" style={{ background: '#FFF1F2', color: '#17191d', borderRadius: 'var(--radius-card)' }}>
               <CalendarCheck size={30} strokeWidth={1.5} style={{ opacity: 0.7 }} />
               <div>
                 <p className="lp-serif text-2xl leading-none">{partner.sessions_completed}</p>

@@ -90,7 +90,7 @@ export default function CreateGroupModal({ onClose, onCreated }) {
                 onClick={() => toggle(p.user_id)}
                 disabled={locked}
                 className="flex w-full items-center gap-3 px-3 py-2 text-start transition-colors disabled:opacity-40"
-                style={{ background: on ? '#aee2d3' : 'var(--surface-2)', color: on ? '#17191d' : 'var(--ink)', borderRadius: 'var(--radius-control)' }}
+                style={{ background: on ? '#fecdd3' : 'var(--surface-2)', color: on ? '#17191d' : 'var(--ink)', borderRadius: 'var(--radius-control)' }}
               >
                 <img src={resolveAvatarUrl(p.avatar, p.user_id, 64)} alt="" className="lp-avatar h-8 w-8 shrink-0 object-cover" />
                 <span className="min-w-0 flex-1 truncate text-sm font-semibold">{p.full_name}</span>

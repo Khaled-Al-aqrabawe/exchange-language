@@ -71,7 +71,7 @@ export default function SmallGroups({ refreshKey = 0, mode = 'all', onCount }) {
           const full = g.seats_taken >= g.max_members
           const when = new Date(g.scheduled_time)
           return (
-            <div key={g.room_id} className="flex flex-col p-5" style={{ background: ['#d6def5', '#c9ece2', '#f4d9cf'][i % 3], color: '#17191d', borderRadius: 'var(--radius-card)' }}>
+            <div key={g.room_id} className="flex flex-col p-5" style={{ background: ['#ede9fe', '#FFF1F2', '#f4d9cf'][i % 3], color: '#17191d', borderRadius: 'var(--radius-card)' }}>
               <div className="flex items-center justify-between gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgb(255 255 255 / 0.7)' }}>
                   {g.session_type === 'conversation' ? <MessagesSquare size={13} /> : <BookOpen size={13} />}
@@ -99,7 +99,7 @@ export default function SmallGroups({ refreshKey = 0, mode = 'all', onCount }) {
                     type="button"
                     onClick={() => navigate(`/group/${g.room_id}`)}
                     className="inline-flex h-11 flex-1 items-center justify-center text-sm font-semibold"
-                    style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}
+                    style={{ background: '#1E293B', color: '#fff', borderRadius: 'var(--radius-pill)' }}
                   >
                     {g.can_enter ? t('group.enter', 'Enter group') : t('group.reserved', 'Seat reserved')}
                   </button>
@@ -119,7 +119,7 @@ export default function SmallGroups({ refreshKey = 0, mode = 'all', onCount }) {
                   onClick={() => reserve(g)}
                   disabled={full || busy === g.room_id}
                   className="mt-4 inline-flex h-11 items-center justify-center text-sm font-semibold disabled:opacity-50"
-                  style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}
+                  style={{ background: '#1E293B', color: '#fff', borderRadius: 'var(--radius-pill)' }}
                 >
                   {full ? t('group.full', 'Full') : t('group.reserve', 'Reserve a seat')}
                 </button>

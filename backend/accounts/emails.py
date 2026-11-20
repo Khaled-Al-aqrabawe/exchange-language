@@ -4,15 +4,15 @@ from django.core.mail import EmailMultiAlternatives, send_mail
 from .email_i18n import RTL_LANGUAGES, get_strings, user_language
 
 BRAND = {
-    'bg': '#f3faf9',
+    'bg': '#F8FAFC',
     'surface': '#ffffff',
-    'surface_2': '#e6f4f2',
-    'ink': '#0c2b30',
-    'ink_soft': '#55747a',
-    'accent': '#0b7d74',
+    'surface_2': '#FFF1F2',
+    'ink': '#171717',
+    'ink_soft': '#52525b',
+    'accent': '#7C3AED',
     'accent_ink': '#ffffff',
-    'border': '#d4e8e5',
-    'muted': '#8aa4a8',
+    'border': '#ece6ea',
+    'muted': '#8b8f99',
 }
 
 FONT_STACK = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
@@ -51,7 +51,7 @@ def render_email_html(preheader, heading, body_html, cta_text=None, cta_url=None
 <tr><td style="background-color:{BRAND['accent']};padding:20px 32px;">
 <table role="presentation" cellpadding="0" cellspacing="0" dir="{dir_attr}"><tr>
 <td style="width:32px;height:32px;background-color:#ffffff;border-radius:8px;text-align:center;vertical-align:middle;
-  font-weight:800;color:#ff6b57;font-size:14px;font-family:{FONT_STACK};">LH</td>
+  font-weight:800;color:#F43F5E;font-size:14px;font-family:{FONT_STACK};">LB</td>
 <td style="padding-{'right' if is_rtl else 'left'}:10px;font-weight:700;font-size:16px;color:#ffffff;font-family:{FONT_STACK};">LanBro</td>
 </tr></table>
 </td></tr>

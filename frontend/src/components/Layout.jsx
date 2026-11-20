@@ -180,7 +180,7 @@ export default function Layout() {
       <nav
         className="sticky top-0 z-50 backdrop-blur-md"
         style={darkNav
-          ? { background: '#0b1a2c', borderBottom: '1px solid rgb(255 255 255 / 0.12)', '--ink': '#fff', '--ink-soft': 'rgb(255 255 255 / 0.78)', '--line': 'rgb(255 255 255 / 0.2)', '--surface-2': 'rgb(255 255 255 / 0.1)', '--surface': '#0b1a2c', '--accent': '#7fd8c3', '--accent-2': '#7fd8c3', '--accent-soft': 'rgb(255 255 255 / 0.14)', '--ink-faint': 'rgb(255 255 255 / 0.55)' }
+          ? { background: '#1E293B', borderBottom: '1px solid rgb(255 255 255 / 0.12)', '--ink': '#fff', '--ink-soft': 'rgb(255 255 255 / 0.78)', '--line': 'rgb(255 255 255 / 0.2)', '--surface-2': 'rgb(255 255 255 / 0.1)', '--surface': '#1E293B', '--accent': '#fb7185', '--accent-2': '#fb7185', '--accent-soft': 'rgb(255 255 255 / 0.14)', '--ink-faint': 'rgb(255 255 255 / 0.55)' }
           : { background: 'color-mix(in srgb, var(--surface) 92%, transparent)', borderBottom: '1px solid var(--line)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">

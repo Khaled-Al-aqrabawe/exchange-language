@@ -26,27 +26,27 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 
   /* --- Ground. Warm off-white, so the white cards read as paper on a desk. --- */
-  --bg: #faf9f7;
+  --bg: #F8FAFC;
   --surface: #ffffff;
-  --surface-2: #f3f2ef;
-  --surface-3: #ebeae6;
+  --surface-2: #FFF1F2;
+  --surface-3: #FFE4E6;
 
   /* --- Ink. Near-black with a trace of blue, never pure #000. --- */
-  --ink: #17191d;
-  --ink-soft: #5a5e68;
+  --ink: #171717;
+  --ink-soft: #52525b;
   --ink-faint: #8b8f99;
   --ink-invert: #ffffff;
 
   /* --- Rules. Hairlines carry the structure instead of shadows. --- */
-  --line: #e3e1dc;
-  --line-strong: #cfcdc7;
+  --line: #ece6ea;
+  --line-strong: #d9ced6;
 
   /* --- The one accent: ink blue. --- */
-  --accent: #1b4d7a;
-  --accent-hover: #163e63;
+  --accent: #7C3AED;
+  --accent-hover: #6D28D9;
   --accent-ink: #ffffff;
-  --accent-soft: #eef2f7;
-  --accent-line: #c3d2e2;
+  --accent-soft: #F5F0FF;
+  --accent-line: #d8c7fb;
 
   /* --- Semantic colour, used only for state. --- */
   --ok: #2f6b4f;
@@ -68,8 +68,8 @@
   --radius-tag: 6px;
 
   /* --- Legacy token names, remapped so no page breaks. --- */
-  --accent-2: var(--accent);
-  --accent-2-ink: var(--accent-ink);
+  --accent-2: #F43F5E;
+  --accent-2-ink: #ffffff;
   --gold: var(--accent);
   --navy-deep: var(--surface-2);
   --on-navy: var(--ink);
@@ -105,11 +105,11 @@
   --line: #2b2e33;
   --line-strong: #3b3f45;
 
-  --accent: #7ba7d4;
-  --accent-hover: #96b9de;
-  --accent-ink: #10243a;
-  --accent-soft: #1a2531;
-  --accent-line: #2f4459;
+  --accent: #a78bfa;
+  --accent-hover: #c4b5fd;
+  --accent-ink: #1e1042;
+  --accent-soft: #221a3a;
+  --accent-line: #43347a;
 
   --ok: #6cc099;
   --ok-soft: #16251f;
@@ -452,15 +452,15 @@ label { font-size: 0.8125rem; font-weight: 500; color: var(--ink-soft); }
 }
 /* Page banners: soft periwinkle-to-mint band with dark text (light theme only) */
 :root:not([data-theme='dark']) .lp-hero-bg {
-  background: linear-gradient(120deg, #c3d0f2 0%, #b9d6ea 55%, #aee2d3 100%);
+  background: linear-gradient(120deg, #ddd6fe 0%, #fbcfe8 60%, #fecdd3 100%);
   border-bottom: none;
-  --ink: #0b1a2c;
-  --ink-soft: rgb(11 26 44 / 0.72);
-  --ink-faint: rgb(11 26 44 / 0.55);
-  --line: rgb(11 26 44 / 0.16);
+  --ink: #1E293B;
+  --ink-soft: rgb(30 41 59 / 0.72);
+  --ink-faint: rgb(30 41 59 / 0.55);
+  --line: rgb(30 41 59 / 0.16);
   --surface-2: rgb(255 255 255 / 0.55);
 }
-:root[data-theme='dark'] .lp-hero-bg { background: linear-gradient(120deg, #12304d, #17405f); border-bottom: none; }
+:root[data-theme='dark'] .lp-hero-bg { background: linear-gradient(120deg, #2e1a66, #4c2a9c); border-bottom: none; }
 .lp-hero-bg::before, .lp-hero-bg::after { content: none; }
 
 .lp-auth-card {
@@ -485,19 +485,19 @@ label { font-size: 0.8125rem; font-weight: 500; color: var(--ink-soft); }
 .lp-navy-panel::after { content: none; }
 
 .lp-footer {
-  background: #0b1a2c;
+  background: #1E293B;
   color: #fff;
   border-top: 1px solid rgb(255 255 255 / 0.12);
   /* the footer is always dark, so re-point the text/line tokens inside it */
   --ink: #fff;
   --ink-soft: rgb(255 255 255 / 0.72);
   --ink-faint: rgb(255 255 255 / 0.5);
-  --accent-2: #7fd8c3;
+  --accent-2: #fb7185;
   --line: rgb(255 255 255 / 0.18);
-  --surface: #0b1a2c;
+  --surface: #1E293B;
   --surface-2: rgb(255 255 255 / 0.08);
 }
-:root[data-theme='dark'] .lp-footer { background: #0b1a2c; }
+:root[data-theme='dark'] .lp-footer { background: #1E293B; }
 
 /* Section divider with a label, used between blocks of a page */
 .lp-section-head {
@@ -530,10 +530,10 @@ label { font-size: 0.8125rem; font-weight: 500; color: var(--ink-soft); }
 .lp-serif { font-family: 'Source Serif 4', 'IBM Plex Sans Arabic', Georgia, serif; font-weight: 600; letter-spacing: -0.01em; }
 .lp-cta-mint {
   display: inline-flex; align-items: center; gap: 0.5rem; height: 3.25rem; padding: 0 1.75rem;
-  border-radius: var(--radius-pill); background: #7fd8c3; color: #0b1a2c; font-weight: 600; font-size: 1rem;
+  border-radius: var(--radius-pill); background: #F43F5E; color: #ffffff; font-weight: 600; font-size: 1rem;
   transition: background 0.15s, transform 0.15s;
 }
-.lp-cta-mint:hover { background: #99e3d1; transform: translateY(-1px); }
+.lp-cta-mint:hover { background: #E11D48; transform: translateY(-1px); }
 .lp-cta-ghost {
   display: inline-flex; align-items: center; height: 3.25rem; padding: 0 1.5rem; border-radius: var(--radius-pill);
   border: 1px solid rgb(255 255 255 / 0.4); color: #fff; font-weight: 500; transition: background 0.15s;

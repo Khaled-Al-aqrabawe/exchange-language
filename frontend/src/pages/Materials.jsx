@@ -262,7 +262,7 @@ export default function Materials() {
     load()
   }
 
-  const PASTELS = ['#f4d9cf', '#d6def5', '#c9ece2']
+  const PASTELS = ['#f4d9cf', '#ede9fe', '#FFF1F2']
 
   const selectStyle = { border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' }
 
@@ -389,14 +389,14 @@ export default function Materials() {
             const progress = levelProgress(language, openLevel)
             return (
               <>
-                <div className="mb-6 flex flex-wrap items-center gap-4 p-6 lp-animate-in" style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-card)' }}>
+                <div className="mb-6 flex flex-wrap items-center gap-4 p-6 lp-animate-in" style={{ background: '#1E293B', color: '#fff', borderRadius: 'var(--radius-card)' }}>
                   <div className="min-w-0 flex-1 basis-56">
                     <p className="lp-serif text-xl" style={{ color: '#fff' }}>{language} · {openLevel}</p>
                     <div className="mt-3 h-2 overflow-hidden rounded-full" style={{ background: 'rgb(255 255 255 / 0.2)' }}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%`, background: '#7fd8c3' }} />
+                      <div className="h-full rounded-full transition-all" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%`, background: '#fb7185' }} />
                     </div>
                   </div>
-                  <span className="text-lg font-semibold" style={{ color: '#7fd8c3' }}>{progress.done} / {progress.total}</span>
+                  <span className="text-lg font-semibold" style={{ color: '#fb7185' }}>{progress.done} / {progress.total}</span>
                 </div>
                 <ol className="relative">
                   {lessons.map((m, i) => {
@@ -420,7 +420,7 @@ export default function Materials() {
                         <div
                           className="flex min-w-0 flex-1 flex-wrap items-center gap-3 px-5 py-3.5 transition-colors"
                           style={{
-                            background: isNext ? '#aee2d3' : done ? '#e3efe6' : PASTELS[i % 3],
+                            background: isNext ? '#fecdd3' : done ? '#e3efe6' : PASTELS[i % 3],
                             color: '#17191d',
                             borderRadius: 'var(--radius-card)',
                           }}

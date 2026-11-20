@@ -39,17 +39,17 @@ export default function AuthImagePanel({ quote }) {
       className="relative hidden lg:flex flex-col justify-between overflow-hidden p-12"
       style={{
         // a soft mid-tone: periwinkle fading to mint, dark text on top
-        background: 'linear-gradient(155deg, #c3d0f2 0%, #b9d6ea 55%, #aee2d3 100%)',
-        '--ink': '#0b1a2c', '--ink-soft': 'rgb(11 26 44 / 0.75)', '--ink-faint': 'rgb(11 26 44 / 0.55)',
-        '--line': 'rgb(11 26 44 / 0.16)', '--line-strong': 'rgb(11 26 44 / 0.28)', '--surface-2': '#c3d0f2',
+        background: 'linear-gradient(155deg, #ddd6fe 0%, #fbcfe8 55%, #fecdd3 100%)',
+        '--ink': '#1E293B', '--ink-soft': 'rgb(30 41 59 / 0.75)', '--ink-faint': 'rgb(30 41 59 / 0.55)',
+        '--line': 'rgb(30 41 59 / 0.16)', '--line-strong': 'rgb(30 41 59 / 0.28)', '--surface-2': '#ddd6fe',
       }}
     >
       <span className="pointer-events-none absolute -bottom-24 -end-24 h-72 w-72 rounded-full" style={{ background: '#fff', opacity: 0.25 }} />
       <span className="pointer-events-none absolute -top-16 -start-16 h-48 w-48 rounded-full" style={{ background: '#fff', opacity: 0.18 }} />
       <div className="relative flex items-center gap-2.5">
         <BrandMark className="h-8 w-8" />
-        <span className="font-display text-lg font-semibold tracking-tight" style={{ color: '#0b1a2c' }}>
-          Lan<span style={{ color: '#1b4d7a' }}>Bro</span>
+        <span className="font-display text-lg font-semibold tracking-tight" style={{ color: '#1E293B' }}>
+          Lan<span style={{ color: '#7C3AED' }}>Bro</span>
         </span>
       </div>
 
@@ -68,12 +68,12 @@ export default function AuthImagePanel({ quote }) {
 
         <div key={active} className="lp-animate-in-fade min-h-[7rem]">
           {slide.kind === 'quote' ? (
-            <p className="lp-serif text-[1.9rem] leading-snug max-w-md" style={{ color: '#0b1a2c' }}>
+            <p className="lp-serif text-[1.9rem] leading-snug max-w-md" style={{ color: '#1E293B' }}>
               {slide.text}
             </p>
           ) : (
             <>
-              <p className="lp-serif text-[1.9rem] leading-snug max-w-md mb-2.5" style={{ color: '#0b1a2c' }}>
+              <p className="lp-serif text-[1.9rem] leading-snug max-w-md mb-2.5" style={{ color: '#1E293B' }}>
                 {slide.headline}
               </p>
               <p className="text-sm leading-relaxed max-w-md" style={{ color: 'var(--ink-soft)' }}>
@@ -91,7 +91,7 @@ export default function AuthImagePanel({ quote }) {
               onClick={() => setActive(i)}
               aria-label={`Slide ${i + 1}`}
               className="h-1 rounded-full transition-all duration-300"
-              style={{ width: i === active ? '24px' : '10px', background: i === active ? '#1b4d7a' : 'rgb(11 26 44 / 0.25)' }}
+              style={{ width: i === active ? '24px' : '10px', background: i === active ? '#7C3AED' : 'rgb(30 41 59 / 0.25)' }}
             />
           ))}
         </div>

@@ -170,7 +170,7 @@ export default function Home() {
         >
         </ModalShell>
       )}
-      <div style={{ background: 'linear-gradient(120deg, #c3d0f2 0%, #b9d6ea 55%, #aee2d3 100%)', color: '#0b1a2c', '--ink': '#0b1a2c' }}>
+      <div style={{ background: 'linear-gradient(120deg, #ddd6fe 0%, #fbcfe8 55%, #fecdd3 100%)', color: '#1E293B', '--ink': '#1E293B' }}>
         <div className="mx-auto max-w-6xl px-6 pb-12 pt-10">
           {/* Greeting */}
           <div className="lp-animate-in flex flex-wrap items-center justify-between gap-5">
@@ -181,7 +181,7 @@ export default function Home() {
                 className="lp-avatar h-16 w-16 shrink-0 object-cover"
                 style={{ border: '3px solid #fff' }}
               />
-              <h1 className="lp-serif text-[2.25rem] leading-tight sm:text-[3rem]" style={{ color: '#0b1a2c' }}>
+              <h1 className="lp-serif text-[2.25rem] leading-tight sm:text-[3rem]" style={{ color: '#1E293B' }}>
               {(() => {
                 const h = new Date().getHours()
                 const part = h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening'
@@ -191,7 +191,7 @@ export default function Home() {
               })()}
               </h1>
             </div>
-            <Link to="/partners" className="inline-flex h-12 items-center gap-2 px-6 text-[15px] font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
+            <Link to="/partners" className="inline-flex h-12 items-center gap-2 px-6 text-[15px] font-semibold transition-transform hover:-translate-y-0.5" style={{ background: '#1E293B', color: '#fff', borderRadius: 'var(--radius-pill)' }}>
               <Users size={17} /> {t('dashboard.quickActions.findPartner')}
             </Link>
           </div>
@@ -208,7 +208,7 @@ export default function Home() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {availableNow.map((p, i) => (
                 <div key={p.user_id} className="flex flex-col overflow-hidden transition-transform hover:-translate-y-0.5" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-card)' }}>
-                  <div className="relative h-16" style={{ background: ['#f4d9cf', '#d6def5', '#c9ece2'][i % 3] }}>
+                  <div className="relative h-16" style={{ background: ['#f4d9cf', '#ede9fe', '#FFF1F2'][i % 3] }}>
                     <span className="absolute end-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: 'rgb(255 255 255 / 0.85)', color: '#0f6b55' }}>
                       <span className="h-2 w-2 rounded-full" style={{ background: '#22c55e', boxShadow: '0 0 0 3px rgb(34 197 94 / 0.25)' }} />
                       {t('partners.visibilityNow')}
@@ -238,7 +238,7 @@ export default function Home() {
                       type="button"
                       onClick={() => handleCall(p)}
                       className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 text-sm font-semibold transition-colors hover:brightness-110"
-                      style={{ background: '#0b1a2c', color: '#fff', borderRadius: 'var(--radius-pill)' }}
+                      style={{ background: '#1E293B', color: '#fff', borderRadius: 'var(--radius-pill)' }}
                     >
                       <Phone size={15} /> {t('partners.callNow')}
                     </button>
@@ -254,8 +254,8 @@ export default function Home() {
         {/* Quick actions */}
         <div className="my-8 grid gap-4 sm:grid-cols-3">
           <QuickAction to="/partners" icon={Users} title={t('dashboard.quickActions.findPartner')} subtitle={t('dashboard.quickActions.findPartnerSub')} bg="#f4d9cf" delay={1} />
-          <QuickAction to="/schedule" icon={CalendarClock} title={t('dashboard.quickActions.schedule')} subtitle={t('dashboard.quickActions.scheduleSub')} bg="#d6def5" delay={2} />
-          <QuickAction to="/materials" icon={BookOpenCheck} title={t('dashboard.quickActions.courses')} subtitle={t('dashboard.quickActions.coursesSub')} bg="#c9ece2" delay={3} />
+          <QuickAction to="/schedule" icon={CalendarClock} title={t('dashboard.quickActions.schedule')} subtitle={t('dashboard.quickActions.scheduleSub')} bg="#ede9fe" delay={2} />
+          <QuickAction to="/materials" icon={BookOpenCheck} title={t('dashboard.quickActions.courses')} subtitle={t('dashboard.quickActions.coursesSub')} bg="#FFF1F2" delay={3} />
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">

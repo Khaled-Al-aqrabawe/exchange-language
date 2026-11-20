@@ -1,13 +1,8 @@
-// LanBro mark: a mint speech bubble holding the letters "L" and "B" - two people talking, in one
-// shape. Mint with navy letters reads on both the navy header and light pages.
+import logo from '../assets/lanbro-logo.png'
+
+// LanBro mark: violet "L" and coral "B" joined by a handshake - two people, one conversation.
 export function BrandMark({ className = 'h-9 w-9' }) {
-  return (
-    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
-      <path d="M16 4h16c6.6 0 12 5.4 12 12v8c0 6.6-5.4 12-12 12H22l-9 8v-8.6C8.3 34.6 4 29.8 4 24v-8C4 9.4 9.4 4 16 4z" fill="#7fd8c3" />
-      <path d="M15 15v14h7" fill="none" stroke="#0b1a2c" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M28 29V15h3.4a3.6 3.6 0 0 1 0 7.2H28m3.8 0a3.7 3.7 0 0 1 0 6.8H28" fill="none" stroke="#0b1a2c" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
+  return <img src={logo} alt="" aria-hidden="true" className={`${className} object-contain`} />
 }
 
 export function BrandWordmark({ className = 'text-[20px]' }) {
