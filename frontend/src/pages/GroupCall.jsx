@@ -1,4 +1,4 @@
-import { BookOpen, MessageCircle, MessagesSquare, Mic, MicOff, PhoneOff, Send, Users, Video, VideoOff } from 'lucide-react'
+import { BookOpen, Download, MessageCircle, MessagesSquare, Mic, MicOff, Maximize, Minimize, MonitorUp, NotebookPen, PhoneOff, Send, Users, Video, VideoOff } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -50,6 +50,13 @@ export default function GroupCall() {
   const [chat, setChat] = useState([])
   const [text, setText] = useState('')
   const [unread, setUnread] = useState(0)
+  const [panel, setPanel] = useState('chat') // chat | notes
+  const [notes, setNotes] = useState(() => { try { return localStorage.getItem(`group-notes-${roomId}`) || '' } catch { return '' } })
+  const [sharing, setSharing] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
+  const rootRef = useRef(null)
+  const cameraTrackRef = useRef(null)
+  const screenStreamRef = useRef(null)
 
   const socketRef = useRef(null)
   const pcsRef = useRef({})
@@ -93,6 +100,7 @@ export default function GroupCall() {
   }
 
   const cleanup = () => {
+    screenStreamRef.current?.getTracks().forEach((tr) => tr.stop())
     socketRef.current?.close()
     Object.values(pcsRef.current).forEach((pc) => pc.close())
     pcsRef.current = {}
@@ -226,8 +234,72 @@ export default function GroupCall() {
     sendState()
   }
 
+  // Swaps what everyone sees in my tile: the screen or the camera
+  const replaceVideoTrack = async (track) => {
+    for (const pc of Object.values(pcsRef.current)) {
+      const sender = pc.getSenders().find((x) => x.track?.kind === 'video')
+      if (sender && track) await sender.replaceTrack(track).catch(() => {})
+    }
+  }
+
+  const stopSharing = async () => {
+    screenStreamRef.current?.getTracks().forEach((tr) => tr.stop())
+    screenStreamRef.current = null
+    const cam = cameraTrackRef.current
+    if (cam) await replaceVideoTrack(cam)
+    if (streamRef.current) setLocalStream(new MediaStream(streamRef.current.getTracks()))
+    setSharing(false)
+  }
+
+  const toggleShare = async () => {
+    if (sharing) { await stopSharing(); return }
+    const camTrack = streamRef.current?.getVideoTracks()[0]
+    if (!camTrack) return // sharing replaces the camera picture, so a camera is needed to carry it
+    try {
+      const display = await navigator.mediaDevices.getDisplayMedia({ video: true })
+      const screenTrack = display.getVideoTracks()[0]
+      cameraTrackRef.current = camTrack
+      screenStreamRef.current = display
+      screenTrack.onended = () => stopSharing()
+      await replaceVideoTrack(screenTrack)
+      setLocalStream(new MediaStream([screenTrack, ...streamRef.current.getAudioTracks()]))
+      setSharing(true)
+    } catch { /* cancelled */ }
+  }
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) document.exitFullscreen?.()
+    else rootRef.current?.requestFullscreen?.()
+  }
+  useEffect(() => {
+    const onChange = () => setFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
+
+  useEffect(() => {
+    try { localStorage.setItem(`group-notes-${roomId}`, notes) } catch { /* ignore */ }
+  }, [notes, roomId])
+
+  const downloadNotes = () => {
+    const blob = new Blob([notes], { type: 'text/plain;charset=utf-8' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `group-notes-${new Date().toISOString().slice(0, 10)}.txt`
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  const openPanel = (name) => {
+    if (chatOpen && panel === name) { setChatOpen(false); return }
+    setPanel(name)
+    setChatOpen(true)
+    if (name === 'chat') setUnread(0)
+  }
+
   const leave = () => {
     leavingRef.current = true
+    document.fullscreenElement && document.exitFullscreen?.()
     cleanup()
     navigate('/partners', { replace: true })
   }
@@ -282,7 +354,7 @@ export default function GroupCall() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col bg-slate-950 md:flex-row">
+    <div ref={rootRef} className={`flex flex-col bg-slate-950 md:flex-row ${fullscreen ? "h-screen" : "h-[calc(100vh-4rem)]"}`}>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col px-4 py-3">
         <div className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-2 text-white">
           <div className="flex items-center gap-3">
@@ -316,9 +388,18 @@ export default function GroupCall() {
           <button type="button" onClick={toggleCam} className={`flex h-12 w-12 items-center justify-center rounded-full text-white ${camOn ? 'bg-white/10 hover:bg-white/20' : 'bg-rose-600'}`} aria-label="Camera">
             {camOn ? <Video size={19} /> : <VideoOff size={19} />}
           </button>
+          <button type="button" onClick={toggleShare} className={`flex h-12 w-12 items-center justify-center rounded-full text-white ${sharing ? 'bg-teal-500' : 'bg-white/10 hover:bg-white/20'}`} aria-label={t('group.share', 'Share screen')} title={t('group.share', 'Share screen')}>
+            <MonitorUp size={19} />
+          </button>
+          <button type="button" onClick={() => openPanel('notes')} className={`flex h-12 w-12 items-center justify-center rounded-full text-white ${chatOpen && panel === 'notes' ? 'bg-teal-500' : 'bg-white/10 hover:bg-white/20'}`} aria-label={t('group.notes', 'Notes')} title={t('group.notes', 'Notes')}>
+            <NotebookPen size={19} />
+          </button>
+          <button type="button" onClick={toggleFullscreen} className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={t('group.fullscreen', 'Full screen')} title={t('group.fullscreen', 'Full screen')}>
+            {fullscreen ? <Minimize size={19} /> : <Maximize size={19} />}
+          </button>
           <button
             type="button"
-            onClick={() => { setChatOpen((o) => !o); setUnread(0) }}
+            onClick={() => openPanel('chat')}
             className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
             aria-label={t('group.chat', 'Chat')}
           >
@@ -331,7 +412,18 @@ export default function GroupCall() {
         </div>
       </div>
 
-      {chatOpen && (
+      {chatOpen && panel === 'notes' && (
+        <aside className="flex h-72 shrink-0 flex-col border-t border-white/10 bg-slate-900 md:h-auto md:w-80 md:border-s md:border-t-0">
+          <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 text-sm text-white">
+            <span className="inline-flex items-center gap-2 font-semibold"><NotebookPen size={15} /> {t('group.notes', 'Notes')}</span>
+            <button type="button" onClick={downloadNotes} disabled={!notes} className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs hover:bg-white/20 disabled:opacity-40">
+              <Download size={13} /> {t('group.downloadNotes', 'Download')}
+            </button>
+          </div>
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('call.notesPlaceholder')} className="flex-1 w-full resize-none bg-transparent p-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none" />
+        </aside>
+      )}
+      {chatOpen && panel === 'chat' && (
         <aside className="flex h-72 shrink-0 flex-col border-t border-white/10 bg-slate-900 md:h-auto md:w-80 md:border-s md:border-t-0">
           <div className="flex-1 space-y-2 overflow-y-auto p-3">
             {chat.length === 0 && <p className="pt-6 text-center text-sm text-slate-500">{t('conversationThread.sayHello')}</p>}

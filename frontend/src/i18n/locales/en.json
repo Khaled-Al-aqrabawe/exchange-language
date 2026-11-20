@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "LanPro",
+    "appName": "LanBro",
     "loading": "Loading...",
     "loadingDashboard": "Loading your home...",
     "seeAll": "See all",
@@ -26,8 +26,8 @@
     "notes": "My notes"
   },
   "footer": {
-    "tagline": "LanPro",
-    "copyright": "© {{year}} LanPro. All rights reserved.",
+    "tagline": "LanBro",
+    "copyright": "© {{year}} LanBro. All rights reserved.",
     "explore": "Explore",
     "account": "Account",
     "getStarted": "Get started"
@@ -45,7 +45,7 @@
     "badge": "Free during early access",
     "heroTitleLine1": "Learn a language by",
     "heroTitleLine2": "actually speaking it",
-    "heroSubtitle": "LanPro connects you with native speakers and fellow learners for real conversation practice, plus structured video courses to build your foundation.",
+    "heroSubtitle": "LanBro connects you with native speakers and fellow learners for real conversation practice, plus structured video courses to build your foundation.",
     "findAPartner": "Find a partner",
     "getStartedFree": "Get started free",
     "learnMore": "Learn more",
@@ -61,7 +61,7 @@
     },
     "realConversations": "Real conversations",
     "practiceHeadline": "Practice with people, not flashcards",
-    "practiceBody": "Apps that only drill vocabulary can only take you so far. LanPro gets you talking with a real person from your very first session — messaging to plan, video to practice, and courses to fill in the gaps.",
+    "practiceBody": "Apps that only drill vocabulary can only take you so far. LanBro gets you talking with a real person from your very first session — messaging to plan, video to practice, and courses to fill in the gaps.",
     "practiceList": {
       "matched": "Matched by language pair, level, and timezone",
       "builtin": "Built-in chat and video — nothing to install",
@@ -84,7 +84,7 @@
       "freeBody": "Every feature is unlocked during early access — no credit card, no paywalls."
     },
     "ctaTitle": "Free to use, no catch",
-    "ctaBody": "LanPro is free during our early access phase — every feature is unlocked from day one.",
+    "ctaBody": "LanBro is free during our early access phase — every feature is unlocked from day one.",
     "ctaButton": "Create your free account",
     "strip": {
       "levels": "All levels welcome",
@@ -105,7 +105,7 @@
     "eyebrow": "About us",
     "titlePrefix": "Fluency comes from",
     "titleHighlight": "conversation",
-    "intro": "LanPro exists because the fastest way to learn a language is to actually speak it with another person. We connect learners for native-speaker exchange, peer practice, and structured self-paced courses — all in one place.",
+    "intro": "LanBro exists because the fastest way to learn a language is to actually speak it with another person. We connect learners for native-speaker exchange, peer practice, and structured self-paced courses — all in one place.",
     "missionEyebrow": "Our mission",
     "missionHeadline": "Make authentic practice accessible to anyone, anywhere",
     "missionBody": "We match learners by language pair, level, and timezone, then get out of the way — built-in video and chat so there's nothing extra to install, and courses for whenever you want a bit more structure between sessions.",
@@ -125,7 +125,7 @@
     "title": "Frequently Asked Questions",
     "items": {
       "free": {
-        "q": "Is LanPro free?",
+        "q": "Is LanBro free?",
         "a": "Yes. During our early access phase, every feature — exchange matching, peer practice, video calls, and courses — is completely free."
       },
       "matching": {
@@ -272,7 +272,7 @@
       "Set a tiny, specific weekly goal, like 'order coffee' or 'tell a 2-minute story' — vague goals are easy to postpone."
     ],
     "howItWorksTitle": "How it works",
-    "whyTitle": "Why learners choose LanPro",
+    "whyTitle": "Why learners choose LanBro",
     "stats": {
       "completed": "Sessions completed",
       "upcoming": "Upcoming sessions",
@@ -683,7 +683,7 @@
     "appearance": "Appearance",
     "appearanceBody": "Switch between light and dark mode.",
     "language": "Language",
-    "languageBody": "Choose the language used across LanPro.",
+    "languageBody": "Choose the language used across LanBro.",
     "logOut": "Log out"
   },
   "call": {
@@ -985,6 +985,10 @@
     "seatReserved": "Your seat is reserved",
     "startsAt": "The group starts {{when}}. You can enter 10 minutes before.",
     "none": "No small groups are scheduled yet. Create one!",
-    "startingSoon": "Small groups starting now"
+    "startingSoon": "Small groups starting now",
+    "share": "Share screen",
+    "notes": "Notes",
+    "fullscreen": "Full screen",
+    "downloadNotes": "Download"
   }
 }

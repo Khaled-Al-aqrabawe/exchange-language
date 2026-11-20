@@ -293,7 +293,7 @@ function FilterField({ label, icon: Icon, children, className = '' }) {
   return (
     <label className={`block ${className}`}>
       <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--ink-soft)' }}>{label}</span>
-      <span className="relative block">
+      <span className="relative block [&_input]:ps-10! [&_select]:ps-10!">
         <Icon size={15} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--accent)' }} />
         {children}
       </span>

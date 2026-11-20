@@ -392,7 +392,7 @@ class SessionReportView(APIView):
             recipients = list(User.objects.filter(is_superuser=True, is_active=True).values_list('email', flat=True))
             if recipients:
                 send_mail(
-                    subject=f'[LanPro] {report.get_reason_display()} - session {session.id}',
+                    subject=f'[LanBro] {report.get_reason_display()} - session {session.id}',
                     message=(
                         f'{request.user.full_name} ({request.user.email}) about {other.full_name} ({other.email})\n'
                         f'Session {session.id}, reason: {report.get_reason_display()}\n\n{details or "(no details)"}'

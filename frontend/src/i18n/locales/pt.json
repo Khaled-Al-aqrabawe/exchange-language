@@ -27,7 +27,7 @@
   },
   "footer": {
     "tagline": "Centro Linguístico",
-    "copyright": "© {{year}} LanPro. Todos os direitos reservados.",
+    "copyright": "© {{year}} LanBro. Todos os direitos reservados.",
     "explore": "Explorar",
     "account": "Conta",
     "getStarted": "Comece"
@@ -45,7 +45,7 @@
     "badge": "Gratuito durante o acesso antecipado",
     "heroTitleLine1": "Aprenda um idioma por",
     "heroTitleLine2": "realmente falando isso",
-    "heroSubtitle": "O LanPro conecta você com falantes nativos e outros alunos para prática real de conversação, além de cursos em vídeo estruturados para construir sua base.",
+    "heroSubtitle": "O LanBro conecta você com falantes nativos e outros alunos para prática real de conversação, além de cursos em vídeo estruturados para construir sua base.",
     "findAPartner": "Encontre um parceiro",
     "getStartedFree": "Comece gratuitamente",
     "learnMore": "Saber mais",
@@ -61,7 +61,7 @@
     },
     "realConversations": "Conversas reais",
     "practiceHeadline": "Pratique com pessoas, não com flashcards",
-    "practiceBody": "Aplicativos que apenas aprimoram o vocabulário só podem levar você até certo ponto. O LanPro permite que você converse com uma pessoa real desde a primeira sessão: mensagens para planejar, vídeos para praticar e cursos para preencher as lacunas.",
+    "practiceBody": "Aplicativos que apenas aprimoram o vocabulário só podem levar você até certo ponto. O LanBro permite que você converse com uma pessoa real desde a primeira sessão: mensagens para planejar, vídeos para praticar e cursos para preencher as lacunas.",
     "practiceList": {
       "matched": "Correspondido por par de idiomas, nível e fuso horário",
       "builtin": "Bate-papo e vídeo integrados – nada para instalar",
@@ -84,7 +84,7 @@
       "freeBody": "Todos os recursos são desbloqueados durante o acesso antecipado – sem cartão de crédito, sem acesso pago."
     },
     "ctaTitle": "Gratuito para usar, sem pegadinhas",
-    "ctaBody": "O LanPro é gratuito durante nossa fase de acesso antecipado — todos os recursos são desbloqueados desde o primeiro dia.",
+    "ctaBody": "O LanBro é gratuito durante nossa fase de acesso antecipado — todos os recursos são desbloqueados desde o primeiro dia.",
     "ctaButton": "Crie sua conta gratuita",
     "strip": {
       "levels": "Todos os níveis são bem-vindos",
@@ -105,7 +105,7 @@
     "eyebrow": "Sobre nós",
     "titlePrefix": "Fluência vem de",
     "titleHighlight": "conversa",
-    "intro": "O LanPro existe porque a maneira mais rápida de aprender um idioma é falá-lo com outra pessoa. Conectamos alunos para intercâmbio de falantes nativos, prática entre pares e cursos estruturados e individualizados — tudo em um só lugar.",
+    "intro": "O LanBro existe porque a maneira mais rápida de aprender um idioma é falá-lo com outra pessoa. Conectamos alunos para intercâmbio de falantes nativos, prática entre pares e cursos estruturados e individualizados — tudo em um só lugar.",
     "missionEyebrow": "Nossa missão",
     "missionHeadline": "Torne a prática autêntica acessível a qualquer pessoa, em qualquer lugar",
     "missionBody": "Combinamos os alunos por par de idiomas, nível e fuso horário e, em seguida, saímos do caminho: vídeo e bate-papo integrados para que não haja nada extra para instalar e cursos para quando você quiser um pouco mais de estrutura entre as sessões.",
@@ -125,7 +125,7 @@
     "title": "Perguntas frequentes",
     "items": {
       "free": {
-        "q": "O LanPro é gratuito?",
+        "q": "O LanBro é gratuito?",
         "a": "Sim. Durante nossa fase de acesso antecipado, todos os recursos – troca de correspondência, prática entre pares, videochamadas e cursos – são totalmente gratuitos."
       },
       "matching": {
@@ -272,7 +272,7 @@
       "Estabeleça uma meta semanal pequena e específica, como “pedir café” ou “contar uma história de 2 minutos” – metas vagas são fáceis de adiar."
     ],
     "howItWorksTitle": "Como funciona",
-    "whyTitle": "Por que os alunos escolhem o LanPro",
+    "whyTitle": "Por que os alunos escolhem o LanBro",
     "stats": {
       "completed": "Sessões concluídas",
       "upcoming": "Próximas sessões",
@@ -683,7 +683,7 @@
     "appearance": "Aparência",
     "appearanceBody": "Alternar entre o modo claro e escuro.",
     "language": "Linguagem",
-    "languageBody": "Escolha o idioma usado no LanPro.",
+    "languageBody": "Escolha o idioma usado no LanBro.",
     "logOut": "Sair"
   },
   "call": {
@@ -984,6 +984,10 @@
     "seatReserved": "Sua vaga está reservada",
     "startsAt": "O grupo começa {{when}}. Você pode entrar 10 minutos antes.",
     "none": "Nenhum grupo pequeno agendado ainda. Crie um!",
-    "startingSoon": "Grupos pequenos começando agora"
+    "startingSoon": "Grupos pequenos começando agora",
+    "share": "Compartilhar tela",
+    "notes": "Notas",
+    "fullscreen": "Tela cheia",
+    "downloadNotes": "Baixar"
   }
 }

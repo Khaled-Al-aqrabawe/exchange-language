@@ -49,7 +49,7 @@ export default function AuthImagePanel({ quote }) {
       <div className="relative flex items-center gap-2.5">
         <BrandMark className="h-8 w-8" />
         <span className="font-display text-lg font-semibold tracking-tight" style={{ color: '#0b1a2c' }}>
-          Lan<span style={{ color: '#1b4d7a' }}>Pro</span>
+          Lan<span style={{ color: '#1b4d7a' }}>Bro</span>
         </span>
       </div>
 

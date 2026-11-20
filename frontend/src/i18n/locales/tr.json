@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "LanPro",
+    "appName": "LanBro",
     "loading": "Yükleniyor...",
     "loadingDashboard": "Ana sayfan yükleniyor...",
     "seeAll": "Tümünü gör",
@@ -26,8 +26,8 @@
     "notes": "notlarım"
   },
   "footer": {
-    "tagline": "LanPro",
-    "copyright": "© {{year}} LanPro. All rights reserved.",
+    "tagline": "LanBro",
+    "copyright": "© {{year}} LanBro. All rights reserved.",
     "explore": "Keşfet",
     "account": "Hesap",
     "getStarted": "Başla"
@@ -45,7 +45,7 @@
     "badge": "Erken erişimde ücretsiz",
     "heroTitleLine1": "Bir dili gerçekten",
     "heroTitleLine2": "konuşarak öğren",
-    "heroSubtitle": "LanPro, gerçek konuşma pratiği için seni ana dili konuşanlarla ve diğer öğrencilerle buluşturur; temellerini oluşturman için yapılandırılmış video kurslar da sunar.",
+    "heroSubtitle": "LanBro, gerçek konuşma pratiği için seni ana dili konuşanlarla ve diğer öğrencilerle buluşturur; temellerini oluşturman için yapılandırılmış video kurslar da sunar.",
     "findAPartner": "Partner bul",
     "getStartedFree": "Ücretsiz başla",
     "learnMore": "Daha fazla bilgi",
@@ -61,7 +61,7 @@
     },
     "realConversations": "Gerçek sohbetler",
     "practiceHeadline": "Kartlarla değil, insanlarla pratik yap",
-    "practiceBody": "Sadece kelime çalıştıran uygulamalar seni ancak belirli bir noktaya kadar götürür. LanPro, daha ilk seansından itibaren seni gerçek biriyle konuşturur — planlamak için mesajlaşma, pratik için video ve boşlukları doldurmak için kurslar.",
+    "practiceBody": "Sadece kelime çalıştıran uygulamalar seni ancak belirli bir noktaya kadar götürür. LanBro, daha ilk seansından itibaren seni gerçek biriyle konuşturur — planlamak için mesajlaşma, pratik için video ve boşlukları doldurmak için kurslar.",
     "practiceList": {
       "matched": "Dil çifti, seviye ve saat dilimine göre eşleştirme",
       "builtin": "Yerleşik sohbet ve video — kurulacak hiçbir şey yok",
@@ -84,7 +84,7 @@
       "freeBody": "Erken erişim süresince tüm özellikler açık — kredi kartı yok, ücretli duvar yok."
     },
     "ctaTitle": "Ücretsiz kullanım, gizli koşul yok",
-    "ctaBody": "LanPro, erken erişim aşamamız boyunca ücretsizdir — tüm özellikler ilk günden itibaren açıktır.",
+    "ctaBody": "LanBro, erken erişim aşamamız boyunca ücretsizdir — tüm özellikler ilk günden itibaren açıktır.",
     "ctaButton": "Ücretsiz hesabını oluştur",
     "strip": {
       "levels": "Her seviye hoş geldin",
@@ -105,7 +105,7 @@
     "eyebrow": "Hakkımızda",
     "titlePrefix": "Akıcılık",
     "titleHighlight": "sohbetten doğar",
-    "intro": "LanPro var, çünkü bir dili öğrenmenin en hızlı yolu onu başka biriyle gerçekten konuşmaktır. Öğrencileri ana dili konuşanlarla değişim, akranlarla pratik ve kendi hızında yapılandırılmış kurslar için tek bir yerde bir araya getiriyoruz.",
+    "intro": "LanBro var, çünkü bir dili öğrenmenin en hızlı yolu onu başka biriyle gerçekten konuşmaktır. Öğrencileri ana dili konuşanlarla değişim, akranlarla pratik ve kendi hızında yapılandırılmış kurslar için tek bir yerde bir araya getiriyoruz.",
     "missionEyebrow": "Misyonumuz",
     "missionHeadline": "Gerçek pratiği herkes için, her yerde erişilebilir kılmak",
     "missionBody": "Öğrencileri dil çifti, seviye ve saat dilimine göre eşleştirir, sonra araya girmeyiz — yerleşik video ve sohbet sayesinde kurulacak ekstra bir şey olmaz, seanslar arasında biraz daha yapı istediğinde kurslar devreye girer.",
@@ -125,7 +125,7 @@
     "title": "Sık Sorulan Sorular",
     "items": {
       "free": {
-        "q": "LanPro ücretsiz mi?",
+        "q": "LanBro ücretsiz mi?",
         "a": "Evet. Erken erişim aşamamız boyunca değişim eşleştirmesi, akran pratiği, video görüşmeleri ve kurslar dahil tüm özellikler tamamen ücretsizdir."
       },
       "matching": {
@@ -267,7 +267,7 @@
       "'Kahve sipariş etmek' ya da '2 dakikalık bir hikaye anlatmak' gibi küçük, somut bir haftalık hedef koy — belirsiz hedefler kolayca ertelenir."
     ],
     "howItWorksTitle": "Nasıl çalışır",
-    "whyTitle": "Öğrenciler neden LanPro'ı seçiyor",
+    "whyTitle": "Öğrenciler neden LanBro'ı seçiyor",
     "stats": {
       "completed": "Tamamlanan oturumlar",
       "upcoming": "Yaklaşan oturumlar",
@@ -683,7 +683,7 @@
     "appearance": "Görünüm",
     "appearanceBody": "Açık ve koyu mod arasında geçiş yap.",
     "language": "Dil",
-    "languageBody": "LanPro genelinde kullanılan dili seç.",
+    "languageBody": "LanBro genelinde kullanılan dili seç.",
     "logOut": "Çıkış yap"
   },
   "call": {
@@ -984,6 +984,10 @@
     "seatReserved": "Yerin ayrıldı",
     "startsAt": "Grup {{when}} başlıyor. 10 dakika önce girebilirsin.",
     "none": "Henüz planlanmış küçük grup yok. Bir tane oluştur!",
-    "startingSoon": "Şimdi başlayan küçük gruplar"
+    "startingSoon": "Şimdi başlayan küçük gruplar",
+    "share": "Ekranı paylaş",
+    "notes": "Notlar",
+    "fullscreen": "Tam ekran",
+    "downloadNotes": "İndir"
   }
 }

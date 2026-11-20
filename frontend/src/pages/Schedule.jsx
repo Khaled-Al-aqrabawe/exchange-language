@@ -309,7 +309,11 @@ export default function Schedule() {
 
   const inTab = (session, key) => {
     const statuses = TABS.find(([name]) => name === key)[1]
-    return !statuses || statuses.includes(session.status)
+    if (!statuses) return true
+    if (!statuses.includes(session.status)) return false
+    // "Upcoming" is only for sessions that are not over yet
+    if (key === 'upcoming') return new Date(session.scheduled_time).getTime() + (session.duration_minutes || 50) * 60000 > Date.now()
+    return true
   }
   // Compares local calendar days, so a session late in the evening still counts for its own day.
   const matchesDate = (session) => {

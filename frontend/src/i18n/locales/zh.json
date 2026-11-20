@@ -45,7 +45,7 @@
     "badge": "抢先体验期间免费",
     "heroTitleLine1": "学习一门语言通过",
     "heroTitleLine2": "实际上说出来",
-    "heroSubtitle": "LanPro 将您与母语人士和其他学习者联系起来，进行真正的对话练习，并提供结构化视频课程来奠定您的基础。",
+    "heroSubtitle": "LanBro 将您与母语人士和其他学习者联系起来，进行真正的对话练习，并提供结构化视频课程来奠定您的基础。",
     "findAPartner": "寻找合作伙伴",
     "getStartedFree": "免费开始使用",
     "learnMore": "了解更多",
@@ -61,7 +61,7 @@
     },
     "realConversations": "真实对话",
     "practiceHeadline": "与人一起练习，而不是抽认卡",
-    "practiceBody": "仅仅练习词汇的应用程序只能带你到目前为止。 LanPro 让您从第一次会话开始就可以与真人交谈 — 消息传递到计划、视频到练习以及课程来填补空白。",
+    "practiceBody": "仅仅练习词汇的应用程序只能带你到目前为止。 LanBro 让您从第一次会话开始就可以与真人交谈 — 消息传递到计划、视频到练习以及课程来填补空白。",
     "practiceList": {
       "matched": "按语言对、级别和时区匹配",
       "builtin": "内置聊天和视频 — 无需安装",
@@ -84,7 +84,7 @@
       "freeBody": "所有功能均在抢先体验期间解锁 - 无需信用卡，无需付费专区。"
     },
     "ctaTitle": "免费使用，无任何限制",
-    "ctaBody": "LanPro 在我们的早期访问阶段是免费的——所有功能从第一天起就已解锁。",
+    "ctaBody": "LanBro 在我们的早期访问阶段是免费的——所有功能从第一天起就已解锁。",
     "ctaButton": "创建您的免费帐户",
     "strip": {
       "levels": "欢迎所有水平",
@@ -105,7 +105,7 @@
     "eyebrow": "关于我们",
     "titlePrefix": "流畅度来自于",
     "titleHighlight": "对话",
-    "intro": "LanPro 的存在是因为学习语言的最快方法就是与另一个人实际交谈。我们将学习者联系起来，进行母语交流、同伴练习和结构化自定进度课程——所有这些都集中在一处。",
+    "intro": "LanBro 的存在是因为学习语言的最快方法就是与另一个人实际交谈。我们将学习者联系起来，进行母语交流、同伴练习和结构化自定进度课程——所有这些都集中在一处。",
     "missionEyebrow": "我们的使命",
     "missionHeadline": "让任何人、任何地方都可以进行真实的练习",
     "missionBody": "我们根据语言对、级别和时区来匹配学习者，然后让开——内置视频和聊天，因此无需安装任何额外内容，并且当您希望在会话之间有更多结构时，可以使用课程。",
@@ -125,7 +125,7 @@
     "title": "常见问题解答",
     "items": {
       "free": {
-        "q": "LanPro 免费吗？",
+        "q": "LanBro 免费吗？",
         "a": "是的。在我们的早期访问阶段，每项功能——交换匹配、同伴练习、视频通话和课程——都是完全免费的。"
       },
       "matching": {
@@ -272,7 +272,7 @@
       "设定一个微小的、具体的每周目标，比如“点咖啡”或“讲一个 2 分钟的故事”——模糊的目标很容易被推迟。"
     ],
     "howItWorksTitle": "它是如何运作的",
-    "whyTitle": "学习者为何选择 LanPro",
+    "whyTitle": "学习者为何选择 LanBro",
     "stats": {
       "completed": "会议已完成",
       "upcoming": "即将举行的会议",
@@ -682,7 +682,7 @@
     "appearance": "外貌",
     "appearanceBody": "在浅色和深色模式之间切换。",
     "language": "语言",
-    "languageBody": "选择 LanPro 使用的语言。",
+    "languageBody": "选择 LanBro 使用的语言。",
     "logOut": "退出"
   },
   "call": {
@@ -983,6 +983,10 @@
     "seatReserved": "你的座位已预订",
     "startsAt": "小组将于 {{when}} 开始。你可以提前 10 分钟进入。",
     "none": "还没有安排的小组，创建一个吧！",
-    "startingSoon": "即将开始的小组"
+    "startingSoon": "即将开始的小组",
+    "share": "共享屏幕",
+    "notes": "笔记",
+    "fullscreen": "全屏",
+    "downloadNotes": "下载"
   }
 }

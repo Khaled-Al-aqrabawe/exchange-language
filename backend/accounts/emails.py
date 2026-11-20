@@ -41,7 +41,7 @@ def render_email_html(preheader, heading, body_html, cta_text=None, cta_url=None
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LanPro</title>
+<title>LanBro</title>
 </head>
 <body dir="{dir_attr}" style="margin:0;padding:0;background-color:{BRAND['bg']};font-family:{FONT_STACK};">
 <span style="display:none;font-size:1px;color:{BRAND['bg']};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">{preheader}</span>
@@ -52,7 +52,7 @@ def render_email_html(preheader, heading, body_html, cta_text=None, cta_url=None
 <table role="presentation" cellpadding="0" cellspacing="0" dir="{dir_attr}"><tr>
 <td style="width:32px;height:32px;background-color:#ffffff;border-radius:8px;text-align:center;vertical-align:middle;
   font-weight:800;color:#ff6b57;font-size:14px;font-family:{FONT_STACK};">LH</td>
-<td style="padding-{'right' if is_rtl else 'left'}:10px;font-weight:700;font-size:16px;color:#ffffff;font-family:{FONT_STACK};">LanPro</td>
+<td style="padding-{'right' if is_rtl else 'left'}:10px;font-weight:700;font-size:16px;color:#ffffff;font-family:{FONT_STACK};">LanBro</td>
 </tr></table>
 </td></tr>
 <tr><td style="padding:36px 32px 8px 32px;">
@@ -64,7 +64,7 @@ def render_email_html(preheader, heading, body_html, cta_text=None, cta_url=None
 <p style="margin:16px 0 0 0;font-size:13px;color:{BRAND['ink_soft']};font-family:{FONT_STACK};text-align:{align};">{get_strings(language, 'common')[1]['footer_note']}</p>
 </td></tr>
 </table>
-<p style="margin:20px 0 0 0;font-size:12px;color:{BRAND['muted']};font-family:{FONT_STACK};">© LanPro</p>
+<p style="margin:20px 0 0 0;font-size:12px;color:{BRAND['muted']};font-family:{FONT_STACK};">© LanBro</p>
 </td></tr>
 </table>
 </body>

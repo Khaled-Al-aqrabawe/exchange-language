@@ -49,7 +49,7 @@ function buildHtml(summary, t, locale, words) {
 
   return `
   <div data-block style="background:linear-gradient(135deg,${ACCENT},#115e59);color:#fff;padding:34px 40px 30px;margin:0 -40px">
-    <div style="font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;opacity:.85">LanPro</div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;opacity:.85">LanBro</div>
     <div style="font-size:28px;font-weight:800;margin-top:8px;line-height:1.2" dir="auto">${escapeHtml(t('summary.title', { name: session.other.full_name }))}</div>
     <div style="margin-top:12px;display:flex;gap:10px;align-items:center;font-size:13px">
       <span>${escapeHtml(fmt(session.scheduled_time))}</span>
@@ -60,7 +60,7 @@ function buildHtml(summary, t, locale, words) {
   ${section(t('summary.notes'), noteLines)}
   ${section(t('summary.chat'), chatRows)}
   ${ratingBlock}
-  <div data-block style="margin-top:34px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center">LanPro · ${escapeHtml(fmt(new Date()))}</div>`
+  <div data-block style="margin-top:34px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center">LanBro · ${escapeHtml(fmt(new Date()))}</div>`
 }
 
 // `words` are the translations picked during the call: [{ word, translation }].

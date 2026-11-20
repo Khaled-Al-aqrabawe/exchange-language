@@ -139,7 +139,7 @@ export default function Home() {
   const otherParty = (session) => (session.host.id === user?.id ? session.partner : session.host)
 
   const upcoming = sessions
-    .filter((s) => s.status === 'confirmed' && new Date(s.scheduled_time) > new Date())
+    .filter((s) => ['pending', 'confirmed'].includes(s.status) && new Date(s.scheduled_time).getTime() + s.duration_minutes * 60000 > Date.now())
     .sort((a, b) => new Date(a.scheduled_time) - new Date(b.scheduled_time))
 
   const [callTarget, setCallTarget] = useState(null)

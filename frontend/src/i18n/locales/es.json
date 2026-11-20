@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "LanPro",
+    "appName": "LanBro",
     "loading": "Cargando...",
     "loadingDashboard": "Cargando tu inicio...",
     "seeAll": "Ver todo",
@@ -26,8 +26,8 @@
     "notes": "mis notas"
   },
   "footer": {
-    "tagline": "LanPro",
-    "copyright": "© {{year}} LanPro. All rights reserved.",
+    "tagline": "LanBro",
+    "copyright": "© {{year}} LanBro. All rights reserved.",
     "explore": "Explorar",
     "account": "Cuenta",
     "getStarted": "Empezar"
@@ -45,7 +45,7 @@
     "badge": "Gratis durante el acceso anticipado",
     "heroTitleLine1": "Aprende un idioma",
     "heroTitleLine2": "hablándolo de verdad",
-    "heroSubtitle": "LanPro te conecta con hablantes nativos y otros estudiantes para practicar conversación real, además de cursos en vídeo estructurados para construir tu base.",
+    "heroSubtitle": "LanBro te conecta con hablantes nativos y otros estudiantes para practicar conversación real, además de cursos en vídeo estructurados para construir tu base.",
     "findAPartner": "Buscar compañero",
     "getStartedFree": "Empieza gratis",
     "learnMore": "Saber más",
@@ -61,7 +61,7 @@
     },
     "realConversations": "Conversaciones reales",
     "practiceHeadline": "Practica con personas, no con tarjetas de memoria",
-    "practiceBody": "Las apps que solo repasan vocabulario solo te llevan hasta cierto punto. LanPro te pone a hablar con una persona real desde tu primera sesión: mensajes para organizar, vídeo para practicar y cursos para cubrir los vacíos.",
+    "practiceBody": "Las apps que solo repasan vocabulario solo te llevan hasta cierto punto. LanBro te pone a hablar con una persona real desde tu primera sesión: mensajes para organizar, vídeo para practicar y cursos para cubrir los vacíos.",
     "practiceList": {
       "matched": "Emparejado por combinación de idiomas, nivel y zona horaria",
       "builtin": "Chat y vídeo integrados, sin nada que instalar",
@@ -84,7 +84,7 @@
       "freeBody": "Todas las funciones están disponibles durante el acceso anticipado, sin tarjeta de crédito ni muros de pago."
     },
     "ctaTitle": "Gratis, sin trampa",
-    "ctaBody": "LanPro es gratuito durante nuestra fase de acceso anticipado: todas las funciones están disponibles desde el primer día.",
+    "ctaBody": "LanBro es gratuito durante nuestra fase de acceso anticipado: todas las funciones están disponibles desde el primer día.",
     "ctaButton": "Crea tu cuenta gratis",
     "strip": {
       "levels": "Todos los niveles son bienvenidos",
@@ -105,7 +105,7 @@
     "eyebrow": "Sobre nosotros",
     "titlePrefix": "La fluidez nace de la",
     "titleHighlight": "conversación",
-    "intro": "LanPro existe porque la forma más rápida de aprender un idioma es hablarlo con otra persona. Conectamos a estudiantes para el intercambio con hablantes nativos, la práctica entre compañeros y cursos estructurados a su propio ritmo, todo en un solo lugar.",
+    "intro": "LanBro existe porque la forma más rápida de aprender un idioma es hablarlo con otra persona. Conectamos a estudiantes para el intercambio con hablantes nativos, la práctica entre compañeros y cursos estructurados a su propio ritmo, todo en un solo lugar.",
     "missionEyebrow": "Nuestra misión",
     "missionHeadline": "Hacer que la práctica auténtica sea accesible para cualquiera, en cualquier lugar",
     "missionBody": "Emparejamos a los estudiantes por combinación de idiomas, nivel y zona horaria, y luego nos apartamos: vídeo y chat integrados para que no haya nada extra que instalar, y cursos para cuando quieras un poco más de estructura entre sesiones.",
@@ -125,7 +125,7 @@
     "title": "Preguntas frecuentes",
     "items": {
       "free": {
-        "q": "¿LanPro es gratis?",
+        "q": "¿LanBro es gratis?",
         "a": "Sí. Durante nuestra fase de acceso anticipado, todas las funciones —emparejamiento de intercambio, práctica entre compañeros, videollamadas y cursos— son completamente gratuitas."
       },
       "matching": {
@@ -267,7 +267,7 @@
       "Ponte una meta semanal pequeña y concreta, como 'pedir un café' o 'contar una historia de 2 minutos' — las metas vagas son fáciles de posponer."
     ],
     "howItWorksTitle": "Cómo funciona",
-    "whyTitle": "Por qué los estudiantes eligen LanPro",
+    "whyTitle": "Por qué los estudiantes eligen LanBro",
     "stats": {
       "completed": "Sesiones completadas",
       "upcoming": "Próximas sesiones",
@@ -683,7 +683,7 @@
     "appearance": "Apariencia",
     "appearanceBody": "Cambia entre modo claro y oscuro.",
     "language": "Idioma",
-    "languageBody": "Elige el idioma que se usa en LanPro.",
+    "languageBody": "Elige el idioma que se usa en LanBro.",
     "logOut": "Cerrar sesión"
   },
   "call": {
@@ -984,6 +984,10 @@
     "seatReserved": "Tu plaza está reservada",
     "startsAt": "El grupo empieza {{when}}. Puedes entrar 10 minutos antes.",
     "none": "Aún no hay grupos pequeños programados. ¡Crea uno!",
-    "startingSoon": "Grupos pequeños que empiezan ahora"
+    "startingSoon": "Grupos pequeños que empiezan ahora",
+    "share": "Compartir pantalla",
+    "notes": "Notas",
+    "fullscreen": "Pantalla completa",
+    "downloadNotes": "Descargar"
   }
 }

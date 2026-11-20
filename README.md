@@ -1,4 +1,4 @@
-# LanPro
+# LanBro
 
 Peer-to-peer language learning platform: native-speaker exchange, peer practice, and
 structured video courses, with built-in real-time messaging and WebRTC video calls.
