@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { useRef } from 'react'
+import { Route } from 'react-router-dom'
+import PageTransition from './components/PageTransition'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import About from './pages/About'
@@ -21,22 +22,22 @@ import Register from './pages/Register'
 import Schedule from './pages/Schedule'
 
 // Every new page opens at the top (picking another chat inside Messages keeps its place).
-function ScrollToTop() {
-  const { pathname } = useLocation()
-  const previous = useRef(pathname)
-  useEffect(() => {
-    const inMessages = previous.current.startsWith('/messages') && pathname.startsWith('/messages')
+// Runs when the new page is actually shown (after the transition swap).
+function useScrollToTop() {
+  const previous = useRef(null)
+  return (pathname) => {
+    const prev = previous.current
     previous.current = pathname
+    if (prev === null || prev === pathname) return
+    const inMessages = prev.startsWith('/messages') && pathname.startsWith('/messages')
     if (!inMessages) window.scrollTo(0, 0)
-  }, [pathname])
-  return null
+  }
 }
 
 function App() {
+  const scrollToTop = useScrollToTop()
   return (
-    <>
-    <ScrollToTop />
-    <Routes>
+    <PageTransition onSwap={scrollToTop}>
       <Route element={<Layout />}>
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<About />} />
@@ -61,8 +62,7 @@ function App() {
           <Route path="/notes" element={<Notes />} />
         </Route>
       </Route>
-    </Routes>
-    </>
+    </PageTransition>
   )
 }
 
