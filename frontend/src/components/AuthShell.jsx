@@ -26,7 +26,7 @@ export default function AuthShell({ children }) {
   return (
     <div className="grid min-h-[calc(100vh-5rem)] lg:grid-cols-[1.05fr_1fr]">
       <AuthImagePanel quote={t('auth.login.quote')} />
-      <div className="relative flex items-center justify-center px-6 py-12" style={{ background: '#eef1f8' }}>
+      <div className="relative flex items-center justify-center px-6 py-12" style={{ background: '#F8FAFC' }}>
         <div className="relative w-full max-w-md">{children}</div>
       </div>
     </div>

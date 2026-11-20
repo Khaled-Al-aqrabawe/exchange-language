@@ -1,10 +1,11 @@
 import { ArrowRight, CheckCircle2, Eye, EyeOff, Lock, Mail, MailCheck } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthImagePanel from '../components/AuthImagePanel'
 import EmailVerifyForm from '../components/EmailVerifyForm'
 import GoogleButton from '../components/GoogleButton'
+import LoginSplash from '../components/LoginSplash'
 import { useAuth } from '../context/AuthContext'
 
 const inputClass = 'w-full ps-10! pe-10! text-sm'
@@ -56,6 +57,8 @@ export default function Login() {
   const [error, setError] = useState('')
   const [justVerified, setJustVerified] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [splashName, setSplashName] = useState(null)
+  const finishSplash = useCallback(() => navigate('/home'), [navigate])
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault()
@@ -63,8 +66,8 @@ export default function Login() {
     setJustVerified(false)
     setSubmitting(true)
     try {
-      await login(email, password)
-      navigate('/home')
+      const data = await login(email, password)
+      setSplashName(data?.user?.first_name || data?.user?.profile?.display_name || '')
     } catch (err) {
       if (err.response?.data?.code === 'email_not_verified') {
         setStep('verifyEmail')
@@ -78,9 +81,10 @@ export default function Login() {
 
   return (
     <div className="grid min-h-[calc(100vh-5rem)] lg:grid-cols-[1.05fr_1fr]">
+      {splashName !== null && <LoginSplash name={splashName} onDone={finishSplash} />}
       <AuthImagePanel quote={t('auth.login.quote')} />
 
-      <div className="relative flex items-center justify-center px-6 py-12" style={{ background: '#eef1f8' }}>
+      <div className="relative flex items-center justify-center px-6 py-12" style={{ background: '#F8FAFC' }}>
         <div className="relative w-full max-w-md">
           <div key={step} className="lp-animate-in-scale">
             {step === 'password' && (

@@ -96,7 +96,7 @@ export default function Messages() {
                       onClick={() => navigate(`/messages/${c.id}`)}
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/messages/${c.id}`) } }}
                       className="mb-1.5 flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-start transition-colors hover:brightness-95"
-                      style={{ background: isActive ? '#fecdd3' : '#eef1f8', color: '#17191d', borderRadius: 'var(--radius-card)' }}
+                      style={{ background: isActive ? '#fecdd3' : '#F8FAFC', color: '#17191d', borderRadius: 'var(--radius-card)' }}
                     >
                       <img src={avatarUrl(other?.id, 80)} alt="" className="lp-avatar h-12 w-12 shrink-0 object-cover" />
                       <div className="min-w-0 flex-1">
